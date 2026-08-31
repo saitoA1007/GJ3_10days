@@ -5,7 +5,6 @@
 #include "Camera.h"
 
 #include "Application/Scene/Transition/Fade.h"
-#include "Application/Camera/CameraController.h"
 
 class GameScene : public GameEngine::IScene {
 public:
@@ -55,12 +54,6 @@ private: // シーン機能
 
 	// 終了フラグ
 	bool isFinished_ = false;
-
-	// メインカメラ
-	std::unique_ptr<GameEngine::Camera> mainCamera_;
-
-	// 操作カメラ
-	CameraController* cameraController_ = nullptr;
 
 private:
 
