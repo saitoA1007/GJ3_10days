@@ -14,6 +14,13 @@ void EditorLayout::SaveLayout(const std::vector<std::unique_ptr<IEditorWindow>>&
 		layoutJson[window->GetName()] = window->isActive;
 	}
 
+	// 保存先ディレクトリが存在しない場合は生成する
+	std::filesystem::path filePath(kFilePath);
+	std::filesystem::path dirPath = filePath.parent_path();
+	if (!dirPath.empty() && !std::filesystem::exists(dirPath)) {
+		std::filesystem::create_directories(dirPath);
+	}
+
 	// ファイルを書き込み用に開く
 	std::ofstream file;
 	// ファイルを書き込み用に開く
