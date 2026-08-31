@@ -32,17 +32,27 @@
             "WallBounceUpSpeed": 20.0,
             "WallHitReflectFactor": 0.20000000298023224
         },
+        "Collider": {
+            "ColliderOffsetPosY": 0.0,
+            "ColliderRadius": 1.090000033378601
+        },
         "Move": {
             "AirAcceleration": 2.0,
             "AirDeceleration": 1.0,
             "AirMaxMoveSpeed": 16.0,
             "GroundAcceleration": 8.0,
             "GroundDeceleration": 2.0,
-            "GroundMaxMoveSpeed": 16.0
+            "GroundMaxMoveSpeed": 16.0,
+            "MoveSpeed": 10.0
         },
         "Physics": {
             "FallAcceleration": -9.600000381469727
         },
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
         "SceneName": "Game",
         "Status": {
             "CoolTime": 3.0,

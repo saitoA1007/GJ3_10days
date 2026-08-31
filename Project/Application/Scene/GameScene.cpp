@@ -3,6 +3,7 @@
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
+#include "Application/Player/Player.h"
 
 GameScene::~GameScene() {
 }
@@ -14,6 +15,11 @@ GameScene::GameScene() {
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
+
+	// プレイヤー
+	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
+	playerModel->SetDefaultIsEnableLight(true);
+	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel);
 }
 
 void GameScene::Initialize() {
