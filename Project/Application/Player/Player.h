@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <vector>
 #include "IGameObject.h"
 #include "Collider.h"
@@ -36,6 +37,8 @@ public:
 
 	void SetCurrentYaw(float yaw) { currentYaw_ = yaw; }
 	float GetCurrentYaw() const { return currentYaw_; }
+	int GetLastThrownCount() const { return lastThrownCount_; }
+	uint32_t GetThrowEventId() const { return throwEventId_; }
 
 public:
 
@@ -87,6 +90,8 @@ private:
 	float chargeTimer_ = 0.0f;
 	float maxChargeTime_ = 1.5f;
 	bool isCharging_ = false;
+	int lastThrownCount_ = 0;
+	uint32_t throwEventId_ = 0;
 
 private:
 
