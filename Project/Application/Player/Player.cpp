@@ -306,7 +306,6 @@ void Player::OnCollisionStay([[maybe_unused]] const GameEngine::CollisionResult&
 			normal.Normalize();
 		}
 
-		// プレイヤーの現在地
 		Vector3 playerPos = modelComponent_.worldTransform_.transform_.translate;
 		Vector3 targetPos = { 0.0f, 0.0f, 0.0f }; 
 
