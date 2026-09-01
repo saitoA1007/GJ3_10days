@@ -44,6 +44,9 @@ public:
 
     GameEngine::SphereCollider& GetCollider() { return collider_; }
 
+    // ハイライト設定
+    void SetHighlight(bool enable);
+
 private:
     // 衝突コールバック
     void OnCollisionEnter(const GameEngine::CollisionResult& result);
@@ -67,4 +70,6 @@ private:
 
     // Pikumi同士の当たり判定をするかどうか
     bool isPikumiCollisionEnabled_ = false;
+
+    bool isHighlighted_ = false;
 };

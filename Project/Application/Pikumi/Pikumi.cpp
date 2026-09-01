@@ -147,6 +147,21 @@ void Pikumi::Update()
     collider_.SetRadius(colliderRadius_);
 }
 
+void Pikumi::SetHighlight(bool enable)
+{
+    isHighlighted_ = enable;
+    if (isHighlighted_)
+    {
+        // ハイライト時
+        modelComponent_.materialData_->color = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
+    }
+    else
+    {
+        // 通常時
+        modelComponent_.materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+}
+
 void Pikumi::Draw()
 {
     modelComponent_.DrawRaytracing(renderQueue_);

@@ -1,6 +1,7 @@
 #include "Player.h"
 
 #include <random>
+#include <algorithm>
 
 #include "Application/CollisionConfig.h"
 #include "FPSCounter.h"
@@ -30,6 +31,7 @@ Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* piku
 	debugParame_->Register("ThrowSpeed", pikumiThrowSpeed_, 4, "Pikumi");
 	debugParame_->Register("Dampening", pikumiDampening_, 5, "Pikumi");
 	debugParame_->Register("CollectRadius", pikumiCollectRadius_, 6, "Pikumi");
+	debugParame_->Register("MaxChargeTime", maxChargeTime_, 7, "Pikumi");
 
 	// 当たり判定を設定
 	collider_.SetRadius(colliderRadius_);
@@ -93,10 +95,7 @@ void Player::Update()
 
 	ClampToField();
 
-	if (inputCommand_->IsCommandActive("Shot"))
-	{
-		ThrowAllPikumis();
-	}
+	UpdateChargeThrow();
 
 	// Pikumiの更新、回収
 	UpdatePikumiFormations();
@@ -123,6 +122,83 @@ void Player::ClampToField()
 	{
 		modelComponent_.worldTransform_.transform_.translate.x = (pos.x / distXZ) * maxRadius;
 		modelComponent_.worldTransform_.transform_.translate.z = (pos.z / distXZ) * maxRadius;
+	}
+}
+
+void Player::UpdateChargeThrow()
+{
+	// 追従中の Pikumi
+	std::vector<Pikumi*> followPikumis;
+	for (auto& pikumi : pikumis_)
+	{
+		if (pikumi->GetState() == PikumiState::kFollow)
+		{
+			followPikumis.push_back(pikumi.get());
+		}
+	}
+
+	if (followPikumis.empty())
+	{
+		isCharging_ = false;
+		chargeTimer_ = 0.0f;
+		ClearAllPikumiHighlights();
+		return;
+	}
+
+	// Shot ボタン長押し
+	if (inputCommand_->IsCommandActive("Shot"))
+	{
+		isCharging_ = true;
+		chargeTimer_ += FpsCounter::deltaTime;
+		if (chargeTimer_ > maxChargeTime_)
+		{
+			chargeTimer_ = maxChargeTime_;
+		}
+
+		// チャージ割合から投擲可能数を算出
+		float ratio = chargeTimer_ / maxChargeTime_;
+		int totalFollowers = static_cast<int>(followPikumis.size());
+		int throwableCount = 1 + static_cast<int>(ratio * (totalFollowers - 1));
+		throwableCount = Math::Min(throwableCount, totalFollowers);
+
+		// 有効範囲内の Pikumi のみ黄色にハイライト
+		for (int i = 0; i < totalFollowers; ++i)
+		{
+			followPikumis[i]->SetHighlight(i < throwableCount);
+		}
+	}
+	// Shot ボタンを離した瞬間
+	else if (isCharging_)
+	{
+		float ratio = chargeTimer_ / maxChargeTime_;
+		int totalFollowers = static_cast<int>(followPikumis.size());
+		int throwableCount = 1 + static_cast<int>(ratio * (totalFollowers - 1));
+		throwableCount = Math::Min(throwableCount, totalFollowers);
+
+		Vector3 forward = Math::YawToDirection(currentYaw_);
+		static std::mt19937 gen(std::random_device{}());
+		std::uniform_real_distribution<float> spreadDist(-0.15f, 0.15f);
+
+		// ハイライトされていた数の Pikumi だけを投擲
+		for (int i = 0; i < throwableCount; ++i)
+		{
+			Vector3 spreadDir = forward + Vector3(spreadDist(gen), 0.0f, spreadDist(gen));
+			followPikumis[i]->SetHighlight(false);
+			followPikumis[i]->Throw(spreadDir, pikumiThrowSpeed_);
+		}
+
+		// チャージ状態のクリア
+		isCharging_ = false;
+		chargeTimer_ = 0.0f;
+		ClearAllPikumiHighlights();
+	}
+}
+
+void Player::ClearAllPikumiHighlights()
+{
+	for (auto& pikumi : pikumis_)
+	{
+		pikumi->SetHighlight(false);
 	}
 }
 
