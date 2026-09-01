@@ -513,6 +513,7 @@
     <ClCompile Include="EngineSource\Graphics\Core\SceneRenderManager.cpp" />
     <ClCompile Include="EngineSource\3D\ParticleSystem\ModulesControl.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
     <ClCompile Include="EngineSource\Core\StaticGameObject.cpp" />
@@ -1032,6 +1033,7 @@
     <ClInclude Include="EngineSource\3D\ParticleSystem\ParticleModules.h" />
     <ClInclude Include="EngineSource\3D\ParticleSystem\ModulesControl.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
+    <ClInclude Include="Application\Utils\GameTimer.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
     <ClInclude Include="EngineSource\Core\StaticGameObject.h" />

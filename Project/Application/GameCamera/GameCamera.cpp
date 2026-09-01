@@ -89,7 +89,7 @@ void GameCamera::Update()
 void GameCamera::StartThrowHeightAnimation()
 {
 	throwHeightAnimationState_ = ThrowHeightAnimationState::Rising;
-	throwHeightAnimationTimer_ = 0.0f;
+	throwHeightAnimationTimer_.Start((std::max)(riseDuration_, 0.0f));
 	throwHeightAnimationStart_ = height_;
 	originMovementStart_ = originMovementProgress_;
 }
@@ -110,29 +110,22 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 		case ThrowHeightAnimationState::Rising:
 		{
 			const float duration = (std::max)(riseDuration_, 0.0f);
-			if (duration <= 0.0f)
-			{
-				height_ = riseHeight_;
-				originMovementProgress_ = moveToOriginWithHeightAnimation_ ? 1.0f : 0.0f;
-				throwHeightAnimationState_ = ThrowHeightAnimationState::Holding;
-				throwHeightAnimationTimer_ = 0.0f;
-				continue;
-			}
-
-			throwHeightAnimationTimer_ += remainingTime;
-			const float progress = std::clamp(throwHeightAnimationTimer_ / duration, 0.0f, 1.0f);
+			const float elapsedBeforeUpdate = throwHeightAnimationTimer_.GetElapsedTime();
+			throwHeightAnimationTimer_.SetDuration(duration);
+			throwHeightAnimationTimer_.Update(remainingTime);
+			const float progress = throwHeightAnimationTimer_.GetProgress();
 			height_ = throwHeightAnimationStart_ + (riseHeight_ - throwHeightAnimationStart_) * progress;
 			originMovementProgress_ = moveToOriginWithHeightAnimation_
 				? originMovementStart_ + (1.0f - originMovementStart_) * progress
 				: 0.0f;
-			if (throwHeightAnimationTimer_ < duration)
+			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
 			}
 
-			remainingTime = throwHeightAnimationTimer_ - duration;
+			remainingTime = (std::max)(elapsedBeforeUpdate + remainingTime - duration, 0.0f);
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Holding;
-			throwHeightAnimationTimer_ = 0.0f;
+			throwHeightAnimationTimer_.Start((std::max)(holdDuration_, 0.0f));
 			continue;
 		}
 
@@ -141,15 +134,17 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 			height_ = riseHeight_;
 			originMovementProgress_ = moveToOriginWithHeightAnimation_ ? 1.0f : 0.0f;
 			const float duration = (std::max)(holdDuration_, 0.0f);
-			throwHeightAnimationTimer_ += remainingTime;
-			if (throwHeightAnimationTimer_ < duration)
+			const float elapsedBeforeUpdate = throwHeightAnimationTimer_.GetElapsedTime();
+			throwHeightAnimationTimer_.SetDuration(duration);
+			throwHeightAnimationTimer_.Update(remainingTime);
+			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
 			}
 
-			remainingTime = throwHeightAnimationTimer_ - duration;
+			remainingTime = (std::max)(elapsedBeforeUpdate + remainingTime - duration, 0.0f);
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Returning;
-			throwHeightAnimationTimer_ = 0.0f;
+			throwHeightAnimationTimer_.Start((std::max)(returnDuration_, 0.0f));
 			throwHeightAnimationStart_ = height_;
 			originMovementStart_ = originMovementProgress_;
 			continue;
@@ -158,21 +153,14 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 		case ThrowHeightAnimationState::Returning:
 		{
 			const float duration = (std::max)(returnDuration_, 0.0f);
-			if (duration <= 0.0f)
-			{
-				height_ = returnHeight_;
-				originMovementProgress_ = 0.0f;
-				throwHeightAnimationState_ = ThrowHeightAnimationState::Idle;
-				return;
-			}
-
-			throwHeightAnimationTimer_ += remainingTime;
-			const float progress = std::clamp(throwHeightAnimationTimer_ / duration, 0.0f, 1.0f);
+			throwHeightAnimationTimer_.SetDuration(duration);
+			throwHeightAnimationTimer_.Update(remainingTime);
+			const float progress = throwHeightAnimationTimer_.GetProgress();
 			height_ = throwHeightAnimationStart_ + (returnHeight_ - throwHeightAnimationStart_) * progress;
 			originMovementProgress_ = moveToOriginWithHeightAnimation_
 				? originMovementStart_ * (1.0f - progress)
 				: 0.0f;
-			if (throwHeightAnimationTimer_ < duration)
+			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
 			}
@@ -180,7 +168,7 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 			height_ = returnHeight_;
 			originMovementProgress_ = 0.0f;
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Idle;
-			throwHeightAnimationTimer_ = 0.0f;
+			throwHeightAnimationTimer_.Reset();
 			return;
 		}
 		}
