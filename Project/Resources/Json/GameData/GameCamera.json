@@ -10,6 +10,20 @@
             0.0
         ],
         "RotateWithMovement": false,
-        "SceneName": "Game"
+        "SceneName": "Game",
+        "ThrowHeightAnimation": {
+            "HoldDuration": 2.0,
+            "MoveTargetPosition": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "MoveToOrigin": true,
+            "ReturnDuration": 0.5,
+            "ReturnHeight": 36.0,
+            "RiseDuration": 0.20000000298023224,
+            "RiseHeight": 80.0,
+            "ThrowCountThreshold": 5
+        }
     }
 }
