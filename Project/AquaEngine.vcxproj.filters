@@ -530,6 +530,11 @@
     <ClCompile Include="EngineSource\3D\Fracture\FractureDamageController.cpp" />
     <ClCompile Include="EngineSource\Graphics\Debug\PixCapture.cpp" />
     <ClCompile Include="EngineSource\Editor\Windows\PixWindow.cpp" />
+    <ClCompile Include="Application\Player\Player.cpp" />
+    <ClCompile Include="Application\Player\PlayerStateMove.cpp" />
+    <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
+    <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
+    <ClCompile Include="Application\Field\Field.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1041,6 +1046,12 @@
     <ClInclude Include="EngineSource\Graphics\Debug\PixCapture.h" />
     <ClInclude Include="EngineSource\Graphics\Debug\PixMarker.h" />
     <ClInclude Include="EngineSource\Editor\Windows\PixWindow.h" />
+    <ClInclude Include="Application\Player\Player.h" />
+    <ClInclude Include="Application\Player\IPlayerState.h" />
+    <ClInclude Include="Application\Player\PlayerStateMove.h" />
+    <ClInclude Include="Application\Player\PlayerStateIdle.h" />
+    <ClInclude Include="Application\Pikumi\Pikumi.h" />
+    <ClInclude Include="Application\Field\Field.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
