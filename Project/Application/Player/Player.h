@@ -44,6 +44,8 @@ public:
 
 private:
 	void ClampToField();
+	void UpdateChargeThrow();
+	void ClearAllPikumiHighlights();
 
 	// パラメータ機能
 	std::unique_ptr<GameEngine::DebugParameter> debugParame_;
@@ -82,6 +84,9 @@ private:
 	float pikumiThrowSpeed_ = 25.0f;
 	float pikumiDampening_ = 0.92f;
 	float pikumiCollectRadius_ = 3.0f;
+	float chargeTimer_ = 0.0f;
+	float maxChargeTime_ = 1.5f;
+	bool isCharging_ = false;
 
 private:
 

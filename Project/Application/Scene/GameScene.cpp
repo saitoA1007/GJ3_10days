@@ -6,6 +6,7 @@ using namespace GameEngine;
 #include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
 #include "Application/Field/Field.h"
+#include "Application/Tower/Tower.h"
 
 GameScene::~GameScene() {
 }
@@ -18,12 +19,15 @@ GameScene::GameScene() {
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
 
-
-
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("cylinder.gltf");
 	fieldModel->SetDefaultIsEnableLight(true);
 	auto field = gameObjectManager_->AddObject<Field>(fieldModel);
+
+	// タワー
+	auto* towerModel = modelManager_->GetNameByModel("cube.obj");
+	towerModel->SetDefaultIsEnableLight(true);
+	auto tower = gameObjectManager_->AddObject<Tower>(towerModel);
 
 	// プレイヤー
 	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
@@ -35,7 +39,6 @@ GameScene::GameScene() {
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
 	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
-
 }
 
 void GameScene::Initialize() {
@@ -65,7 +68,7 @@ void GameScene::InputRegisterCommand() {
 	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
 	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D },{InputState::PadLeftStick,0,{1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
 	// ピクミ発射コマンドを登録する
-	inputCommand_->RegisterCommand("Shot", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_A} });
+	inputCommand_->RegisterCommand("Shot", { {InputState::KeyPush, DIK_SPACE},{InputState::KeyPush, XINPUT_GAMEPAD_A} });
 
 	// カメラ操作のコマンドを登録する
 	inputCommand_->RegisterCommand("CameraMoveLeft", { { InputState::KeyPush, DIK_LEFT },{InputState::PadRightStick,0,{-1.0f,0.0f},0.2f} });

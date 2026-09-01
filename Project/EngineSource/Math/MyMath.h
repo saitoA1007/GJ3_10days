@@ -89,6 +89,7 @@ namespace GameEngine {
 		Vector4 MaxVector4(Vector4 pos1, Vector4 pos2);
 		// 最小値
 		Vector3 Min(Vector3 pos1, Vector3 pos2);
+		int Min(int a, int b);
 		Vector4 MinVector4(Vector4 pos1, Vector4 pos2);
 
 		// 4xx4のX軸の回転行列を作成

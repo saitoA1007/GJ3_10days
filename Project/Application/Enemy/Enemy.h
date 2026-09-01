@@ -40,6 +40,7 @@ public:
 	void Update() override;
 	void DeadUpdate();
 
+	Vector3 GetPosition() const { return data_->transform.translate; }
 	//SetUp後に呼び出す。
 	void SetSnake(float width, float speed) { snakeWidth_ = width; snakeSpeed_ = speed; }
 	void SetRound(float speed) { roundSpeed_ = speed; }
