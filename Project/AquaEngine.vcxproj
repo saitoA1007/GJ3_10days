@@ -160,6 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
     <ClCompile Include="Application\Player\PlayerStateMove.cpp" />
     <ClCompile Include="Application\Scene\GameScene.cpp" />
@@ -392,6 +393,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Application\Field\Field.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
     </ClCompile>
@@ -402,6 +404,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Field\Field.h" />
+    <ClInclude Include="Application\Pikumi\Pikumi.h" />
     <ClInclude Include="Application\Player\IPlayerState.h" />
     <ClInclude Include="Application\Player\PlayerStateIdle.h" />
     <ClInclude Include="Application\Player\PlayerStateMove.h" />

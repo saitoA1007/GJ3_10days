@@ -4,6 +4,7 @@ using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
 #include "Application/Player/Player.h"
+#include "Application/Field/Field.h"
 
 GameScene::~GameScene() {
 }
@@ -16,10 +17,17 @@ GameScene::GameScene() {
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
 
+	// フィールド
+	auto* fieldModel = modelManager_->GetNameByModel("cylinder.gltf");
+	fieldModel->SetDefaultIsEnableLight(true);
+	auto field = gameObjectManager_->AddObject<Field>(fieldModel);
+
 	// プレイヤー
 	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
+	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
-	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel);
+	pikumiModel->SetDefaultIsEnableLight(true);
+	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field);
 }
 
 void GameScene::Initialize() {
@@ -48,8 +56,8 @@ void GameScene::InputRegisterCommand() {
 	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadPush, XINPUT_GAMEPAD_DPAD_DOWN} });
 	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
 	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D },{InputState::PadLeftStick,0,{1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
-	// ジャンプコマンドを登録する
-	inputCommand_->RegisterCommand("Jump", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_A} });
+	// ピクミ発射コマンドを登録する
+	inputCommand_->RegisterCommand("Shot", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_A} });
 
 	// カメラ操作のコマンドを登録する
 	inputCommand_->RegisterCommand("CameraMoveLeft", { { InputState::KeyPush, DIK_LEFT },{InputState::PadRightStick,0,{-1.0f,0.0f},0.2f} });
