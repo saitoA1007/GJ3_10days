@@ -165,7 +165,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player\PlayerStateMove.cpp" />
     <ClCompile Include="Application\Scene\GameScene.cpp" />
     <ClCompile Include="Application\Player\Player.cpp" />
+    <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
@@ -416,7 +418,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\GameScene.h" />
     <ClInclude Include="Application\Player\Player.h" />
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h" />
+    <ClInclude Include="Application\Scene\StageSelectScene.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
+    <ClInclude Include="Application\Scene\TitleScene.h" />
     <ClInclude Include="Application\Scene\Transition\Fade.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
     <ClInclude Include="Application\Utils\Timer.h" />

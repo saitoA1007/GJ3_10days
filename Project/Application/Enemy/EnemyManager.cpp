@@ -2,9 +2,10 @@
 #include <LogManager.h>
 #include <Application/Utils/ShigeFunc.h>
 #include <RandomGenerator.h>
+#include <FPSCounter.h>
 
 #include <numbers>
-	
+
 EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model) : maxEnemyNum_(maxEnemyNum) {
 	renderer_.SetModel(model);
 }
@@ -31,22 +32,43 @@ void EnemyManager::Initialize() {
 	renderer_.SetTransforms(&worldTransforms_);
 
 	debugParam_.Register("Pop", debugPop_);
+	debugParam_.Register("PopInterval", popInterval_);
+	debugParam_.Register("Speed", enemyConfig_.speed_, 0, "EnemyConfig");
+	debugParam_.Register("HP", enemyConfig_.hp, 0, "EnemyConfig");
+	debugParam_.Register("NormalColor", enemyConfig_.normalColor_, 0, "EnemyConfig");
+	debugParam_.Register("HitColor", enemyConfig_.hitColor_, 0, "EnemyConfig");
+
+	debugParam_.Apply();
 }
 
 void EnemyManager::Update() {
 	debugParam_.ApplyIfDirty();
 
+	auto getRandomPos = [](float fieldSize)->Vector2 {
+		float range = RandomGenerator::Get(fieldSize / 2.f, fieldSize);
+		float theta = RandomGenerator::Get(0.f, 2.f * std::numbers::pi_v<float>);
+		return Vector2(range * std::cos(theta), range * std::sin(theta));
+		};
+
+	const float fieldSize = 20.f;
+
 #ifdef USE_IMGUI
 
 	if (debugPop_) {
 		debugPop_ = false;
-		float range = RandomGenerator::Get(-20.f, 20.f);
-		float theta = RandomGenerator::Get(0.f, 2.f * std::numbers::pi_v<float>);
-		Pop(1, Vector2(range * std::cos(theta), range * std::sin(theta)));
+		Pop(1, getRandomPos(fieldSize));
 	}
 
 #endif
 
+	//出現処理
+	popTimer_ += GameEngine::FpsCounter::deltaTime;
+	if (popTimer_ > popInterval_) {
+		popTimer_ = 0.0f;
+		Pop(1, getRandomPos(fieldSize));
+	}
+
+	//更新処理
 	for (const auto& [index, enemy] : deadEnemies_) {
 		enemy->DeadUpdate();
 
@@ -86,7 +108,7 @@ void EnemyManager::Pop(int num, Vector2 position) {
 		// 敵をアクティブにする
 		activeEnemies_[index] = enemies_[index].get();
 		enemies_[index]->SetActive(true);
-		enemies_[index]->SetUp(position);
+		enemies_[index]->SetUp(position, enemyConfig_);
 	}
 }
 
