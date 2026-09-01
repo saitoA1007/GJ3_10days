@@ -61,6 +61,7 @@ void EnemyManager::Initialize() {
 
 void EnemyManager::Update() {
 	debugParam_.ApplyIfDirty();
+	Enemy::SetCollisionRadius(collisionRadius_);
 
 	auto getRandomPos = [](float fieldSize)->Vector2 {
 		float range = RandomGenerator::Get(fieldSize / 2.f, fieldSize);
