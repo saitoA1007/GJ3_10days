@@ -181,14 +181,16 @@ void Pikumi::OnCollisionEnter(const GameEngine::CollisionResult& result)
         return;
     }
     if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy) ||
-        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer))
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer) ||
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kTower))
     {
         isPikumiCollisionEnabled_ = true;
     }
 
     if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy) ||
         result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer) ||
-        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPikumi))
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPikumi) ||
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kTower))
     {
         if (state_ == PikumiState::kThrown)
         {

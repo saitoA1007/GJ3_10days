@@ -6,6 +6,7 @@ using namespace GameEngine;
 #include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
 #include "Application/Field/Field.h"
+#include "Application/Tower/Tower.h"
 
 GameScene::~GameScene() {
 }
@@ -23,6 +24,11 @@ GameScene::GameScene() {
 	fieldModel->SetDefaultIsEnableLight(true);
 	auto field = gameObjectManager_->AddObject<Field>(fieldModel);
 
+	// タワー
+	auto* towerModel = modelManager_->GetNameByModel("cube.obj");
+	towerModel->SetDefaultIsEnableLight(true);
+	auto tower = gameObjectManager_->AddObject<Tower>(towerModel);
+
 	// プレイヤー
 	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
@@ -33,7 +39,6 @@ GameScene::GameScene() {
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
 	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
-
 }
 
 void GameScene::Initialize() {

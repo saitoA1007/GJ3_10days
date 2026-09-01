@@ -18,6 +18,7 @@
             "Dampening": 0.9700000286102295,
             "FollowOffset": 3.009999990463257,
             "FollowSpeed": 18.510000228881836,
+            "MaxChargeTime": 1.5,
             "Radius": 2.0999999046325684,
             "Scale": 0.5,
             "ThrowSpeed": 200.0
@@ -26,6 +27,7 @@
             1.0,
             1.0,
             1.0
-        ]
+        ],
+        "SceneName": "Game"
     }
 }

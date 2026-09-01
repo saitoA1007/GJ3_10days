@@ -9,6 +9,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	GameEngine::UserData userData;
 	userData.typeID = uint32_t(CollisionTypeID::kEnemy);
 	userData.object = this;
+	collider_.SetCollisionAttribute(uint32_t(CollisionTypeID::kEnemy));
 	collider_.SetCollisionMask(uint32_t(CollisionTypeID::kPlayer) | uint32_t(CollisionTypeID::kPikumi) | uint32_t(CollisionTypeID::kTower));
 	collider_.SetUserData(userData);
 	collider_.SetRadius(2.0f);

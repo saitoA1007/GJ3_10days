@@ -26,6 +26,8 @@ public:
 	void Update() override;
 	void DeadUpdate();
 
+	Vector3 GetPosition() const { return data_->transform.translate; }
+
 	void SetDamageTime(float time) { damageTime_ = time; }
 
 private:

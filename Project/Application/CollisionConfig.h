@@ -5,6 +5,8 @@
 static inline const uint32_t kCollisionAttributePlayer = 0b1;
 // ピクミ陣営
 static inline const uint32_t kCollisionAttributePikumi = 0b1;
+// タワー陣営
+static inline const uint32_t kCollisionAttributeTower = 0b1;
 // 敵陣営
 static inline const uint32_t kCollisionAttributeEnemy = 0b1 << 1;
 // 地形陣営

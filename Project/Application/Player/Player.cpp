@@ -8,6 +8,7 @@
 #include "IPlayerState.h"
 #include "PlayerStateIdle.h"
 #include "Application/Field/Field.h"
+#include "Application/Enemy/Enemy.h"
 
 using namespace GameEngine;
 
@@ -37,7 +38,7 @@ Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* piku
 	collider_.SetRadius(colliderRadius_);
 	collider_.SetWorldPosition(modelComponent_.worldTransform_.transform_.translate + Vector3(0.0f, colliderOffsetPosY_, 0.0f));
 	collider_.SetCollisionAttribute(kCollisionAttributePlayer);
-	collider_.SetCollisionMask(kCollisionAttributeEnemy | kCollisionAttributePikumi);
+	collider_.SetCollisionMask(kCollisionAttributePikumi | kCollisionAttributeTower | kCollisionAttributeEnemy);
 	// データを登録
 	UserData userData;
 	userData.typeID = static_cast<uint32_t>(CollisionTypeID::kPlayer);
@@ -64,6 +65,7 @@ Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* piku
 void Player::Initialize() 
 {
 	modelComponent_.worldTransform_.transform_.translate = { 0.0f,0.0f,0.0f };
+	modelComponent_.materialData_->color = { 0.0f,0.0f,1.0f,1.0f };
 
 	// Pikumiの初期化
 	for (auto& pikumi : pikumis_)
@@ -288,12 +290,50 @@ void Player::Draw()
 
 void Player::OnCollisionEnter([[maybe_unused]] const GameEngine::CollisionResult& result) 
 {
-
+	OnCollisionStay(result);
 }
 
 void Player::OnCollisionStay([[maybe_unused]] const GameEngine::CollisionResult& result)
 {
+	if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kTower) ||
+		result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy))
+	{
+		Vector3 normal = result.contactNormal;
+		normal.y = 0.0f;
 
+		if (normal.LengthSquared() > 0.0001f)
+		{
+			normal.Normalize();
+		}
+
+		// プレイヤーの現在地
+		Vector3 playerPos = modelComponent_.worldTransform_.transform_.translate;
+		Vector3 targetPos = { 0.0f, 0.0f, 0.0f }; 
+
+		if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy) && result.userData.object)
+		{
+			auto enemy = result.userData.As<Enemy>();
+			targetPos = enemy->GetPosition();
+		}
+
+		// 相手の中心からプレイヤーに向かう方向
+		Vector3 dirFromTarget = Vector3(playerPos.x - targetPos.x, 0.0f, playerPos.z - targetPos.z);
+
+		if (dirFromTarget.LengthSquared() > 0.0001f)
+		{
+			dirFromTarget.Normalize();
+			// 法線が相手の内側を向いている場合、外側向きに反転
+			if (Math::Dot(normal, dirFromTarget) < 0.0f)
+			{
+				normal = normal * -1.0f;
+			}
+		}
+
+		// めり込んだ分だけ押し戻す
+		modelComponent_.worldTransform_.transform_.translate += normal * result.penetrationDepth;
+
+		modelComponent_.Update();
+	}
 }
 
 void Player::ChangeState(std::unique_ptr<IPlayerState> newState)
