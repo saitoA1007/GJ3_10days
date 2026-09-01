@@ -4,6 +4,7 @@
 #include "RandomGenerator.h"
 #include "FPSCounter.h"
 #include "Application/CollisionConfig.h"
+#include "Application/Field/ImpactDetectionEffect.h"
 using namespace GameEngine;
 
 TestScene::~TestScene() {}
@@ -57,6 +58,9 @@ TestScene::TestScene() {
 	effectModel_ = modelManager_->GetNameByModel("plane.obj");
 	effectModel_->SetDefaultIsEnableLight(false);
 	//gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_, &renderQueue_->GetMainCamera());
+
+	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
+	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
 }
 
 void TestScene::Initialize() {
