@@ -160,7 +160,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+	<ClCompile Include="Application\GameObject\Player\Player.cpp" />
     <ClCompile Include="Application\Scene\GameScene.cpp" />
+    <ClCompile Include="Application\Scene\PrototypeScene.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
@@ -399,7 +401,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="Application\GameObject\Player\Player.h" />
     <ClInclude Include="Application\Scene\GameScene.h" />
+    <ClInclude Include="Application\Scene\PrototypeScene.h" />
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
     <ClInclude Include="Application\Scene\Transition\Fade.h" />

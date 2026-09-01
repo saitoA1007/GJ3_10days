@@ -3,30 +3,44 @@
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
-
+#include "Application/GameObject/Player/Player.h"
 GameScene::~GameScene() {
 }
 
 GameScene::GameScene() {
+	InputRegisterCommand();
+}
+
+void GameScene::Initialize() {
 	// 入力コマンド設定s
 	InputRegisterCommand();
 
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
-}
 
-void GameScene::Initialize() {
+	// メインカメラの初期化
+	mainCamera_ = std::make_unique<GameEngine::Camera>();
+	mainCamera_->Initialize({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,1.0f,-15.0f} }, 1280, 720);
+	mainCamera_->Update();
 
-	
+	// プロトタイプ用プレイヤーの初期化
+	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
+	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel);
 }
 
 void GameScene::Update() {
-	
+	// カメラの更新処理
+	mainCamera_->Update();
+
+	player_->Update();
+
+	DebugUpdate();
 }
 
 void GameScene::Draw() {
-	
+	// 描画に使用するカメラを設定
+	renderQueue_->SetCamera(mainCamera_.get());
 }
 
 void GameScene::InputRegisterCommand() {

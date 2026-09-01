@@ -6,6 +6,8 @@
 
 #include "Application/Scene/Transition/Fade.h"
 
+class Player;
+
 class GameScene : public GameEngine::IScene {
 public:
 	GameScene();
@@ -54,6 +56,12 @@ private: // シーン機能
 
 	// 終了フラグ
 	bool isFinished_ = false;
+
+	// メインカメラ
+	std::unique_ptr<GameEngine::Camera> mainCamera_;
+
+	// プロトタイプ用プレイヤー
+	Player* player_ = nullptr;
 
 private:
 

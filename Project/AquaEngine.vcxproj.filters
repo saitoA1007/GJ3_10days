@@ -12,6 +12,12 @@
     <Filter Include="Application\Player">
       <UniqueIdentifier>{ce755995-4689-4d0d-84c3-661e24754cc7}</UniqueIdentifier>
     </Filter>
+	<Filter Include="Application\GameObject">
+	  <UniqueIdentifier>{af0d8599-1720-4607-a24b-23552be2c383}</UniqueIdentifier>
+	</Filter>
+	<Filter Include="Application\GameObject\Player">
+	  <UniqueIdentifier>{9f5144a7-e83f-46a2-a9c5-af89b29df93d}</UniqueIdentifier>
+	</Filter>
     <Filter Include="Application\Scene">
       <UniqueIdentifier>{223a4067-9209-4765-ac4c-cce8c2c67a60}</UniqueIdentifier>
     </Filter>
@@ -162,7 +168,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+	<ClCompile Include="Application\GameObject\Player\Player.cpp">
+	  <Filter>Application\GameObject\Player</Filter>
+	</ClCompile>
     <ClCompile Include="Application\Scene\GameScene.cpp">
+      <Filter>Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Scene\PrototypeScene.cpp">
       <Filter>Application\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\Transition\Fade.cpp">
@@ -532,7 +544,13 @@
     <ClCompile Include="EngineSource\Editor\Windows\PixWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="Application\GameObject\Player\Player.h">
+	  <Filter>Application\GameObject\Player</Filter>
+	</ClInclude>
     <ClInclude Include="Application\Scene\GameScene.h">
+      <Filter>Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Scene\PrototypeScene.h">
       <Filter>Application\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h">
