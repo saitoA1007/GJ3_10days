@@ -530,6 +530,10 @@
     <ClCompile Include="EngineSource\3D\Fracture\FractureDamageController.cpp" />
     <ClCompile Include="EngineSource\Graphics\Debug\PixCapture.cpp" />
     <ClCompile Include="EngineSource\Editor\Windows\PixWindow.cpp" />
+    <ClCompile Include="Application\Enemy\EnemyManager.cpp" />
+    <ClCompile Include="Application\Enemy\Enemy.cpp" />
+    <ClCompile Include="Application\Enemy\EnemyRenderer.cpp" />
+    <ClCompile Include="Application\Utils\ShigeFunc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1041,6 +1045,10 @@
     <ClInclude Include="EngineSource\Graphics\Debug\PixCapture.h" />
     <ClInclude Include="EngineSource\Graphics\Debug\PixMarker.h" />
     <ClInclude Include="EngineSource\Editor\Windows\PixWindow.h" />
+    <ClInclude Include="Application\Enemy\EnemyManager.h" />
+    <ClInclude Include="Application\Enemy\Enemy.h" />
+    <ClInclude Include="Application\Enemy\EnemyRenderer.h" />
+    <ClInclude Include="Application\Utils\ShigeFunc.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

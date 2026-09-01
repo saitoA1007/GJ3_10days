@@ -3,6 +3,7 @@
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
+#include <Application/Enemy/EnemyManager.h>
 
 GameScene::~GameScene() {
 }
@@ -14,6 +15,10 @@ GameScene::GameScene() {
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
+
+
+
+	gameObjectManager_->AddObject<EnemyManager>(32, modelManager_->GetNameByModel("Enemy.obj"));
 }
 
 void GameScene::Initialize() {
