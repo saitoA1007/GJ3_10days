@@ -80,6 +80,12 @@ namespace GameEngine {
 		bool IsCommandActive(const std::string& commandName) const;
 
 		/// <summary>
+		/// 左スティックの入力値を取得
+		/// </summary>
+		/// <returns>デッドゾーン補正済みの入力値</returns>
+		Vector2 GetLeftStick() const;
+
+		/// <summary>
 		/// 全てのコマンドを削除
 		/// </summary>
 		void ClearAllCommands();

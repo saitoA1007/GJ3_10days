@@ -67,12 +67,12 @@ void GameScene::InputRegisterCommand() {
 	inputCommand_->RegisterCommand("SelectDown", { {InputState::KeyTrigger, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadTrigger, XINPUT_GAMEPAD_DPAD_DOWN} });
 
 	// 移動の入力コマンドを登録する
-	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_W },{InputState::PadLeftStick,0,{0.0f,1.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_UP } });
-	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadPush, XINPUT_GAMEPAD_DPAD_DOWN} });
-	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
-	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D },{InputState::PadLeftStick,0,{1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
+	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_W }, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_UP } });
+	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_S }, {InputState::PadPush, XINPUT_GAMEPAD_DPAD_DOWN} });
+	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A }, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
+	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D }, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
 	// ピクミ発射コマンドを登録する
-	inputCommand_->RegisterCommand("Shot", { {InputState::KeyPush, DIK_SPACE},{InputState::KeyPush, XINPUT_GAMEPAD_A} });
+	inputCommand_->RegisterCommand("Shot", { {InputState::KeyPush, DIK_SPACE},{InputState::PadPush, XINPUT_GAMEPAD_A} });
 
 	// カメラ操作のコマンドを登録する
 	inputCommand_->RegisterCommand("CameraMoveLeft", { { InputState::KeyPush, DIK_LEFT },{InputState::PadRightStick,0,{-1.0f,0.0f},0.2f} });
