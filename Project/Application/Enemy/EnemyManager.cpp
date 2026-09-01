@@ -3,11 +3,18 @@
 #include <Application/Utils/ShigeFunc.h>
 #include <RandomGenerator.h>
 #include <FPSCounter.h>
+#include <ImGuiManager.h>
 
 #include <numbers>
 
 EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model) : maxEnemyNum_(maxEnemyNum) {
 	renderer_.SetModel(model);
+	worldTransforms_.Initialize(maxEnemyNum_, {});
+
+	enemies_.resize(maxEnemyNum_);
+	for (uint32_t i = 0; i < maxEnemyNum_; ++i) {
+		enemies_[i] = std::make_unique<Enemy>(&worldTransforms_.transformDatas_[i]);
+	}
 }
 
 void EnemyManager::Initialize() {
@@ -15,16 +22,10 @@ void EnemyManager::Initialize() {
 	activeEnemies_.clear();
 	deadEnemies_.clear();
 
-	worldTransforms_.Initialize(maxEnemyNum_, {});
-
-	enemies_.resize(maxEnemyNum_);
 	freeEnemyIndices_.reserve(maxEnemyNum_);
+	configList_.resize(static_cast<int>(EnemyType::Count));
 
 	for (uint32_t i = 0; i < maxEnemyNum_; ++i) {
-		if (!enemies_[i]) {
-			enemies_[i] = std::make_unique<Enemy>(&worldTransforms_.transformDatas_[i]);
-		}
-
 		enemies_[i]->Initialize();
 		freeEnemyIndices_.push_back(i);
 	}
@@ -33,16 +34,34 @@ void EnemyManager::Initialize() {
 
 	debugParam_.Register("Pop", debugPop_);
 	debugParam_.Register("PopInterval", popInterval_);
-	debugParam_.Register("Speed", enemyConfig_.speed_, 0, "EnemyConfig");
-	debugParam_.Register("HP", enemyConfig_.hp, 0, "EnemyConfig");
-	debugParam_.Register("NormalColor", enemyConfig_.normalColor_, 0, "EnemyConfig");
-	debugParam_.Register("HitColor", enemyConfig_.hitColor_, 0, "EnemyConfig");
+	debugParam_.Register("CollisionRadius", collisionRadius_);
+
+	for (int i = 0; i < static_cast<int>(EnemyType::Count); ++i) {
+		std::string label = std::to_string(i) + "_" + enemyTypeNames_[i];
+		debugParam_.Register("Speed", configList_[i].speed_, 0, label);
+		debugParam_.Register("HP", configList_[i].hp, 0, label);
+		debugParam_.Register("Size", configList_[i].size_, 0, label);
+		debugParam_.Register("NormalColor", configList_[i].normalColor_, 0, label);
+		debugParam_.Register("HitColor", configList_[i].hitColor_, 0, label);
+
+		enemyTypeNamesForImGuiList_[i] = enemyTypeNames_[i].c_str();
+
+		if (i == static_cast<int>(EnemyType::Snake)) {
+			debugParam_.Register("SwingWidth", swingWidth_, 0, label);
+			debugParam_.Register("SnakeSpeed", snakeSpeed_, 0, label);
+		}
+
+		if (i == static_cast<int>(EnemyType::Round)) {
+			debugParam_.Register("RoundSpeed", roundSpeed_, 0, label);
+		}
+	}
 
 	debugParam_.Apply();
 }
 
 void EnemyManager::Update() {
 	debugParam_.ApplyIfDirty();
+	Enemy::SetCollisionRadius(collisionRadius_);
 
 	auto getRandomPos = [](float fieldSize)->Vector2 {
 		float range = RandomGenerator::Get(fieldSize / 2.f, fieldSize);
@@ -56,7 +75,7 @@ void EnemyManager::Update() {
 
 	if (debugPop_) {
 		debugPop_ = false;
-		Pop(1, getRandomPos(fieldSize));
+		Pop(1, getRandomPos(fieldSize), currentType_);
 	}
 
 #endif
@@ -65,7 +84,7 @@ void EnemyManager::Update() {
 	popTimer_ += GameEngine::FpsCounter::deltaTime;
 	if (popTimer_ > popInterval_) {
 		popTimer_ = 0.0f;
-		Pop(1, getRandomPos(fieldSize));
+		Pop(1, getRandomPos(fieldSize), EnemyType::Straight_S);
 	}
 
 	//更新処理
@@ -95,7 +114,18 @@ void EnemyManager::Draw() {
 	renderer_.Draw();
 }
 
-void EnemyManager::Pop(int num, Vector2 position) {
+void EnemyManager::DebugUpdate() {
+#ifdef USE_IMGUI
+	ImGui::Begin("EnemyPop");
+	static int currentTypeIndex = 0;
+	ImGui::ListBox("Type", &currentTypeIndex, enemyTypeNamesForImGuiList_, static_cast<int>(EnemyType::Count));
+	ImGui::End();
+
+	currentType_ = static_cast<EnemyType>(currentTypeIndex);
+#endif
+}
+
+void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 	for (int i = 0; i < num; ++i) {
 		if (freeEnemyIndices_.empty()) {
 			// 敵のプールが空の場合は何もしない
@@ -108,7 +138,13 @@ void EnemyManager::Pop(int num, Vector2 position) {
 		// 敵をアクティブにする
 		activeEnemies_[index] = enemies_[index].get();
 		enemies_[index]->SetActive(true);
-		enemies_[index]->SetUp(position, enemyConfig_);
+		enemies_[index]->SetUp(position, configList_[static_cast<int>(type)], type);
+
+		if (type == EnemyType::Snake) {
+			enemies_[index]->SetSnake(swingWidth_, snakeSpeed_);
+		} else if (type == EnemyType::Round) {
+			enemies_[index]->SetRound(roundSpeed_);
+		}
 	}
 }
 

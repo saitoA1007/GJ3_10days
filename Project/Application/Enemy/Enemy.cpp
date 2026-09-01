@@ -58,14 +58,21 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	collider_.SetActive(false);
 }
 
-void Enemy::SetUp(Vector2 position, Config config) {
+void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
+	//パラメータのリセット
 	config_ = config;
-	data_->transform.scale = { 1.0f, 1.0f, 1.0f };
+	type_ = type;
+	snakeSpeed_ = 0.0f;
+	snakeWidth_ = 0.0f;
+	roundSpeed_ = 0.0f;
 
-	data_->transform.translate.x = position.x;
-	data_->transform.translate.z = position.y;
-
+	data_->transform.scale = { config.size_, config.size_, config.size_ };
+	data_->transform.translate = { position.x, 0.0f, position.y };
 	data_->color = config_.normalColor_;
+
+	distance_ = position.Length();
+	direction_ = position;
+	direction_.Normalize();
 
 	isActive_ = true;
 	isDead_ = false;
@@ -73,34 +80,39 @@ void Enemy::SetUp(Vector2 position, Config config) {
 	hp_ = config_.hp;
 
 	damageTimer_ = 100.f;
+	snakeTimer_ = 0.0f;
 
 	collider_.SetActive(true);
+	collider_.SetRadius(collisionRadius_ * config.size_);
 }
 
 
 void Enemy::Initialize() {
 	isActive_ = false;
 	isDead_ = true;
+	data_->transform.scale = {};
+	collider_.SetActive(false);
 }
 
 void Enemy::Update() {
-	Vector3 position = data_->transform.translate;
-	Vector2 toMid = { -position.x, -position.z };
-	toMid.Normalize();
-
-	toMid = toMid * config_.speed_ * GameEngine::FpsCounter::deltaTime;
-
-	data_->transform.translate.x += toMid.x;
-	data_->transform.translate.z += toMid.y;
+	//移動処理
+	if (type_ == EnemyType::Round) {
+		RoundMovement();
+	} else {
+		DefaultMovement();
+	}
 
 	collider_.SetWorldPosition(data_->transform.translate);
 
 	//暫定的な死亡判定
-	if (position.Length() < 0.2f) {
-		isDead_ = true;
+	{
+		if (distance_ < 0.2f) {
+			isDead_ = true;
+		}
+
 	}
 
-
+	//当たった時の色変化処理
 	damageTimer_ += GameEngine::FpsCounter::deltaTime;
 	if (damageTimer_ < damageTime_) {
 		data_->color = config_.hitColor_;
@@ -113,4 +125,32 @@ void Enemy::DeadUpdate() {
 	data_->transform.scale = {};
 	isActive_ = false;
 	collider_.SetActive(false);
+}
+
+void Enemy::DefaultMovement() {
+	distance_ -= config_.speed_ * GameEngine::FpsCounter::deltaTime;
+
+	Vector2 localPos = {};
+
+	snakeTimer_ += GameEngine::FpsCounter::deltaTime;
+	localPos += { distance_, std::sin(snakeTimer_* snakeSpeed_) * snakeWidth_ };
+
+	Vector2 position = SF::RotDir(localPos, direction_);
+
+	data_->transform.translate.x = position.x;
+	data_->transform.translate.z = position.y;
+}
+
+void Enemy::RoundMovement() {
+	distance_ -= config_.speed_ * GameEngine::FpsCounter::deltaTime;
+
+	Vector2 localPos = {};
+
+	roundTimer_ += GameEngine::FpsCounter::deltaTime;
+	localPos += { std::cos(roundTimer_* roundSpeed_)* distance_, std::sin(roundTimer_* roundSpeed_)* distance_ };
+
+	Vector2 position = SF::RotDir(localPos, direction_);
+
+	data_->transform.translate.x = position.x;
+	data_->transform.translate.z = position.y;
 }

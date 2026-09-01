@@ -4,7 +4,7 @@
 #include "ConstantBuffer.h"
 #include "RenderPass/RenderPassController.h"
 #include "IPostEffect.h"
-
+#include "PostEffectData.h"
 namespace GameEngine {
 
 	class PostEffectManager {
@@ -69,6 +69,8 @@ namespace GameEngine {
 
 		// psoのリスト
 		std::unordered_map<std::string, DrawPsoData> psoList_;
+
+		Bloom* bloom_ = nullptr;
 	private:
 
 		// psoを登録する

@@ -1,0 +1,39 @@
+{
+    "BGRock.obj_1": {
+        "IsActiveCollider": false,
+        "Material": {
+            "Color": [
+                0.6000000238418579,
+                0.6000000238418579,
+                0.6000000238418579,
+                1.0
+            ],
+            "Metalic": 0.009999999776482582,
+            "Roughness": 0.08908708393573761,
+            "SpecularColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "SceneName": "Game",
+        "WorldWorldTransform": {
+            "Rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Translate": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    }
+}

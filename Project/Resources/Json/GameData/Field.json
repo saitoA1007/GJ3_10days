@@ -1,0 +1,9 @@
+{
+    "Field": {
+        "SceneName": "Game",
+        "Transform": {
+            "Height": 1.0,
+            "Radius": 20.0
+        }
+    }
+}
