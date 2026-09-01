@@ -27,15 +27,15 @@ Pikumi::Pikumi(GameEngine::Model* model) : modelComponent_(model)
     collider_.SetRadius(colliderRadius_);
     collider_.SetWorldPosition(modelComponent_.worldTransform_.transform_.translate);
     collider_.SetCollisionAttribute(kCollisionAttributePikumi); 
-    collider_.SetCollisionMask(kCollisionAttributeEnemy | kCollisionAttributePlayer);
+    collider_.SetCollisionMask(kCollisionAttributeEnemy | kCollisionAttributePlayer | kCollisionAttributePikumi);
 
     UserData userData;
     userData.typeID = static_cast<uint32_t>(CollisionTypeID::kPikumi);
     userData.object = this;
     collider_.SetUserData(userData);
 
-    collider_.SetOnCollisionCallback([this](const CollisionResult& result) {
-        this->OnCollisionStay(result);
+    collider_.SetOnCollisionEnterCallback([this](const CollisionResult& result) {
+        this->OnCollisionEnter(result);
         });
 }
 
@@ -54,8 +54,11 @@ void Pikumi::Throw(const Vector3& direction, float initialSpeed)
 
     velocity_ = dir * initialSpeed;
 
-    // 投げた直後0.05秒間はプレイヤーとの衝突処理を無視
-    throwIgnorePlayerTimer_ = 0.05f;
+    // 投げた直後プレイヤーとの衝突処理を無視
+    throwIgnorePlayerTimer_ = 0.1f;
+
+    // 投げられた直後は Pikumi 同士の当たり判定を無効化
+    isPikumiCollisionEnabled_ = false;
 }
 
 void Pikumi::RandomizeFormation()
@@ -99,7 +102,7 @@ void Pikumi::Update()
         // 減速
         velocity_ *= std::pow(dampening_, FpsCounter::deltaTime * 60.0f);
 
-        if (velocity_.LengthSquared() < 0.1f) 
+        if (velocity_.LengthSquared() < 1.0f) 
         {
             velocity_ = { 0.0f, 0.0f, 0.0f };
             state_ = PikumiState::kIdle;
@@ -120,6 +123,9 @@ void Pikumi::Update()
 
         modelComponent_.worldTransform_.transform_.translate.x = normal.x * fieldRadius_;
         modelComponent_.worldTransform_.transform_.translate.z = normal.z * fieldRadius_;
+
+        // Pikumi 同士の判定を true に
+        isPikumiCollisionEnabled_ = true;
 
         // 投擲中の場合の反射計算
         if (state_ == PikumiState::kThrown)
@@ -146,15 +152,28 @@ void Pikumi::Draw()
     modelComponent_.DrawRaytracing(renderQueue_);
 }
 
-void Pikumi::OnCollisionStay(const GameEngine::CollisionResult& result)
+void Pikumi::OnCollisionEnter(const GameEngine::CollisionResult& result)
 {
+    // 投げ直後の Player 無視処理
     if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer) && throwIgnorePlayerTimer_ > 0.0f)
     {
         return;
     }
 
+    // Pikumi 同士の判定条件チェック
+    if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPikumi) && !isPikumiCollisionEnabled_)
+    {
+        return;
+    }
     if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy) ||
         result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer))
+    {
+        isPikumiCollisionEnabled_ = true;
+    }
+
+    if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy) ||
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer) ||
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPikumi))
     {
         if (state_ == PikumiState::kThrown)
         {
