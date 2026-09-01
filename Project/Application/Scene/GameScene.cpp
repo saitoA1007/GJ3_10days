@@ -3,6 +3,7 @@
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
+#include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
 #include "Application/Field/Field.h"
 
@@ -17,6 +18,8 @@ GameScene::GameScene() {
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
 
+
+
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("cylinder.gltf");
 	fieldModel->SetDefaultIsEnableLight(true);
@@ -28,6 +31,11 @@ GameScene::GameScene() {
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
 	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field);
+
+	//Enemy
+	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
+	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+
 }
 
 void GameScene::Initialize() {

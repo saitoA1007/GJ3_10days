@@ -18,6 +18,7 @@ enum class CollisionTypeID : uint32_t {
 	kPlayer,  // プレイヤー
 	kPikumi,  // ピクミ
 	kEnemy,	  // 敵
+	kTower,   // タワー
 	kWall,    // 壁
 	kGround,  // 地面
 	kIceFall, // つらら

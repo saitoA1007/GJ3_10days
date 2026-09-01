@@ -535,6 +535,10 @@
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
     <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
     <ClCompile Include="Application\Field\Field.cpp" />
+    <ClCompile Include="Application\Enemy\EnemyManager.cpp" />
+    <ClCompile Include="Application\Enemy\Enemy.cpp" />
+    <ClCompile Include="Application\Enemy\EnemyRenderer.cpp" />
+    <ClCompile Include="Application\Utils\ShigeFunc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1052,6 +1056,10 @@
     <ClInclude Include="Application\Player\PlayerStateIdle.h" />
     <ClInclude Include="Application\Pikumi\Pikumi.h" />
     <ClInclude Include="Application\Field\Field.h" />
+    <ClInclude Include="Application\Enemy\EnemyManager.h" />
+    <ClInclude Include="Application\Enemy\Enemy.h" />
+    <ClInclude Include="Application\Enemy\EnemyRenderer.h" />
+    <ClInclude Include="Application\Utils\ShigeFunc.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
