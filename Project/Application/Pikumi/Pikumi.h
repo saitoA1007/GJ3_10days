@@ -10,10 +10,13 @@ enum class PikumiState
     kIdle    // 停止して回収待ち
 };
 
+// 前方宣言
+class ImpactDetectionEffect;
+
 class Pikumi : public GameEngine::IGameObject
 {
 public:
-    Pikumi(GameEngine::Model* model);
+    Pikumi(GameEngine::Model* model, ImpactDetectionEffect* impactDetectionEffect);
 
     void Initialize() override;
     void Update() override;
@@ -67,4 +70,6 @@ private:
 
     // Pikumi同士の当たり判定をするかどうか
     bool isPikumiCollisionEnabled_ = false;
+
+    ImpactDetectionEffect* impactDetectionEffect_ = nullptr;
 };

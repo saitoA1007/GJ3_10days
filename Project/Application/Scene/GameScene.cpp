@@ -6,7 +6,7 @@ using namespace GameEngine;
 #include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
 #include "Application/Field/Field.h"
-
+#include "Application/Field/ImpactDetectionEffect.h"
 GameScene::~GameScene() {
 }
 
@@ -17,6 +17,12 @@ GameScene::GameScene() {
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
+
+	// 衝突可視化演出のテスト
+	auto planeModel = modelManager_->GetNameByModel("plane.obj");
+	planeModel->SetDefaultIsEnableLight(false);
+	uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
+	auto* impactDetectionEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
 
 
 
@@ -30,12 +36,11 @@ GameScene::GameScene() {
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
-	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field);
+	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactDetectionEffect);
 
-	//Enemy
-	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
-	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
-
+	////Enemy
+	//auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
+	//gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
 }
 
 void GameScene::Initialize() {

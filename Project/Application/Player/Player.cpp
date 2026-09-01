@@ -10,7 +10,7 @@
 
 using namespace GameEngine;
 
-Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* pikumiModel, Field* field)
+Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* pikumiModel, Field* field, ImpactDetectionEffect* impactDetectionEffect)
 	: inputCommand_(inputCommand), modelComponent_(model), pikumiModel_(pikumiModel), field_(field)
 {
 	// 初期化
@@ -53,7 +53,7 @@ Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* piku
 	pikumis_.clear();
 	for (int i = 0; i < pikumiCount_; ++i)
 	{
-		pikumis_.push_back(std::make_unique<Pikumi>(pikumiModel_));
+		pikumis_.push_back(std::make_unique<Pikumi>(pikumiModel_, impactDetectionEffect));
 	}
 
 	debugParame_->Apply();
