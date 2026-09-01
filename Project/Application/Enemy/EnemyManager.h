@@ -34,9 +34,13 @@ private:
 
 	EnemyRenderer renderer_ = EnemyRenderer(renderQueue_);
 
+	float popTimer_ = 0.0f;
+
 private:
 
 	GameEngine::DebugParameter debugParam_{ "EnemyManager" };
 
 	bool debugPop_ = false;
+	Enemy::Config enemyConfig_;
+	float popInterval_ = 3.0f;
 };

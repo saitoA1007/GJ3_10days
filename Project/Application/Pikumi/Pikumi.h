@@ -40,6 +40,7 @@ public:
     float GetAngleOffset() const { return angleOffset_; }
     float GetRadiusRatio() const { return radiusRatio_; }
     float GetSeed() const { return seed_; }
+	Vector2 GetVelocity() const { return { velocity_.x, velocity_.z }; }
 
     GameEngine::SphereCollider& GetCollider() { return collider_; }
 
