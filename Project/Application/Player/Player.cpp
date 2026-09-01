@@ -143,6 +143,7 @@ void Player::UpdateChargeThrow()
 	{
 		isCharging_ = false;
 		chargeTimer_ = 0.0f;
+		chargedPikumiCount_ = 0;
 		ClearAllPikumiHighlights();
 		return;
 	}
@@ -162,6 +163,7 @@ void Player::UpdateChargeThrow()
 		int totalFollowers = static_cast<int>(followPikumis.size());
 		int throwableCount = 1 + static_cast<int>(ratio * (totalFollowers - 1));
 		throwableCount = Math::Min(throwableCount, totalFollowers);
+		chargedPikumiCount_ = throwableCount;
 
 		// 有効範囲内の Pikumi のみ黄色にハイライト
 		for (int i = 0; i < totalFollowers; ++i)
@@ -194,7 +196,12 @@ void Player::UpdateChargeThrow()
 		// チャージ状態のクリア
 		isCharging_ = false;
 		chargeTimer_ = 0.0f;
+		chargedPikumiCount_ = 0;
 		ClearAllPikumiHighlights();
+	}
+	else
+	{
+		chargedPikumiCount_ = 0;
 	}
 }
 

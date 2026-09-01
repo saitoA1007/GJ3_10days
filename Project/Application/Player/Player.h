@@ -21,7 +21,7 @@ class Player : public GameEngine::IGameObject
 {
 public:
 	Player(GameEngine::InputCommand* inputCommand, GameEngine::Model* model, GameEngine::Model* pikumiModel, Field* field);
-	~Player() = default;
+	~Player() override = default;
 
 	void Initialize() override;
 	void Update() override;
@@ -37,6 +37,7 @@ public:
 
 	void SetCurrentYaw(float yaw) { currentYaw_ = yaw; }
 	float GetCurrentYaw() const { return currentYaw_; }
+	int GetChargedPikumiCount() const { return chargedPikumiCount_; }
 	int GetLastThrownCount() const { return lastThrownCount_; }
 	uint32_t GetThrowEventId() const { return throwEventId_; }
 
@@ -90,6 +91,7 @@ private:
 	float chargeTimer_ = 0.0f;
 	float maxChargeTime_ = 1.5f;
 	bool isCharging_ = false;
+	int chargedPikumiCount_ = 0;
 	int lastThrownCount_ = 0;
 	uint32_t throwEventId_ = 0;
 

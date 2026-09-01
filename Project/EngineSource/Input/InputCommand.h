@@ -90,13 +90,6 @@ namespace GameEngine {
 		/// </summary>
 		void ClearAllCommands();
 
-		/// <summary>
-		/// 振動させる(0~1の範囲を入れる)
-		/// </summary>
-		/// <param name="left">左モーター : 低周波</param>
-		/// <param name="right">右モーター : 高周波</param>
-		void PlayPadVibration(float left, float right);
-
 	private:
 		InputCommand(const InputCommand&) = delete;
 		const InputCommand& operator=(const InputCommand&) = delete;
