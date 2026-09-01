@@ -84,7 +84,7 @@ void ParticleBehavior::Update() {
 }
 
 void ParticleBehavior::Draw() {
-    renderQueue_->SubmitInstancing(model_, currentNumInstance_, *worldTransforms_, 0.0f, BlendMode::kBlendModeAdd);
+    renderQueue_->SubmitInstancing(model_, currentNumInstance_, *worldTransforms_, 0.0f, BlendMode::kBlendModeAdd,nullptr,"WBOITAccumulatePass");
 }
 
 void ParticleBehavior::Emit(const Vector3& pos) {
