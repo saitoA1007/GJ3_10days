@@ -56,6 +56,10 @@ bool InputCommand::IsCommandActive(const std::string& commandName) const {
 	}
 }
 
+Vector2 InputCommand::GetLeftStick() const {
+	return input_->GetLeftStick();
+}
+
 void InputCommand::ClearAllCommands() {
 	inputCommands_.clear();
 	inputCommandStates_.clear();
