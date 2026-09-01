@@ -182,6 +182,8 @@ void Player::UpdateChargeThrow()
 		std::uniform_real_distribution<float> spreadDist(-0.15f, 0.15f);
 
 		// ハイライトされていた数の Pikumi だけを投擲
+		lastThrownCount_ = throwableCount;
+		++throwEventId_;
 		for (int i = 0; i < throwableCount; ++i)
 		{
 			Vector3 spreadDir = forward + Vector3(spreadDist(gen), 0.0f, spreadDist(gen));
