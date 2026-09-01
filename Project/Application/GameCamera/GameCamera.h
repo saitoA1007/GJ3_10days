@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "Application/Utils/GameTimer.h"
 #include "Camera.h"
 #include "IGameObject.h"
 #include "Vector3.h"
@@ -74,7 +75,7 @@ private:
 
 	ThrowHeightAnimationState throwHeightAnimationState_ = ThrowHeightAnimationState::Idle;
 	uint32_t lastHandledThrowEventId_ = 0;
-	float throwHeightAnimationTimer_ = 0.0f;
+	GameTimer throwHeightAnimationTimer_;
 	float throwHeightAnimationStart_ = 28.0f;
 	float originMovementProgress_ = 0.0f;
 	float originMovementStart_ = 0.0f;

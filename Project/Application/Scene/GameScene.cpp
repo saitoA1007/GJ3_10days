@@ -8,6 +8,15 @@ using namespace GameEngine;
 #include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
 #include "Application/Tower/Tower.h"
+#include "ControllerVibration.h"
+
+// 後で別クラスに纏めて消す
+namespace
+{
+	constexpr int kChargeVibrationThreshold = 5;        // 振動を開始するためのチャージされたピクミの数
+	constexpr float kChargeVibrationLeftMotor = 0.35f;  // 左モーターの振動強度
+	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
+}
 
 GameScene::~GameScene() {
 }
@@ -15,6 +24,7 @@ GameScene::~GameScene() {
 GameScene::GameScene() {
 	// 入力コマンド設定s
 	InputRegisterCommand();
+	controllerVibration_ = std::make_unique<ControllerVibration>(input_);
 
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
@@ -35,10 +45,10 @@ GameScene::GameScene() {
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
-	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field);
+	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
-	gameObjectManager_->AddObject<GameCamera>(player);
+	gameObjectManager_->AddObject<GameCamera>(player_);
 
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
@@ -51,7 +61,24 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
-	
+	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
+	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
+	{
+		controllerVibration_->SetVibration(kChargeVibrationLeftMotor, kChargeVibrationRightMotor);
+	}
+	else if (controllerVibration_)
+	{
+		controllerVibration_->Stop();
+	}
+}
+
+void GameScene::DebugUpdate()
+{
+	// ゲーム更新を停止している間に振動が残らないようにする。
+	if (controllerVibration_)
+	{
+		controllerVibration_->Stop();
+	}
 }
 
 void GameScene::Draw() {

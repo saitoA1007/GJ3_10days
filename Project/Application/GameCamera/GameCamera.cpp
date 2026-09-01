@@ -63,6 +63,7 @@ void GameCamera::Update()
 		return;
 	}
 
+	// イベントIDの変化で、同じ投擲を複数フレーム処理することを防ぐ。
 	const uint32_t throwEventId = player_->GetThrowEventId();
 	if (throwEventId != lastHandledThrowEventId_)
 	{
@@ -78,6 +79,8 @@ void GameCamera::Update()
 	UpdateThrowHeightAnimation(deltaTime);
 
 	const Vector3 animatedTargetPosition = CalculateCameraPosition(playerPosition);
+
+	// フレームレートに依存しにくい指数補間で目標位置を追従する。
 	const float interpolation = 1.0f - std::exp(-(std::max)(followSpeed_, 0.0f) * deltaTime);
 
 	camera_.transform_.translate +=
@@ -88,8 +91,9 @@ void GameCamera::Update()
 
 void GameCamera::StartThrowHeightAnimation()
 {
+	// 演出中に再度投げた場合も、現在の高さと移動率から滑らかに上昇し直す。
 	throwHeightAnimationState_ = ThrowHeightAnimationState::Rising;
-	throwHeightAnimationTimer_ = 0.0f;
+	throwHeightAnimationTimer_.Start((std::max)(riseDuration_, 0.0f));
 	throwHeightAnimationStart_ = height_;
 	originMovementStart_ = originMovementProgress_;
 }
@@ -109,47 +113,47 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 
 		case ThrowHeightAnimationState::Rising:
 		{
+			// カメラを持ち上げながら、追従先を演出用の目標位置へ移す。
 			const float duration = (std::max)(riseDuration_, 0.0f);
-			if (duration <= 0.0f)
-			{
-				height_ = riseHeight_;
-				originMovementProgress_ = moveToOriginWithHeightAnimation_ ? 1.0f : 0.0f;
-				throwHeightAnimationState_ = ThrowHeightAnimationState::Holding;
-				throwHeightAnimationTimer_ = 0.0f;
-				continue;
-			}
+			const float elapsedBeforeUpdate = throwHeightAnimationTimer_.GetElapsedTime();
 
-			throwHeightAnimationTimer_ += remainingTime;
-			const float progress = std::clamp(throwHeightAnimationTimer_ / duration, 0.0f, 1.0f);
+			// デバッグパラメータで変更された継続時間を実行中のタイマーにも反映する。
+			throwHeightAnimationTimer_.SetDuration(duration);
+			throwHeightAnimationTimer_.Update(remainingTime);
+			const float progress = throwHeightAnimationTimer_.GetProgress();
 			height_ = throwHeightAnimationStart_ + (riseHeight_ - throwHeightAnimationStart_) * progress;
 			originMovementProgress_ = moveToOriginWithHeightAnimation_
 				? originMovementStart_ + (1.0f - originMovementStart_) * progress
 				: 0.0f;
-			if (throwHeightAnimationTimer_ < duration)
+			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
 			}
 
-			remainingTime = throwHeightAnimationTimer_ - duration;
+			// フェーズ終端を越えた時間は、同じフレーム内で次のフェーズへ渡す。
+			remainingTime = (std::max)(elapsedBeforeUpdate + remainingTime - duration, 0.0f);
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Holding;
-			throwHeightAnimationTimer_ = 0.0f;
+			throwHeightAnimationTimer_.Start((std::max)(holdDuration_, 0.0f));
 			continue;
 		}
 
 		case ThrowHeightAnimationState::Holding:
 		{
+			// 上昇後の高さと目標位置を、指定時間だけ維持する。
 			height_ = riseHeight_;
 			originMovementProgress_ = moveToOriginWithHeightAnimation_ ? 1.0f : 0.0f;
 			const float duration = (std::max)(holdDuration_, 0.0f);
-			throwHeightAnimationTimer_ += remainingTime;
-			if (throwHeightAnimationTimer_ < duration)
+			const float elapsedBeforeUpdate = throwHeightAnimationTimer_.GetElapsedTime();
+			throwHeightAnimationTimer_.SetDuration(duration);
+			throwHeightAnimationTimer_.Update(remainingTime);
+			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
 			}
 
-			remainingTime = throwHeightAnimationTimer_ - duration;
+			remainingTime = (std::max)(elapsedBeforeUpdate + remainingTime - duration, 0.0f);
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Returning;
-			throwHeightAnimationTimer_ = 0.0f;
+			throwHeightAnimationTimer_.Start((std::max)(returnDuration_, 0.0f));
 			throwHeightAnimationStart_ = height_;
 			originMovementStart_ = originMovementProgress_;
 			continue;
@@ -157,22 +161,16 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 
 		case ThrowHeightAnimationState::Returning:
 		{
+			// 高さと追従先を通常状態へ補間して戻す。
 			const float duration = (std::max)(returnDuration_, 0.0f);
-			if (duration <= 0.0f)
-			{
-				height_ = returnHeight_;
-				originMovementProgress_ = 0.0f;
-				throwHeightAnimationState_ = ThrowHeightAnimationState::Idle;
-				return;
-			}
-
-			throwHeightAnimationTimer_ += remainingTime;
-			const float progress = std::clamp(throwHeightAnimationTimer_ / duration, 0.0f, 1.0f);
+			throwHeightAnimationTimer_.SetDuration(duration);
+			throwHeightAnimationTimer_.Update(remainingTime);
+			const float progress = throwHeightAnimationTimer_.GetProgress();
 			height_ = throwHeightAnimationStart_ + (returnHeight_ - throwHeightAnimationStart_) * progress;
 			originMovementProgress_ = moveToOriginWithHeightAnimation_
 				? originMovementStart_ * (1.0f - progress)
 				: 0.0f;
-			if (throwHeightAnimationTimer_ < duration)
+			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
 			}
@@ -180,7 +178,7 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 			height_ = returnHeight_;
 			originMovementProgress_ = 0.0f;
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Idle;
-			throwHeightAnimationTimer_ = 0.0f;
+			throwHeightAnimationTimer_.Reset();
 			return;
 		}
 		}
@@ -189,6 +187,7 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 
 Vector3 GameCamera::CalculateCameraPosition(const Vector3& playerPosition) const
 {
+	// 演出中はプレイヤー追従位置から演出用の目標位置へ徐々に寄せる。
 	const float originProgress = moveToOriginWithHeightAnimation_ ? originMovementProgress_ : 0.0f;
 	const Vector3 followPosition =
 		playerPosition * (1.0f - originProgress) + moveTargetPosition_ * originProgress;

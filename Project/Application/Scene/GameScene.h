@@ -6,6 +6,13 @@
 
 #include "Application/Scene/Transition/Fade.h"
 
+class Player;
+
+namespace GameEngine
+{
+	class ControllerVibration;
+}
+
 class GameScene : public GameEngine::IScene {
 public:
 	GameScene();
@@ -25,7 +32,7 @@ public:
 	/// <summary>
 	/// デバック時、処理して良いものを更新する
 	/// </summary>
-	void DebugUpdate() override {}
+	void DebugUpdate() override;
 
 	/// <summary>
 	/// 描画処理
@@ -54,6 +61,8 @@ private: // シーン機能
 
 	// 終了フラグ
 	bool isFinished_ = false;
+	Player* player_ = nullptr;
+	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 
 private:
 
