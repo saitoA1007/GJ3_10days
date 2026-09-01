@@ -14,7 +14,9 @@ public:
 	void Update() override;
 	void Draw() override;
 
-	void Pop(int num, Vector2 position);
+	void DebugUpdate() override;
+
+	void Pop(int num, Vector2 position, EnemyType type);
 
 	int GetCurrentNum();
 
@@ -41,6 +43,26 @@ private:
 	GameEngine::DebugParameter debugParam_{ "EnemyManager" };
 
 	bool debugPop_ = false;
-	Enemy::Config enemyConfig_;
 	float popInterval_ = 3.0f;
+
+	//固有の敵の設定
+	float swingWidth_ = 1.0f;
+	float snakeSpeed_ = 2.0f;
+	float roundSpeed_ = 2.0f;
+
+	//共通の設定
+	std::vector<Enemy::Config> configList_;
+	std::vector<std::string> enemyTypeNames_ = {
+		"Straight_S",
+		"Straight_M",
+		"Straight_L",
+		"Round",
+		"Snake"
+	};
+
+	EnemyType currentType_ = EnemyType::Straight_S;
+
+	const char* enemyTypeNamesForImGuiList_[static_cast<int>(EnemyType::Count)];
+
+	float collisionRadius_ = 1.0f;
 };

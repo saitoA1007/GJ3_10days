@@ -1,0 +1,26 @@
+{
+    "Player": {
+        "Collider": {
+            "ColliderOffsetPosY": 0.0,
+            "ColliderRadius": 3.0
+        },
+        "Move": {
+            "MoveSpeed": 5.0
+        },
+        "Pikumi": {
+            "CollectRadius": 3.0,
+            "Dampening": 0.9200000166893005,
+            "FollowOffset": 2.5,
+            "FollowSpeed": 10.0,
+            "Radius": 2.5,
+            "Scale": 1.0,
+            "ThrowSpeed": 25.0
+        },
+        "Scale": [
+            3.0,
+            3.0,
+            3.0
+        ],
+        "SceneName": "Game"
+    }
+}
