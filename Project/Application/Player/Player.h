@@ -64,6 +64,7 @@ private:
 	GameEngine::Model* pikumiModel_ = nullptr;
 	std::vector<std::unique_ptr<Pikumi>> pikumis_;
 
+	// フィールドのポインタ
 	Field* field_ = nullptr;
 
 	// プレイヤー調整パラメータ

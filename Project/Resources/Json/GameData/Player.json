@@ -49,7 +49,7 @@
             "FallAcceleration": -9.600000381469727
         },
         "Pikumi": {
-            "CollectRadius": 3.0,
+            "CollectRadius": 7.0,
             "Dampening": 0.9700000286102295,
             "FollowOffset": 3.009999990463257,
             "FollowSpeed": 18.510000228881836,

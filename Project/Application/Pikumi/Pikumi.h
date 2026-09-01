@@ -45,7 +45,7 @@ public:
 
 private:
     // 衝突コールバック
-    void OnCollisionStay(const GameEngine::CollisionResult& result);
+    void OnCollisionEnter(const GameEngine::CollisionResult& result);
 
 private:
     GameEngine::ModelComponent modelComponent_;
@@ -63,4 +63,7 @@ private:
     float radiusRatio_ = 1.0f;  
     float seed_ = 0.0f;    
     float throwIgnorePlayerTimer_ = 0.0f;
+
+    // Pikumi同士の当たり判定をするかどうか
+    bool isPikumiCollisionEnabled_ = false;
 };
