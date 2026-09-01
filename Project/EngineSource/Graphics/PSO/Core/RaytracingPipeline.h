@@ -9,6 +9,7 @@ namespace GameEngine {
 	namespace AppHitGroups {
 		static const std::wstring DefaultModel = L"DefaultModel";
 		static const std::wstring IceModel = L"IceModel";
+		static const std::wstring UniverseModel = L"UniverseModel";
 	}
 
 	class RaytracingPipeline {

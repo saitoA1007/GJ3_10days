@@ -542,6 +542,7 @@
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1066,6 +1067,7 @@
     <ClInclude Include="Application\Scene\TitleScene.h" />
     <ClInclude Include="Application\Scene\StageSelectScene.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
+    <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
@@ -1090,6 +1092,7 @@
     <FxCompile Include="Resources\Shaders\Fracture.PS.hlsl" />
     <FxCompile Include="Resources\Shaders\PostEffect\ColorGrading.PS.hlsl" />
     <FxCompile Include="Resources\Shaders\IceFracture.PS.hlsl" />
+    <FxCompile Include="Resources\Shaders\Raytracing\chsUniverse.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />

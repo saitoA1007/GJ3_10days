@@ -33,6 +33,8 @@ Pikumi::Pikumi(GameEngine::Model* model, ImpactDetectionEffect* impactDetectionE
     collider_.SetCollisionAttribute(kCollisionAttributePikumi); 
     collider_.SetCollisionMask(kCollisionAttributeEnemy | kCollisionAttributePlayer | kCollisionAttributePikumi);
 
+    modelComponent_.materialData_->metallic = 0.9f;
+
     UserData userData;
     userData.typeID = static_cast<uint32_t>(CollisionTypeID::kPikumi);
     userData.object = this;

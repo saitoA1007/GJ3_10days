@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.2.39",
+		"generator":"Khronos glTF Blender I/O v4.4.56",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -54,7 +54,7 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":288,
+			"count":1078,
 			"max":[
 				1,
 				0,
@@ -70,51 +70,51 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":288,
+			"count":1078,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":288,
+			"count":1078,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5123,
-			"count":564,
+			"count":1716,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":3456,
+			"byteLength":12936,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3456,
-			"byteOffset":3456,
+			"byteLength":12936,
+			"byteOffset":12936,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":2304,
-			"byteOffset":6912,
+			"byteLength":8624,
+			"byteOffset":25872,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1128,
-			"byteOffset":9216,
+			"byteLength":3432,
+			"byteOffset":34496,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":10344,
+			"byteLength":37928,
 			"uri":"cylinder.bin"
 		}
 	]

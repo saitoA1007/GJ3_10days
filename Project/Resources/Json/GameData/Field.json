@@ -1,9 +1,24 @@
 {
     "Field": {
+        "Material": {
+            "UniversePos": [
+                0.0,
+                0.0
+            ],
+            "radius": 1.7799999713897705,
+            "scale": 0.03999999910593033,
+            "strength": 1.0,
+            "swirl": 1.0
+        },
         "SceneName": "Game",
         "Transform": {
-            "Height": 1.0,
-            "Radius": 20.0
+            "Height": 9.0,
+            "Radius": 20.0,
+            "translate": [
+                0.0,
+                -1.809999942779541,
+                0.0
+            ]
         }
     }
 }

@@ -31,6 +31,8 @@ Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* piku
 	debugParame_->Register("Dampening", pikumiDampening_, 5, "Pikumi");
 	debugParame_->Register("CollectRadius", pikumiCollectRadius_, 6, "Pikumi");
 
+	modelComponent_.materialData_->metallic = 0.9f;
+
 	// 当たり判定を設定
 	collider_.SetRadius(colliderRadius_);
 	collider_.SetWorldPosition(modelComponent_.worldTransform_.transform_.translate + Vector3(0.0f, colliderOffsetPosY_, 0.0f));
@@ -85,6 +87,9 @@ void Player::Update()
 		pikumi->SetScale(pikumiScale_);
 		pikumi->SetFieldRadius(field_->GetFieldRadius());
 	}
+
+	// プレイヤーの位置を取得
+	field_->SetPlayerPos(modelComponent_.worldTransform_.transform_.translate);
 
 	if (currentState_) 
 	{
