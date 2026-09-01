@@ -12,6 +12,9 @@
     <Filter Include="Application\Player">
       <UniqueIdentifier>{ce755995-4689-4d0d-84c3-661e24754cc7}</UniqueIdentifier>
     </Filter>
+	<Filter Include="Application\GameCamera">
+	  <UniqueIdentifier>{395e17da-4b62-4f75-b5f6-e628bfeb8b5c}</UniqueIdentifier>
+	</Filter>
     <Filter Include="Application\Scene">
       <UniqueIdentifier>{223a4067-9209-4765-ac4c-cce8c2c67a60}</UniqueIdentifier>
     </Filter>
@@ -528,6 +531,9 @@
     <ClCompile Include="EngineSource\3D\Fracture\DestructibleObject.cpp" />
     <ClCompile Include="EngineSource\3D\Fracture\RuntimeMeshFracturer.cpp" />
     <ClCompile Include="EngineSource\3D\Fracture\FractureDamageController.cpp" />
+	<ClCompile Include="Application\GameCamera\GameCamera.cpp">
+	  <Filter>Application\GameCamera</Filter>
+	</ClCompile>
     <ClCompile Include="EngineSource\Graphics\Debug\PixCapture.cpp" />
     <ClCompile Include="EngineSource\Editor\Windows\PixWindow.cpp" />
     <ClCompile Include="Application\Player\Player.cpp" />
@@ -1052,6 +1058,9 @@
     <ClInclude Include="EngineSource\3D\Fracture\FractureDamageController.h" />
     <ClInclude Include="EngineSource\Graphics\Debug\DebugName.h" />
     <ClInclude Include="EngineSource\Graphics\Debug\PixCapture.h" />
+	<ClInclude Include="Application\GameCamera\GameCamera.h">
+	  <Filter>Application\GameCamera</Filter>
+	</ClInclude>
     <ClInclude Include="EngineSource\Graphics\Debug\PixMarker.h" />
     <ClInclude Include="EngineSource\Editor\Windows\PixWindow.h" />
     <ClInclude Include="Application\Player\Player.h" />

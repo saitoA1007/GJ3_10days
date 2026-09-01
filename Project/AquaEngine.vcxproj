@@ -160,6 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+	<ClCompile Include="Application\GameCamera\GameCamera.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
@@ -412,6 +413,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="Application\GameCamera\GameCamera.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="Application\Pikumi\Pikumi.h" />

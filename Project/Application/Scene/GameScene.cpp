@@ -5,6 +5,7 @@ using namespace GameEngine;
 #include "PostProcess/PostEffectData.h"
 #include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
+#include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
 #include "Application/Tower/Tower.h"
 
@@ -35,6 +36,9 @@ GameScene::GameScene() {
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
 	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field);
+
+	// プレイヤーを見下ろしながら追従するメインカメラ
+	gameObjectManager_->AddObject<GameCamera>(player);
 
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
