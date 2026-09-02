@@ -24,7 +24,7 @@ void Engine::Initialize(HINSTANCE hInstance) {
     LogManager::GetInstance().Create();
 
     // サブシステムを生成
-    core_ = std::make_unique<CoreSubsystem>(CoreSubsystemDesc{ L"AquaEngine", 1280, 720, hInstance });
+    core_ = std::make_unique<CoreSubsystem>(CoreSubsystemDesc{ L"3001_ドパミン", 1280, 720, hInstance });
     graphics_ = std::make_unique<GraphicsSubsystem>();
     resource_ = std::make_unique<ResourceSubsystem>();
     input_ = std::make_unique<InputSubsystem>();
