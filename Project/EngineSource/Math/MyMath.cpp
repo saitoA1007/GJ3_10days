@@ -663,5 +663,22 @@ namespace GameEngine {
 			} };
 			return result;
 		}
+
+		Vector3 HSVtoRGB(float h, float s, float v) {
+			h = h - std::floorf(h);
+			float i = std::floorf(h * 6.0f);
+			float f = h * 6.0f - i;
+			float p = v * (1.0f - s);
+			float q = v * (1.0f - f * s);
+			float t = v * (1.0f - (1.0f - f) * s);
+			switch (static_cast<int>(i) % 6) {
+			case 0: return { v, t, p };
+			case 1: return { q, v, p };
+			case 2: return { p, v, t };
+			case 3: return { p, q, v };
+			case 4: return { t, p, v };
+			default:return { v, p, q };
+			}
+		}
 	}
 }

@@ -68,13 +68,18 @@ void ModelComponent::Draw(RenderQueue* renderQueue, const Draw3dType& drawType, 
 void ModelComponent::DrawRaytracing(RenderQueue* renderQueue) {
 
 	for (size_t i = 0; i < refBuffers_.size(); ++i) {
-		if (defaultMaterials_[i].materialData_->color.w == 1.0f) {
+		if (defaultMaterials_[i].materialData_->color.w >= 1.0f) {
 			refBuffers_[i].SetBufferMaterial(0, defaultMaterials_[i].GetMaterialSrvIndex());
 		} else {
 			refBuffers_[i].SetBufferMaterial(1, defaultMaterials_[i].GetMaterialSrvIndex());
 		}
 	}
 
+	// レイトレによる描画
+	renderQueue->SubmitRaytracingModel(model_, worldTransform_, &refBuffers_);
+}
+
+void ModelComponent::DrawCustomRaytracing(RenderQueue* renderQueue) {
 	// レイトレによる描画
 	renderQueue->SubmitRaytracingModel(model_, worldTransform_, &refBuffers_);
 }

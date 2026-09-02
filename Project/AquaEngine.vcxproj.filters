@@ -12,9 +12,9 @@
     <Filter Include="Application\Player">
       <UniqueIdentifier>{ce755995-4689-4d0d-84c3-661e24754cc7}</UniqueIdentifier>
     </Filter>
-	<Filter Include="Application\GameCamera">
-	  <UniqueIdentifier>{395e17da-4b62-4f75-b5f6-e628bfeb8b5c}</UniqueIdentifier>
-	</Filter>
+    <Filter Include="Application\GameCamera">
+      <UniqueIdentifier>{395e17da-4b62-4f75-b5f6-e628bfeb8b5c}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Application\Scene">
       <UniqueIdentifier>{223a4067-9209-4765-ac4c-cce8c2c67a60}</UniqueIdentifier>
     </Filter>
@@ -535,9 +535,9 @@
     <ClCompile Include="EngineSource\3D\Fracture\DestructibleObject.cpp" />
     <ClCompile Include="EngineSource\3D\Fracture\RuntimeMeshFracturer.cpp" />
     <ClCompile Include="EngineSource\3D\Fracture\FractureDamageController.cpp" />
-	<ClCompile Include="Application\GameCamera\GameCamera.cpp">
-	  <Filter>Application\GameCamera</Filter>
-	</ClCompile>
+    <ClCompile Include="Application\GameCamera\GameCamera.cpp">
+      <Filter>Application\GameCamera</Filter>
+    </ClCompile>
     <ClCompile Include="EngineSource\Graphics\Debug\PixCapture.cpp" />
     <ClCompile Include="EngineSource\Editor\Windows\PixWindow.cpp" />
     <ClCompile Include="Application\Player\Player.cpp" />
@@ -553,6 +553,7 @@
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="Application\Tower\Tower.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1066,9 +1067,9 @@
     <ClInclude Include="EngineSource\3D\Fracture\FractureDamageController.h" />
     <ClInclude Include="EngineSource\Graphics\Debug\DebugName.h" />
     <ClInclude Include="EngineSource\Graphics\Debug\PixCapture.h" />
-	<ClInclude Include="Application\GameCamera\GameCamera.h">
-	  <Filter>Application\GameCamera</Filter>
-	</ClInclude>
+    <ClInclude Include="Application\GameCamera\GameCamera.h">
+      <Filter>Application\GameCamera</Filter>
+    </ClInclude>
     <ClInclude Include="EngineSource\Graphics\Debug\PixMarker.h" />
     <ClInclude Include="EngineSource\Editor\Windows\PixWindow.h" />
     <ClInclude Include="Application\Player\Player.h" />
@@ -1085,6 +1086,7 @@
     <ClInclude Include="Application\Scene\StageSelectScene.h" />
     <ClInclude Include="Application\Tower\Tower.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
+    <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
@@ -1109,6 +1111,7 @@
     <FxCompile Include="Resources\Shaders\Fracture.PS.hlsl" />
     <FxCompile Include="Resources\Shaders\PostEffect\ColorGrading.PS.hlsl" />
     <FxCompile Include="Resources\Shaders\IceFracture.PS.hlsl" />
+    <FxCompile Include="Resources\Shaders\Raytracing\chsUniverse.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />

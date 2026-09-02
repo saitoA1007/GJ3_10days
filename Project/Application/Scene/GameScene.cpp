@@ -40,7 +40,10 @@ GameScene::GameScene() {
 	// 円
 	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
 	circleModel->SetDefaultIsEnableLight(false);
-	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel);
+	// 宇宙を映す平面
+	auto* planeXZModel = modelManager_->GetNameByModel("cube.obj");
+	planeXZModel->SetDefaultIsEnableLight(false);
+	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel, planeXZModel);
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
