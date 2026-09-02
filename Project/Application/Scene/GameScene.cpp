@@ -28,13 +28,19 @@ GameScene::GameScene() {
 	controllerVibration_ = std::make_unique<ControllerVibration>(input_);
 
 	// 背景を設定
-	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
+	uint32_t skyboxGH = textureManager_->GetHandleByName("rogland_clear_night_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
 
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("cylinder.gltf");
 	fieldModel->SetDefaultIsEnableLight(true);
-	auto field = gameObjectManager_->AddObject<Field>(fieldModel);
+	// ポール
+	auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
+	poleModel->SetDefaultIsEnableLight(false);
+	// 円
+	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
+	circleModel->SetDefaultIsEnableLight(false);
+	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel);
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
