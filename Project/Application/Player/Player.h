@@ -15,11 +15,13 @@ namespace GameEngine
 
 class IPlayerState;
 class Field;
+class ImpactDetectionEffect;
 
 class Player : public GameEngine::IGameObject 
 {
 public:
-	Player(GameEngine::InputCommand* inputCommand, GameEngine::Model* model, GameEngine::Model* pikumiModel, Field* field);
+	Player(GameEngine::InputCommand* inputCommand, GameEngine::Model* model, GameEngine::Model* pikumiModel, Field* field,
+		ImpactDetectionEffect* impactDetectionEffect);
 	~Player() = default;
 
 	void Initialize() override;

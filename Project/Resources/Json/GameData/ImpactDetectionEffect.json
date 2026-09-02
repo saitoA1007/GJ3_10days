@@ -31,7 +31,7 @@
                 1.0
             ]
         },
-        "SceneName": "Test",
+        "SceneName": "Game",
         "Wave": {
             "Count": 1.0,
             "FadeDistance": 20.0,
