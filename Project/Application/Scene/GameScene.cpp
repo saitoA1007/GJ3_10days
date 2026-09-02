@@ -7,6 +7,7 @@ using namespace GameEngine;
 #include "Application/Player/Player.h"
 #include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
+#include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
 #include "ControllerVibration.h"
 
@@ -35,6 +36,11 @@ GameScene::GameScene() {
 	fieldModel->SetDefaultIsEnableLight(true);
 	auto field = gameObjectManager_->AddObject<Field>(fieldModel);
 
+	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
+	planeModel->SetDefaultIsEnableLight(false);
+	uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
+	auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
+
 	// タワー
 	auto* towerModel = modelManager_->GetNameByModel("cube.obj");
 	towerModel->SetDefaultIsEnableLight(true);
@@ -45,7 +51,7 @@ GameScene::GameScene() {
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
-	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field);
+	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	gameObjectManager_->AddObject<GameCamera>(player_);

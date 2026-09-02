@@ -3,6 +3,9 @@
 #include "ModelComponent.h"
 #include "Collider.h"
 
+// 前方宣言
+class ImpactDetectionEffect;
+
 enum class PikumiState
 {
     kFollow, // 追従
@@ -13,7 +16,7 @@ enum class PikumiState
 class Pikumi : public GameEngine::IGameObject
 {
 public:
-    Pikumi(GameEngine::Model* model);
+    Pikumi(GameEngine::Model* model, ImpactDetectionEffect* impactDetectionEffect);
 
     void Initialize() override;
     void Update() override;
@@ -52,6 +55,7 @@ private:
     void OnCollisionEnter(const GameEngine::CollisionResult& result);
 
 private:
+    ImpactDetectionEffect* impactDetectionEffect_ = nullptr;
     GameEngine::ModelComponent modelComponent_;
     GameEngine::SphereCollider collider_;
     PikumiState state_ = PikumiState::kFollow;
