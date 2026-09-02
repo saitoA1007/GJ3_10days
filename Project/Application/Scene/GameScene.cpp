@@ -5,9 +5,19 @@ using namespace GameEngine;
 #include "PostProcess/PostEffectData.h"
 #include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
+#include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
+#include "ControllerVibration.h"
+
+// 後で別クラスに纏めて消す
+namespace
+{
+	constexpr int kChargeVibrationThreshold = 5;        // 振動を開始するためのチャージされたピクミの数
+	constexpr float kChargeVibrationLeftMotor = 0.35f;  // 左モーターの振動強度
+	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
+}
 
 GameScene::~GameScene() {
 }
@@ -15,6 +25,7 @@ GameScene::~GameScene() {
 GameScene::GameScene() {
 	// 入力コマンド設定s
 	InputRegisterCommand();
+	controllerVibration_ = std::make_unique<ControllerVibration>(input_);
 
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
@@ -42,6 +53,9 @@ GameScene::GameScene() {
 	pikumiModel->SetDefaultIsEnableLight(true);
 	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
 
+	// プレイヤーを見下ろしながら追従するメインカメラ
+	gameObjectManager_->AddObject<GameCamera>(player_);
+
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
 	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
@@ -53,7 +67,24 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
-	
+	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
+	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
+	{
+		controllerVibration_->SetVibration(kChargeVibrationLeftMotor, kChargeVibrationRightMotor);
+	}
+	else if (controllerVibration_)
+	{
+		controllerVibration_->Stop();
+	}
+}
+
+void GameScene::DebugUpdate()
+{
+	// ゲーム更新を停止している間に振動が残らないようにする。
+	if (controllerVibration_)
+	{
+		controllerVibration_->Stop();
+	}
 }
 
 void GameScene::Draw() {
@@ -69,12 +100,12 @@ void GameScene::InputRegisterCommand() {
 	inputCommand_->RegisterCommand("SelectDown", { {InputState::KeyTrigger, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadTrigger, XINPUT_GAMEPAD_DPAD_DOWN} });
 
 	// 移動の入力コマンドを登録する
-	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_W },{InputState::PadLeftStick,0,{0.0f,1.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_UP } });
-	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadPush, XINPUT_GAMEPAD_DPAD_DOWN} });
-	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
-	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D },{InputState::PadLeftStick,0,{1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
+	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_W }, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_UP } });
+	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_S }, {InputState::PadPush, XINPUT_GAMEPAD_DPAD_DOWN} });
+	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A }, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
+	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D }, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
 	// ピクミ発射コマンドを登録する
-	inputCommand_->RegisterCommand("Shot", { {InputState::KeyPush, DIK_SPACE},{InputState::KeyPush, XINPUT_GAMEPAD_A} });
+	inputCommand_->RegisterCommand("Shot", { {InputState::KeyPush, DIK_SPACE},{InputState::PadPush, XINPUT_GAMEPAD_A} });
 
 	// カメラ操作のコマンドを登録する
 	inputCommand_->RegisterCommand("CameraMoveLeft", { { InputState::KeyPush, DIK_LEFT },{InputState::PadRightStick,0,{-1.0f,0.0f},0.2f} });

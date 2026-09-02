@@ -80,16 +80,15 @@ namespace GameEngine {
 		bool IsCommandActive(const std::string& commandName) const;
 
 		/// <summary>
+		/// 左スティックの入力値を取得
+		/// </summary>
+		/// <returns>デッドゾーン補正済みの入力値</returns>
+		Vector2 GetLeftStick() const;
+
+		/// <summary>
 		/// 全てのコマンドを削除
 		/// </summary>
 		void ClearAllCommands();
-
-		/// <summary>
-		/// 振動させる(0~1の範囲を入れる)
-		/// </summary>
-		/// <param name="left">左モーター : 低周波</param>
-		/// <param name="right">右モーター : 高周波</param>
-		void PlayPadVibration(float left, float right);
 
 	private:
 		InputCommand(const InputCommand&) = delete;

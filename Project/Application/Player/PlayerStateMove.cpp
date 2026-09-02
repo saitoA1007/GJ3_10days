@@ -14,7 +14,8 @@ void PlayerStateMove::Initialize(Player* player)
 void PlayerStateMove::Update(Player* player)
 {
     auto* input = player->GetInputCommand();
-    Vector3 move = { 0.0f, 0.0f, 0.0f };
+    const Vector2 leftStick = input->GetLeftStick();
+    Vector3 move = { leftStick.x, 0.0f, leftStick.y };
 
     if (input->IsCommandActive("MoveUp")) { move.z += 1.0f; }
     if (input->IsCommandActive("MoveDown")) { move.z -= 1.0f; }

@@ -160,6 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+	<ClCompile Include="Application\GameCamera\GameCamera.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
@@ -171,6 +172,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
     <ClCompile Include="Application\Tower\Tower.cpp" />
+    <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Enemy\Enemy.cpp" />
@@ -345,6 +347,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="EngineSource\Graphics\RenderPass\RenderPassController.cpp" />
     <ClCompile Include="EngineSource\Graphics\Core\RenderPipeline.cpp" />
     <ClCompile Include="EngineSource\Graphics\Resources\SrvResource.cpp" />
+    <ClCompile Include="EngineSource\Input\ControllerVibration.cpp" />
     <ClCompile Include="EngineSource\Input\InPut.cpp" />
     <ClCompile Include="EngineSource\Input\InputCommand.cpp" />
     <ClCompile Include="EngineSource\Math\EasingManager.cpp" />
@@ -412,6 +415,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="Application\GameCamera\GameCamera.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="Application\Pikumi\Pikumi.h" />
@@ -426,6 +430,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\TitleScene.h" />
     <ClInclude Include="Application\Scene\Transition\Fade.h" />
     <ClInclude Include="Application\Tower\Tower.h" />
+    <ClInclude Include="Application\Utils\GameTimer.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Enemy\Enemy.h" />
@@ -640,6 +645,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="EngineSource\Graphics\Resources\SrvResource.h" />
     <ClInclude Include="EngineSource\Graphics\Buffers\StructuredBuffer.h" />
     <ClInclude Include="EngineSource\Graphics\Buffers\VertexBuffer.h" />
+    <ClInclude Include="EngineSource\Input\ControllerVibration.h" />
     <ClInclude Include="EngineSource\Input\InPut.h" />
     <ClInclude Include="EngineSource\Input\InputCommand.h" />
     <ClInclude Include="EngineSource\Math\EasingManager.h" />
