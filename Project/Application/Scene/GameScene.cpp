@@ -49,9 +49,13 @@ GameScene::GameScene() {
 	// プレイヤー
 	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
+	auto* rightHandModel = modelManager_->GetNameByModel("playerHand.gltf");
+	auto* trajectryModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
-	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
+	rightHandModel->SetDefaultIsEnableLight(true);
+	trajectryModel->SetDefaultIsEnableLight(true);
+	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, rightHandModel, trajectryModel, field, impactEffect);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	gameObjectManager_->AddObject<GameCamera>(player_);

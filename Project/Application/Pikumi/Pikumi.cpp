@@ -231,7 +231,10 @@ void Pikumi::OnCollisionEnter(const GameEngine::CollisionResult& result)
         if (state_ == PikumiState::kThrown)
         {
             // 衝突演出
-            impactDetectionEffect_->ApplayImpact(modelComponent_.worldTransform_.transform_.translate, 50.0f);
+            if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy))
+            {
+                impactDetectionEffect_->ApplayImpact(modelComponent_.worldTransform_.transform_.translate, 50.0f);
+            }
 
             Vector3 normal = result.contactNormal;
             normal.y = 0.0f;
