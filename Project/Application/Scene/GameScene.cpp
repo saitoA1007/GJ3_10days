@@ -7,6 +7,7 @@ using namespace GameEngine;
 #include "Application/Player/Player.h"
 #include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
+#include "Application/Field/FieldEffect.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
 #include "ControllerVibration.h"
@@ -30,6 +31,11 @@ GameScene::GameScene() {
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("rogland_clear_night_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
+	
+	// 地面演出
+	auto* cubeModel = modelManager_->GetNameByModel("cube.obj");
+	cubeModel->SetDefaultIsEnableLight(true);
+	auto* fieldEffect = gameObjectManager_->AddObject<FieldEffect>(cubeModel, 0);
 
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("cylinder.gltf");
@@ -43,7 +49,7 @@ GameScene::GameScene() {
 	// 宇宙を映す平面
 	auto* planeXZModel = modelManager_->GetNameByModel("halfDome.gltf");
 	planeXZModel->SetDefaultIsEnableLight(false);
-	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel, planeXZModel);
+	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel, planeXZModel, fieldEffect);
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);

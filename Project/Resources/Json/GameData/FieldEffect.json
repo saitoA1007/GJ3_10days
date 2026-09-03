@@ -1,0 +1,17 @@
+{
+    "FieldEffect": {
+        "SceneName": "Game",
+        "center": [
+            0.0,
+            -33.7400016784668,
+            0.0
+        ],
+        "cubeScale": 0.5199999809265137,
+        "followRate": 2.819999933242798,
+        "gap": 0.0,
+        "influenceRadius": 8.0,
+        "maxHeight": 19.219999313354492,
+        "minHeight": 1.0,
+        "ringNum": 20
+    }
+}

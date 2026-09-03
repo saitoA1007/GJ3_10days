@@ -554,6 +554,7 @@
     <ClCompile Include="Application\Tower\Tower.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
+    <ClCompile Include="Application\Field\FieldEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1087,6 +1088,7 @@
     <ClInclude Include="Application\Tower\Tower.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
+    <ClInclude Include="Application\Field\FieldEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
