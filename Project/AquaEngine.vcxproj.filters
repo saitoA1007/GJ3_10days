@@ -552,6 +552,9 @@
     <ClCompile Include="Application\Score\Score.cpp">
       <Filter>Application\Score</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Score\ScoreView.cpp">
+      <Filter>Application\Score</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Enemy\Enemy.cpp" />
     <ClCompile Include="Application\Enemy\EnemyRenderer.cpp" />
     <ClCompile Include="Application\Utils\ShigeFunc.cpp" />
@@ -1086,6 +1089,9 @@
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\Score\Score.h">
+      <Filter>Application\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Score\ScoreView.h">
       <Filter>Application\Score</Filter>
     </ClInclude>
     <ClInclude Include="Application\Enemy\Enemy.h" />
