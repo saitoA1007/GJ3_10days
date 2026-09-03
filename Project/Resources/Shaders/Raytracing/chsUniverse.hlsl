@@ -159,8 +159,8 @@ void MainUniverseCHS(inout Payload payload, MyAttribute attrib)
     //float3 col = starColor;
  
     // アインシュタインリング（BH中心基準・ワールド単位）
-    float ring = exp(-pow((r - bhRadius * 1.55f) / (bhRadius * 0.45f), 2.0f));
-    col += float3(1.0f, 0.72f, 0.42f) * ring * 0.7f;
+    //float ring = exp(-pow((r - bhRadius * 1.55f) / (bhRadius * 0.45f), 2.0f));
+    //col += float3(1.0f, 0.72f, 0.42f) * ring * 0.7f;
  
     // 事象の地平線で黒く抜く
     col *= smoothstep(bhRadius, bhRadius * 1.12f, r);

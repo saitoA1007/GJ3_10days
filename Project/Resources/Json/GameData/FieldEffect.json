@@ -6,12 +6,16 @@
             -33.7400016784668,
             0.0
         ],
-        "cubeScale": 0.5199999809265137,
+        "cubeScale": 0.5699999928474426,
         "followRate": 2.819999933242798,
-        "gap": 0.0,
-        "influenceRadius": 8.0,
-        "maxHeight": 19.219999313354492,
-        "minHeight": 1.0,
-        "ringNum": 20
+        "gap": -0.05999999865889549,
+        "idleWaveHeight": 0.4000000059604645,
+        "influenceRadius": 12.0,
+        "maxHeight": 20.0,
+        "minHeight": 2.609999895095825,
+        "nearWaveHeight": 3.5399999618530273,
+        "ringNum": 20,
+        "waveSpeed": 2.5,
+        "waveSpeedByDist": 0.10000000149011612
     }
 }

@@ -9,7 +9,7 @@ using namespace GameEngine;
 
 namespace {
 
-	// 座標から0.0~1.0の乱数を作る(GLSLでよく使われるhash)
+	// 座標から0.0~1.0の乱数を作る
 	float Rand(float x, float y) {
 		float value = std::sin(x * 12.9898f + y * 78.233f) * 43758.5453f;
 		return value - std::floor(value);
@@ -63,7 +63,6 @@ void FieldEffect::Update() {
 	}
 
 	const float deltaTime = FpsCounter::gameDeltaTime;
-	time_ += deltaTime;
 
 	// フレームレートに依存しない補間の割合
 	const float rate = 1.0f - std::exp(-followRate_ * deltaTime);
@@ -90,10 +89,18 @@ void FieldEffect::Update() {
 
 		// 遠いcubeほど少し速く揺らして、動きに差を作る
 		float waveSpeed = waveSpeed_ * (1.0f + distance * waveSpeedByDist_);
+
+		// 位相を積算する。sin(phase + time * speed)のようにspeedを時間へ掛けると、
+		// プレイヤーが動いてspeedが変わった瞬間に位相が飛んで震えてしまう
+		particle.phase += waveSpeed * deltaTime;
+		// 精度が落ちないように0~2PIへ丸める
+		if (particle.phase > TWO_PI) {
+			particle.phase -= TWO_PI;
+		}
+
 		// 目標から遠くてもidleWaveHeight_の分だけは揺れ続ける
 		float waveHeight = idleWaveHeight_ + (nearWaveHeight_ - idleWaveHeight_) * t;
-		// cubeごとに位相をずらして、揃って動かないようにする
-		float wave = std::sin(particle.phase + time_ * waveSpeed) * waveHeight;
+		float wave = std::sin(particle.phase) * waveHeight;
 
 		// 土台 + 揺れ。地面に潜らないように下限を設ける
 		float height = std::max(particle.height + wave, 0.01f);
@@ -161,7 +168,7 @@ void FieldEffect::ResetCircle() {
 				center_.y,
 				center_.z + std::sin(theta) * ringRadius };
 
-			// cubeごとに固定のランダムな位相を持たせる
+			// cubeごとに開始位相をずらして、揃って動かないようにする
 			particle.phase = Rand(particle.basePos.x, particle.basePos.z) * TWO_PI;
 
 			particle.height = minHeight_;

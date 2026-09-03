@@ -14,8 +14,8 @@ public:
 		Vector4 color = { 1.0f,1.0f,1.0f,1.0f };  // 色
 		uint32_t textureHandle = 0; // テクスチャ
 		Vector3 basePos = { 0.0f,0.0f,0.0f };   // 基準位置
-		float height = 0.0f;                    // 現在の高さ(波を含まない土台部分)
-		float phase = 0.0f;                     // 揺れの位相。cubeごとにばらけさせる
+		float height = 0.0f;                    // 現在の高さ
+		float phase = 0.0f;                     // 揺れの位相
 	};
 
 public:
@@ -30,7 +30,7 @@ public:
 
 public:
 
-	// 高さを持ち上げる位置(プレイヤーの位置)を設定
+	// 高さを持ち上げる位置を設定
 	void ApplayPosition(Vector3 pos);
 
 private:
@@ -44,7 +44,7 @@ private:
 	// 全体の中心
 	Vector3 center_ = { 0.0f,0.0f,0.0f };
 
-	// cubeのxz方向の大きさ(cube.objは原点中心の半径1なので、実際の幅はこの2倍)
+	// cubeのxz方向の大きさ
 	float cubeScale_ = 0.4f;
 
 	// cube同士の隙間
@@ -53,7 +53,7 @@ private:
 	// 実際に並んでいる数
 	uint32_t activeNum_ = 0;
 
-	// 円全体の半径(ResetCircleで計算される)
+	// 円全体の半径
 	float radius_ = 20.0f;
 
 private:
@@ -86,9 +86,6 @@ private:
 
 	// 目標に近いcubeの揺れ幅
 	float nearWaveHeight_ = 0.5f;
-
-	// 経過時間
-	float time_ = 0.0f;
 
 private:
 	GameEngine::Model* model_ = nullptr;
