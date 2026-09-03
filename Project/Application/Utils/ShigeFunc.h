@@ -9,5 +9,7 @@ namespace SF {
 	void error(const std::string& message, const std::string& category);
 
 	Vector2 RotDir(const Vector2& origin, const Vector2& dir);
-};
 
+	//指定したディレクトリ内から、特定の拡張子と一致するファイルを探索する。ディレクトリは除外
+	std::vector<std::string> SearchFiles(const std::filesystem::path& directory, const std::string& extension);
+};

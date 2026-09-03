@@ -18,6 +18,7 @@ public:
 
 	void DebugUpdate() override;
 
+	void SetStage(const std::string& stageName);
 	void Pop(int num, Vector2 position, EnemyType type);
 
 	int GetCurrentNum();
@@ -27,6 +28,8 @@ public:
 	}
 
 private:
+
+	void LoadPreset();
 
 	const uint32_t maxEnemyNum_ = 0;
 
@@ -72,4 +75,20 @@ private:
 	const char* enemyTypeNamesForImGuiList_[static_cast<int>(EnemyType::Count)];
 
 	float collisionRadius_ = 1.0f;
+
+private:
+
+	struct Preset {
+		std::vector<std::vector<Transform>> enemyPositions; // 敵の出現位置のリスト
+	};
+
+	struct StageData {
+		std::string name;
+		std::vector<Preset> fases;
+		float hpRatio = 1.0f;
+		int minEnemyCount = 1;
+	};
+
+	std::unordered_map<std::string, Preset> stageDataMap_;
+	StageData currentStageData_;
 };

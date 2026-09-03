@@ -35,7 +35,7 @@ private:
 	uint32_t readIndex_ = 0;
 	uint32_t prevReadIndex_ = 0;
 
-	static inline const std::string basePath = "Assets/Binary/";
+	static inline const std::string basePath = "Resources/Binary/";
 
 	static constexpr uint32_t idSize = uint32_t(sizeof(TypeID));
 	static constexpr uint32_t sizeSize = uint32_t(sizeof(uint32_t));

@@ -15,6 +15,8 @@ EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model)
 	for (uint32_t i = 0; i < maxEnemyNum_; ++i) {
 		enemies_[i] = std::make_unique<Enemy>(&worldTransforms_.transformDatas_[i]);
 	}
+
+	auto presetFiles = SF::SearchFiles("Assets/Binary/Preset/", ".bin");
 }
 
 void EnemyManager::Initialize() {
@@ -136,6 +138,9 @@ void EnemyManager::DebugUpdate() {
 #endif
 }
 
+void EnemyManager::SetStage(const std::string& stageName) {
+}
+
 void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 	for (int i = 0; i < num; ++i) {
 		if (freeEnemyIndices_.empty()) {
@@ -161,4 +166,8 @@ void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 
 int EnemyManager::GetCurrentNum() {
 	return 0;
+}
+
+void EnemyManager::LoadPreset() {
+
 }
