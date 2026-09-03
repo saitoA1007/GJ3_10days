@@ -2,6 +2,8 @@
 #include <IGameObject.h>
 #include <Vector2.h>
 #include <DebugParameter.h>
+#include <functional>
+#include <utility>
 #include "Enemy.h"
 #include "EnemyRenderer.h"
 
@@ -20,6 +22,10 @@ public:
 
 	int GetCurrentNum();
 
+	void SetOnEnemyDefeated(std::function<void()> callback) {
+		onEnemyDefeated_ = std::move(callback);
+	}
+
 private:
 
 	const uint32_t maxEnemyNum_ = 0;
@@ -33,6 +39,7 @@ private:
 	std::map<int, Enemy*> activeEnemies_;
 	//死亡したとき専用アクションを起こす用のマップ
 	std::map<int, Enemy*> deadEnemies_;
+	std::function<void()> onEnemyDefeated_;
 
 	EnemyRenderer renderer_ = EnemyRenderer(renderQueue_);
 

@@ -88,22 +88,33 @@ void EnemyManager::Update() {
 	}
 
 	//更新処理
-	for (const auto& [index, enemy] : deadEnemies_) {
+	for (auto it = deadEnemies_.begin(); it != deadEnemies_.end();) {
+		const auto [index, enemy] = *it;
 		enemy->DeadUpdate();
 
 		if (!enemy->IsActive()) {
-			deadEnemies_.erase(index);
+			it = deadEnemies_.erase(it);
 			freeEnemyIndices_.push_back(index);
+		} else {
+			++it;
 		}
 	}
 
-	for (const auto& [index, enemy] : activeEnemies_) {
-		enemy->Update();
+	for (auto it = activeEnemies_.begin(); it != activeEnemies_.end();) {
+		const auto [index, enemy] = *it;
+		if (!enemy->IsDead()) {
+			enemy->Update();
+		}
 
 		if (enemy->IsDead()) {
-			// 敵が死亡した場合、アクティブリストから削除し、フリーリストに戻す
+			// 死亡処理用のリストへ移し、攻撃による撃破だけを一度通知する。
 			deadEnemies_[index] = enemy;
-			activeEnemies_.erase(index);
+			it = activeEnemies_.erase(it);
+			if (enemy->WasDefeated() && onEnemyDefeated_) {
+				onEnemyDefeated_();
+			}
+		} else {
+			++it;
 		}
 	}
 
