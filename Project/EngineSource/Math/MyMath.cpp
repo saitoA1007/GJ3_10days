@@ -342,6 +342,14 @@ namespace GameEngine {
 			return Vector3(std::max(pos1.x, pos2.x), std::max(pos1.y, pos2.y), std::max(pos1.z, pos2.z));
 		}
 
+		int Max(int a, int b) {
+			return std::max(a, b);
+		}
+
+		float Max(float a, float b) {
+			return std::max(a, b);
+		}
+
 		Vector4 MaxVector4(Vector4 pos1, Vector4 pos2) {
 			return Vector4(std::max(pos1.x, pos2.x), std::max(pos1.y, pos2.y), std::max(pos1.z, pos2.z), std::max(pos1.w, pos2.w));
 		}

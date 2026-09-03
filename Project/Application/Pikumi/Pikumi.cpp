@@ -90,20 +90,23 @@ void Pikumi::Update()
     switch (state_)
     {
     case PikumiState::kFollow:
-        modelComponent_.worldTransform_.transform_.translate = Lerp(
+    {
+        // 基本の目標位置への移動
+        Vector3 newPos = Lerp(
             modelComponent_.worldTransform_.transform_.translate,
             targetFollowPos_,
             followSpeed_ * FpsCounter::deltaTime
         );
-        break;
 
+        // Pikumi同士の重なり防止
+        modelComponent_.worldTransform_.transform_.translate = newPos;
+        break;
+    }
     case PikumiState::kThrown:
-        // 位置更新
         modelComponent_.worldTransform_.transform_.translate += velocity_ * FpsCounter::deltaTime;
-        // 減速
         velocity_ *= std::pow(dampening_, FpsCounter::deltaTime * 60.0f);
 
-        if (velocity_.LengthSquared() < 1.0f) 
+        if (velocity_.LengthSquared() < 1.0f)
         {
             velocity_ = { 0.0f, 0.0f, 0.0f };
             state_ = PikumiState::kIdle;
@@ -113,6 +116,9 @@ void Pikumi::Update()
     case PikumiState::kIdle:
         break;
     }
+
+    // アニメーションの更新
+    UpdateAnimation();
 
     // 円形フィールド境界判定、反射処理
     Vector3 pos = modelComponent_.worldTransform_.transform_.translate;
@@ -125,18 +131,14 @@ void Pikumi::Update()
         modelComponent_.worldTransform_.transform_.translate.x = normal.x * fieldRadius_;
         modelComponent_.worldTransform_.transform_.translate.z = normal.z * fieldRadius_;
 
-        // Pikumi 同士の判定を true に
         isPikumiCollisionEnabled_ = true;
 
-        // 投擲中の場合の反射計算
         if (state_ == PikumiState::kThrown)
         {
             float dot = Math::Dot(velocity_, normal);
             if (dot > 0.0f)
             {
                 velocity_ = velocity_ - normal * (2.0f * dot);
-
-                // 跳ね返り時の減速
                 velocity_ *= 0.9f;
             }
         }
@@ -144,8 +146,40 @@ void Pikumi::Update()
 
     modelComponent_.Update();
 
-    collider_.SetWorldPosition(modelComponent_.worldTransform_.GetWorldPosition());
+    // コライダーは地面位置を維持
+    Vector3 colliderPos = modelComponent_.worldTransform_.GetWorldPosition();
+    colliderPos.y -= animOffsetY_;
+    collider_.SetWorldPosition(colliderPos);
     collider_.SetRadius(colliderRadius_);
+}
+
+void Pikumi::UpdateAnimation()
+{
+    if (state_ == PikumiState::kFollow)
+    {
+        float speedMultiplier = 0.85f + std::fmod(seed_, 0.3f);
+        animTimer_ += FpsCounter::deltaTime * jumpFrequency_ * speedMultiplier;
+
+        float bounce = std::abs(std::sin(animTimer_ + seed_));
+
+        animOffsetY_ = bounce * jumpHeight_;
+
+        float factor = (bounce - 0.5f) * 2.0f;
+        Vector3 currentScale;
+        currentScale.x = baseScale_.x * (1.0f - factor * squashStretchAmount_ * 0.5f);
+        currentScale.y = baseScale_.y * (1.0f + factor * squashStretchAmount_);
+        currentScale.z = baseScale_.z * (1.0f - factor * squashStretchAmount_ * 0.5f);
+
+        modelComponent_.worldTransform_.transform_.scale = currentScale;
+        modelComponent_.worldTransform_.transform_.translate.y = animOffsetY_;
+    }
+    else
+    {
+        animTimer_ = 0.0f;
+        animOffsetY_ = 0.0f;
+        modelComponent_.worldTransform_.transform_.scale = baseScale_;
+        modelComponent_.worldTransform_.transform_.translate.y = 0.0f;
+    }
 }
 
 void Pikumi::SetHighlight(bool enable)
@@ -196,7 +230,10 @@ void Pikumi::OnCollisionEnter(const GameEngine::CollisionResult& result)
         if (state_ == PikumiState::kThrown)
         {
             // 衝突演出
-            impactDetectionEffect_->ApplayImpact(modelComponent_.worldTransform_.transform_.translate, 50.0f);
+            if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy))
+            {
+                impactDetectionEffect_->ApplayImpact(modelComponent_.worldTransform_.transform_.translate, 50.0f);
+            }
 
             Vector3 normal = result.contactNormal;
             normal.y = 0.0f;
