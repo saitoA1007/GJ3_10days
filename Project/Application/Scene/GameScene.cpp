@@ -71,6 +71,8 @@ GameScene::GameScene() {
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
 		digitModels[digit] = modelManager_->GetNameByModel(std::to_string(digit) + ".obj");
 	}
+
+	// スコア表示
 	scoreView_ = std::make_unique<ScoreView>(digitModels, gameCamera->GetCamera());
 
 	//Enemy
@@ -89,8 +91,8 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 	score_.Update(FpsCounter::deltaTime);
 	scoreView_->SetValue(score_.GetDisplayedValue());
-	scoreView_->DebugUpdate();
-
+	scoreView_->Update();
+	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
 	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
 	{
@@ -105,8 +107,8 @@ void GameScene::Update() {
 void GameScene::DebugUpdate()
 {
 	scoreView_->SetValue(score_.GetDisplayedValue());
-	scoreView_->DebugUpdate();
-
+	scoreView_->Update();
+	
 	// ゲーム更新を停止している間に振動が残らないようにする。
 	if (controllerVibration_)
 	{

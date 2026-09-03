@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include "DebugParameter.h"
 #include "Material.h"
 #include "WorldTransform.h"
 
@@ -18,8 +19,8 @@ public:
 	ScoreView(const DigitModels& models, const GameEngine::Camera* camera);
 
 	void SetValue(int value);
+	void Update();
 	void Draw(GameEngine::RenderQueue* renderQueue);
-	void DebugUpdate();
 
 	void SetPosition(const Vector3& position) { position_ = position; }
 	void SetScale(float scale) { scale_ = scale; }
@@ -30,11 +31,16 @@ private:
 	const GameEngine::Camera* camera_ = nullptr;
 	std::array<GameEngine::WorldTransform, kDigitCount> digitTransforms_;
 	std::array<int, kDigitCount> digits_{};
-	GameEngine::Material material_;
-	int displayedValue_ = 0;
 
-	// カメラ座標での左端の数字の位置・サイズ・桁間隔。
-	Vector3 position_ = { -3.2f, 1.8f, 10.0f };
-	float scale_ = 0.15f;
-	float digitSpacing_ = 0.45f;
+	// 左から万・千・百・十・一の位、Translateは共通配置からの追加移動量
+	std::array<Vector3, kDigitCount> digitTranslations_{};
+	std::array<Vector3, kDigitCount> digitRotations_{};
+	GameEngine::Material material_;
+
+	// カメラ座標での左端の数字の位置・サイズ・桁間隔
+	Vector3 position_ = { -3.2f, 1.8f, 10.0f }; // 左端の数字の位置
+	float scale_ = 0.15f;                       // サイズ
+	float digitSpacing_ = 0.45f;                // 桁間隔
+	bool hideLeadingZeros_ = true;              // 先頭の0を非表示にするかどうか
+	GameEngine::DebugParameter debugParameter_{ "ScoreView" };
 };
