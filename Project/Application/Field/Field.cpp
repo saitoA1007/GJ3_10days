@@ -4,9 +4,11 @@
 #include "MyMath.h"
 using namespace GameEngine;
 
-Field::Field(GameEngine::Model* model, GameEngine::Model* poleModel, GameEngine::Model* circleModel, GameEngine::Model* planeModel)
+Field::Field(GameEngine::Model* model, GameEngine::Model* poleModel, GameEngine::Model* circleModel, GameEngine::Model* planeModel, FieldEffect* fieldEffect)
     : modelComponent_(model), universeModel_(planeModel)
 {
+    fieldEffect_ = fieldEffect;
+
     modelComponent_.worldTransform_.Initialize({ {fieldRadius_, height_, fieldRadius_},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} });
 
     // パラメータの登録
@@ -18,6 +20,7 @@ Field::Field(GameEngine::Model* model, GameEngine::Model* poleModel, GameEngine:
     debugParame_->Register("metallic", modelComponent_.materialData_->metallic, 1, "Material");
     debugParame_->Register("roughness", modelComponent_.materialData_->roughness, 1, "Material");
     debugParame_->Register("color", modelComponent_.materialData_->color, 1, "Material");
+
     // レインボー
     debugParame_->Register("Cycle", colorCycle_, 1, "Color");
     debugParame_->Register("Offset", colorOffset_, 1, "Color");

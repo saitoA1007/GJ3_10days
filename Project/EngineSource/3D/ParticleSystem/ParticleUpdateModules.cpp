@@ -1,5 +1,4 @@
 #include "ParticleUpdateModules.h"
-#include "EasingManager.h"
 using namespace GameEngine;
 
 //==================================================
@@ -8,7 +7,7 @@ using namespace GameEngine;
 
 void VelocityOverLifeTimeModule::Update(ParticleData& particleData, [[maybe_unused]] float time) {
 	// 速度を補間
-	particleData.velocity = Lerp(particleData.startSpeed, endVelocity_, particleData.currentTime);
+	particleData.velocity = Lerp(particleData.startSpeed, endVelocity_, particleData.currentTime, easeType_);
 }
 
 //==================================================
@@ -18,9 +17,9 @@ void VelocityOverLifeTimeModule::Update(ParticleData& particleData, [[maybe_unus
 void SizeOverLifeTimeModule::Update(ParticleData& particleData, [[maybe_unused]] float time) {
 
 	if (separateAxes_) {
-		particleData.transform.scale = Lerp(particleData.startSize, separateAxesEndSize_, particleData.currentTime);
+		particleData.transform.scale = Lerp(particleData.startSize, separateAxesEndSize_, particleData.currentTime, easeType_);
 	} else {
-		particleData.transform.scale = Lerp(particleData.startSize, Vector3(endSize_, endSize_, endSize_), particleData.currentTime);
+		particleData.transform.scale = Lerp(particleData.startSize, Vector3(endSize_, endSize_, endSize_), particleData.currentTime, easeType_);
 	}
 }
 
@@ -29,7 +28,7 @@ void SizeOverLifeTimeModule::Update(ParticleData& particleData, [[maybe_unused]]
 //==================================================
 
 void AlphaOverLifeTimeModule::Update(ParticleData& particleData, [[maybe_unused]] float time) {
-	particleData.color.w = Lerp(particleData.startColor.w, endAlpha_, particleData.currentTime);
+	particleData.color.w = Lerp(particleData.startColor.w, endAlpha_, particleData.currentTime, easeType_);
 }
 
 //==================================================

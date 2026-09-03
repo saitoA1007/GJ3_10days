@@ -117,6 +117,9 @@ void Player::Update()
 {
 	debugParame_->ApplyIfDirty();
 
+	// 位置を設定
+	field_->SetPos(modelComponent_.worldTransform_.transform_.translate);
+  
 	isMoving_ = false;
 
 	for (auto& pikumi : pikumis_)

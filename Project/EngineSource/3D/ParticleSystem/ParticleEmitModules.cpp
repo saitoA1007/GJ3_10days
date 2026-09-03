@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 #include "RandomGenerator.h"
 #include "MyMath.h"
+#include <algorithm>
 #include <numbers>
 using namespace GameEngine;
 
@@ -170,4 +171,20 @@ void ColorEmitModule::Create(ParticleData& particleData) {
 		RandomGenerator::Get(minColor_.w, maxColor_.w)
 	};
 	particleData.startColor = particleData.color;
+}
+
+//==================================================
+// 生存時間モジュール
+//==================================================
+
+void LifeTimeEmitModule::Create(ParticleData& particleData) {
+	// 最小値と最大値が逆に設定されていても動くようにする
+	float minLifeTime = minLifeTime_;
+	float maxLifeTime = maxLifeTime_;
+	if (maxLifeTime < minLifeTime) {
+		std::swap(minLifeTime, maxLifeTime);
+	}
+
+	// 経過時間の割合を求める時に0除算しないよう、下限を設ける
+	particleData.lifeTime = (std::max)(RandomGenerator::Get(minLifeTime, maxLifeTime), 0.01f);
 }

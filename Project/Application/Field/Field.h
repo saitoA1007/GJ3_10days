@@ -4,11 +4,12 @@
 #include "ModelComponent.h"
 #include "DebugParameter.h"
 #include "UniverseMaterial.h"
+#include "FieldEffect.h"
 
 class Field : public GameEngine::IGameObject
 {
 public:
-    Field(GameEngine::Model* model, GameEngine::Model* poleModel, GameEngine::Model* circleModel, GameEngine::Model* planeModel);
+    Field(GameEngine::Model* model, GameEngine::Model* poleModel, GameEngine::Model* circleModel, GameEngine::Model* planeModel, FieldEffect* fieldEffect);
 
     void Initialize() override;
     void Update() override;
@@ -17,7 +18,16 @@ public:
     // ゲッター
     float GetFieldRadius() const { return fieldRadius_; }
 
+public:
+
+    // プレイヤーの位置を設定
+    void SetPos(Vector3 pos) {
+        fieldEffect_->ApplayPosition(pos);
+    }
+
 private:
+    FieldEffect* fieldEffect_ = nullptr;
+
     GameEngine::ModelComponent modelComponent_;
 
     // パラメータ機能
