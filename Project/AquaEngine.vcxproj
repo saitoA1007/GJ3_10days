@@ -172,6 +172,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\TestScene.cpp" />
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
+    <ClCompile Include="Application\Score\Score.cpp" />
+    <ClCompile Include="Application\Score\ScoreView.cpp" />
     <ClCompile Include="Application\Tower\Tower.cpp" />
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
@@ -438,6 +440,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Enemy\Enemy.h" />
     <ClInclude Include="Application\Enemy\EnemyManager.h" />
+    <ClInclude Include="Application\Score\Score.h" />
+    <ClInclude Include="Application\Score\ScoreView.h" />
     <ClInclude Include="Application\Enemy\EnemyRenderer.h" />
     <ClInclude Include="EngineSource\2D\ImGuiManager.h" />
     <ClInclude Include="EngineSource\2D\Sprite.h" />

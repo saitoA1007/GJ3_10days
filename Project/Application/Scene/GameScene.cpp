@@ -1,5 +1,4 @@
 #include "GameScene.h"
-#include "ImguiManager.h"
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
@@ -10,11 +9,14 @@ using namespace GameEngine;
 #include "Application/Field/FieldEffect.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
+#include "Application/Score/ScoreView.h"
 #include "ControllerVibration.h"
+#include "FPSCounter.h"
 
 // 後で別クラスに纏めて消す
 namespace
 {
+	constexpr int kScorePerEnemy = 100;
 	constexpr int kChargeVibrationThreshold = 5;        // 振動を開始するためのチャージされたピクミの数
 	constexpr float kChargeVibrationLeftMotor = 0.35f;  // 左モーターの振動強度
 	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
@@ -64,24 +66,43 @@ GameScene::GameScene() {
 	// プレイヤー
 	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
+	auto* rightHandModel = modelManager_->GetNameByModel("playerHand.gltf");
+	auto* trajectryModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
-	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
+	rightHandModel->SetDefaultIsEnableLight(true);
+	trajectryModel->SetDefaultIsEnableLight(true);
+	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, rightHandModel, trajectryModel, field, impactEffect);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
-	gameObjectManager_->AddObject<GameCamera>(player_);
+	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
+
+	ScoreView::DigitModels digitModels{};
+	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
+		digitModels[digit] = modelManager_->GetNameByModel(std::to_string(digit) + ".obj");
+	}
+
+	// スコア表示
+	scoreView_ = std::make_unique<ScoreView>(digitModels, gameCamera->GetCamera());
 
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
-	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+	auto* enemies = gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+	enemies->SetOnEnemyDefeated([this]() {
+		score_.Add(kScorePerEnemy);
+	});
 }
 
 void GameScene::Initialize() {
-
-	
+	score_.Reset();
+	scoreView_->SetValue(score_.GetDisplayedValue());
 }
 
 void GameScene::Update() {
+	score_.Update(FpsCounter::deltaTime);
+	scoreView_->SetValue(score_.GetDisplayedValue());
+	scoreView_->Update();
+	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
 	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
 	{
@@ -95,6 +116,9 @@ void GameScene::Update() {
 
 void GameScene::DebugUpdate()
 {
+	scoreView_->SetValue(score_.GetDisplayedValue());
+	scoreView_->Update();
+	
 	// ゲーム更新を停止している間に振動が残らないようにする。
 	if (controllerVibration_)
 	{
@@ -103,7 +127,7 @@ void GameScene::DebugUpdate()
 }
 
 void GameScene::Draw() {
-	
+	scoreView_->Draw(renderQueue_);
 }
 
 void GameScene::InputRegisterCommand() {

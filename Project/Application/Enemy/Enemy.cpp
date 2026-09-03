@@ -15,6 +15,10 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	collider_.SetRadius(2.0f);
 
 	collider_.SetOnCollisionEnterCallback([this](const GameEngine::CollisionResult& result) {
+		if (isDead_) {
+			return;
+		}
+
 		switch (result.userData.typeID) {
 		case  uint32_t(CollisionTypeID::kPlayer):
 
@@ -40,6 +44,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			damageTimer_ = 0;
 
 			if (hp_ <= 0) {
+				wasDefeated_ = true;
 				isDead_ = true;
 			}
 			break;
@@ -76,6 +81,7 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
 
 	isActive_ = true;
 	isDead_ = false;
+	wasDefeated_ = false;
 
 	hp_ = config_.hp;
 
@@ -90,6 +96,7 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
 void Enemy::Initialize() {
 	isActive_ = false;
 	isDead_ = true;
+	wasDefeated_ = false;
 	data_->transform.scale = {};
 	collider_.SetActive(false);
 }

@@ -41,6 +41,7 @@ public:
 	void DeadUpdate();
 
 	Vector3 GetPosition() const { return data_->transform.translate; }
+	bool WasDefeated() const { return wasDefeated_; }
 	//SetUp後に呼び出す。
 	void SetSnake(float width, float speed) { snakeWidth_ = width; snakeSpeed_ = speed; }
 	void SetRound(float speed) { roundSpeed_ = speed; }
@@ -67,6 +68,7 @@ private:
 	Vector2 direction_ = { 0.0f, 0.0f };
 
 	int hp_ = 1;
+	bool wasDefeated_ = false;
 	float damageTimer_ = 0.0f;
 	float snakeTimer_ = 0.0f;
 	float roundTimer_ = 0.0f;

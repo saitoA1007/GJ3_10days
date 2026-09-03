@@ -3,6 +3,9 @@
     <Filter Include="Application">
       <UniqueIdentifier>{0d846e0b-9d04-4141-83db-4277da1da826}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Score">
+      <UniqueIdentifier>{eeb7dbee-8cef-4bde-a71c-12d3d44f9d44}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Application\Camera">
       <UniqueIdentifier>{4229cca0-51b9-4315-bbbf-3d86e506fe0a}</UniqueIdentifier>
     </Filter>
@@ -546,6 +549,12 @@
     <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
     <ClCompile Include="Application\Field\Field.cpp" />
     <ClCompile Include="Application\Enemy\EnemyManager.cpp" />
+    <ClCompile Include="Application\Score\Score.cpp">
+      <Filter>Application\Score</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Score\ScoreView.cpp">
+      <Filter>Application\Score</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Enemy\Enemy.cpp" />
     <ClCompile Include="Application\Enemy\EnemyRenderer.cpp" />
     <ClCompile Include="Application\Utils\ShigeFunc.cpp" />
@@ -1080,6 +1089,12 @@
     <ClInclude Include="Application\Pikumi\Pikumi.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Enemy\EnemyManager.h" />
+    <ClInclude Include="Application\Score\Score.h">
+      <Filter>Application\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Score\ScoreView.h">
+      <Filter>Application\Score</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Enemy\Enemy.h" />
     <ClInclude Include="Application\Enemy\EnemyRenderer.h" />
     <ClInclude Include="Application\Utils\ShigeFunc.h" />
