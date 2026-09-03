@@ -1,5 +1,4 @@
 #include "GameScene.h"
-#include "ImguiManager.h"
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
@@ -9,11 +8,14 @@ using namespace GameEngine;
 #include "Application/Field/Field.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
+#include "Application/Score/ScoreView.h"
 #include "ControllerVibration.h"
+#include "FPSCounter.h"
 
 // 後で別クラスに纏めて消す
 namespace
 {
+	constexpr int kScorePerEnemy = 100;
 	constexpr int kChargeVibrationThreshold = 5;        // 振動を開始するためのチャージされたピクミの数
 	constexpr float kChargeVibrationLeftMotor = 0.35f;  // 左モーターの振動強度
 	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
@@ -28,13 +30,22 @@ GameScene::GameScene() {
 	controllerVibration_ = std::make_unique<ControllerVibration>(input_);
 
 	// 背景を設定
-	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
+	uint32_t skyboxGH = textureManager_->GetHandleByName("rogland_clear_night_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
 
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("cylinder.gltf");
 	fieldModel->SetDefaultIsEnableLight(true);
-	auto field = gameObjectManager_->AddObject<Field>(fieldModel);
+	// ポール
+	auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
+	poleModel->SetDefaultIsEnableLight(false);
+	// 円
+	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
+	circleModel->SetDefaultIsEnableLight(false);
+	// 宇宙を映す平面
+	auto* planeXZModel = modelManager_->GetNameByModel("halfDome.gltf");
+	planeXZModel->SetDefaultIsEnableLight(false);
+	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel, planeXZModel);
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
@@ -55,22 +66,37 @@ GameScene::GameScene() {
 	pikumiModel->SetDefaultIsEnableLight(true);
 	rightHandModel->SetDefaultIsEnableLight(true);
 	trajectryModel->SetDefaultIsEnableLight(true);
-	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, rightHandModel, trajectryModel, field, impactEffect);
+	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, rightHandModel, trajectryModel, field, impactEffect);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
-	gameObjectManager_->AddObject<GameCamera>(player_);
+	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
+
+	ScoreView::DigitModels digitModels{};
+	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
+		digitModels[digit] = modelManager_->GetNameByModel(std::to_string(digit) + ".obj");
+	}
+
+	// スコア表示
+	scoreView_ = std::make_unique<ScoreView>(digitModels, gameCamera->GetCamera());
 
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
-	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+	auto* enemies = gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+	enemies->SetOnEnemyDefeated([this]() {
+		score_.Add(kScorePerEnemy);
+	});
 }
 
 void GameScene::Initialize() {
-
-	
+	score_.Reset();
+	scoreView_->SetValue(score_.GetDisplayedValue());
 }
 
 void GameScene::Update() {
+	score_.Update(FpsCounter::deltaTime);
+	scoreView_->SetValue(score_.GetDisplayedValue());
+	scoreView_->Update();
+	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
 	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
 	{
@@ -84,6 +110,9 @@ void GameScene::Update() {
 
 void GameScene::DebugUpdate()
 {
+	scoreView_->SetValue(score_.GetDisplayedValue());
+	scoreView_->Update();
+	
 	// ゲーム更新を停止している間に振動が残らないようにする。
 	if (controllerVibration_)
 	{
@@ -92,7 +121,7 @@ void GameScene::DebugUpdate()
 }
 
 void GameScene::Draw() {
-	
+	scoreView_->Draw(renderQueue_);
 }
 
 void GameScene::InputRegisterCommand() {

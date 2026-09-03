@@ -146,7 +146,7 @@ void MainObjectCHS(inout Payload payload, MyAttribute attrib) {
     payload.color = directLight + indirectLight;
     
     // 遮蔽物が不透明かをマスクで区別して影の濃さを取得する
-    float shadowFactor = ComputeShadowFactor(worldPosition, lightDir);
+   // float shadowFactor = ComputeShadowFactor(worldPosition, lightDir);
     // 影の中であれば、影色を設定
-    payload.color.xyz *= lerp(0.5f, 1.0f, shadowFactor);
+    //payload.color.xyz *= lerp(0.5f, 1.0f, shadowFactor);
 }

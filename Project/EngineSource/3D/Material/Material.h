@@ -145,12 +145,12 @@ namespace GameEngine {
 
 		const uint32_t& GetMaterialSrvIndex() const { return materialBuffer_.GetSrvIndex(); }
 
+		// マテリアルにデータを書き込む
+		MaterialData* materialData_ = nullptr;
+
 	private:
 		// マテリアルデータ
 		StructuredBuffer<MaterialData> materialBuffer_;
-
-		// マテリアルにデータを書き込む
-		MaterialData* materialData_ = nullptr;
 
 		// テクスチャ情報
 		uint32_t defaultTextureHandle_ = 0;

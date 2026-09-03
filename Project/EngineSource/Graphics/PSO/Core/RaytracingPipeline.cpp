@@ -46,6 +46,7 @@ void RaytracingPipeline::CreateStateObject() {
 	LibraryResult missResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/Miss.hlsl");
 	LibraryResult objectResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsObject.hlsl");
 	LibraryResult iceObjectResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/ChsIceObject.hlsl");
+	LibraryResult universeResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsUniverse.hlsl");
 
 	// 初期化処理
 	stateObjectBuilder_.Initialize();
@@ -55,10 +56,12 @@ void RaytracingPipeline::CreateStateObject() {
 	stateObjectBuilder_.AddDXILLibrary(missResult.blob.Get(), missResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(objectResult.blob.Get(), objectResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(iceObjectResult.blob.Get(), iceObjectResult.exportNames);
+	stateObjectBuilder_.AddDXILLibrary(universeResult.blob.Get(), universeResult.exportNames);
 
 	// ヒットグループを設定
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::DefaultModel, L"MainObjectCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::IceModel, L"MainIceObjectCHS");
+	stateObjectBuilder_.AddHitGroup(AppHitGroups::UniverseModel, L"MainUniverseCHS");
 
 	// シェーダー設定
 	const uint32_t MaxPayloadSize = sizeof(float) * 3 + sizeof(uint32_t) + sizeof(float);
@@ -129,6 +132,15 @@ void RaytracingPipeline::CreateShaderTable() {
 		ShaderRecord iceRecord;
 		auto& iceTable = iceRecord.SetIdentifier(iceId);
 		shaderTableBuilder_.HitGroup().AddRecord(std::move(iceRecord));
+
+		// 宇宙
+		auto universeId = rtsoProps->GetShaderIdentifier(AppHitGroups::UniverseModel.c_str());
+		if (universeId == nullptr) {
+			assert(false && "Not found ShaderIdentifier");
+		}
+		ShaderRecord universeRecord;
+		auto& universeTable = universeRecord.SetIdentifier(universeId);
+		shaderTableBuilder_.HitGroup().AddRecord(std::move(universeRecord));
 	}
 
 	// テーブルを設定する

@@ -160,7 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-	<ClCompile Include="Application\GameCamera\GameCamera.cpp" />
+    <ClCompile Include="Application\GameCamera\GameCamera.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
@@ -171,6 +171,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\TestScene.cpp" />
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
+    <ClCompile Include="Application\Score\Score.cpp" />
+    <ClCompile Include="Application\Score\ScoreView.cpp" />
     <ClCompile Include="Application\Tower\Tower.cpp" />
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
@@ -191,6 +193,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="EngineSource\3D\Animation\AnimationManager.cpp" />
     <ClCompile Include="EngineSource\3D\Animation\Animator.cpp" />
     <ClCompile Include="EngineSource\3D\Material\IceMaterial.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Model\ModelComponent.cpp" />
     <ClCompile Include="EngineSource\3D\ParticleSystem\ModulesControl.cpp" />
     <ClCompile Include="EngineSource\3D\Model\Skeleton.cpp" />
@@ -415,7 +418,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-	<ClInclude Include="Application\GameCamera\GameCamera.h" />
+    <ClInclude Include="Application\GameCamera\GameCamera.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="Application\Pikumi\Pikumi.h" />
@@ -435,6 +438,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Enemy\Enemy.h" />
     <ClInclude Include="Application\Enemy\EnemyManager.h" />
+    <ClInclude Include="Application\Score\Score.h" />
+    <ClInclude Include="Application\Score\ScoreView.h" />
     <ClInclude Include="Application\Enemy\EnemyRenderer.h" />
     <ClInclude Include="EngineSource\2D\ImGuiManager.h" />
     <ClInclude Include="EngineSource\2D\Sprite.h" />
@@ -454,6 +459,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="EngineSource\3D\Animation\Animator.h" />
     <ClInclude Include="EngineSource\3D\Material\IceMaterial.h" />
     <ClInclude Include="EngineSource\3D\Fracture\FractureData.h" />
+    <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
     <ClInclude Include="EngineSource\3D\Model\ModelComponent.h" />
     <ClInclude Include="EngineSource\3D\ParticleSystem\ModulesControl.h" />
     <ClInclude Include="EngineSource\3D\ParticleSystem\ParticleBehaviorGPU.h" />
@@ -692,6 +698,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="Resources\Shaders\RandomUtils.hlsli" />
     <None Include="Resources\Shaders\Rasterize\WBOIT.hlsli" />
     <None Include="Resources\Shaders\Raytracing\Common.hlsli" />
+    <None Include="Resources\Shaders\StarField.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Externals\imgui\LICENSE.txt" />
@@ -854,6 +861,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Raytracing\chsUniverse.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Library</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

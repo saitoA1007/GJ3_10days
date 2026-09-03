@@ -26,6 +26,7 @@ namespace GameEngine {
 
 		// レイトレによる描画
 		void DrawRaytracing(RenderQueue* renderQueue);
+		void DrawCustomRaytracing(RenderQueue* renderQueue);
 
 	public:
 
