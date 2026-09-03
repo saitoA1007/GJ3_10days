@@ -123,112 +123,112 @@ namespace GameEngine {
 		t = std::clamp(t, 0.0f, 1.0f);
 
 		switch (type) {
-		case EaseType::Linear:
+		case EaseType::kLinear:
 			return t;
 
-		case EaseType::EaseInQuad:
+		case EaseType::kEaseInQuad:
 			return t * t;
 
-		case EaseType::EaseOutQuad:
+		case EaseType::kEaseOutQuad:
 			return 1.0f - (1.0f - t) * (1.0f - t);
 
-		case EaseType::EaseInOutQuad:
+		case EaseType::kEaseInOutQuad:
 			if (t < 0.5f) {
 				return 2.0f * t * t;
 			} else {
 				return 1.0f - std::pow(-2.0f * t + 2.0f, 2.0f) / 2.0f;
 			}
 
-		case EaseType::EaseOutInQuad:
+		case EaseType::kEaseOutInQuad:
 			if (t < 0.5f) {
 				return 0.5f * (1.0f - (1.0f - 2.0f * t) * (1.0f - 2.0f * t));
 			} else {
 				return 0.5f + 0.5f * (2.0f * t - 1.0f) * (2.0f * t - 1.0f);
 			}
 
-		case EaseType::EaseInCubic:
+		case EaseType::kEaseInCubic:
 			return t * t * t;
 
-		case EaseType::EaseOutCubic:
+		case EaseType::kEaseOutCubic:
 			return 1.0f - std::pow(1.0f - t, 3.0f);
 
-		case EaseType::EaseInOutCubic:
+		case EaseType::kEaseInOutCubic:
 			if (t < 0.5f) {
 				return 4.0f * t * t * t;
 			} else {
 				return 1.0f - std::pow(-2.0f * t + 2.0f, 3.0f) / 2.0f;
 			}
 
-		case EaseType::EaseOutInCubic:
+		case EaseType::kEaseOutInCubic:
 			if (t < 0.5f) {
 				return 0.5f * (1.0f - std::pow(1.0f - 2.0f * t, 3.0f));
 			} else {
 				return 0.5f + 0.5f * std::pow(2.0f * t - 1.0f, 3.0f);
 			}
 
-		case EaseType::EaseInQuart:
+		case EaseType::kEaseInQuart:
 			return t * t * t * t;
 
-		case EaseType::EaseOutQuart:
+		case EaseType::kEaseOutQuart:
 			return 1.0f - std::pow(1.0f - t, 4.0f);
 
-		case EaseType::EaseInOutQuart:
+		case EaseType::kEaseInOutQuart:
 			if (t < 0.5f) {
 				return 8.0f * t * t * t * t;
 			} else {
 				return 1.0f - std::pow(-2.0f * t + 2.0f, 4.0f) / 2.0f;
 			}
 
-		case EaseType::EaseOutInQuart:
+		case EaseType::kEaseOutInQuart:
 			if (t < 0.5f) {
 				return 0.5f * (1.0f - std::pow(1.0f - 2.0f * t, 4.0f));
 			} else {
 				return 0.5f + 0.5f * std::pow(2.0f * t - 1.0f, 4.0f);
 			}
 
-		case EaseType::EaseInQuint:
+		case EaseType::kEaseInQuint:
 			return t * t * t * t * t;
 
-		case EaseType::EaseOutQuint:
+		case EaseType::kEaseOutQuint:
 			return 1.0f - std::pow(1.0f - t, 5.0f);
 
-		case EaseType::EaseInOutQuint:
+		case EaseType::kEaseInOutQuint:
 			if (t < 0.5f) {
 				return 16.0f * t * t * t * t * t;
 			} else {
 				return 1.0f - std::pow(-2.0f * t + 2.0f, 5.0f) / 2.0f;
 			}
 
-		case EaseType::EaseOutInQuint:
+		case EaseType::kEaseOutInQuint:
 			if (t < 0.5f) {
 				return 0.5f * (1.0f - std::pow(1.0f - 2.0f * t, 5.0f));
 			} else {
 				return 0.5f + 0.5f * std::pow(2.0f * t - 1.0f, 5.0f);
 			}
 
-		case EaseType::EaseInSine:
+		case EaseType::kEaseInSine:
 			return 1.0f - std::cos((t * std::numbers::pi_v<float>) / 2.0f);
 
-		case EaseType::EaseOutSine:
+		case EaseType::kEaseOutSine:
 			return std::sin((t * std::numbers::pi_v<float>) / 2.0f);
 
-		case EaseType::EaseInOutSine:
+		case EaseType::kEaseInOutSine:
 			return -(std::cos(std::numbers::pi_v<float> *t) - 1.0f) / 2.0f;
 
-		case EaseType::EaseOutInSine:
+		case EaseType::kEaseOutInSine:
 			if (t < 0.5f) {
 				return 0.5f * std::sin((2.0f * t * std::numbers::pi_v<float>) / 2.0f);
 			} else {
 				return 1.0f - 0.5f * std::cos(((2.0f * t - 1.0f) * std::numbers::pi_v<float>) / 2.0f);
 			}
 
-		case EaseType::EaseInExpo:
+		case EaseType::kEaseInExpo:
 			return t == 0.0f ? 0.0f : std::pow(2.0f, 10.0f * (t - 1.0f));
 
-		case EaseType::EaseOutExpo:
+		case EaseType::kEaseOutExpo:
 			return t == 1.0f ? 1.0f : 1.0f - std::pow(2.0f, -10.0f * t);
 
-		case EaseType::EaseInOutExpo:
+		case EaseType::kEaseInOutExpo:
 			if (t == 0.0f) return 0.0f;
 			if (t == 1.0f) return 1.0f;
 			if (t < 0.5f) {
@@ -237,7 +237,7 @@ namespace GameEngine {
 				return (2.0f - std::pow(2.0f, -20.0f * t + 10.0f)) / 2.0f;
 			}
 
-		case EaseType::EaseOutInExpo:
+		case EaseType::kEaseOutInExpo:
 			if (t == 0.0f) return 0.0f;
 			if (t == 1.0f) return 1.0f;
 			if (t < 0.5f) {
@@ -246,41 +246,41 @@ namespace GameEngine {
 				return 0.5f + 0.5f * std::pow(2.0f, 20.0f * (t - 1.0f));
 			}
 
-		case EaseType::EaseInCirc:
+		case EaseType::kEaseInCirc:
 			return 1.0f - std::sqrt(1.0f - t * t);
 
-		case EaseType::EaseOutCirc:
+		case EaseType::kEaseOutCirc:
 			return std::sqrt(1.0f - std::pow(t - 1.0f, 2.0f));
 
-		case EaseType::EaseInOutCirc:
+		case EaseType::kEaseInOutCirc:
 			if (t < 0.5f) {
 				return (1.0f - std::sqrt(1.0f - std::pow(2.0f * t, 2.0f))) / 2.0f;
 			} else {
 				return (std::sqrt(1.0f - std::pow(-2.0f * t + 2.0f, 2.0f)) + 1.0f) / 2.0f;
 			}
 
-		case EaseType::EaseOutInCirc:
+		case EaseType::kEaseOutInCirc:
 			if (t < 0.5f) {
 				return 0.5f * std::sqrt(1.0f - std::pow(2.0f * t - 1.0f, 2.0f));
 			} else {
 				return 1.0f - 0.5f * std::sqrt(1.0f - std::pow(2.0f * t - 1.0f, 2.0f));
 			}
 
-		case EaseType::EaseInBack:
+		case EaseType::kEaseInBack:
 		{
 			const float c1 = 1.70158f;
 			const float c3 = c1 + 1.0f;
 			return c3 * t * t * t - c1 * t * t;
 		}
 
-		case EaseType::EaseOutBack:
+		case EaseType::kEaseOutBack:
 		{
 			const float c1 = 1.70158f;
 			const float c3 = c1 + 1.0f;
 			return 1.0f + c3 * std::pow(t - 1.0f, 3.0f) + c1 * std::pow(t - 1.0f, 2.0f);
 		}
 
-		case EaseType::EaseInOutBack:
+		case EaseType::kEaseInOutBack:
 		{
 			const float c1 = 1.70158f;
 			const float c2 = c1 * 1.525f;
@@ -291,7 +291,7 @@ namespace GameEngine {
 			}
 		}
 
-		case EaseType::EaseOutInBack:
+		case EaseType::kEaseOutInBack:
 		{
 			const float c1 = 1.70158f;
 			const float c3 = c1 + 1.0f;
@@ -302,7 +302,7 @@ namespace GameEngine {
 			}
 		}
 
-		case EaseType::EaseInElastic:
+		case EaseType::kEaseInElastic:
 		{
 			const float c4 = (2.0f * std::numbers::pi_v<float>) / 3.0f;
 			if (t == 0.0f) return 0.0f;
@@ -310,7 +310,7 @@ namespace GameEngine {
 			return -std::pow(2.0f, 10.0f * t - 10.0f) * std::sin((t * 10.0f - 10.75f) * c4);
 		}
 
-		case EaseType::EaseOutElastic:
+		case EaseType::kEaseOutElastic:
 		{
 			const float c4 = (2.0f * std::numbers::pi_v<float>) / 3.0f;
 			if (t == 0.0f) return 0.0f;
@@ -318,7 +318,7 @@ namespace GameEngine {
 			return std::pow(2.0f, -10.0f * t) * std::sin((t * 10.0f - 0.75f) * c4) + 1.0f;
 		}
 
-		case EaseType::EaseInOutElastic:
+		case EaseType::kEaseInOutElastic:
 		{
 			const float c5 = (2.0f * std::numbers::pi_v<float>) / 4.5f;
 			if (t == 0.0f) return 0.0f;
@@ -330,7 +330,7 @@ namespace GameEngine {
 			}
 		}
 
-		case EaseType::EaseOutInElastic:
+		case EaseType::kEaseOutInElastic:
 		{
 			const float c4 = (2.0f * std::numbers::pi_v<float>) / 3.0f;
 			if (t == 0.0f) return 0.0f;
@@ -342,10 +342,10 @@ namespace GameEngine {
 			}
 		}
 
-		case EaseType::EaseInBounce:
-			return 1.0f - Apply(1.0f - t, EaseType::EaseOutBounce);
+		case EaseType::kEaseInBounce:
+			return 1.0f - Apply(1.0f - t, EaseType::kEaseOutBounce);
 
-		case EaseType::EaseOutBounce:
+		case EaseType::kEaseOutBounce:
 		{
 			const float n1 = 7.5625f;
 			const float d1 = 2.75f;
@@ -361,18 +361,18 @@ namespace GameEngine {
 			}
 		}
 
-		case EaseType::EaseInOutBounce:
+		case EaseType::kEaseInOutBounce:
 			if (t < 0.5f) {
-				return (1.0f - Apply(1.0f - 2.0f * t, EaseType::EaseOutBounce)) / 2.0f;
+				return (1.0f - Apply(1.0f - 2.0f * t, EaseType::kEaseOutBounce)) / 2.0f;
 			} else {
-				return (1.0f + Apply(2.0f * t - 1.0f, EaseType::EaseOutBounce)) / 2.0f;
+				return (1.0f + Apply(2.0f * t - 1.0f, EaseType::kEaseOutBounce)) / 2.0f;
 			}
 
-		case EaseType::EaseOutInBounce:
+		case EaseType::kEaseOutInBounce:
 			if (t < 0.5f) {
-				return 0.5f * Apply(2.0f * t, EaseType::EaseOutBounce);
+				return 0.5f * Apply(2.0f * t, EaseType::kEaseOutBounce);
 			} else {
-				return 1.0f - 0.5f * Apply(2.0f - 2.0f * t, EaseType::EaseOutBounce);
+				return 1.0f - 0.5f * Apply(2.0f - 2.0f * t, EaseType::kEaseOutBounce);
 			}
 
 		default:

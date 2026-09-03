@@ -18,7 +18,7 @@ namespace GameEngine{
 
 	class ParticleBehavior : public IGameObject {
 	public:
-		ParticleBehavior(const std::string& name, uint32_t maxNum, TextureManager* textureManager, Model* model, Camera* camera);
+		ParticleBehavior(const std::string& name, uint32_t maxNum, TextureManager* textureManager, Model* model);
 		~ParticleBehavior() = default;
 
 		// 初期化処理
@@ -78,6 +78,13 @@ namespace GameEngine{
 		void SetDirection(const Vector3& direction) {
 			if (auto* directionModule = modulesControl_->GetModule<DirectionEmitModule>("DirectionEmit")) {
 				directionModule->SetDirection(direction);
+			}
+		}
+
+		// パーティクルの生存時間を設定
+		void SetLifeTime(float minLifeTime, float maxLifeTime) {
+			if (auto* lifeTimeModule = modulesControl_->GetModule<LifeTimeEmitModule>("LifeTimeEmit")) {
+				lifeTimeModule->SetLifeTime(minLifeTime, maxLifeTime);
 			}
 		}
 

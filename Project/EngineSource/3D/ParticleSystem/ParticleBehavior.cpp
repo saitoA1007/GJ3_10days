@@ -4,11 +4,11 @@
 #include "ParticleEmitModules.h"
 using namespace GameEngine;
 
-ParticleBehavior::ParticleBehavior(const std::string& name, uint32_t maxNum, TextureManager* textureManager, Model* model, Camera* camera) {
+ParticleBehavior::ParticleBehavior(const std::string& name, uint32_t maxNum, TextureManager* textureManager, Model* model) {
     maxNumInstance_ = maxNum;
     name_ = name;
-    camera_ = camera;
     model_ = model;
+    camera_ = &renderQueue_->GetMainCamera();
 
     // パーティクル配列を確保
     particles_.resize(maxNumInstance_);
@@ -32,13 +32,14 @@ ParticleBehavior::ParticleBehavior(const std::string& name, uint32_t maxNum, Tex
     std::string subGroup = "Emitter";
     debugParame_->Register("SpawnMaxCount", main_.spawnMaxCount, index++, subGroup);
     debugParame_->Register("SpawnCoolTime", main_.spawnCoolTime, index++, subGroup);
-    debugParame_->Register("LifeTime", main_.lifeTime, index++, subGroup);
     debugParame_->Register("IsLoop", main_.isLoop, index++, subGroup);
     debugParame_->Register("IsBillBoard", main_.isBillBoard, index++, subGroup);
     subGroup += "/Defalut";
+    debugParame_->Register("LifeTime", main_.lifeTime, index++, subGroup);
     debugParame_->Register("EmittePos", main_.emitterPos, index++, subGroup);
     debugParame_->Register("Rotate", main_.rotate, index++, subGroup);
     debugParame_->Register("Scale", main_.scale, index++, subGroup);
+    debugParame_->Register("Color", main_.color, index++, subGroup);
 
     // 出現範囲を抑える
     if (maxNumInstance_ <= main_.spawnMaxCount) {
@@ -79,8 +80,12 @@ void ParticleBehavior::Update() {
         Create();
     }
 
+    Matrix4x4 cameraMatrix = camera_->GetWorldMatrix();
+    if (renderQueue_->GetUseDebugCamera()) {
+        cameraMatrix = renderQueue_->GetDebugCameraWorldMatrix();
+    }
     // 移動処理
-    Move(camera_->GetWorldMatrix());
+    Move(cameraMatrix);
 }
 
 void ParticleBehavior::Draw() {
@@ -104,7 +109,7 @@ ParticleData ParticleBehavior::MakeNewParticle() {
     tmpParticleData.transform.scale = main_.scale;
     tmpParticleData.transform.rotate = main_.rotate;
     tmpParticleData.velocity = { 0.0f,0.0f,0.0f };
-    tmpParticleData.color = { 1.0f,1.0f,1.0f,1.0f };
+    tmpParticleData.color = main_.color;
     tmpParticleData.startColor = tmpParticleData.color;
     tmpParticleData.startSize =  main_.scale;
     tmpParticleData.startSpeed = tmpParticleData.velocity;
@@ -179,7 +184,7 @@ void ParticleBehavior::Move(const Matrix4x4& cameraMatrix) {
             if (isRotateVelocity) {
                 worldTransforms_->transformDatas_[currentNumInstance_].worldMatrix = Math::MakeDirectionalBillboardMatrix(particle.transform.scale, particle.transform.translate, cameraMatrix, camera_->GetViewMatrix(), particle.velocity, particle.transform.rotate.z);
             } else {
-                worldTransforms_->transformDatas_[currentNumInstance_].worldMatrix = Math::MakeBillboardMatrix(particle.transform.scale, particle.transform.translate, particle.transform.translate.z,cameraMatrix);
+                worldTransforms_->transformDatas_[currentNumInstance_].worldMatrix = Math::MakeBillboardMatrix(particle.transform.scale, particle.transform.translate, particle.transform.rotate.z,cameraMatrix);
             }
         } else {
             worldTransforms_->transformDatas_[currentNumInstance_].transform = particle.transform;

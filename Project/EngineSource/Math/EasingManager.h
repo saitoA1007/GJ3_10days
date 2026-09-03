@@ -4,6 +4,150 @@
 #include "Vector3.h"
 #include "Quaternion.h"
 
+// イージングタイプ
+enum class EaseType {
+
+	// 等速
+
+	kLinear,
+
+	// Quadratic
+
+	kEaseInQuad,
+	kEaseOutQuad,
+	kEaseInOutQuad,
+	kEaseOutInQuad,
+
+	// Cubic
+
+	kEaseInCubic,
+	kEaseOutCubic,
+	kEaseInOutCubic,
+	kEaseOutInCubic,
+
+	// Quartic
+
+	kEaseInQuart,
+	kEaseOutQuart,
+	kEaseInOutQuart,
+	kEaseOutInQuart,
+
+	// Quintic
+
+	kEaseInQuint,
+	kEaseOutQuint,
+	kEaseInOutQuint,
+	kEaseOutInQuint,
+
+	// Sine
+
+	kEaseInSine,
+	kEaseOutSine,
+	kEaseInOutSine,
+	kEaseOutInSine,
+
+	// Exponential
+
+	kEaseInExpo,
+	kEaseOutExpo,
+	kEaseInOutExpo,
+	kEaseOutInExpo,
+
+	// Circular
+
+	kEaseInCirc,
+	kEaseOutCirc,
+	kEaseInOutCirc,
+	kEaseOutInCirc,
+
+	// Back
+
+	kEaseInBack,
+	kEaseOutBack,
+	kEaseInOutBack,
+	kEaseOutInBack,
+
+	// Elastic
+
+	kEaseInElastic,
+	kEaseOutElastic,
+	kEaseInOutElastic,
+	kEaseOutInElastic,
+
+	// Bounce
+
+	kEaseInBounce,
+	kEaseOutBounce,
+	kEaseInOutBounce,
+	kEaseOutInBounce,
+
+	kMaxCount
+};
+inline constexpr const char* EaseTypeNames[] = {
+	// Linear
+"Linear",
+
+// Quadratic
+"EaseInQuad",
+"EaseOutQuad",
+"EaseInOutQuad",
+"EaseOutInQuad",
+
+// Cubic
+"EaseInCubic",
+"EaseOutCubic",
+"EaseInOutCubic",
+"EaseOutInCubic",
+
+// Quartic
+"EaseInQuart",
+"EaseOutQuart",
+"EaseInOutQuart",
+"EaseOutInQuart",
+
+// Quintic
+"EaseInQuint",
+"EaseOutQuint",
+"EaseInOutQuint",
+"EaseOutInQuint",
+
+// Sine
+"EaseInSine",
+"EaseOutSine",
+"EaseInOutSine",
+"EaseOutInSine",
+
+// Exponential
+"EaseInExpo",
+"EaseOutExpo",
+"EaseInOutExpo",
+"EaseOutInExpo",
+
+// Circular
+"EaseInCirc",
+"EaseOutCirc",
+"EaseInOutCirc",
+"EaseOutInCirc",
+
+// Back
+"EaseInBack",
+"EaseOutBack",
+"EaseInOutBack",
+"EaseOutInBack",
+
+// Elastic
+"EaseInElastic",
+"EaseOutElastic",
+"EaseInOutElastic",
+"EaseOutInElastic",
+
+// Bounce
+"EaseInBounce",
+"EaseOutBounce",
+"EaseInOutBounce",
+"EaseOutInBounce"
+};
+
 namespace GameEngine {
 	
 	/// <summary>
@@ -31,82 +175,6 @@ namespace GameEngine {
 	Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t);
 	Vector3 Slerp(const Vector3& start, const Vector3& end, float t);
 
-	enum class EaseType {
-
-		// 等速
-
-		Linear,
-
-		// Quadratic
-
-		EaseInQuad,
-		EaseOutQuad,
-		EaseInOutQuad,
-		EaseOutInQuad,
-
-		// Cubic
-
-		EaseInCubic,
-		EaseOutCubic,
-		EaseInOutCubic,
-		EaseOutInCubic,
-
-		// Quartic
-
-		EaseInQuart,
-		EaseOutQuart,
-		EaseInOutQuart,
-		EaseOutInQuart,
-
-		// Quintic
-
-		EaseInQuint,
-		EaseOutQuint,
-		EaseInOutQuint,
-		EaseOutInQuint,
-
-		// Sine
-
-		EaseInSine,
-		EaseOutSine,
-		EaseInOutSine,
-		EaseOutInSine,
-
-		// Exponential
-
-		EaseInExpo,
-		EaseOutExpo,
-		EaseInOutExpo,
-		EaseOutInExpo,
-
-		// Circular
-
-		EaseInCirc,
-		EaseOutCirc,
-		EaseInOutCirc,
-		EaseOutInCirc,
-
-		// Back
-
-		EaseInBack,
-		EaseOutBack,
-		EaseInOutBack,
-		EaseOutInBack,
-
-		// Elastic
-
-		EaseInElastic,
-		EaseOutElastic,
-		EaseInOutElastic,
-		EaseOutInElastic,
-
-		// Bounce
-
-		EaseInBounce,
-		EaseOutBounce,
-		EaseInOutBounce,
-		EaseOutInBounce
-	};
 
 	/// @brief イージング関数を適用
 	/// @param t 進行状況 0.0～1.0
@@ -120,7 +188,7 @@ namespace GameEngine {
 	/// @param t            進行状況 0.0～1.0
 	/// @param goType イージングタイプ
 	template<typename T>
-	T lerp(const T& start, const T& end, float t, EaseType type = EaseType::Linear) {
+	T Lerp(const T& start, const T& end, float t, EaseType type = EaseType::kLinear) {
 		float easedT = Apply(t, type);
 		return T(start + (end - start) * easedT);
 	}
@@ -132,8 +200,8 @@ namespace GameEngine {
 	/// @param goType    行きのイージング
 	/// @param backType 帰りのイージング
 	template<typename T>
-	T lerp_RoundTrip(const T& start, const T& end, float t,
-		EaseType goType = EaseType::Linear, EaseType backType = EaseType::Linear) {
+	T Lerp_RoundTrip(const T& start, const T& end, float t,
+		EaseType goType = EaseType::Linear, EaseType backType = EaseType::kLinear) {
 
 		// 0〜1 に Clamp
 		t = std::clamp(t, 0.0f, 1.0f);

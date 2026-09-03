@@ -57,7 +57,7 @@ TestScene::TestScene() {
 	// エフェクト用モデル
 	effectModel_ = modelManager_->GetNameByModel("plane.obj");
 	effectModel_->SetDefaultIsEnableLight(false);
-	//gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_, &renderQueue_->GetMainCamera());
+	gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_);
 
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
