@@ -47,6 +47,7 @@ void RaytracingPipeline::CreateStateObject() {
 	LibraryResult objectResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsObject.hlsl");
 	LibraryResult iceObjectResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/ChsIceObject.hlsl");
 	LibraryResult universeResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsUniverse.hlsl");
+	LibraryResult BlackHoleResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsBlackHole.hlsl");
 
 	// 初期化処理
 	stateObjectBuilder_.Initialize();
@@ -57,11 +58,13 @@ void RaytracingPipeline::CreateStateObject() {
 	stateObjectBuilder_.AddDXILLibrary(objectResult.blob.Get(), objectResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(iceObjectResult.blob.Get(), iceObjectResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(universeResult.blob.Get(), universeResult.exportNames);
+	stateObjectBuilder_.AddDXILLibrary(BlackHoleResult.blob.Get(), BlackHoleResult.exportNames);
 
 	// ヒットグループを設定
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::DefaultModel, L"MainObjectCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::IceModel, L"MainIceObjectCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::UniverseModel, L"MainUniverseCHS");
+	stateObjectBuilder_.AddHitGroup(AppHitGroups::BlackHoleModel, L"MainBlackHoleLensCHS");
 
 	// シェーダー設定
 	const uint32_t MaxPayloadSize = sizeof(float) * 3 + sizeof(uint32_t) + sizeof(float);
@@ -141,6 +144,15 @@ void RaytracingPipeline::CreateShaderTable() {
 		ShaderRecord universeRecord;
 		auto& universeTable = universeRecord.SetIdentifier(universeId);
 		shaderTableBuilder_.HitGroup().AddRecord(std::move(universeRecord));
+
+		// ブラックホール
+		auto blackHoleId = rtsoProps->GetShaderIdentifier(AppHitGroups::BlackHoleModel.c_str());
+		if (blackHoleId == nullptr) {
+			assert(false && "Not found ShaderIdentifier");
+		}
+		ShaderRecord blackHoleRecord;
+		auto& blackHoleTable = blackHoleRecord.SetIdentifier(blackHoleId);
+		shaderTableBuilder_.HitGroup().AddRecord(std::move(blackHoleRecord));
 	}
 
 	// テーブルを設定する
