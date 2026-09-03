@@ -98,8 +98,7 @@ void Pikumi::Update()
             followSpeed_ * FpsCounter::deltaTime
         );
 
-        // ★ Pikumi同士の重なり防止（押し出し力）
-        // ※Playerクラス側からpikumis_のリストを参照させるか、簡易的に処理
+        // Pikumi同士の重なり防止
         modelComponent_.worldTransform_.transform_.translate = newPos;
         break;
     }
