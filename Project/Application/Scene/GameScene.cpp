@@ -6,6 +6,7 @@ using namespace GameEngine;
 #include "Application/Player/Player.h"
 #include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
+#include "Application/Field/FieldEffect.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
 #include "Application/Score/ScoreView.h"
@@ -32,6 +33,11 @@ GameScene::GameScene() {
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("rogland_clear_night_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
+	
+	// 地面演出
+	auto* cubeModel = modelManager_->GetNameByModel("cube.obj");
+	cubeModel->SetDefaultIsEnableLight(true);
+	auto* fieldEffect = gameObjectManager_->AddObject<FieldEffect>(cubeModel, 0);
 
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("cylinder.gltf");
@@ -45,7 +51,7 @@ GameScene::GameScene() {
 	// 宇宙を映す平面
 	auto* planeXZModel = modelManager_->GetNameByModel("halfDome.gltf");
 	planeXZModel->SetDefaultIsEnableLight(false);
-	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel, planeXZModel);
+	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel, planeXZModel, fieldEffect);
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
@@ -60,9 +66,13 @@ GameScene::GameScene() {
 	// プレイヤー
 	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
+	auto* rightHandModel = modelManager_->GetNameByModel("playerHand.gltf");
+	auto* trajectryModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
-	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
+	rightHandModel->SetDefaultIsEnableLight(true);
+	trajectryModel->SetDefaultIsEnableLight(true);
+	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, rightHandModel, trajectryModel, field, impactEffect);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);

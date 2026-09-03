@@ -564,6 +564,8 @@
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
+    <ClCompile Include="Application\Field\FieldEffect.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\BlackHoleMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1105,6 +1107,8 @@
     <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
     <ClInclude Include="Application\Utils\Binary\BinaryManager.h" />
     <ClInclude Include="Application\Utils\Binary\Value.h" />
+    <ClInclude Include="Application\Field\FieldEffect.h" />
+    <ClInclude Include="EngineSource\3D\Material\BlackHoleMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
@@ -1130,6 +1134,7 @@
     <FxCompile Include="Resources\Shaders\PostEffect\ColorGrading.PS.hlsl" />
     <FxCompile Include="Resources\Shaders\IceFracture.PS.hlsl" />
     <FxCompile Include="Resources\Shaders\Raytracing\chsUniverse.hlsl" />
+    <FxCompile Include="Resources\Shaders\Raytracing\chsBlackHole.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />

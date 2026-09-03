@@ -57,7 +57,13 @@ TestScene::TestScene() {
 	// エフェクト用モデル
 	effectModel_ = modelManager_->GetNameByModel("plane.obj");
 	effectModel_->SetDefaultIsEnableLight(false);
-	//gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_, &renderQueue_->GetMainCamera());
+	gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_);
+
+	auto* sModel = modelManager_->GetNameByModel("sphere.obj");
+	m_ = std::make_unique<ModelComponent>(sModel);
+
+	m_->SetHitGroup(3);
+	m_->SetBufferMaterial(0, blackHoleMaterial_.GetMaterialSrvIndex());
 
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
@@ -77,6 +83,8 @@ void TestScene::Update() {
 	// アニメーションの更新処理
 	walkAnimator_->ComputeUpdate();
 
+	m_->Update();
+
 	DebugUpdate();
 }
 
@@ -86,14 +94,18 @@ void TestScene::DebugUpdate() {
 
 	ImGui::Begin("test");
 
-	ImGui::DragFloat3("PlayerPos", &world_.transform_.translate.x, 0.1f);
-	ImGui::DragFloat3("PlayerScale", &world_.transform_.scale.x, 0.1f);
+	ImGui::DragFloat3("PlayerPos", &m_->worldTransform_.transform_.translate.x, 0.1f);
+	ImGui::DragFloat3("PlayerScale", &m_->worldTransform_.transform_.scale.x, 0.1f);
 	ImGui::ColorEdit4("PlayerColor", &playerColor_.x);
 
 	ImGui::DragFloat3("lightDir", &dir_.x, 0.1f);
 	ImGui::DragFloat("lightIntensity", &intensity_, 0.1f);
 	ImGui::ColorEdit4("lightColor", &lightColor_.x);
 
+	ImGui::DragFloat("radius", &blackHoleMaterial_.materialData_->radius, 0.1f);
+	ImGui::DragFloat("strength", &blackHoleMaterial_.materialData_->strength, 0.1f);
+	ImGui::DragFloat("swirl", &blackHoleMaterial_.materialData_->swirl, 0.1f);
+	
 	dir_.Normalize();
 
 	light->SetDirectionalDirction(dir_);
@@ -112,4 +124,6 @@ void TestScene::Draw() {
 
 	// 地面を描画
 	renderQueue_->SubmitRaytracingModel(terrainModel_, terrainWorld_);
+
+	m_->DrawCustomRaytracing(renderQueue_);
 }

@@ -13,6 +13,8 @@
 #include "IceMaterial.h"
 #include "Collider.h"
 #include "DestructibleObject.h"
+#include "ModelComponent.h"
+#include "BlackHoleMaterial.h"
 
 #include "Application/Scene/Transition/Fade.h"
 
@@ -84,6 +86,10 @@ private: // シーン機能
 	Vector4 lightColor_ = { 1.0f,1.0f,1.0f,1.0f };
 
 	Vector4 playerColor_ = { 1.0f,1.0f,1.0f,1.0f };
+
+	std::unique_ptr<GameEngine::ModelComponent> m_;
+
+	GameEngine::BlackHoleMaterial blackHoleMaterial_;
 
 
 	// 地面

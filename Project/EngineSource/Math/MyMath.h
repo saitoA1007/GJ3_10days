@@ -85,11 +85,13 @@ namespace GameEngine {
 		Vector3 CalculateRayDirection(Vector2 mousePos, const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix, float windowWidth = 1280.0f, float windowHeight = 720.0f);
 
 		// 最大値
+		int Max(int a, int b);
+		float Max(float a, float b);
 		Vector3 Max(Vector3 pos1, Vector3 pos2);
 		Vector4 MaxVector4(Vector4 pos1, Vector4 pos2);
 		// 最小値
-		Vector3 Min(Vector3 pos1, Vector3 pos2);
 		int Min(int a, int b);
+		Vector3 Min(Vector3 pos1, Vector3 pos2);
 		Vector4 MinVector4(Vector4 pos1, Vector4 pos2);
 
 		// 4xx4のX軸の回転行列を作成
