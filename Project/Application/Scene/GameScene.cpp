@@ -10,6 +10,7 @@ using namespace GameEngine;
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
 #include "ControllerVibration.h"
+#include "FPSCounter.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -79,6 +80,7 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+	score_.Update(FpsCounter::deltaTime);
 	DrawScoreImGui();
 
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
@@ -110,7 +112,7 @@ void GameScene::Draw() {
 void GameScene::DrawScoreImGui() const {
 #ifdef USE_IMGUI
 	if (ImGui::Begin("Score", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text("Score: %d", score_.GetValue());
+		ImGui::Text("Score: %d", score_.GetDisplayedValue());
 	}
 	ImGui::End();
 #endif
