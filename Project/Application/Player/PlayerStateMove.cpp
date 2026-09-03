@@ -29,6 +29,9 @@ void PlayerStateMove::Update(Player* player)
         return;
     }
 
+    // 移動中フラグ
+    player->SetIsMoving(true);
+
     // プレイヤーの向き更新
     float yaw = std::atan2f(move.x, move.z);
     player->SetCurrentYaw(yaw);

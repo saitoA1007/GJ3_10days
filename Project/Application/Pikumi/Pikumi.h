@@ -30,8 +30,14 @@ public:
     // パラメータ変更用セッター
     void SetFollowSpeed(float speed) { followSpeed_ = speed; }
     void SetDampening(float damp) { dampening_ = damp; }
-    void SetScale(float scale) { modelComponent_.worldTransform_.transform_.scale = { scale, scale, scale }; }
+    void SetScale(float scale) { baseScale_ = { scale, scale, scale }; }
     void SetFieldRadius(float fieldRadius) { fieldRadius_ = fieldRadius; }
+    void SetAnimationParams(float jumpHeight, float jumpFrequency, float squashAmount)
+    {
+        jumpHeight_ = jumpHeight;
+        jumpFrequency_ = jumpFrequency;
+        squashStretchAmount_ = squashAmount;
+    }
 
     // 状態と位置の設定
     void SetTargetFollowPosition(const Vector3& targetPos) { targetFollowPos_ = targetPos; }
@@ -51,6 +57,7 @@ public:
     void SetHighlight(bool enable);
 
 private:
+    void UpdateAnimation();
     // 衝突コールバック
     void OnCollisionEnter(const GameEngine::CollisionResult& result);
 
@@ -76,4 +83,12 @@ private:
     bool isPikumiCollisionEnabled_ = false;
 
     bool isHighlighted_ = false;
+
+    // アニメーションパラメータ
+    Vector3 baseScale_ = { 1.0f, 1.0f, 1.0f };
+    float jumpHeight_ = 0.4f;
+    float jumpFrequency_ = 12.0f;
+    float squashStretchAmount_ = 0.2f;
+    float animTimer_ = 0.0f;
+    float animOffsetY_ = 0.0f;
 };

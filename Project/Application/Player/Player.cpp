@@ -9,6 +9,7 @@
 #include "PlayerStateIdle.h"
 #include "Application/Field/Field.h"
 #include "Application/Enemy/Enemy.h"
+#include "EasingManager.h"
 
 using namespace GameEngine;
 
@@ -21,19 +22,27 @@ Player::Player(InputCommand* inputCommand, Model* model, GameEngine::Model* piku
 
 	// パラメータ機能
 	debugParame_ = std::make_unique<DebugParameter>("Player");
-	debugParame_->Register("Scale", modelComponent_.worldTransform_.transform_.scale);
+	debugParame_->Register("BaseScale", baseScale_, 0, "Transform");
 	debugParame_->Register("MoveSpeed", moveSpeed_, 0, "Move");
+
+	debugParame_->Register("SquashFrequency", squashFrequency_, 0, "Animation");
+	debugParame_->Register("SquashAmount", squashStretchAmount_, 1, "Animation");
+
 	debugParame_->Register("ColliderRadius", colliderRadius_, 0, "Collider");
 	debugParame_->Register("ColliderOffsetPosY", colliderOffsetPosY_, 1, "Collider");
 
 	debugParame_->Register("Scale", pikumiScale_, 0, "Pikumi");
 	debugParame_->Register("FollowOffset", pikumiFollowOffset_, 1, "Pikumi");
-	debugParame_->Register("Radius", pikumiRadius_, 2, "Pikumi");
-	debugParame_->Register("FollowSpeed", pikumiFollowSpeed_, 3, "Pikumi");
-	debugParame_->Register("ThrowSpeed", pikumiThrowSpeed_, 4, "Pikumi");
-	debugParame_->Register("Dampening", pikumiDampening_, 5, "Pikumi");
-	debugParame_->Register("CollectRadius", pikumiCollectRadius_, 6, "Pikumi");
-	debugParame_->Register("MaxChargeTime", maxChargeTime_, 7, "Pikumi");
+	debugParame_->Register("Spacing", pikumiSpacing_, 2, "Pikumi");         
+	debugParame_->Register("Separation", pikumiSeparation_, 3, "Pikumi");   
+	debugParame_->Register("FollowSpeed", pikumiFollowSpeed_, 4, "Pikumi");
+	debugParame_->Register("ThrowSpeed", pikumiThrowSpeed_, 5, "Pikumi");
+	debugParame_->Register("Dampening", pikumiDampening_, 6, "Pikumi");
+	debugParame_->Register("CollectRadius", pikumiCollectRadius_, 7, "Pikumi");
+	debugParame_->Register("MaxChargeTime", maxChargeTime_, 8, "Pikumi");
+	debugParame_->Register("JumpHeight", pikumiJumpHeight_, 9, "Pikumi");
+	debugParame_->Register("JumpFrequency", pikumiJumpFrequency_, 10, "Pikumi");
+	debugParame_->Register("SquashAmount", pikumiSquashAmount_, 11, "Pikumi");
 
 	// 当たり判定を設定
 	collider_.SetRadius(colliderRadius_);
@@ -83,12 +92,15 @@ void Player::Update()
 {
 	debugParame_->ApplyIfDirty();
 
+	isMoving_ = false;
+
 	for (auto& pikumi : pikumis_)
 	{
 		pikumi->SetFollowSpeed(pikumiFollowSpeed_);
 		pikumi->SetDampening(pikumiDampening_);
 		pikumi->SetScale(pikumiScale_);
 		pikumi->SetFieldRadius(field_->GetFieldRadius());
+		pikumi->SetAnimationParams(pikumiJumpHeight_, pikumiJumpFrequency_, pikumiSquashAmount_);
 	}
 
 	if (currentState_) 
@@ -96,12 +108,43 @@ void Player::Update()
 		currentState_->Update(this);
 	}
 
+	UpdateMoveAnimation();
+
 	ClampToField();
 
 	UpdateChargeThrow();
 
 	// Pikumiの更新、回収
 	UpdatePikumiFormations();
+	// Pikumi同士の押し出し処理
+	const float minSepDistance = pikumiSeparation_;
+	for (size_t i = 0; i < pikumis_.size(); ++i)
+	{
+		if (pikumis_[i]->GetState() != PikumiState::kFollow) continue;
+
+		for (size_t j = i + 1; j < pikumis_.size(); ++j)
+		{
+			if (pikumis_[j]->GetState() != PikumiState::kFollow) continue;
+
+			Vector3 posA = pikumis_[i]->GetWorldTransform().transform_.translate;
+			Vector3 posB = pikumis_[j]->GetWorldTransform().transform_.translate;
+
+			Vector3 diff = posA - posB;
+			diff.y = 0.0f; 
+			float dist = diff.Length();
+
+			if (dist < minSepDistance && dist > 0.0001f)
+			{
+				// 重なっている分だけ押し返す
+				Vector3 pushDir = diff / dist;
+				float overlap = (minSepDistance - dist) * 0.5f;
+
+				pikumis_[i]->SetPosition(posA + pushDir * overlap);
+				pikumis_[j]->SetPosition(posB - pushDir * overlap);
+			}
+		}
+	}
+
 	for (auto& pikumi : pikumis_) {
 		pikumi->Update();
 	}
@@ -111,6 +154,33 @@ void Player::Update()
 
 	collider_.SetWorldPosition(modelComponent_.worldTransform_.GetWorldPosition() + Vector3(0.0f, colliderOffsetPosY_, 0.0f));
 	collider_.SetRadius(colliderRadius_);
+}
+
+void Player::UpdateMoveAnimation()
+{
+	if (isMoving_)
+	{
+		moveAnimTimer_ += FpsCounter::deltaTime * squashFrequency_;
+
+		float bounce = std::abs(std::sin(moveAnimTimer_));
+		float factor = (bounce - 0.5f) * 2.0f;
+
+		Vector3 currentScale;
+		currentScale.x = baseScale_.x * (1.0f - factor * squashStretchAmount_ * 0.5f);
+		currentScale.y = baseScale_.y * (1.0f + factor * squashStretchAmount_);
+		currentScale.z = baseScale_.z * (1.0f - factor * squashStretchAmount_ * 0.5f);
+
+		modelComponent_.worldTransform_.transform_.scale = currentScale;
+	}
+	else
+	{
+		moveAnimTimer_ = 0.0f;
+		modelComponent_.worldTransform_.transform_.scale = Lerp(
+			modelComponent_.worldTransform_.transform_.scale,
+			baseScale_,
+			15.0f * FpsCounter::deltaTime
+		);
+	}
 }
 
 void Player::ClampToField()
@@ -216,7 +286,7 @@ void Player::ClearAllPikumiHighlights()
 
 void Player::UpdatePikumiFormations()
 {
-	if (static_cast<int>(pikumis_.size()) == 0) return;
+	if (pikumis_.empty()) return;
 
 	Vector3 forward = Math::YawToDirection(currentYaw_);
 	Vector3 right = Vector3(forward.z, 0.0f, -forward.x);
@@ -227,14 +297,25 @@ void Player::UpdatePikumiFormations()
 	static float time = 0.0f;
 	time += FpsCounter::deltaTime;
 
-	for (int i = 0; i < static_cast<int>(pikumis_.size()); ++i)
+	// 黄金角
+	const float kGoldenAngle = 2.39996f;
+	// Pikumiの最小間隔
+	const float kSpacing = pikumiSpacing_;
+
+	int followIndex = 0;
+
+	for (size_t i = 0; i < pikumis_.size(); ++i)
 	{
 		if (pikumis_[i]->GetState() != PikumiState::kFollow) continue;
 
-		float wiggle = std::sin(time * 2.5f + pikumis_[i]->GetSeed()) * 0.12f;
-		float angle = pikumis_[i]->GetAngleOffset() + wiggle;
+		// 黄金角で均等配置
+		float angle = followIndex * kGoldenAngle;
+		// 外側に行くほど半径を大きく
+		float r = kSpacing * std::sqrt(static_cast<float>(followIndex + 1));
 
-		float r = pikumiRadius_ * pikumis_[i]->GetRadiusRatio();
+		// 少しゆらめかせ
+		float wiggle = std::sin(time * 2.0f + pikumis_[i]->GetSeed()) * 0.08f;
+		angle += wiggle;
 
 		float localX = std::cos(angle) * r;
 		float localZ = std::sin(angle) * r;
@@ -251,6 +332,7 @@ void Player::UpdatePikumiFormations()
 		}
 
 		pikumis_[i]->SetTargetFollowPosition(targetPos);
+		followIndex++;
 	}
 }
 

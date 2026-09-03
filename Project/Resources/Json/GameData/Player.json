@@ -1,5 +1,11 @@
 {
     "Player": {
+        "Animation": {
+            "JumpFrequency": 6.0,
+            "JumpHeight": 1.7599999904632568,
+            "SquashAmount": 0.23000000417232513,
+            "SquashFrequency": 8.0
+        },
         "Collider": {
             "ColliderOffsetPosY": 0.0,
             "ColliderRadius": 1.090000033378601
@@ -16,11 +22,16 @@
         "Pikumi": {
             "CollectRadius": 7.0,
             "Dampening": 0.9700000286102295,
-            "FollowOffset": 3.009999990463257,
-            "FollowSpeed": 18.510000228881836,
+            "FollowOffset": 3.75,
+            "FollowSpeed": 6.110000133514404,
+            "JumpFrequency": 6.0,
+            "JumpHeight": 0.9399999976158142,
             "MaxChargeTime": 1.5,
             "Radius": 2.0999999046325684,
             "Scale": 0.5,
+            "Separation": 0.699999988079071,
+            "Spacing": 0.75,
+            "SquashAmount": 0.09000000357627869,
             "ThrowSpeed": 200.0
         },
         "Scale": [
@@ -28,6 +39,13 @@
             1.0,
             1.0
         ],
-        "SceneName": "Game"
+        "SceneName": "Game",
+        "Transform": {
+            "BaseScale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
     }
 }

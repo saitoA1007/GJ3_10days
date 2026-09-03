@@ -38,6 +38,7 @@ public:
 	float GetMoveSpeed() const { return moveSpeed_; }
 
 	void SetCurrentYaw(float yaw) { currentYaw_ = yaw; }
+	void SetIsMoving(bool isMoving) { isMoving_ = isMoving; }
 	float GetCurrentYaw() const { return currentYaw_; }
 	int GetChargedPikumiCount() const { return chargedPikumiCount_; }
 	int GetLastThrownCount() const { return lastThrownCount_; }
@@ -52,6 +53,7 @@ private:
 	void ClampToField();
 	void UpdateChargeThrow();
 	void ClearAllPikumiHighlights();
+	void UpdateMoveAnimation();
 
 	// パラメータ機能
 	std::unique_ptr<GameEngine::DebugParameter> debugParame_;
@@ -76,26 +78,39 @@ private:
 	Field* field_ = nullptr;
 
 	// プレイヤー調整パラメータ
-	float colliderRadius_ = 3.0f;
-	float colliderOffsetPosY_ = 0.0f;
-	float moveSpeed_ = 5.0f;
-	float currentYaw_ = 0.0f;
+	float colliderRadius_;
+	float colliderOffsetPosY_;
+	float moveSpeed_;
+	float currentYaw_;
 
 	// Pikumi調整パラメータ
 	int pikumiCount_ = 10;
-	float pikumiScale_ = 1.0f;        
-	float pikumiFollowOffset_ = 2.5f;
-	float pikumiRadius_ = 2.5f;
-	float pikumiFollowSpeed_ = 10.0f;
-	float pikumiThrowSpeed_ = 25.0f;
-	float pikumiDampening_ = 0.92f;
-	float pikumiCollectRadius_ = 3.0f;
-	float chargeTimer_ = 0.0f;
-	float maxChargeTime_ = 1.5f;
+	float pikumiScale_;        
+	float pikumiFollowOffset_;
+	float pikumiSpacing_ = 0.5f;      
+	float pikumiSeparation_ = 0.4f;
+	float pikumiFollowSpeed_;
+	float pikumiThrowSpeed_;
+	float pikumiDampening_;
+	float pikumiCollectRadius_;
+	float chargeTimer_;
+	float maxChargeTime_;
 	bool isCharging_ = false;
-	int chargedPikumiCount_ = 0;
-	int lastThrownCount_ = 0;
-	uint32_t throwEventId_ = 0;
+	int chargedPikumiCount_;
+	int lastThrownCount_;
+	uint32_t throwEventId_;
+
+	// アニメーションのパラメータ
+	Vector3 baseScale_ = { 3.0f,3.0f,3.0f };
+	float squashFrequency_ = 14.0f;
+	float squashStretchAmount_ = 0.25f;
+	float pikumiJumpHeight_ = 0.4f;
+	float pikumiJumpFrequency_ = 12.0f;
+	float pikumiSquashAmount_ = 0.2f;
+
+	// アニメーション変数
+	float moveAnimTimer_ = 0.0f;
+	bool isMoving_ = false;
 
 private:
 
