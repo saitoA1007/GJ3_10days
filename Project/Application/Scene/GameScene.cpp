@@ -14,6 +14,7 @@ using namespace GameEngine;
 // 後で別クラスに纏めて消す
 namespace
 {
+	constexpr int kScorePerEnemy = 100;
 	constexpr int kChargeVibrationThreshold = 5;        // 振動を開始するためのチャージされたピクミの数
 	constexpr float kChargeVibrationLeftMotor = 0.35f;  // 左モーターの振動強度
 	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
@@ -60,22 +61,26 @@ GameScene::GameScene() {
 	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
 	pikumiModel->SetDefaultIsEnableLight(true);
-	auto player = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
+	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	gameObjectManager_->AddObject<GameCamera>(player_);
 
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
-	gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+	auto* enemies = gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+	enemies->SetOnEnemyDefeated([this]() {
+		score_.Add(kScorePerEnemy);
+	});
 }
 
 void GameScene::Initialize() {
-
-	
+	score_.Reset();
 }
 
 void GameScene::Update() {
+	DrawScoreImGui();
+
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
 	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
 	{
@@ -89,6 +94,8 @@ void GameScene::Update() {
 
 void GameScene::DebugUpdate()
 {
+	DrawScoreImGui();
+
 	// ゲーム更新を停止している間に振動が残らないようにする。
 	if (controllerVibration_)
 	{
@@ -98,6 +105,15 @@ void GameScene::DebugUpdate()
 
 void GameScene::Draw() {
 	
+}
+
+void GameScene::DrawScoreImGui() const {
+#ifdef USE_IMGUI
+	if (ImGui::Begin("Score", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("Score: %d", score_.GetValue());
+	}
+	ImGui::End();
+#endif
 }
 
 void GameScene::InputRegisterCommand() {

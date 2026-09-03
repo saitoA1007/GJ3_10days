@@ -5,6 +5,7 @@
 #include "Camera.h"
 
 #include "Application/Scene/Transition/Fade.h"
+#include "Application/Score/Score.h"
 
 class Player;
 
@@ -62,6 +63,7 @@ private: // シーン機能
 	// 終了フラグ
 	bool isFinished_ = false;
 	Player* player_ = nullptr;
+	Score score_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 
 private:
@@ -70,4 +72,5 @@ private:
 	/// 入力のコマンドを設定する
 	/// </summary>
 	void InputRegisterCommand();
+	void DrawScoreImGui() const;
 };
