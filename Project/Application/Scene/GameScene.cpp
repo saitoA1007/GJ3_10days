@@ -1,5 +1,4 @@
 #include "GameScene.h"
-#include "ImguiManager.h"
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
@@ -9,6 +8,7 @@ using namespace GameEngine;
 #include "Application/Field/Field.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Tower/Tower.h"
+#include "Application/Score/ScoreView.h"
 #include "ControllerVibration.h"
 #include "FPSCounter.h"
 
@@ -65,7 +65,13 @@ GameScene::GameScene() {
 	player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, field, impactEffect);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
-	gameObjectManager_->AddObject<GameCamera>(player_);
+	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
+
+	ScoreView::DigitModels digitModels{};
+	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
+		digitModels[digit] = modelManager_->GetNameByModel(std::to_string(digit) + ".obj");
+	}
+	scoreView_ = std::make_unique<ScoreView>(digitModels, gameCamera->GetCamera());
 
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
@@ -77,11 +83,13 @@ GameScene::GameScene() {
 
 void GameScene::Initialize() {
 	score_.Reset();
+	scoreView_->SetValue(score_.GetDisplayedValue());
 }
 
 void GameScene::Update() {
 	score_.Update(FpsCounter::deltaTime);
-	DrawScoreImGui();
+	scoreView_->SetValue(score_.GetDisplayedValue());
+	scoreView_->DebugUpdate();
 
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
 	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
@@ -96,7 +104,8 @@ void GameScene::Update() {
 
 void GameScene::DebugUpdate()
 {
-	DrawScoreImGui();
+	scoreView_->SetValue(score_.GetDisplayedValue());
+	scoreView_->DebugUpdate();
 
 	// ゲーム更新を停止している間に振動が残らないようにする。
 	if (controllerVibration_)
@@ -106,16 +115,7 @@ void GameScene::DebugUpdate()
 }
 
 void GameScene::Draw() {
-	
-}
-
-void GameScene::DrawScoreImGui() const {
-#ifdef USE_IMGUI
-	if (ImGui::Begin("Score", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-		ImGui::Text("Score: %d", score_.GetDisplayedValue());
-	}
-	ImGui::End();
-#endif
+	scoreView_->Draw(renderQueue_);
 }
 
 void GameScene::InputRegisterCommand() {

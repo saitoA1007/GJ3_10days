@@ -1,7 +1,11 @@
 #pragma once
+#include "Application/Utils/GameTimer.h"
 
 class Score {
 public:
+	static constexpr int kMinValue = 0;
+	static constexpr int kMaxValue = 99999;
+
 	void Add(int points);
 	void Update(float deltaTime);
 	void Reset();
@@ -15,5 +19,5 @@ private:
 	int value_ = 0;
 	float displayedValue_ = 0.0f;
 	float countUpStartValue_ = 0.0f;
-	float countUpElapsed_ = 0.0f;
+	GameTimer countUpTimer_;
 };

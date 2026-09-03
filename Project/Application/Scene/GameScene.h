@@ -8,6 +8,7 @@
 #include "Application/Score/Score.h"
 
 class Player;
+class ScoreView;
 
 namespace GameEngine
 {
@@ -64,6 +65,7 @@ private: // シーン機能
 	bool isFinished_ = false;
 	Player* player_ = nullptr;
 	Score score_;
+	std::unique_ptr<ScoreView> scoreView_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 
 private:
@@ -72,5 +74,4 @@ private:
 	/// 入力のコマンドを設定する
 	/// </summary>
 	void InputRegisterCommand();
-	void DrawScoreImGui() const;
 };
