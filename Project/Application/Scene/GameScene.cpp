@@ -41,7 +41,7 @@ GameScene::GameScene() {
 	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
 	circleModel->SetDefaultIsEnableLight(false);
 	// 宇宙を映す平面
-	auto* planeXZModel = modelManager_->GetNameByModel("cube.obj");
+	auto* planeXZModel = modelManager_->GetNameByModel("halfDome.gltf");
 	planeXZModel->SetDefaultIsEnableLight(false);
 	auto field = gameObjectManager_->AddObject<Field>(fieldModel, poleModel, circleModel, planeXZModel);
 

@@ -1126,6 +1126,7 @@
     <None Include="Resources\Shaders\RandomUtils.hlsli" />
     <None Include="Resources\Shaders\Fracture.hlsli" />
     <None Include="packages.config" />
+    <None Include="Resources\Shaders\StarField.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Externals\imgui\LICENSE.txt" />

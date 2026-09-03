@@ -694,6 +694,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="Resources\Shaders\RandomUtils.hlsli" />
     <None Include="Resources\Shaders\Rasterize\WBOIT.hlsli" />
     <None Include="Resources\Shaders\Raytracing\Common.hlsli" />
+    <None Include="Resources\Shaders\StarField.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Externals\imgui\LICENSE.txt" />

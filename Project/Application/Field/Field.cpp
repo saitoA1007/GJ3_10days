@@ -94,7 +94,7 @@ void Field::Update()
 
 void Field::Draw()
 {
-    modelComponent_.DrawRaytracing(renderQueue_);
+    //modelComponent_.DrawRaytracing(renderQueue_);
 
     // 宇宙を描画
     universeModel_.DrawCustomRaytracing(renderQueue_);

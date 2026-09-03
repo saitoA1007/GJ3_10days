@@ -1,5 +1,6 @@
 #include "Common.hlsli"
 #include "../LightElement.hlsli"
+#include "../StarField.hlsli"
 
 struct VertexData
 {
@@ -118,7 +119,6 @@ void MainUniverseCHS(inout Payload payload, MyAttribute attrib)
     // マテリアルデータを取得
     MaterialData material = gBufferData[ref.MaterialIndex].Load < MaterialData > (0);
     
-     // ---- パラメータ（0 ならフォールバックを使う）----
     float scale = material.scale;
     float bhRadius = material.radius;
     float swirl = material.swirl;
@@ -126,43 +126,44 @@ void MainUniverseCHS(inout Payload payload, MyAttribute attrib)
     float2 bhPos = material.PlayerPos; // ブラックホールの中心
     float2 uniPos = material.UniversePos; // 宇宙の中心
  
-    // ---- 地面上のヒット位置（ワールド空間）----
+    // 地面上のヒット位置
     float3 worldPos = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     float2 P = worldPos.xz;
  
-    // ============================================================
-    // 重力レンズは「ワールド空間で光線を曲げる」処理として行う。
-    // こうすると曲げた後の位置 lensP を、宇宙とは独立に決められる。
-    // ============================================================
+    // 重力レンズ
     float2 d = P - bhPos;
-    float r = length(d); // BHからの距離【ワールド単位】
+    float r = length(d); // BHからの距離
     float rs = max(r, bhRadius * 0.5f); // 中心で発散させない
     float2 dir = d / max(r, 1e-5f);
  
-    float bend = material.strength * bhRadius * bhRadius / rs; // 偏向量 ∝ 1/r
+    float bend = material.strength * bhRadius * bhRadius / rs; // 偏向量
     float2 lensP = P - dir * bend; // 中心へ引き寄せる
  
-    // --- 渦（ブラックホール中心まわりに回転）---
-    float ang = (bend / bhRadius) * swirl; // 無次元化：r=bhRadius で ang=swirl
+    // 渦
+    float ang = (bend / bhRadius) * swirl;
     float cs = cos(ang), sn = sin(ang);
     float2 q = lensP - bhPos;
     lensP = bhPos + float2(q.x * cs - q.y * sn,
                            q.x * sn + q.y * cs);
  
-    // ============================================================
-    // 曲げた後のワールド位置を、宇宙の中心を原点とするUVに変換して評価。
-    // → 星雲は uniPos に貼り付いたまま。ブラックホールだけ bhPos で動く。
-    // ============================================================
+    // 
     float2 uv = (lensP - uniPos) * scale;
     float3 col = Universe(uv, material.time);
+    
+    VertexData vtx = GetHitVertex(attrib, ref.vertexHandle, ref.indexHandle);
+    
+    // 宇宙の星々を追加
+    float3 starDir = normalize(StarDirFromUV(vtx.texcoord));
+    float3 starColor = CalcStarColor(starDir, material.time, 75.0f);
+    col += starColor;
+    //float3 col = starColor;
  
-    // --- アインシュタインリング（BH中心基準・ワールド単位）---
+    // アインシュタインリング（BH中心基準・ワールド単位）
     float ring = exp(-pow((r - bhRadius * 1.55f) / (bhRadius * 0.45f), 2.0f));
     col += float3(1.0f, 0.72f, 0.42f) * ring * 0.7f;
  
-    // --- 事象の地平線で黒く抜く ---
+    // 事象の地平線で黒く抜く
     col *= smoothstep(bhRadius, bhRadius * 1.12f, r);
  
-    // 自発光として出力
     payload.color = saturate(col);
 }
