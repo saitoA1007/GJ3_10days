@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 #include "Application/Player/Player.h"
 #include "DebugParameter.h"
@@ -23,14 +24,18 @@ GameCamera::GameCamera(Player* player)
 	debugParameter_->Register("FollowSpeed", followSpeed_, 3);
 	debugParameter_->Register("Rotate", rotateOffset_, 4);
 	debugParameter_->Register("RotateWithMovement", rotateWithMovement_, 5);
-	debugParameter_->Register("ThrowCountThreshold", throwCountThreshold_, 0, "ThrowHeightAnimation");
-	debugParameter_->Register("RiseHeight", riseHeight_, 1, "ThrowHeightAnimation");
-	debugParameter_->Register("RiseDuration", riseDuration_, 2, "ThrowHeightAnimation");
-	debugParameter_->Register("HoldDuration", holdDuration_, 3, "ThrowHeightAnimation");
-	debugParameter_->Register("ReturnDuration", returnDuration_, 4, "ThrowHeightAnimation");
-	debugParameter_->Register("ReturnHeight", returnHeight_, 5, "ThrowHeightAnimation");
-	debugParameter_->Register("MoveToOrigin", moveToOriginWithHeightAnimation_, 6, "ThrowHeightAnimation");
-	debugParameter_->Register("MoveTargetPosition", moveTargetPosition_, 7, "ThrowHeightAnimation");
+	debugParameter_->Register("MoveTargetPosition", moveTargetPosition_, 0, "ThrowHeightAnimation");
+	for (int count = kMinThrowAnimationCount; count <= kMaxThrowAnimationCount; ++count)
+	{
+		auto& settings = throwHeightAnimationSettings_[count - kMinThrowAnimationCount];
+		const std::string group = "ThrowHeightAnimation/Count" + std::to_string(count);
+		debugParameter_->Register("RiseHeight", settings.riseHeight, 0, group);
+		debugParameter_->Register("RiseDuration", settings.riseDuration, 1, group);
+		debugParameter_->Register("HoldDuration", settings.holdDuration, 2, group);
+		debugParameter_->Register("ReturnDuration", settings.returnDuration, 3, group);
+		debugParameter_->Register("ReturnHeight", settings.returnHeight, 4, group);
+		debugParameter_->Register("MoveToOrigin", settings.moveToOrigin, 5, group);
+	}
 	debugParameter_->Apply();
 }
 
@@ -68,10 +73,7 @@ void GameCamera::Update()
 	if (throwEventId != lastHandledThrowEventId_)
 	{
 		lastHandledThrowEventId_ = throwEventId;
-		if (player_->GetLastThrownCount() >= (std::max)(throwCountThreshold_, 1))
-		{
-			StartThrowHeightAnimation();
-		}
+		StartThrowHeightAnimation(player_->GetLastThrownCount());
 	}
 
 	const Vector3 playerPosition = player_->GetWorldTransform().GetWorldPosition();
@@ -89,17 +91,27 @@ void GameCamera::Update()
 	camera_.Update();
 }
 
-void GameCamera::StartThrowHeightAnimation()
+void GameCamera::StartThrowHeightAnimation(int thrownCount)
 {
+	if (thrownCount < kMinThrowAnimationCount)
+	{
+		return;
+	}
+
+	// 5個を超える投擲では5個用の設定を使用する。
+	activeThrowHeightAnimationIndex_ = (std::min)(thrownCount, kMaxThrowAnimationCount) - kMinThrowAnimationCount;
+	const auto& settings = throwHeightAnimationSettings_[activeThrowHeightAnimationIndex_];
+
 	// 演出中に再度投げた場合も、現在の高さと移動率から滑らかに上昇し直す。
 	throwHeightAnimationState_ = ThrowHeightAnimationState::Rising;
-	throwHeightAnimationTimer_.Start((std::max)(riseDuration_, 0.0f));
+	throwHeightAnimationTimer_.Start((std::max)(settings.riseDuration, 0.0f));
 	throwHeightAnimationStart_ = height_;
 	originMovementStart_ = originMovementProgress_;
 }
 
 void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 {
+	const auto& settings = throwHeightAnimationSettings_[activeThrowHeightAnimationIndex_];
 	float remainingTime = (std::max)(deltaTime, 0.0f);
 
 	// 秒数が0のフェーズも同一フレーム内で進める。
@@ -114,17 +126,17 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 		case ThrowHeightAnimationState::Rising:
 		{
 			// カメラを持ち上げながら、追従先を演出用の目標位置へ移す。
-			const float duration = (std::max)(riseDuration_, 0.0f);
+			const float duration = (std::max)(settings.riseDuration, 0.0f);
 			const float elapsedBeforeUpdate = throwHeightAnimationTimer_.GetElapsedTime();
 
 			// デバッグパラメータで変更された継続時間を実行中のタイマーにも反映する。
 			throwHeightAnimationTimer_.SetDuration(duration);
 			throwHeightAnimationTimer_.Update(remainingTime);
 			const float progress = throwHeightAnimationTimer_.GetProgress();
-			height_ = throwHeightAnimationStart_ + (riseHeight_ - throwHeightAnimationStart_) * progress;
-			originMovementProgress_ = moveToOriginWithHeightAnimation_
-				? originMovementStart_ + (1.0f - originMovementStart_) * progress
-				: 0.0f;
+			height_ = throwHeightAnimationStart_ + (settings.riseHeight - throwHeightAnimationStart_) * progress;
+			// 移動しない設定へ投げ直した場合も、現在の移動率からプレイヤー追従へ戻す。
+			const float targetOriginProgress = settings.moveToOrigin ? 1.0f : 0.0f;
+			originMovementProgress_ = originMovementStart_ + (targetOriginProgress - originMovementStart_) * progress;
 			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
@@ -133,16 +145,16 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 			// フェーズ終端を越えた時間は、同じフレーム内で次のフェーズへ渡す。
 			remainingTime = (std::max)(elapsedBeforeUpdate + remainingTime - duration, 0.0f);
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Holding;
-			throwHeightAnimationTimer_.Start((std::max)(holdDuration_, 0.0f));
+			throwHeightAnimationTimer_.Start((std::max)(settings.holdDuration, 0.0f));
 			continue;
 		}
 
 		case ThrowHeightAnimationState::Holding:
 		{
 			// 上昇後の高さと目標位置を、指定時間だけ維持する。
-			height_ = riseHeight_;
-			originMovementProgress_ = moveToOriginWithHeightAnimation_ ? 1.0f : 0.0f;
-			const float duration = (std::max)(holdDuration_, 0.0f);
+			height_ = settings.riseHeight;
+			originMovementProgress_ = settings.moveToOrigin ? 1.0f : 0.0f;
+			const float duration = (std::max)(settings.holdDuration, 0.0f);
 			const float elapsedBeforeUpdate = throwHeightAnimationTimer_.GetElapsedTime();
 			throwHeightAnimationTimer_.SetDuration(duration);
 			throwHeightAnimationTimer_.Update(remainingTime);
@@ -153,7 +165,7 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 
 			remainingTime = (std::max)(elapsedBeforeUpdate + remainingTime - duration, 0.0f);
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Returning;
-			throwHeightAnimationTimer_.Start((std::max)(returnDuration_, 0.0f));
+			throwHeightAnimationTimer_.Start((std::max)(settings.returnDuration, 0.0f));
 			throwHeightAnimationStart_ = height_;
 			originMovementStart_ = originMovementProgress_;
 			continue;
@@ -162,20 +174,18 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 		case ThrowHeightAnimationState::Returning:
 		{
 			// 高さと追従先を通常状態へ補間して戻す。
-			const float duration = (std::max)(returnDuration_, 0.0f);
+			const float duration = (std::max)(settings.returnDuration, 0.0f);
 			throwHeightAnimationTimer_.SetDuration(duration);
 			throwHeightAnimationTimer_.Update(remainingTime);
 			const float progress = throwHeightAnimationTimer_.GetProgress();
-			height_ = throwHeightAnimationStart_ + (returnHeight_ - throwHeightAnimationStart_) * progress;
-			originMovementProgress_ = moveToOriginWithHeightAnimation_
-				? originMovementStart_ * (1.0f - progress)
-				: 0.0f;
+			height_ = throwHeightAnimationStart_ + (settings.returnHeight - throwHeightAnimationStart_) * progress;
+			originMovementProgress_ = originMovementStart_ * (1.0f - progress);
 			if (!throwHeightAnimationTimer_.IsFinished())
 			{
 				return;
 			}
 
-			height_ = returnHeight_;
+			height_ = settings.returnHeight;
 			originMovementProgress_ = 0.0f;
 			throwHeightAnimationState_ = ThrowHeightAnimationState::Idle;
 			throwHeightAnimationTimer_.Reset();
@@ -188,7 +198,7 @@ void GameCamera::UpdateThrowHeightAnimation(float deltaTime)
 Vector3 GameCamera::CalculateCameraPosition(const Vector3& playerPosition) const
 {
 	// 演出中はプレイヤー追従位置から演出用の目標位置へ徐々に寄せる。
-	const float originProgress = moveToOriginWithHeightAnimation_ ? originMovementProgress_ : 0.0f;
+	const float originProgress = originMovementProgress_;
 	const Vector3 followPosition =
 		playerPosition * (1.0f - originProgress) + moveTargetPosition_ * originProgress;
 	return followPosition + Vector3{ 0.0f, height_, -distance_ };

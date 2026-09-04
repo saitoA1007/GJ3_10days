@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <memory>
 
@@ -31,8 +32,18 @@ public:
 	const GameEngine::Camera* GetCamera() const { return &camera_; }
 	void SetRotateWithMovement(bool enabled) { rotateWithMovement_ = enabled; }
 	bool GetRotateWithMovement() const { return rotateWithMovement_; }
-	void SetMoveToOriginWithHeightAnimation(bool enabled) { moveToOriginWithHeightAnimation_ = enabled; }
-	bool GetMoveToOriginWithHeightAnimation() const { return moveToOriginWithHeightAnimation_; }
+	// 全個数の設定を一括変更する。取得時は現在選択されている個数の設定を返す。
+	void SetMoveToOriginWithHeightAnimation(bool enabled)
+	{
+		for (auto& settings : throwHeightAnimationSettings_)
+		{
+			settings.moveToOrigin = enabled;
+		}
+	}
+	bool GetMoveToOriginWithHeightAnimation() const
+	{
+		return throwHeightAnimationSettings_[activeThrowHeightAnimationIndex_].moveToOrigin;
+	}
 	void SetMoveTargetPosition(const Vector3& position) { moveTargetPosition_ = position; }
 	const Vector3& GetMoveTargetPosition() const { return moveTargetPosition_; }
 
@@ -47,9 +58,22 @@ private:
 		Returning, // 元の高さに戻る途中
 	};
 
+	struct ThrowHeightAnimationSettings
+	{
+		float riseHeight = 80.0f;
+		float riseDuration = 0.2f;
+		float holdDuration = 2.0f;
+		float returnDuration = 0.5f;
+		float returnHeight = 36.0f;
+		bool moveToOrigin = true;
+	};
+
+	static constexpr int kMinThrowAnimationCount = 2;
+	static constexpr int kMaxThrowAnimationCount = 5;
+
 	Vector3 CalculateCameraPosition(const Vector3& playerPosition) const;
 	void LookAtPlayer(const Vector3& playerPosition);
-	void StartThrowHeightAnimation();
+	void StartThrowHeightAnimation(int thrownCount);
 	void UpdateThrowHeightAnimation(float deltaTime);
 
 	Player* player_ = nullptr;
@@ -63,14 +87,10 @@ private:
 	Vector3 rotateOffset_ = { 0.0f, 0.0f, 0.0f };
 	bool rotateWithMovement_ = true;
 
-	// Pikumiをまとめて投げたときのHeight演出
-	int throwCountThreshold_ = 5;
-	float riseHeight_ = 72.0f;
-	float riseDuration_ = 1.0f;
-	float holdDuration_ = 1.0f;
-	float returnDuration_ = 1.0f;
-	float returnHeight_ = 28.0f;
-	bool moveToOriginWithHeightAnimation_ = true;
+	// 2・3・4・5個以上の投擲ごとにHeight演出を調整する。
+	std::array<ThrowHeightAnimationSettings, kMaxThrowAnimationCount - kMinThrowAnimationCount + 1>
+		throwHeightAnimationSettings_ = {{ { 48.0f }, { 60.0f }, { 70.0f }, { 80.0f } }};
+	int activeThrowHeightAnimationIndex_ = 0;
 	Vector3 moveTargetPosition_ = { 0.0f, 0.0f, 0.0f };
 
 	ThrowHeightAnimationState throwHeightAnimationState_ = ThrowHeightAnimationState::Idle;

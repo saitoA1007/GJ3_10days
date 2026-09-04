@@ -12,18 +12,43 @@
         "RotateWithMovement": false,
         "SceneName": "Game",
         "ThrowHeightAnimation": {
-            "HoldDuration": 2.0,
+            "Count2": {
+                "HoldDuration": 2.0,
+                "MoveToOrigin": true,
+                "ReturnDuration": 0.5,
+                "ReturnHeight": 36.0,
+                "RiseDuration": 0.20000000298023224,
+                "RiseHeight": 48.0
+            },
+            "Count3": {
+                "HoldDuration": 2.0,
+                "MoveToOrigin": true,
+                "ReturnDuration": 0.5,
+                "ReturnHeight": 36.0,
+                "RiseDuration": 0.20000000298023224,
+                "RiseHeight": 60.0
+            },
+            "Count4": {
+                "HoldDuration": 2.0,
+                "MoveToOrigin": true,
+                "ReturnDuration": 0.5,
+                "ReturnHeight": 36.0,
+                "RiseDuration": 0.20000000298023224,
+                "RiseHeight": 70.0
+            },
+            "Count5": {
+                "HoldDuration": 2.0,
+                "MoveToOrigin": true,
+                "ReturnDuration": 0.5,
+                "ReturnHeight": 36.0,
+                "RiseDuration": 0.20000000298023224,
+                "RiseHeight": 80.0
+            },
             "MoveTargetPosition": [
                 0.0,
                 0.0,
                 -1.0
-            ],
-            "MoveToOrigin": true,
-            "ReturnDuration": 0.5,
-            "ReturnHeight": 36.0,
-            "RiseDuration": 0.20000000298023224,
-            "RiseHeight": 80.0,
-            "ThrowCountThreshold": 5
+            ]
         }
     }
 }
