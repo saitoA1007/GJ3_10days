@@ -38,7 +38,8 @@ TitleScene::TitleScene() {
 }
 
 void TitleScene::Initialize() {
-
+	isFinished_ = false;
+	titleLogo_->ResetAnimation();
 }
 
 void TitleScene::Update() {
@@ -46,13 +47,22 @@ void TitleScene::Update() {
 	// カメラの更新処理
 	mainCamera_->Update();
 
+	// Decision入力を受けたらタイトル終了演出を開始する。
+	if (inputCommand_->IsCommandActive("Decision")) {
+		titleLogo_->AnimationStart();
+	}
+
 	// タイトルロゴの更新処理
 	titleLogo_->Update();
 
+	// ロゴが画面奥まで移動し終えたらシーン遷移を許可する。
+	if (titleLogo_->IsAnimationFinished()) {
+		isFinished_ = true;
+	}
 }
 
 void TitleScene::DebugUpdate() {
-	titleLogo_->Update();
+	titleLogo_->DebugUpdate();
 }
 
 void TitleScene::Draw() {

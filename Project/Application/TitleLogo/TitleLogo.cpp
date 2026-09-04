@@ -1,9 +1,12 @@
 #include "TitleLogo.h"
 
 #include <cassert>
+#include <cmath>
 #include <numbers>
 #include <string>
 
+#include "EasingManager.h"
+#include "FPSCounter.h"
 #include "Model.h"
 #include "ModelComponent.h"
 #include "ModelManager.h"
@@ -73,14 +76,131 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 			registerSrt("T" + std::to_string(i), *parts_[i]);
 		}
 	}
+
+	// タイトル終了演出の調整値をImGuiへ登録する。
+	debugParameter_.Register("ShakeDuration", shakeDuration_, 0, "Animation");
+	debugParameter_.Register("ShakeAmplitude", shakeAmplitude_, 1, "Animation");
+	debugParameter_.Register("ShakeFrequencyX", shakeFrequencyX_, 2, "Animation");
+	debugParameter_.Register("ShakeFrequencyY", shakeFrequencyY_, 3, "Animation");
+	debugParameter_.Register("MoveDuration", moveDuration_, 4, "Animation");
+	debugParameter_.Register("MoveDistance", moveDistance_, 5, "Animation");
+	debugParameter_.Register("BottomScalingDuration", bottomScalingDuration_, 6, "Animation");
+	debugParameter_.Register("BottomScalingStart", bottomScalingStart_, 7, "Animation");
+	debugParameter_.Register("BottomScalingEnd", bottomScalingEnd_, 8, "Animation");
 	debugParameter_.Apply();
 }
 
 TitleLogo::~TitleLogo() = default;
 
+void TitleLogo::AnimationStart() {
+	if (animationState_ != AnimationState::Idle) {
+		return;
+	}
+
+	// Decision時点のImGui設定値を演出の基準位置として使用する。
+	debugParameter_.ApplyIfDirty();
+	CaptureAnimationOrigins();
+	animationState_ = AnimationState::Shaking;
+	shakeTimer_.Start(shakeDuration_, false);
+	bottomScalingTimer_.Start(bottomScalingDuration_, false);
+}
+
+void TitleLogo::ResetAnimation() {
+	debugParameter_.Apply();
+	animationState_ = AnimationState::Idle;
+	shakeTimer_.Reset();
+	moveTimer_.Reset();
+	bottomScalingTimer_.Reset();
+	UpdateTransforms();
+}
+
+bool TitleLogo::IsAnimationFinished() const {
+	return animationState_ == AnimationState::Finished;
+}
+
 void TitleLogo::Update() {
 	debugParameter_.ApplyIfDirty();
+	UpdateAnimation(FpsCounter::deltaTime);
+	UpdateTransforms();
+}
 
+void TitleLogo::DebugUpdate() {
+	debugParameter_.ApplyIfDirty();
+	UpdateTransforms();
+}
+
+void TitleLogo::UpdateAnimation(float deltaTime) {
+	switch (animationState_) {
+	case AnimationState::Idle:
+	case AnimationState::Finished:
+		return;
+
+	case AnimationState::Shaking: {
+		// ImGuiで実行中に変更された時間も現在のタイマーへ反映する。
+		shakeTimer_.SetDuration(shakeDuration_);
+		shakeTimer_.Update(deltaTime);
+
+		if (shakeTimer_.IsFinished()) {
+			RestorePartTranslations();
+			animationState_ = AnimationState::Moving;
+			moveTimer_.Start(moveDuration_, false);
+			return;
+		}
+
+		// 終端に近づくほど揺れ幅を小さくし、元の位置へ滑らかに戻す。
+		const float strength = shakeAmplitude_ * shakeTimer_.GetReverseProgress();
+		const float elapsed = shakeTimer_.GetElapsedTime();
+		for (std::size_t i = 0; i < parts_.size(); ++i) {
+			if (!parts_[i]) {
+				continue;
+			}
+
+			const float phase = static_cast<float>(i) * 1.7f;
+			parts_[i]->worldTransform_.transform_.translate =
+				partAnimationOrigins_[i] + Vector3{
+					std::sin(elapsed * shakeFrequencyX_ + phase) * strength,
+					std::cos(elapsed * shakeFrequencyY_ + phase) * strength,
+					0.0f
+				};
+		}
+
+		if (bottomScalingTimer_.IsFinished()) {
+			bottom_->worldTransform_.transform_.scale = Vector3({0.0f,0.0f,0.0f});
+		}
+		else
+		{
+			Vector3 scale = GameEngine::Lerp(bottomScalingStart_, bottomScalingEnd_, bottomScalingTimer_.GetProgress(), EaseType::kLinear);
+			bottom_->worldTransform_.transform_.scale = scale;
+		}
+
+		bottomScalingTimer_.Update(deltaTime);
+		return;
+	}
+
+	case AnimationState::Moving: {
+		moveTimer_.SetDuration(moveDuration_);
+		moveTimer_.Update(deltaTime);
+		const float progress = Apply(moveTimer_.GetProgress(), EaseType::kEaseInCubic);
+		const Vector3 moveOffset = {0.0f, 0.0f, moveDistance_ * progress};
+
+		if (bottom_) {
+			bottom_->worldTransform_.transform_.translate = bottomAnimationOrigin_ + moveOffset;
+		}
+		for (std::size_t i = 0; i < parts_.size(); ++i) {
+			if (parts_[i]) {
+				parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i] + moveOffset;
+			}
+		}
+
+		if (moveTimer_.IsFinished()) {
+			animationState_ = AnimationState::Finished;
+		}
+		return;
+	}
+	}
+}
+
+void TitleLogo::UpdateTransforms() {
 	if (bottom_) {
 		bottom_->Update();
 	}
@@ -88,6 +208,25 @@ void TitleLogo::Update() {
 	for (const auto& part : parts_) {
 		if (part) {
 			part->Update();
+		}
+	}
+}
+
+void TitleLogo::CaptureAnimationOrigins() {
+	if (bottom_) {
+		bottomAnimationOrigin_ = bottom_->worldTransform_.transform_.translate;
+	}
+	for (std::size_t i = 0; i < parts_.size(); ++i) {
+		if (parts_[i]) {
+			partAnimationOrigins_[i] = parts_[i]->worldTransform_.transform_.translate;
+		}
+	}
+}
+
+void TitleLogo::RestorePartTranslations() {
+	for (std::size_t i = 0; i < parts_.size(); ++i) {
+		if (parts_[i]) {
+			parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i];
 		}
 	}
 }
