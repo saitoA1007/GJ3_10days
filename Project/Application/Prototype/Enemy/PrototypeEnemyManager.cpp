@@ -37,6 +37,7 @@ namespace Prototype {
 		for (size_t i = 0; i < safeCapacity; ++i) {
 			enemies_.push_back(std::make_unique<Enemy>(
 				enemyModel,
+				field_,
 				rocket,
 				energySpawner,
 				unitManager,

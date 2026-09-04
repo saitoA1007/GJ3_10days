@@ -163,7 +163,7 @@ namespace Prototype {
 			return;
 		}
 
-		EnergyPickup* droppedEnergy = targetEnemy_->DefeatAndDropSmallEnergy();
+		EnergyPickup* droppedEnergy = targetEnemy_->DefeatAndDropEnergy();
 		targetEnemy_ = nullptr;
 		if (stamina_ > 0.0f &&
 			droppedEnergy != nullptr &&

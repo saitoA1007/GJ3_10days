@@ -8,6 +8,7 @@
 
 #include "Application/Prototype/Energy/PrototypeEnergyPickup.h"
 #include "Application/Prototype/Energy/PrototypeEnergySpawner.h"
+#include "Application/Prototype/Field/PrototypeField.h"
 #include "Application/Prototype/Rocket/PrototypeRocket.h"
 #include "Application/Prototype/Unit/PrototypeUnit.h"
 #include "Application/Prototype/Unit/PrototypeUnitManager.h"
@@ -18,12 +19,14 @@ namespace Prototype {
 
 	Enemy::Enemy(
 		Model* model,
+		Field* field,
 		Rocket* rocket,
 		EnergySpawner* energySpawner,
 		UnitManager* unitManager,
 		const EnemySettings* settings)
-		: rocket_(rocket), energySpawner_(energySpawner), unitManager_(unitManager), settings_(settings) {
+		: field_(field), rocket_(rocket), energySpawner_(energySpawner), unitManager_(unitManager), settings_(settings) {
 		assert(model != nullptr && "Prototype enemy requires enemy.obj");
+		assert(field_ != nullptr && "Prototype enemy requires a field");
 		assert(rocket_ != nullptr && "Prototype enemy requires a rocket");
 		assert(energySpawner_ != nullptr && "Prototype enemy requires an energy spawner");
 		assert(unitManager_ != nullptr && "Prototype enemy requires a unit manager");
@@ -108,14 +111,32 @@ namespace Prototype {
 		SyncModel();
 	}
 
-	EnergyPickup* Enemy::DefeatAndDropSmallEnergy() {
+	EnergyPickup* Enemy::DefeatAndDropEnergy() {
 		if (!isActive_) {
 			return nullptr;
 		}
 
 		const Vector3 dropPosition = position_;
+		const EnergySize dropSize = GetDropEnergySize();
 		Reset();
-		return energySpawner_->SpawnOnGround(EnergySize::Small, dropPosition);
+		return energySpawner_->SpawnOnGround(dropSize, dropPosition);
+	}
+
+	EnergySize Enemy::GetDropEnergySize() const {
+		switch (field_->GetZone(position_)) {
+		case FieldZone::Center:
+		case FieldZone::Near:
+			return EnergySize::Small;
+		case FieldZone::NearBuffer:
+		case FieldZone::Middle:
+			return EnergySize::Medium;
+		case FieldZone::MiddleBuffer:
+		case FieldZone::Far:
+		case FieldZone::OuterBuffer:
+		case FieldZone::Outside:
+		default:
+			return EnergySize::Large;
+		}
 	}
 
 	void Enemy::SetHighlighted(bool highlighted) {

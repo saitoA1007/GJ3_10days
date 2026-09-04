@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 #include "ModelComponent.h"
@@ -12,8 +13,10 @@ namespace GameEngine {
 }
 
 namespace Prototype {
+	enum class EnergySize : uint8_t;
 	class EnergyPickup;
 	class EnergySpawner;
+	class Field;
 	class Rocket;
 	class Unit;
 	class UnitManager;
@@ -34,6 +37,7 @@ namespace Prototype {
 	public:
 		Enemy(
 			GameEngine::Model* model,
+			Field* field,
 			Rocket* rocket,
 			EnergySpawner* energySpawner,
 			UnitManager* unitManager,
@@ -54,10 +58,11 @@ namespace Prototype {
 
 		bool TryReserveForAttack();
 		void CancelAttackReservation();
-		EnergyPickup* DefeatAndDropSmallEnergy();
+		EnergyPickup* DefeatAndDropEnergy();
 		void SetHighlighted(bool highlighted);
 
 	private:
+		EnergySize GetDropEnergySize() const;
 		void UpdateTarget();
 		void MoveTowards(const Vector3& target, float deltaTime);
 		bool TryHitTargetUnit();
@@ -65,6 +70,7 @@ namespace Prototype {
 		float DistanceSquaredXZ(const Vector3& a, const Vector3& b) const;
 		void SyncModel();
 
+		Field* field_ = nullptr;
 		Rocket* rocket_ = nullptr;
 		EnergySpawner* energySpawner_ = nullptr;
 		UnitManager* unitManager_ = nullptr;
