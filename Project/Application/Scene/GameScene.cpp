@@ -87,7 +87,7 @@ GameScene::GameScene() {
 	scoreView_ = std::make_unique<ScoreView>(digitModels, gameCamera->GetCamera());
 
 	//Enemy
-	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
+	auto enemyModel = modelManager_->GetNameByModel("Enemy.gltf");
 	auto* enemies = gameObjectManager_->AddObject<EnemyManager>(128, enemyModel);
 	enemies->SetOnEnemyDefeated([this]() {
 		score_.Add(kScorePerEnemy);

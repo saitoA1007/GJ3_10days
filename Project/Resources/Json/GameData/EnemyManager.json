@@ -14,8 +14,8 @@
                 0.6000000238418579,
                 1.0
             ],
-            "Size": 1.0,
-            "Speed": 2.0
+            "Size": 0.6899999976158142,
+            "Speed": 1.0
         },
         "1_Straight_M": {
             "HP": 3,
@@ -31,8 +31,8 @@
                 0.6000000238418579,
                 1.0
             ],
-            "Size": 3.0,
-            "Speed": 2.0
+            "Size": 1.5,
+            "Speed": 1.0
         },
         "2_Straight_L": {
             "HP": 5,
@@ -48,8 +48,8 @@
                 0.6000000238418579,
                 1.0
             ],
-            "Size": 5.0,
-            "Speed": 1.0
+            "Size": 3.0,
+            "Speed": 0.5
         },
         "3_Round": {
             "HP": 3,
@@ -65,9 +65,9 @@
                 0.3999999761581421,
                 1.0
             ],
-            "RoundSpeed": 2.0,
-            "Size": 1.0,
-            "Speed": 1.0
+            "RoundSpeed": 0.44999998807907104,
+            "Size": 0.800000011920929,
+            "Speed": 0.699999988079071
         },
         "4_Snake": {
             "HP": 3,
@@ -84,11 +84,11 @@
                 1.0
             ],
             "Size": 1.0,
-            "SnakeSpeed": 3.0,
-            "Speed": 1.5,
+            "SnakeSpeed": 2.0,
+            "Speed": 1.0,
             "SwingWidth": 3.0999999046325684
         },
-        "CollisionRadius": 1.0,
+        "CollisionRadius": 1.2200000286102295,
         "Pop": false,
         "PopInterval": 3.0,
         "SceneName": "Game"
