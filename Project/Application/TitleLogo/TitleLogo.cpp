@@ -79,6 +79,12 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 		}
 	}
 
+	// タイトル開始演出の調整値をImGuiへ登録する。
+	debugParameter_.Register("FallDuration", fallDuration_, 0, "EntranceAnimation");
+	debugParameter_.Register("FallInterval", fallInterval_, 1, "EntranceAnimation");
+	debugParameter_.Register("FallStartOffsetY", fallStartOffsetY_, 2, "EntranceAnimation");
+	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 3, "EntranceAnimation");
+
 	// タイトル終了演出の調整値をImGuiへ登録する。
 	debugParameter_.Register("ShakeDuration", shakeDuration_, 0, "Animation");
 	debugParameter_.Register("ShakeStartAmplitude", shakeStartAmplitude_, 1, "Animation");
@@ -113,10 +119,24 @@ void TitleLogo::AnimationStart() {
 
 void TitleLogo::ResetAnimation() {
 	debugParameter_.Apply();
-	animationState_ = AnimationState::Idle;
+	CaptureAnimationOrigins();
+	animationState_ = AnimationState::Falling;
+	fallTimer_.Start(GetFallSequenceDuration(), false);
+	bottomFadeTimer_.Reset();
 	shakeTimer_.Reset();
 	moveTimer_.Reset();
 	bottomScalingTimer_.Reset();
+
+	// t0～t3を画面上側の待機位置へ移動し、Bottomは透明にしておく。
+	for (std::size_t i = 0; i < parts_.size(); ++i) {
+		if (parts_[i]) {
+			parts_[i]->worldTransform_.transform_.translate =
+				partAnimationOrigins_[i] + Vector3{ 0.0f, fallStartOffsetY_, 0.0f };
+		}
+	}
+	if (bottom_) {
+		bottom_->SetAlpha(0.0f);
+	}
 	UpdateTransforms();
 }
 
@@ -137,6 +157,54 @@ void TitleLogo::DebugUpdate() {
 
 void TitleLogo::UpdateAnimation(float deltaTime) {
 	switch (animationState_) {
+	case AnimationState::Falling: {
+		fallTimer_.SetDuration(GetFallSequenceDuration());
+		fallTimer_.Update(deltaTime);
+
+		const float elapsed = fallTimer_.GetElapsedTime();
+		const float partDuration = (std::max)(fallDuration_, 0.0f);
+		const float interval = (std::max)(fallInterval_, 0.0f);
+		for (std::size_t i = 0; i < parts_.size(); ++i) {
+			if (!parts_[i]) {
+				continue;
+			}
+
+			// t0からt3へ順に、上側の待機位置から本来の位置まで落下させる。
+			const float localElapsed = elapsed - interval * static_cast<float>(i);
+			const float progress = partDuration > 0.0f
+				? std::clamp(localElapsed / partDuration, 0.0f, 1.0f)
+				: (localElapsed >= 0.0f ? 1.0f : 0.0f);
+			const float easedProgress = Apply(progress, EaseType::kEaseOutBounce);
+			parts_[i]->worldTransform_.transform_.translate =
+				partAnimationOrigins_[i] + Vector3{
+					0.0f,
+					fallStartOffsetY_ * (1.0f - easedProgress),
+					0.0f
+				};
+		}
+
+		if (fallTimer_.IsFinished()) {
+			RestorePartTranslations();
+			animationState_ = AnimationState::FadingBottom;
+			bottomFadeTimer_.Start(bottomFadeDuration_, false);
+		}
+		return;
+	}
+
+	case AnimationState::FadingBottom:
+		bottomFadeTimer_.SetDuration(bottomFadeDuration_);
+		bottomFadeTimer_.Update(deltaTime);
+		if (bottom_) {
+			bottom_->SetAlpha(Lerp(0.0f, 1.0f, bottomFadeTimer_.GetProgress()));
+		}
+		if (bottomFadeTimer_.IsFinished()) {
+			if (bottom_) {
+				bottom_->SetAlpha(1.0f);
+			}
+			animationState_ = AnimationState::Idle;
+		}
+		return;
+
 	case AnimationState::Idle:
 	case AnimationState::Finished:
 		return;
@@ -240,6 +308,12 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 		return;
 	}
 	}
+}
+
+float TitleLogo::GetFallSequenceDuration() const {
+	const float partDuration = (std::max)(fallDuration_, 0.0f);
+	const float interval = (std::max)(fallInterval_, 0.0f);
+	return partDuration + interval * static_cast<float>(kPartCount - 1);
 }
 
 float TitleLogo::GetMoveSequenceDuration() const {

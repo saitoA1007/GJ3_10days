@@ -36,6 +36,12 @@ void ModelComponent::Update() {
 	worldTransform_.UpdateTransformMatrix();
 }
 
+void ModelComponent::SetAlpha(float alpha) {
+	for (auto& material : defaultMaterials_) {
+		material.SetAlpha(alpha);
+	}
+}
+
 void ModelComponent::Draw(RenderQueue* renderQueue, const Draw3dType& drawType, const std::string& passName) {
 
 	switch (drawType)
