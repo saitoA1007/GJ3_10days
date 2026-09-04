@@ -6,6 +6,8 @@
 
 #include "Application/Scene/Transition/Fade.h"
 
+class TitleLogo;
+
 class TitleScene : public GameEngine::IScene {
 public:
 	TitleScene();
@@ -57,4 +59,7 @@ private: // シーン機能
 
 	// メインカメラ
 	std::unique_ptr<GameEngine::Camera> mainCamera_;
+
+	// タイトルロゴ
+	std::unique_ptr<TitleLogo> titleLogo_;
 };
