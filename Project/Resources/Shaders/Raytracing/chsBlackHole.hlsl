@@ -1,14 +1,15 @@
 #include "Common.hlsli"
 
-// ブラックホールの重力レンズだけを再現するマテリアル。
-// どのオブジェクトに適用しても、そのオブジェクト自身のワールド座標を
-// 重力源として扱い、その場で背後の空間（実際にトレースされたシーン）を歪めて映す。
+// ブラックホールの重力レンズのマテリアル
 struct MaterialData
 {
-    float radius;   // 事象の地平線の半径（ワールド単位）
-    float strength; // 光を曲げる強さ
-    float swirl;    // 降着円盤のような渦の強さ
-    float pad;
+    float radius;        // 事象の地平線の半径
+    float strength;      // 光を曲げる強さ
+    float swirl;         // 降着円盤のような渦の強さ
+    float glowIntensity; // ふちの発光強度
+
+    float3 glowColor;    // ふちの発光色
+    float glowWidth;     // 発光が広がる範囲
 };
 
 [shader("closesthit")]
@@ -27,14 +28,12 @@ void MainBlackHoleLensCHS(inout Payload payload, MyAttribute attrib)
 
     float bhRadius = material.radius;
 
-    // ブラックホールの中心 = オブジェクト自身のワールド座標。
-    // これによりモデルをシーンのどこに配置してもそのまま重力源になる。
     float3 bhCenter = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), ObjectToWorld4x3());
 
     float3 worldPos = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     float3 rayDir = normalize(WorldRayDirection());
 
-    // レイ上で中心に最も近づく点との距離（衝突径数）を求める
+    // レイ上で中心に最も近づく点との距離を求める
     float3 toCenter = bhCenter - worldPos;
     float tClosest = dot(toCenter, rayDir);
     float3 closestPoint = worldPos + rayDir * tClosest;
@@ -43,14 +42,14 @@ void MainBlackHoleLensCHS(inout Payload payload, MyAttribute attrib)
     float b = length(offset); // 衝突径数
     float3 pullDir = offset / max(b, 1e-5f); // 中心へ引き寄せる方向
 
-    // 事象の地平線の内側は完全に黒。歪ませても仕方ないので早期に返す
+    // 事象の地平線の内側は完全に黒
     if (b < bhRadius)
     {
         payload.color = float3(0.0f, 0.0f, 0.0f);
         return;
     }
 
-    // 偏向量（中心に近いほど強く曲がる）
+    // 偏向量
     float bs = max(b, bhRadius * 0.5f);
     float bend = material.strength * bhRadius * bhRadius / bs;
 
@@ -92,5 +91,11 @@ void MainBlackHoleLensCHS(inout Payload payload, MyAttribute attrib)
 
     // 事象の地平線に近いほど暗く落とし込む
     float darken = smoothstep(bhRadius, bhRadius * 1.5f, b);
-    payload.color = lensPayload.color * darken;
+
+    // ふちのリング状の発光
+    float edgeDist = (b - bhRadius) / max(bhRadius * material.glowWidth, 1e-4f);
+    float glow = exp(-edgeDist * edgeDist);
+    float3 glowColor = material.glowColor * glow * material.glowIntensity;
+
+    payload.color = lensPayload.color * darken + glowColor;
 }

@@ -566,6 +566,7 @@
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleMaterial.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\BlackHoleRingMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1109,6 +1110,7 @@
     <ClInclude Include="Application\Utils\Binary\Value.h" />
     <ClInclude Include="Application\Field\FieldEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleMaterial.h" />
+    <ClInclude Include="EngineSource\3D\Material\BlackHoleRingMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
@@ -1135,6 +1137,7 @@
     <FxCompile Include="Resources\Shaders\IceFracture.PS.hlsl" />
     <FxCompile Include="Resources\Shaders\Raytracing\chsUniverse.hlsl" />
     <FxCompile Include="Resources\Shaders\Raytracing\chsBlackHole.hlsl" />
+    <FxCompile Include="Resources\Shaders\Raytracing\chsBlackHoleRing.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />
