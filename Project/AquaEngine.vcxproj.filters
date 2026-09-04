@@ -39,6 +39,15 @@
     <Filter Include="Application\Prototype\Rocket">
       <UniqueIdentifier>{dd43b3a8-65c4-49ed-9565-bfc1539f3f9e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Prototype\Energy">
+      <UniqueIdentifier>{997cd2ae-f15d-40c8-9bcc-c3db35194fd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\Unit">
+      <UniqueIdentifier>{80cd08ef-da2f-4859-953c-ec7ba10c6ca0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\LockOn">
+      <UniqueIdentifier>{c625222a-c76e-4645-b6dc-17a174a0e139}</UniqueIdentifier>
+    </Filter>
     <Filter Include="EngineSource">
       <UniqueIdentifier>{f8ed931d-59ae-469c-b602-a18b3d78668e}</UniqueIdentifier>
     </Filter>
@@ -537,11 +546,26 @@
     <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp">
       <Filter>Application\Prototype\Field</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Prototype\Energy\PrototypeEnergyPickup.cpp">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Energy\PrototypeEnergySpawner.cpp">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\LockOn\PrototypeLockOnController.cpp">
+      <Filter>Application\Prototype\LockOn</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Prototype\Rocket\PrototypeRocket.cpp">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClCompile>
     <ClCompile Include="Application\Prototype\Rocket\RocketEnergy.cpp">
       <Filter>Application\Prototype\Rocket</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Unit\PrototypeUnit.cpp">
+      <Filter>Application\Prototype\Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Unit\PrototypeUnitManager.cpp">
+      <Filter>Application\Prototype\Unit</Filter>
     </ClCompile>
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
@@ -1087,11 +1111,26 @@
     <ClInclude Include="Application\Prototype\Field\PrototypeField.h">
       <Filter>Application\Prototype\Field</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Prototype\Energy\PrototypeEnergyPickup.h">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Energy\PrototypeEnergySpawner.h">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\LockOn\PrototypeLockOnController.h">
+      <Filter>Application\Prototype\LockOn</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Prototype\Rocket\PrototypeRocket.h">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClInclude>
     <ClInclude Include="Application\Prototype\Rocket\RocketEnergy.h">
       <Filter>Application\Prototype\Rocket</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Unit\PrototypeUnit.h">
+      <Filter>Application\Prototype\Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Unit\PrototypeUnitManager.h">
+      <Filter>Application\Prototype\Unit</Filter>
     </ClInclude>
     <ClInclude Include="Application\Utils\GameTimer.h" />
     <ClInclude Include="Application\Utils\Timer.h" />

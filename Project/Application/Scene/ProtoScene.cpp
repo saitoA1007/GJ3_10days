@@ -1,7 +1,10 @@
 #include "ProtoScene.h"
 
+#include "Application/Prototype/Energy/PrototypeEnergySpawner.h"
 #include "Application/Prototype/Field/PrototypeField.h"
+#include "Application/Prototype/LockOn/PrototypeLockOnController.h"
 #include "Application/Prototype/Rocket/PrototypeRocket.h"
+#include "Application/Prototype/Unit/PrototypeUnitManager.h"
 #include "MyMath.h"
 
 using namespace GameEngine;
@@ -12,6 +15,8 @@ namespace {
 }
 
 ProtoScene::ProtoScene() {
+	RegisterInputCommands();
+
 	mainCamera_ = std::make_unique<Camera>();
 	mainCamera_->Initialize(
 		{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, kCameraPosition },
@@ -23,6 +28,23 @@ ProtoScene::ProtoScene() {
 
 	auto* rocketModel = modelManager_->GetNameByModel("rocket.obj");
 	rocket_ = gameObjectManager_->AddObject<Prototype::Rocket>(rocketModel);
+
+	auto* energyModel = modelManager_->GetNameByModel("energy.obj");
+	energySpawner_ = gameObjectManager_->AddObject<Prototype::EnergySpawner>(energyModel, field_);
+
+	auto* unitModel = modelManager_->GetNameByModel("unit.obj");
+	unitManager_ = gameObjectManager_->AddObject<Prototype::UnitManager>(unitModel, rocket_);
+	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");
+	lockOnController_ = gameObjectManager_->AddObject<Prototype::LockOnController>(
+		input_,
+		inputCommand_,
+		mainCamera_.get(),
+		cursorModel,
+		debugRenderer_,
+		field_,
+		rocket_,
+		energySpawner_,
+		unitManager_);
 }
 
 void ProtoScene::Initialize() {
@@ -47,6 +69,37 @@ void ProtoScene::DebugUpdate() {
 
 void ProtoScene::Draw() {
 	// StaticGameObjectManager がエディタから追加したオブジェクトを描画する。
+}
+
+void ProtoScene::RegisterInputCommands() {
+	inputCommand_->RegisterCommand("ProtoCursorUp", {
+		{ InputState::KeyPush, DIK_W },
+	});
+	inputCommand_->RegisterCommand("ProtoCursorDown", {
+		{ InputState::KeyPush, DIK_S },
+	});
+	inputCommand_->RegisterCommand("ProtoCursorLeft", {
+		{ InputState::KeyPush, DIK_A },
+	});
+	inputCommand_->RegisterCommand("ProtoCursorRight", {
+		{ InputState::KeyPush, DIK_D },
+	});
+
+	inputCommand_->RegisterCommand("ProtoLockOnTrigger", {
+		{ InputState::MouseTrigger, 0 },
+		{ InputState::KeyTrigger, DIK_SPACE },
+		{ InputState::PadTrigger, XINPUT_GAMEPAD_A },
+	});
+	inputCommand_->RegisterCommand("ProtoLockOnPush", {
+		{ InputState::MousePush, 0 },
+		{ InputState::KeyPush, DIK_SPACE },
+		{ InputState::PadPush, XINPUT_GAMEPAD_A },
+	});
+	inputCommand_->RegisterCommand("ProtoLockOnRelease", {
+		{ InputState::MouseRelease, 0 },
+		{ InputState::KeyRelease, DIK_SPACE },
+		{ InputState::PadRelease, XINPUT_GAMEPAD_A },
+	});
 }
 
 void ProtoScene::UpdateCamera() {

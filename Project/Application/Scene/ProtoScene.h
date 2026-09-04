@@ -7,8 +7,11 @@
 #include "Application/Scene/Transition/Fade.h"
 
 namespace Prototype {
+	class EnergySpawner;
 	class Field;
+	class LockOnController;
 	class Rocket;
+	class UnitManager;
 }
 
 /// <summary>
@@ -29,6 +32,7 @@ public:
 	std::unique_ptr<ITransitionEffect> GetTransitionEffect() override { return std::make_unique<Fade>(); }
 
 private:
+	void RegisterInputCommands();
 	void UpdateCamera();
 	void DrawOriginGuide();
 
@@ -36,4 +40,7 @@ private:
 	std::unique_ptr<GameEngine::Camera> mainCamera_;
 	Prototype::Field* field_ = nullptr;
 	Prototype::Rocket* rocket_ = nullptr;
+	Prototype::EnergySpawner* energySpawner_ = nullptr;
+	Prototype::UnitManager* unitManager_ = nullptr;
+	Prototype::LockOnController* lockOnController_ = nullptr;
 };

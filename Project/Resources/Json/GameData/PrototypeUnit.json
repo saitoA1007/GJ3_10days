@@ -1,0 +1,49 @@
+{
+    "PrototypeUnit": {
+        "Color": {
+            "Normal": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "WithStamina": [
+                0.25,
+                0.85,
+                1.0,
+                1.0
+            ]
+        },
+        "Manager": {
+            "UnitCount": 5
+        },
+        "Move": {
+            "BoostedSpeed": 5.0,
+            "DeliveryRadius": 1.6,
+            "NormalSpeed": 1.5,
+            "PickupRadius": 0.45
+        },
+        "SceneName": "Proto",
+        "Stamina": {
+            "DistanceDrainRate": 0.08,
+            "DrainPerSecond": 2.0
+        },
+        "Transform": {
+            "CarryOffset": [
+                0.0,
+                1.45,
+                0.0
+            ],
+            "Scale": [
+                0.7,
+                0.7,
+                0.7
+            ],
+            "LaunchOffset": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    }
+}

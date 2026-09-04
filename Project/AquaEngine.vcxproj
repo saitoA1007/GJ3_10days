@@ -173,8 +173,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="Application\Scene\ProtoScene.cpp" />
     <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp" />
+    <ClCompile Include="Application\Prototype\Energy\PrototypeEnergyPickup.cpp" />
+    <ClCompile Include="Application\Prototype\Energy\PrototypeEnergySpawner.cpp" />
+    <ClCompile Include="Application\Prototype\LockOn\PrototypeLockOnController.cpp" />
     <ClCompile Include="Application\Prototype\Rocket\PrototypeRocket.cpp" />
     <ClCompile Include="Application\Prototype\Rocket\RocketEnergy.cpp" />
+    <ClCompile Include="Application\Prototype\Unit\PrototypeUnit.cpp" />
+    <ClCompile Include="Application\Prototype\Unit\PrototypeUnitManager.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
     <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
@@ -443,8 +448,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\StageSelectScene.h" />
     <ClInclude Include="Application\Scene\ProtoScene.h" />
     <ClInclude Include="Application\Prototype\Field\PrototypeField.h" />
+    <ClInclude Include="Application\Prototype\Energy\PrototypeEnergyPickup.h" />
+    <ClInclude Include="Application\Prototype\Energy\PrototypeEnergySpawner.h" />
+    <ClInclude Include="Application\Prototype\LockOn\PrototypeLockOnController.h" />
     <ClInclude Include="Application\Prototype\Rocket\PrototypeRocket.h" />
     <ClInclude Include="Application\Prototype\Rocket\RocketEnergy.h" />
+    <ClInclude Include="Application\Prototype\Unit\PrototypeUnit.h" />
+    <ClInclude Include="Application\Prototype\Unit\PrototypeUnitManager.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
     <ClInclude Include="Application\Scene\TitleScene.h" />
     <ClInclude Include="Application\TitleLogo\TitleLogo.h" />

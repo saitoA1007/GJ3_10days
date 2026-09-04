@@ -8,8 +8,11 @@ namespace {
 	constexpr std::array<const char*, Prototype::kFieldZoneCount> kZoneNames = {
 		"Center",
 		"Near",
+		"NearBuffer",
 		"Middle",
+		"MiddleBuffer",
 		"Far",
+		"OuterBuffer",
 	};
 }
 
@@ -21,7 +24,7 @@ namespace Prototype {
 		for (size_t i = 0; i < settings_.radii.size(); ++i) {
 			assert(settings_.radii[i] > 0.0f && "Field radii must be positive");
 			assert((i == 0 || settings_.radii[i - 1] < settings_.radii[i]) &&
-				"Field radii must increase from Center to Far");
+				"Field radii must increase from Center to OuterBuffer");
 		}
 
 		for (auto& zoneModel : zoneModels_) {

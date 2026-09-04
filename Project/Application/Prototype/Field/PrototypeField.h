@@ -19,12 +19,15 @@ namespace Prototype {
 	enum class FieldZone : uint8_t {
 		Center,
 		Near,
+		NearBuffer,
 		Middle,
+		MiddleBuffer,
 		Far,
+		OuterBuffer,
 		Outside,
 	};
 
-	inline constexpr size_t kFieldZoneCount = 4;
+	inline constexpr size_t kFieldZoneCount = 7;
 	static_assert(static_cast<size_t>(FieldZone::Outside) == kFieldZoneCount);
 
 	/// <summary>
@@ -34,16 +37,22 @@ namespace Prototype {
 		Vector3 center = { 0.0f, 0.0f, 0.0f };
 		// FieldZone と同じく、中心から外側へ向かう順番。
 		std::array<float, kFieldZoneCount> radii = {
-			3.0f,  // Center
-			8.0f,  // Near
-			14.0f, // Middle
-			20.0f, // Far
+			5.0f,  // Center
+			10.0f, // Near
+			15.0f, // NearBuffer
+			20.0f, // Middle
+			25.0f, // MiddleBuffer
+			30.0f, // Far
+			35.0f, // OuterBuffer
 		};
 		std::array<Vector4, kFieldZoneCount> colors = {
 			Vector4{ 0.86f, 0.92f, 1.00f, 1.0f }, // Center
 			Vector4{ 0.28f, 0.68f, 0.48f, 1.0f }, // Near
+			Vector4{ 0.16f, 0.24f, 0.22f, 1.0f }, // NearBuffer
 			Vector4{ 0.86f, 0.62f, 0.24f, 1.0f }, // Middle
+			Vector4{ 0.28f, 0.22f, 0.16f, 1.0f }, // MiddleBuffer
 			Vector4{ 0.68f, 0.28f, 0.34f, 1.0f }, // Far
+			Vector4{ 0.24f, 0.16f, 0.18f, 1.0f }, // OuterBuffer
 		};
 		float layerHeight = 0.06f;
 	};
