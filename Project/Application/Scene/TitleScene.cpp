@@ -4,6 +4,7 @@
 #include "RandomGenerator.h"
 #include "FPSCounter.h"
 #include "Application/CollisionConfig.h"
+#include "Application/TitleLogo/TitleLogo.h"
 using namespace GameEngine;
 
 TitleScene::~TitleScene() {}
@@ -31,10 +32,14 @@ TitleScene::TitleScene() {
 	// 背景画像を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("grasslands_sunset_1k.dds");
 	renderQueue_->SetSkyboxTexture(skyboxGH);
+
+	// タイトルロゴを構成するt0.obj～t3.objを生成
+	titleLogo_ = std::make_unique<TitleLogo>(modelManager_);
 }
 
 void TitleScene::Initialize() {
-
+	isFinished_ = false;
+	titleLogo_->ResetAnimation();
 }
 
 void TitleScene::Update() {
@@ -42,12 +47,24 @@ void TitleScene::Update() {
 	// カメラの更新処理
 	mainCamera_->Update();
 
+	// Decision入力を受けたらタイトル終了演出を開始する。
+	if (inputCommand_->IsCommandActive("Decision")) {
+		titleLogo_->AnimationStart();
+	}
+
+	// タイトルロゴの更新処理
+	titleLogo_->Update();
+
+	// ロゴが画面奥まで移動し終えたらシーン遷移を許可する。
+	if (titleLogo_->IsAnimationFinished()) {
+		isFinished_ = true;
+	}
 }
 
 void TitleScene::DebugUpdate() {
-
+	titleLogo_->DebugUpdate();
 }
 
 void TitleScene::Draw() {
-
+	titleLogo_->Draw(renderQueue_);
 }
