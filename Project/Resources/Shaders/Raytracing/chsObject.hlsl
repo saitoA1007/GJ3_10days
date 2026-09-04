@@ -137,7 +137,6 @@ void MainObjectCHS(inout Payload payload, MyAttribute attrib) {
         float3 refractColor = TranslucentRefraction(worldPosition, worldNormal, payload.recursive, material.ior);
         // オブジェクトの色を取得
         float3 objectColor = directLight + indirectLight;
-        
         payload.color = lerp(refractColor, objectColor, material.color.a);
         return;
     }
