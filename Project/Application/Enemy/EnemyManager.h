@@ -82,13 +82,24 @@ private:
 		std::vector<std::vector<Transform>> enemyPositions; // 敵の出現位置のリスト
 	};
 
+	struct StagePreset {
+		std::string name;
+		float time = 0.0f;
+		float rotation = 0.0f;
+	};
+
 	struct StageData {
 		std::string name;
-		std::vector<Preset> fases;
+		std::vector<StagePreset> fases;
 		float hpRatio = 1.0f;
 		int minEnemyCount = 1;
 	};
 
-	std::unordered_map<std::string, Preset> stageDataMap_;
-	StageData currentStageData_;
+	std::unordered_map<std::string, EnemyType> typeMap_;
+	std::unordered_map<std::string, Preset> presetDataMap_;
+	std::unordered_map<std::string, StageData> stageDataMap_;
+
+	std::string currentStageName_;
+	float stageTimer_ = 0.0f;
+	int currentFaseIndex_ = 0;
 };

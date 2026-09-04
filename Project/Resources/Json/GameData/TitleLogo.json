@@ -1,9 +1,9 @@
 {
     "TitleLogo": {
         "Animation": {
-            "BottomScalingDuration": 0.15000000596046448,
+            "BottomScalingDuration": 0.10000000149011612,
             "BottomScalingEnd": [
-                3.0,
+                5.0,
                 0.5,
                 0.0
             ],
@@ -12,12 +12,15 @@
                 0.5,
                 0.5
             ],
-            "MoveDistance": 180.0,
-            "MoveDuration": 1.25,
+            "MoveDistance": 360.0,
+            "MoveDuration": 1.0,
+            "MoveInterval": 0.05000000074505806,
             "ShakeAmplitude": 0.07999999821186066,
             "ShakeDuration": 1.0,
-            "ShakeFrequencyX": 55.0,
-            "ShakeFrequencyY": 47.0
+            "ShakeEndAmplitude": 0.07999999821186066,
+            "ShakeFrequencyX": 64.0,
+            "ShakeFrequencyY": 64.0,
+            "ShakeStartAmplitude": 0.0
         },
         "Bottom": {
             "Rotate": [
