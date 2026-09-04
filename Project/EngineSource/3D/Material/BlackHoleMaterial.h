@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector2.h"
+#include "Vector3.h"
 #include "StructuredBuffer.h"
 
 namespace GameEngine {
@@ -10,7 +10,10 @@ namespace GameEngine {
 			float radius;   // 事象の地平線の半径
 			float strength; // 光を曲げる強さ
 			float swirl;    // 降着円盤のような渦の強さ
-			float pad;
+			float glowIntensity; // ふちの発光強度
+
+			Vector3 glowColor;    // ふちの発光色
+			float glowWidth;
 		};
 
 	public:

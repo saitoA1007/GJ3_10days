@@ -87,10 +87,11 @@ GameScene::GameScene() {
 
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
-	auto* enemies = gameObjectManager_->AddObject<EnemyManager>(32, enemyModel);
+	auto* enemies = gameObjectManager_->AddObject<EnemyManager>(128, enemyModel);
 	enemies->SetOnEnemyDefeated([this]() {
 		score_.Add(kScorePerEnemy);
 	});
+	enemies->SetStage("Test");
 }
 
 void GameScene::Initialize() {

@@ -65,6 +65,12 @@ TestScene::TestScene() {
 	m_->SetHitGroup(3);
 	m_->SetBufferMaterial(0, blackHoleMaterial_.GetMaterialSrvIndex());
 
+	auto* rModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	r_ = std::make_unique<ModelComponent>(rModel);
+
+	r_->SetHitGroup(4);
+	r_->SetBufferMaterial(0, blackHoleRingMaterial_.GetMaterialSrvIndex());
+
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
 }
@@ -84,6 +90,7 @@ void TestScene::Update() {
 	walkAnimator_->ComputeUpdate();
 
 	m_->Update();
+	r_->Update();
 
 	DebugUpdate();
 }
@@ -105,6 +112,9 @@ void TestScene::DebugUpdate() {
 	ImGui::DragFloat("radius", &blackHoleMaterial_.materialData_->radius, 0.1f);
 	ImGui::DragFloat("strength", &blackHoleMaterial_.materialData_->strength, 0.1f);
 	ImGui::DragFloat("swirl", &blackHoleMaterial_.materialData_->swirl, 0.1f);
+	ImGui::DragFloat("glowIntensity", &blackHoleMaterial_.materialData_->glowIntensity, 0.1f);
+	ImGui::ColorEdit3("glowColor", &blackHoleMaterial_.materialData_->glowColor.x, 0.1f);
+	ImGui::DragFloat("glowWidth", &blackHoleMaterial_.materialData_->glowWidth, 0.1f);
 	
 	dir_.Normalize();
 
@@ -113,6 +123,30 @@ void TestScene::DebugUpdate() {
 	light->SetDirectionalColor(lightColor_);
 	world_.UpdateTransformMatrix();
 	model_->SetDefaultColor(playerColor_);
+	ImGui::End();
+
+	ImGui::Begin("Ring");
+
+	ImGui::DragFloat3("Pos", &r_->worldTransform_.transform_.translate.x, 0.1f);
+	ImGui::DragFloat3("Scale", &r_->worldTransform_.transform_.scale.x, 0.1f);
+
+	ImGui::DragFloat("InnerRadius", &blackHoleRingMaterial_.materialData_->innerRadius, 0.1f);
+	ImGui::DragFloat("OuterRadius", &blackHoleRingMaterial_.materialData_->outerRadius, 0.1f);
+	ImGui::DragFloat("ScrollSpeed", &blackHoleRingMaterial_.materialData_->scrollSpeed, 0.1f);
+
+	ImGui::DragFloat("noiseScale", &blackHoleRingMaterial_.materialData_->noiseScale, 0.1f);
+	ImGui::DragFloat("noiseJitter", &blackHoleRingMaterial_.materialData_->noiseJitter, 0.1f);
+	ImGui::DragFloat("driftSpeed", &blackHoleRingMaterial_.materialData_->driftSpeed, 0.1f);
+	ImGui::DragFloat("dissolveThreshold", &blackHoleRingMaterial_.materialData_->dissolveThreshold, 0.1f);
+
+	ImGui::DragFloat("dissolveEdge", &blackHoleRingMaterial_.materialData_->dissolveEdge, 0.1f);
+	ImGui::DragFloat("densityPower", &blackHoleRingMaterial_.materialData_->densityPower, 0.1f);
+	ImGui::DragFloat("emissionIntensity", &blackHoleRingMaterial_.materialData_->emissionIntensity, 0.1f);
+
+	ImGui::ColorEdit3("glowColor", &blackHoleRingMaterial_.materialData_->emissionColor.x, 0.1f);
+
+	blackHoleRingMaterial_.materialData_->time += FpsCounter::gameDeltaTime;
+
 	ImGui::End();
 #endif
 }
@@ -126,4 +160,6 @@ void TestScene::Draw() {
 	renderQueue_->SubmitRaytracingModel(terrainModel_, terrainWorld_);
 
 	m_->DrawCustomRaytracing(renderQueue_);
+
+	r_->DrawCustomRaytracing(renderQueue_);
 }

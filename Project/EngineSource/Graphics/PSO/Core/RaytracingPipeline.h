@@ -11,6 +11,7 @@ namespace GameEngine {
 		static const std::wstring IceModel = L"IceModel";
 		static const std::wstring UniverseModel = L"UniverseModel";
 		static const std::wstring BlackHoleModel = L"BlackHoleModel";
+		static const std::wstring BlackHoleRingModel = L"BlackHoleRingModel";
 	}
 
 	class RaytracingPipeline {
