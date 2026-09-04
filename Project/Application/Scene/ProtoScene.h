@@ -8,6 +8,7 @@
 
 namespace Prototype {
 	class Field;
+	class Rocket;
 }
 
 /// <summary>
@@ -34,4 +35,5 @@ private:
 	bool isFinished_ = false;
 	std::unique_ptr<GameEngine::Camera> mainCamera_;
 	Prototype::Field* field_ = nullptr;
+	Prototype::Rocket* rocket_ = nullptr;
 };

@@ -1,6 +1,7 @@
 #include "ProtoScene.h"
 
 #include "Application/Prototype/Field/PrototypeField.h"
+#include "Application/Prototype/Rocket/PrototypeRocket.h"
 #include "MyMath.h"
 
 using namespace GameEngine;
@@ -19,6 +20,9 @@ ProtoScene::ProtoScene() {
 
 	auto* fieldCircleModel = modelManager_->GetNameByModel("fieldCircle.obj");
 	field_ = gameObjectManager_->AddObject<Prototype::Field>(fieldCircleModel);
+
+	auto* rocketModel = modelManager_->GetNameByModel("rocket.obj");
+	rocket_ = gameObjectManager_->AddObject<Prototype::Rocket>(rocketModel);
 }
 
 void ProtoScene::Initialize() {

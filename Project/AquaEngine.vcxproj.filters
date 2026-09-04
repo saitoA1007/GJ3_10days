@@ -36,6 +36,9 @@
     <Filter Include="Application\Prototype\Field">
       <UniqueIdentifier>{38c02e8a-8f56-4f7c-b78f-7d697779cd54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Prototype\Rocket">
+      <UniqueIdentifier>{dd43b3a8-65c4-49ed-9565-bfc1539f3f9e}</UniqueIdentifier>
+    </Filter>
     <Filter Include="EngineSource">
       <UniqueIdentifier>{f8ed931d-59ae-469c-b602-a18b3d78668e}</UniqueIdentifier>
     </Filter>
@@ -533,6 +536,12 @@
     </ClCompile>
     <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp">
       <Filter>Application\Prototype\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Rocket\PrototypeRocket.cpp">
+      <Filter>Application\Prototype\Rocket</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Rocket\RocketEnergy.cpp">
+      <Filter>Application\Prototype\Rocket</Filter>
     </ClCompile>
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
@@ -1077,6 +1086,12 @@
     </ClInclude>
     <ClInclude Include="Application\Prototype\Field\PrototypeField.h">
       <Filter>Application\Prototype\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Rocket\PrototypeRocket.h">
+      <Filter>Application\Prototype\Rocket</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Rocket\RocketEnergy.h">
+      <Filter>Application\Prototype\Rocket</Filter>
     </ClInclude>
     <ClInclude Include="Application\Utils\GameTimer.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
