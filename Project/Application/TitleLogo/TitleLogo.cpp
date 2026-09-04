@@ -80,14 +80,16 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 
 	// タイトル終了演出の調整値をImGuiへ登録する。
 	debugParameter_.Register("ShakeDuration", shakeDuration_, 0, "Animation");
-	debugParameter_.Register("ShakeAmplitude", shakeAmplitude_, 1, "Animation");
-	debugParameter_.Register("ShakeFrequencyX", shakeFrequencyX_, 2, "Animation");
-	debugParameter_.Register("ShakeFrequencyY", shakeFrequencyY_, 3, "Animation");
-	debugParameter_.Register("MoveDuration", moveDuration_, 4, "Animation");
-	debugParameter_.Register("MoveDistance", moveDistance_, 5, "Animation");
-	debugParameter_.Register("BottomScalingDuration", bottomScalingDuration_, 6, "Animation");
-	debugParameter_.Register("BottomScalingStart", bottomScalingStart_, 7, "Animation");
-	debugParameter_.Register("BottomScalingEnd", bottomScalingEnd_, 8, "Animation");
+	debugParameter_.Register("ShakeStartAmplitude", shakeStartAmplitude_, 1, "Animation");
+	debugParameter_.Register("ShakeEndAmplitude", shakeEndAmplitude_, 2, "Animation");
+	debugParameter_.Register("ShakeFrequencyX", shakeFrequencyX_, 3, "Animation");
+	debugParameter_.Register("ShakeFrequencyY", shakeFrequencyY_, 4, "Animation");
+	debugParameter_.Register("MoveDuration", moveDuration_, 5, "Animation");
+	debugParameter_.Register("MoveInterval", moveInterval_, 6, "Animation");
+	debugParameter_.Register("MoveDistance", moveDistance_, 7, "Animation");
+	debugParameter_.Register("BottomScalingDuration", bottomScalingDuration_, 8, "Animation");
+	debugParameter_.Register("BottomScalingStart", bottomScalingStart_, 9, "Animation");
+	debugParameter_.Register("BottomScalingEnd", bottomScalingEnd_, 10, "Animation");
 	debugParameter_.Apply();
 }
 
@@ -144,12 +146,16 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 		if (shakeTimer_.IsFinished()) {
 			RestorePartTranslations();
 			animationState_ = AnimationState::Moving;
-			moveTimer_.Start(moveDuration_, false);
+			moveTimer_.Start(GetMoveSequenceDuration(), false);
 			return;
 		}
 
-		// 終端に近づくほど揺れ幅を小さくし、元の位置へ滑らかに戻す。
-		const float strength = shakeAmplitude_ * shakeTimer_.GetReverseProgress();
+		// シェイクの進行に合わせて、開始時から終了時の強さへ徐々に変化させる。
+		const float strength = Lerp(
+			shakeStartAmplitude_,
+			shakeEndAmplitude_,
+			shakeTimer_.GetProgress()
+		);
 		const float elapsed = shakeTimer_.GetElapsedTime();
 		for (std::size_t i = 0; i < parts_.size(); ++i) {
 			if (!parts_[i]) {
@@ -179,9 +185,12 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 	}
 
 	case AnimationState::Moving: {
-		moveTimer_.SetDuration(moveDuration_);
+		moveTimer_.SetDuration(GetMoveSequenceDuration());
 		moveTimer_.Update(deltaTime);
 		const float sequenceProgress = moveTimer_.GetProgress();
+		const float elapsed = moveTimer_.GetElapsedTime();
+		const float partDuration = (std::max)(moveDuration_, 0.0f);
+		const float interval = (std::max)(moveInterval_, 0.0f);
 
 		// bottomは演出全体を通して奥へ移動する。
 		if (bottom_) {
@@ -190,16 +199,14 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 			bottom_->worldTransform_.transform_.translate = bottomAnimationOrigin_ + bottomOffset;
 		}
 
-		// 移動時間を4分割し、t0からt3まで1つずつ順番に奥へ移動する。
-		const float partCount = static_cast<float>(parts_.size());
+		// MoveInterval秒ずつ開始を遅らせ、t0からt3まで順番に奥へ移動する。
 		for (std::size_t i = 0; i < parts_.size(); ++i) {
 			if (parts_[i]) {
-				const float partProgress = std::clamp(
-					sequenceProgress * partCount - static_cast<float>(i),
-					0.0f,
-					1.0f
-				);
-				const float easedProgress = Apply(partProgress, EaseType::kEaseInBack);
+				const float localElapsed = elapsed - interval * static_cast<float>(i);
+				const float partProgress = partDuration > 0.0f
+					? std::clamp(localElapsed / partDuration, 0.0f, 1.0f)
+					: (localElapsed >= 0.0f ? 1.0f : 0.0f);
+				const float easedProgress = Apply(partProgress, EaseType::kEaseInQuart);
 				const Vector3 partOffset = {0.0f, 0.0f, moveDistance_ * easedProgress};
 				parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i] + partOffset;
 			}
@@ -211,6 +218,12 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 		return;
 	}
 	}
+}
+
+float TitleLogo::GetMoveSequenceDuration() const {
+	const float partDuration = (std::max)(moveDuration_, 0.0f);
+	const float interval = (std::max)(moveInterval_, 0.0f);
+	return partDuration + interval * static_cast<float>(kPartCount - 1);
 }
 
 void TitleLogo::UpdateTransforms() {

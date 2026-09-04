@@ -42,6 +42,7 @@ private:
 	void UpdateTransforms();
 	void CaptureAnimationOrigins();
 	void RestorePartTranslations();
+	float GetMoveSequenceDuration() const;
 
 	static constexpr std::size_t kPartCount = 4;
 	std::unique_ptr<GameEngine::ModelComponent> bottom_;
@@ -53,10 +54,12 @@ private:
 	Vector3 bottomScalingEnd_{ 1.0f, 1.0f };
 
 	float shakeDuration_ = 1.0f;
-	float shakeAmplitude_ = 0.08f;
+	float shakeStartAmplitude_ = 0.0f;
+	float shakeEndAmplitude_ = 0.08f;
 	float shakeFrequencyX_ = 55.0f;
 	float shakeFrequencyY_ = 47.0f;
 	float moveDuration_ = 1.25f;
+	float moveInterval_ = 0.15f;
 	float moveDistance_ = 180.0f;
 
 	AnimationState animationState_ = AnimationState::Idle;
