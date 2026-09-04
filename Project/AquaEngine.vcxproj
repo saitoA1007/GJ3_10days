@@ -160,6 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
     <ClCompile Include="Application\TitleLogo\TitleLogo.cpp" />
     <ClCompile Include="Application\GameCamera\GameCamera.cpp" />
@@ -423,6 +424,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="Application\Field\FieldEffect.h" />
     <ClInclude Include="Application\GameCamera\GameCamera.h" />
     <ClInclude Include="Application\Field\Field.h" />

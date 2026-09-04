@@ -12,6 +12,7 @@ using namespace GameEngine;
 #include "Application/Score/ScoreView.h"
 #include "ControllerVibration.h"
 #include "FPSCounter.h"
+#include "Application/Effect/BlackHoleEffect.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -91,7 +92,13 @@ GameScene::GameScene() {
 	enemies->SetOnEnemyDefeated([this]() {
 		score_.Add(kScorePerEnemy);
 	});
-	enemies->SetStage("Test");
+  
+  enemies->SetStage("Test");
+
+	// ブラックホールのテスト
+	auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
+	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
 }
 
 void GameScene::Initialize() {

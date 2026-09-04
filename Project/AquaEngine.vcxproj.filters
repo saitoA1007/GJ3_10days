@@ -573,6 +573,7 @@
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleRingMaterial.cpp" />
+    <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1120,6 +1121,7 @@
     <ClInclude Include="Application\Field\FieldEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleMaterial.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleRingMaterial.h" />
+    <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
