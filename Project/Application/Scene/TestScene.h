@@ -15,6 +15,7 @@
 #include "DestructibleObject.h"
 #include "ModelComponent.h"
 #include "BlackHoleMaterial.h"
+#include "BlackHoleRingMaterial.h"
 
 #include "Application/Scene/Transition/Fade.h"
 
@@ -88,8 +89,10 @@ private: // シーン機能
 	Vector4 playerColor_ = { 1.0f,1.0f,1.0f,1.0f };
 
 	std::unique_ptr<GameEngine::ModelComponent> m_;
-
 	GameEngine::BlackHoleMaterial blackHoleMaterial_;
+
+	std::unique_ptr<GameEngine::ModelComponent> r_;
+	GameEngine::BlackHoleRingMaterial blackHoleRingMaterial_;
 
 
 	// 地面

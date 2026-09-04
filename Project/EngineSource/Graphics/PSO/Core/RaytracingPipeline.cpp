@@ -48,6 +48,7 @@ void RaytracingPipeline::CreateStateObject() {
 	LibraryResult iceObjectResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/ChsIceObject.hlsl");
 	LibraryResult universeResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsUniverse.hlsl");
 	LibraryResult BlackHoleResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsBlackHole.hlsl");
+	LibraryResult BlackHoleRingResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsBlackHoleRing.hlsl");
 
 	// 初期化処理
 	stateObjectBuilder_.Initialize();
@@ -59,12 +60,14 @@ void RaytracingPipeline::CreateStateObject() {
 	stateObjectBuilder_.AddDXILLibrary(iceObjectResult.blob.Get(), iceObjectResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(universeResult.blob.Get(), universeResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(BlackHoleResult.blob.Get(), BlackHoleResult.exportNames);
+	stateObjectBuilder_.AddDXILLibrary(BlackHoleRingResult.blob.Get(), BlackHoleRingResult.exportNames);
 
 	// ヒットグループを設定
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::DefaultModel, L"MainObjectCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::IceModel, L"MainIceObjectCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::UniverseModel, L"MainUniverseCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::BlackHoleModel, L"MainBlackHoleLensCHS");
+	stateObjectBuilder_.AddHitGroup(AppHitGroups::BlackHoleRingModel, L"MainBlackHoleRingCHS");
 
 	// シェーダー設定
 	const uint32_t MaxPayloadSize = sizeof(float) * 3 + sizeof(uint32_t) + sizeof(float);
@@ -153,6 +156,15 @@ void RaytracingPipeline::CreateShaderTable() {
 		ShaderRecord blackHoleRecord;
 		auto& blackHoleTable = blackHoleRecord.SetIdentifier(blackHoleId);
 		shaderTableBuilder_.HitGroup().AddRecord(std::move(blackHoleRecord));
+
+		// ブラックホールリング
+		auto blackHoleRingId = rtsoProps->GetShaderIdentifier(AppHitGroups::BlackHoleRingModel.c_str());
+		if (blackHoleRingId == nullptr) {
+			assert(false && "Not found ShaderIdentifier");
+		}
+		ShaderRecord blackHoleRingRecord;
+		auto& blackHoleRingTable = blackHoleRingRecord.SetIdentifier(blackHoleRingId);
+		shaderTableBuilder_.HitGroup().AddRecord(std::move(blackHoleRingRecord));
 	}
 
 	// テーブルを設定する
