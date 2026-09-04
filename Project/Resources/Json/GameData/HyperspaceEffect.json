@@ -1,0 +1,23 @@
+{
+    "HyperspaceEffect": {
+        "HyperspaceJumpDuration": 2.0,
+        "SceneName": "Title",
+        "WorldTransform": {
+            "Rotate": [
+                -1.5199999809265137,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "Translate": [
+                0.0,
+                1.6200000047683716,
+                11.069999694824219
+            ]
+        }
+    }
+}

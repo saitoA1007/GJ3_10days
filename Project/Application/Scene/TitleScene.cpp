@@ -5,6 +5,7 @@
 #include "FPSCounter.h"
 #include "Application/CollisionConfig.h"
 #include "Application/TitleLogo/TitleLogo.h"
+#include "Application/Effect/HyperspaceEffect.h"
 using namespace GameEngine;
 
 TitleScene::~TitleScene() {}
@@ -35,11 +36,16 @@ TitleScene::TitleScene() {
 
 	// タイトルロゴを構成するt0.obj～t3.objを生成
 	titleLogo_ = std::make_unique<TitleLogo>(modelManager_);
+
+	auto* halfDomeModel = modelManager_->GetNameByModel("halfDome.gltf");
+	halfDomeModel->SetDefaultIsEnableLight(false);
+	hyperspaceEffect_ = gameObjectManager_->AddObject<HyperspaceEffect>(halfDomeModel);
 }
 
 void TitleScene::Initialize() {
 	isFinished_ = false;
 	titleLogo_->ResetAnimation();
+	hyperspaceEffect_->ResetAnimation();
 }
 
 void TitleScene::Update() {
@@ -50,6 +56,7 @@ void TitleScene::Update() {
 	// Decision入力を受けたらタイトル終了演出を開始する。
 	if (inputCommand_->IsCommandActive("Decision")) {
 		titleLogo_->AnimationStart();
+		hyperspaceEffect_->StartAnimation();
 	}
 
 	// タイトルロゴの更新処理

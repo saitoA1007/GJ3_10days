@@ -7,6 +7,7 @@
 #include "Application/Scene/Transition/Fade.h"
 
 class TitleLogo;
+class HyperspaceEffect;
 
 class TitleScene : public GameEngine::IScene {
 public:
@@ -59,6 +60,9 @@ private: // シーン機能
 
 	// メインカメラ
 	std::unique_ptr<GameEngine::Camera> mainCamera_;
+
+	// ハイパースペースの演出
+	HyperspaceEffect* hyperspaceEffect_ = nullptr;
 
 	// タイトルロゴ
 	std::unique_ptr<TitleLogo> titleLogo_;
