@@ -32,6 +32,7 @@ namespace Prototype {
 		assert(unitManager_ != nullptr && "Prototype enemy requires a unit manager");
 		assert(settings_ != nullptr && "Prototype enemy requires settings");
 
+		// 設定はManagerが共有し、個体ごとには状態とModelComponentだけを持つ。
 		modelComponent_ = std::make_unique<ModelComponent>(model);
 		modelComponent_->materialData_->enableLighting = true;
 	}
@@ -57,6 +58,7 @@ namespace Prototype {
 			return;
 		}
 
+		// 運搬中ユニットが索敵範囲にいる間だけ、ロケットより優先して追跡する。
 		UpdateTarget();
 		const Vector3 targetPosition = targetUnit_
 			? targetUnit_->GetPosition()
@@ -68,6 +70,7 @@ namespace Prototype {
 			SyncModel();
 			return;
 		}
+		// ユニットとの接触がなければ、最終目的地であるロケットへの到達を判定する。
 		if (TryHitRocket()) {
 			return;
 		}
@@ -96,6 +99,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 複数ユニットが同じ敵へ派遣されないよう、選択候補から一時的に外す。
 		isReservedForAttack_ = true;
 		isHighlighted_ = false;
 		SyncModel();
@@ -116,6 +120,7 @@ namespace Prototype {
 			return nullptr;
 		}
 
+		// Reset前に撃破地点と距離帯を保存し、その地点へEnergyを再生成する。
 		const Vector3 dropPosition = position_;
 		const EnergySize dropSize = GetDropEnergySize();
 		Reset();
@@ -123,6 +128,7 @@ namespace Prototype {
 	}
 
 	EnergySize Enemy::GetDropEnergySize() const {
+		// 7層を距離に応じた3段階へまとめる。生成禁止帯でも敵ドロップは発生する。
 		switch (field_->GetZone(position_)) {
 		case FieldZone::Center:
 		case FieldZone::Near:
@@ -149,10 +155,12 @@ namespace Prototype {
 	}
 
 	void Enemy::UpdateTarget() {
+		// 現在の対象がまだ運搬中なら追跡を継続し、毎フレームの対象ぶれを防ぐ。
 		if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
 			return;
 		}
 
+		// 対象が消えた、納品した、倒された場合は範囲内から選び直す。
 		targetUnit_ = unitManager_->FindNearestCarryingUnit(position_, settings_->searchRadius);
 	}
 
@@ -183,6 +191,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 運搬Energyは接触地点へ戻り、ユニット本体は待機状態へ即時復帰する。
 		const bool defeated = targetUnit_->DefeatAndDropEnergy();
 		targetUnit_ = nullptr;
 		return defeated;
@@ -194,6 +203,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 到達した敵はロケットのEnergyを減らした後、プールへ戻る。
 		rocket_->ReceiveEnemyHit();
 		Reset();
 		return true;

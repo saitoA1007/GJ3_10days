@@ -13,28 +13,25 @@
 
 namespace Prototype {
 
-	/// <summary>
-	/// フィールド中心からの距離で区切られるゲームプレイ領域
-	/// </summary>
+	/// @brief フィールド中心からの距離で区切られるゲームプレイ領域。
 	enum class FieldZone : uint8_t {
-		Center,
-		Near,
-		NearBuffer,
-		Middle,
-		MiddleBuffer,
-		Far,
-		OuterBuffer,
-		Outside,
+		Center,       // ロケットを配置する中心領域
+		Near,         // Small Energyの生成領域
+		NearBuffer,   // エネルギーを生成しないNearとMiddleの間
+		Middle,       // Medium Energyの生成領域
+		MiddleBuffer, // エネルギーを生成しないMiddleとFarの間
+		Far,          // Large Energyの生成領域
+		OuterBuffer,  // エネルギーを生成しない最外周。敵の出現位置
+		Outside,      // フィールド外
 	};
 
+	// Outsideを除いた、描画する円形モデルの枚数。
 	inline constexpr size_t kFieldZoneCount = 7;
 	static_assert(static_cast<size_t>(FieldZone::Outside) == kFieldZoneCount);
 
-	/// <summary>
-	/// 表示と領域判定で共有するフィールド設定
-	/// </summary>
+	/// @brief 表示と領域判定で共有するフィールド設定。
 	struct FieldSettings {
-		Vector3 center = { 0.0f, 0.0f, 0.0f };
+		Vector3 center = { 0.0f, 0.0f, 0.0f }; // すべての円が共有する中心座標
 		// FieldZone と同じく、中心から外側へ向かう順番。
 		std::array<float, kFieldZoneCount> radii = {
 			5.0f,  // Center
@@ -54,33 +51,55 @@ namespace Prototype {
 			Vector4{ 0.68f, 0.28f, 0.34f, 1.0f }, // Far
 			Vector4{ 0.24f, 0.16f, 0.18f, 1.0f }, // OuterBuffer
 		};
-		float layerHeight = 0.06f;
+		float layerHeight = 0.06f; // 重なりを避けるため、内側の円を持ち上げる高さ差
 	};
 
-	/// <summary>
-	/// プロトタイプ用の円形フィールド
-	/// </summary>
+	/// @brief プロトタイプ用の7層円形フィールド。
 	class Field final : public GameEngine::IGameObject {
 	public:
+		/// @brief 同じ円モデルを7枚用意し、各領域の半径と色を登録する。
+		/// @param[in] circleModel XZ平面上の円形モデル。
+		/// @param[in] settings 中心、半径、色、高さ差の初期設定。
 		explicit Field(GameEngine::Model* circleModel, const FieldSettings& settings = {});
 		~Field() override = default;
 
+		/// @brief 初期設定を全円モデルへ反映する。
 		void Initialize() override;
+
+		/// @brief Register変更があれば全円モデルへ反映する。
 		void Update() override;
+
+		/// @brief デバッグ停止中もRegister変更を反映する。
 		void DebugUpdate() override;
+
+		/// @brief 外側から内側の順に7枚の円を描画する。
 		void Draw() override;
 
+		/// @brief 中心からのXZ距離に対応する領域を取得する。
+		/// @param[in] worldPosition 判定するワールド座標。
+		/// @return 所属領域。最外周の外側ならOutside。
 		FieldZone GetZone(const Vector3& worldPosition) const;
+
+		/// @brief 座標が最外周円の内側か判定する。
+		/// @param[in] worldPosition 判定するワールド座標。
+		/// @return フィールド内ならtrue。
 		bool Contains(const Vector3& worldPosition) const;
+
+		/// @brief 指定領域の外周半径を取得する。
+		/// @param[in] zone 半径を取得する領域。
+		/// @return 領域の半径。Outsideなど範囲外なら0。
 		float GetRadius(FieldZone zone) const;
 
+		/// @brief 現在のフィールド設定を取得する。
+		/// @return フィールド設定への参照。
 		const FieldSettings& GetSettings() const { return settings_; }
 
 	private:
+		/// @brief 半径・色・重なり順を7枚のモデルへ反映する。
 		void ApplySettings();
 
-		FieldSettings settings_;
-		std::array<std::unique_ptr<GameEngine::ModelComponent>, kFieldZoneCount> zoneModels_;
-		std::unique_ptr<GameEngine::DebugParameter> debugParameter_;
+		FieldSettings settings_; // 表示と領域判定の両方で共有する設定
+		std::array<std::unique_ptr<GameEngine::ModelComponent>, kFieldZoneCount> zoneModels_; // 外側から重ねる円モデル
+		std::unique_ptr<GameEngine::DebugParameter> debugParameter_; // 半径・色とParameter Inspectorの接続
 	};
 }

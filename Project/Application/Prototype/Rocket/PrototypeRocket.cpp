@@ -17,6 +17,7 @@ namespace Prototype {
 		modelComponent_ = std::make_unique<ModelComponent>(model);
 		modelComponent_->materialData_->enableLighting = true;
 
+		// RocketはEnemyだけを受け付け、接触時のEnergy減算をコールバックへ集約する。
 		collider_.SetCollisionAttribute(kCollisionAttributeRocket);
 		collider_.SetCollisionMask(kCollisionAttributeEnemy);
 		collider_.SetUserData({ static_cast<uint32_t>(CollisionTypeID::kRocket), this });
@@ -59,12 +60,14 @@ namespace Prototype {
 	}
 
 	EnergyChange Rocket::DepositEnergy(int32_t amount) {
+		// 増減理由を付けておくことで、将来UIや演出が変化元を判別できる。
 		const EnergyChange change = energy_.Add(amount, EnergyChangeReason::Delivery);
 		NotifyEnergyChanged(change);
 		return change;
 	}
 
 	EnergyChange Rocket::AllocateEnergyToUnit(int32_t requestedAmount) {
+		// 不足時は残量だけを渡す。Unitは返された実消費量をスタミナとして使う。
 		const EnergyChange change = energy_.ConsumeUpTo(requestedAmount, EnergyChangeReason::UnitAllocation);
 		NotifyEnergyChanged(change);
 		return change;
@@ -96,6 +99,7 @@ namespace Prototype {
 	}
 
 	void Rocket::SyncComponents() {
+		// 見た目と当たり判定が別座標にならないよう、同じ設定から毎回同期する。
 		modelComponent_->worldTransform_.transform_.scale = settings_.scale;
 		modelComponent_->worldTransform_.transform_.translate = settings_.position;
 		modelComponent_->Update();
@@ -109,6 +113,7 @@ namespace Prototype {
 	}
 
 	void Rocket::NotifyEnergyChanged(const EnergyChange& change) {
+		// 0消費・0加算では不要なUI更新を発生させない。
 		if (change.Changed() && onEnergyChanged_) {
 			onEnergyChanged_(change);
 		}

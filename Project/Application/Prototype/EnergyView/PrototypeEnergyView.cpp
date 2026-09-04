@@ -32,6 +32,7 @@ namespace Prototype {
 	}
 
 	void EnergyView::SyncValue() {
+		// 値の分解やモデル配置は既存ScoreViewへ任せ、このViewはRocketとの接続だけを担う。
 		numberView_.SetValue(rocket_->GetEnergy());
 		numberView_.Update();
 	}

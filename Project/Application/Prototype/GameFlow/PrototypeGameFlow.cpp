@@ -49,6 +49,7 @@ namespace Prototype {
 		remainingTime_ = settings_.gameDuration;
 		finalEnergy_ = 0;
 		debugPaused_ = false;
+		// 待機時間が0ならReadyを飛ばしてすぐPlayingを開始する。
 		phase_ = initialDelayRemaining_ > 0.0f ? GamePhase::Ready : GamePhase::Playing;
 		ApplyGameplayState();
 	}
@@ -59,6 +60,7 @@ namespace Prototype {
 			return;
 		}
 
+		// フェーズごとに扱うタイマーを限定し、TimeUp後は値を変化させない。
 		const float deltaTime = (std::max)(FpsCounter::gameDeltaTime, 0.0f);
 		switch (phase_) {
 		case GamePhase::Ready:
@@ -115,6 +117,7 @@ namespace Prototype {
 
 	void GameFlowController::FinishPlaying() {
 		remainingTime_ = 0.0f;
+		// 発射・リザルトで同じ値を使えるよう、時間切れの瞬間に固定する。
 		finalEnergy_ = rocket_->GetEnergy();
 		phase_ = GamePhase::TimeUp;
 		debugPaused_ = false;
@@ -122,6 +125,7 @@ namespace Prototype {
 	}
 
 	void GameFlowController::ApplyGameplayState() {
+		// このクラスを唯一の停止判断元にし、各Managerの稼働状態を揃える。
 		const bool enabled = phase_ == GamePhase::Playing && !debugPaused_;
 		energySpawner_->SetGameplayEnabled(enabled);
 		enemyManager_->SetGameplayEnabled(enabled);

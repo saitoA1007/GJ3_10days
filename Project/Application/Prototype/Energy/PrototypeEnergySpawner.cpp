@@ -17,6 +17,7 @@ namespace {
 		"Medium",
 		"Large",
 	};
+	// 自然落下するEnergyは生成禁止帯を除いた3領域だけから抽選する。
 	constexpr std::array<Prototype::FieldZone, Prototype::kEnergySizeCount> kEnergySpawnZones = {
 		Prototype::FieldZone::Near,
 		Prototype::FieldZone::Middle,
@@ -31,6 +32,7 @@ namespace Prototype {
 		assert(energyModel != nullptr && "Prototype energy spawner requires energy.obj");
 		assert(field_ != nullptr && "Prototype energy spawner requires a field");
 
+		// Energyは生成頻度が高いため、固定プールを作って実行中の確保を避ける。
 		const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 		pickups_.reserve(safeCapacity);
 		for (size_t i = 0; i < safeCapacity; ++i) {
@@ -61,10 +63,12 @@ namespace Prototype {
 		ApplyDebugParameters();
 		gameplayEnabled_ = true;
 		spawnTimer_ = 0.0f;
+		// シーン再初期化時に落下・予約・運搬状態を残さない。
 		for (auto& pickup : pickups_) {
 			pickup->Reset();
 		}
 
+		// 各サイズを最初から確認できるよう、3つの生成領域へ同数ずつ置く。
 		for (int32_t i = 0; i < settings_.initialCountPerZone; ++i) {
 			SpawnInZone(FieldZone::Near);
 			SpawnInZone(FieldZone::Middle);
@@ -78,6 +82,7 @@ namespace Prototype {
 			return;
 		}
 
+		// gameplayEnabled_がfalseの間は落下も生成タイマーも完全に停止する。
 		UpdatePickups(FpsCounter::gameDeltaTime);
 
 		spawnTimer_ += FpsCounter::gameDeltaTime;
@@ -103,6 +108,7 @@ namespace Prototype {
 		if (!gameplayEnabled_) {
 			return false;
 		}
+		// Centerと3つのBufferには自然生成しない。
 		if (zone != FieldZone::Near && zone != FieldZone::Middle && zone != FieldZone::Far) {
 			return false;
 		}
@@ -110,6 +116,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 非アクティブな個体だけをプールから再利用する。
 		auto available = std::find_if(pickups_.begin(), pickups_.end(), [](const auto& pickup) {
 			return !pickup->IsActive();
 		});
@@ -140,6 +147,7 @@ namespace Prototype {
 			return nullptr;
 		}
 
+		// 呼び出し元のY座標に関係なく、Energy用の地面高さへ揃える。
 		Vector3 groundPosition = position;
 		groundPosition.y = settings_.groundHeight;
 		(*available)->SpawnOnGround(size, groundPosition, typeSettings_[sizeIndex]);
@@ -151,6 +159,7 @@ namespace Prototype {
 		const float safeMaxDistance = (std::max)(maxDistance, 0.0f);
 		float nearestDistanceSquared = safeMaxDistance * safeMaxDistance;
 
+		// Falling・Reserved・Carriedはロックオン候補に含めない。
 		for (auto& pickup : pickups_) {
 			if (!pickup->IsTargetable()) {
 				continue;
@@ -203,6 +212,7 @@ namespace Prototype {
 				continue;
 			}
 
+			// Register変更を既に存在する個体にも即時反映する。
 			pickup->ApplyTypeSettings(typeSettings_[static_cast<size_t>(pickup->GetSize())]);
 			pickup->Update(deltaTime);
 		}
@@ -214,6 +224,7 @@ namespace Prototype {
 	}
 
 	Vector3 EnergySpawner::MakeSpawnPosition(FieldZone zone) const {
+		// 各生成領域の直前にあるBufferを内周として、生成可能な円環を求める。
 		FieldZone innerZone = FieldZone::Center;
 		switch (zone) {
 		case FieldZone::Middle:
@@ -232,7 +243,7 @@ namespace Prototype {
 		const float minRadius = (std::min)(innerRadius, outerRadius);
 		const float maxRadius = (std::max)(innerRadius, outerRadius);
 
-		// 面積に対して一様になるよう、半径の二乗を補間する。
+		// 半径そのものではなく二乗を一様抽選し、円環の外側へ偏る問題を防ぐ。
 		const float radiusSquared = RandomGenerator::Get<float>(
 			minRadius * minRadius,
 			maxRadius * maxRadius);

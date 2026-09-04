@@ -22,6 +22,7 @@ namespace Prototype {
 		float fallHeight,
 		float fallSpeed,
 		const EnergyTypeSettings& typeSettings) {
+		// 着地点を保持したまま開始位置だけ上へずらし、Falling状態から始める。
 		size_ = size;
 		state_ = EnergyState::Falling;
 		typeSettings_ = typeSettings;
@@ -36,6 +37,7 @@ namespace Prototype {
 		EnergySize size,
 		const Vector3& groundPosition,
 		const EnergyTypeSettings& typeSettings) {
+		// 敵ドロップは落下を経由せず、すぐロックオン可能なOnGroundにする。
 		size_ = size;
 		state_ = EnergyState::OnGround;
 		typeSettings_ = typeSettings;
@@ -60,6 +62,7 @@ namespace Prototype {
 		}
 
 		if (state_ == EnergyState::Falling) {
+			// 地面を通り抜けないよう、到達したフレームで位置をgroundY_へ固定する。
 			position_.y -= fallSpeed_ * (std::max)(deltaTime, 0.0f);
 			if (position_.y <= groundY_) {
 				position_.y = groundY_;
@@ -81,6 +84,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 予約後は別ユニットの検索対象から外れる。
 		state_ = EnergyState::Reserved;
 		return true;
 	}
@@ -99,6 +103,7 @@ namespace Prototype {
 			return;
 		}
 
+		// ユニットが倒れた位置のXZを使い、Yだけはフィールドの地面へ戻す。
 		position_ = position;
 		SyncModel();
 	}
@@ -119,6 +124,7 @@ namespace Prototype {
 			return 0;
 		}
 
+		// Resetで状態を破棄する前に獲得量を退避する。
 		const int32_t deliveredValue = typeSettings_.value;
 		Reset();
 		return deliveredValue;
@@ -150,6 +156,7 @@ namespace Prototype {
 		modelComponent_->worldTransform_.transform_.translate = position_;
 		Vector4 color = typeSettings_.color;
 		if (isHighlighted_) {
+			// 選択中は元の色味を残しながら白へ寄せ、対象を判別しやすくする。
 			color.x = color.x + (1.0f - color.x) * 0.65f;
 			color.y = color.y + (1.0f - color.y) * 0.65f;
 			color.z = color.z + (1.0f - color.z) * 0.65f;

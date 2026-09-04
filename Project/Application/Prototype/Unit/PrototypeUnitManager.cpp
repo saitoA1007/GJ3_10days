@@ -19,6 +19,7 @@ namespace Prototype {
 		assert(unitModel != nullptr && "Prototype unit manager requires unit.obj");
 		assert(rocket_ != nullptr && "Prototype unit manager requires a rocket");
 
+		// Unitは倒れても再利用するため、最大候補数を固定プールとして確保する。
 		const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 		units_.reserve(safeCapacity);
 		for (size_t i = 0; i < safeCapacity; ++i) {
@@ -59,6 +60,7 @@ namespace Prototype {
 			return;
 		}
 
+		// capacity全体ではなく、Registerで指定された先頭unitCount体だけを稼働させる。
 		for (size_t i = 0; i < GetUnitCount(); ++i) {
 			units_[i]->Update(FpsCounter::gameDeltaTime);
 		}
@@ -84,6 +86,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 待機中の最初の1体へ依頼し、利用可能数を越えた派遣は拒否する。
 		for (size_t i = 0; i < GetUnitCount(); ++i) {
 			if (units_[i]->IsAvailable()) {
 				return units_[i]->DispatchToEnergy(target, requestedEnergy);
@@ -110,6 +113,7 @@ namespace Prototype {
 		const float safeMaxDistance = (std::max)(maxDistance, 0.0f);
 		float nearestDistanceSquared = safeMaxDistance * safeMaxDistance;
 
+		// Enemyの索敵用。sqrtを避けてXZ距離の二乗で最短個体を比較する。
 		for (size_t i = 0; i < GetUnitCount(); ++i) {
 			Unit* unit = units_[i].get();
 			if (!unit->IsCarryingEnergy()) {
@@ -170,6 +174,7 @@ namespace Prototype {
 	}
 
 	void UnitManager::ApplyUnitCount() {
+		// 実行中に参加数を減らした場合、範囲外になった個体の予約を安全に解放する。
 		for (size_t i = GetUnitCount(); i < units_.size(); ++i) {
 			if (!units_[i]->IsAvailable()) {
 				units_[i]->Recall();

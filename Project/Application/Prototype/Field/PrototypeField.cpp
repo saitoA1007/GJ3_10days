@@ -21,12 +21,14 @@ namespace Prototype {
 	Field::Field(Model* circleModel, const FieldSettings& settings)
 		: settings_(settings) {
 		assert(circleModel != nullptr && "Prototype field requires fieldCircle.obj");
+		// 領域判定は配列の先頭から行うため、半径は必ず内側から昇順にする。
 		for (size_t i = 0; i < settings_.radii.size(); ++i) {
 			assert(settings_.radii[i] > 0.0f && "Field radii must be positive");
 			assert((i == 0 || settings_.radii[i - 1] < settings_.radii[i]) &&
 				"Field radii must increase from Center to OuterBuffer");
 		}
 
+		// 同一モデルを7枚重ね、色と半径だけを個別設定する。
 		for (auto& zoneModel : zoneModels_) {
 			zoneModel = std::make_unique<ModelComponent>(circleModel);
 		}
@@ -65,6 +67,7 @@ namespace Prototype {
 		const float offsetZ = worldPosition.z - settings_.center.z;
 		const float distanceSquared = offsetX * offsetX + offsetZ * offsetZ;
 
+		// 最初に収まった円が、その座標の最も内側の所属領域となる。
 		for (size_t i = 0; i < settings_.radii.size(); ++i) {
 			const float radius = settings_.radii[i];
 			if (distanceSquared <= radius * radius) {
@@ -92,6 +95,7 @@ namespace Prototype {
 		for (size_t i = 0; i < zoneModels_.size(); ++i) {
 			auto& zoneModel = zoneModels_[i];
 			const float radius = settings_.radii[i];
+			// 内側ほどわずかに高くし、重なった面のちらつきを防ぐ。
 			const float height = static_cast<float>(kFieldZoneCount - 1 - i) * settings_.layerHeight;
 
 			zoneModel->worldTransform_.transform_.scale = { radius, 1.0f, radius };

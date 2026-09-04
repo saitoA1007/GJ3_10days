@@ -23,6 +23,7 @@
 using namespace GameEngine;
 
 namespace {
+	// ProtoSceneで登録する入力コマンド名。入力デバイスの違いはScene側で吸収する。
 	constexpr const char* kCursorUpCommand = "ProtoCursorUp";
 	constexpr const char* kCursorDownCommand = "ProtoCursorDown";
 	constexpr const char* kCursorLeftCommand = "ProtoCursorLeft";
@@ -30,6 +31,7 @@ namespace {
 	constexpr const char* kLockOnTriggerCommand = "ProtoLockOnTrigger";
 	constexpr const char* kLockOnPushCommand = "ProtoLockOnPush";
 	constexpr const char* kLockOnReleaseCommand = "ProtoLockOnRelease";
+	// Camera初期化時の画面サイズと合わせ、マウス座標をワールドへ逆変換する。
 	constexpr float kViewportWidth = 1280.0f;
 	constexpr float kViewportHeight = 720.0f;
 }
@@ -69,6 +71,7 @@ namespace Prototype {
 		assert(enemyManager_ != nullptr && "Prototype lock-on requires an enemy manager");
 		assert(unitManager_ != nullptr && "Prototype lock-on requires a unit manager");
 
+		// カーソルは画面上で色を判別しやすいよう、ライティングの影響を受けない。
 		cursorModel_ = std::make_unique<ModelComponent>(cursorModel);
 		cursorModel_->materialData_->enableLighting = false;
 
@@ -111,6 +114,7 @@ namespace Prototype {
 
 		UpdateCursor(FpsCounter::gameDeltaTime);
 
+		// チャージ中は対象を固定し、それ以外のときだけ最寄り対象を探し直す。
 		if (isCharging_) {
 			UpdateLockOn(FpsCounter::gameDeltaTime);
 		} else {
@@ -143,6 +147,7 @@ namespace Prototype {
 		}
 
 		gameplayEnabled_ = enabled;
+		// 時間切れやPause中に入力を離しても、後から派遣が成立しないよう解除する。
 		if (!gameplayEnabled_) {
 			CancelLockOn();
 		}
@@ -173,11 +178,13 @@ namespace Prototype {
 		const Vector2 mouseDelta = input_->GetMouseDelta();
 		const bool mouseMoved = mouseDelta.LengthSquared() >
 			settings_.mouseMoveThreshold * settings_.mouseMoveThreshold;
+		// マウスが動いたフレームは絶対位置を優先し、キー・スティックとの競合を防ぐ。
 		if (mouseMoved && TrySetCursorFromMouse()) {
 			ClampCursorToField();
 			return;
 		}
 
+		// WASDと左スティックを同じ2D移動ベクトルへ合成する。
 		Vector2 move = inputCommand_->GetLeftStick();
 		if (inputCommand_->IsCommandActive(kCursorLeftCommand)) {
 			move.x -= 1.0f;
@@ -203,6 +210,7 @@ namespace Prototype {
 
 	bool LockOnController::TrySetCursorFromMouse() {
 		const Vector2 mousePosition = input_->GetMousePosition();
+		// Near/Farのスクリーン座標を逆変換し、カメラから地面へ伸びるレイを作る。
 		const Matrix4x4 viewport = Math::MakeViewportMatrix(
 			0.0f,
 			0.0f,
@@ -218,6 +226,7 @@ namespace Prototype {
 		if (std::abs(ray.y) <= 0.0001f) {
 			return false;
 		}
+		// レイとY=groundHeight平面の交点距離を求める。
 		const float distance = (settings_.groundHeight - nearPoint.y) / ray.y;
 		if (distance < 0.0f) {
 			return false;
@@ -237,6 +246,7 @@ namespace Prototype {
 		const float distanceSquared = offsetX * offsetX + offsetZ * offsetZ;
 
 		if (distanceSquared > allowedRadius * allowedRadius && distanceSquared > 0.0f) {
+			// 中心からの方向は維持し、半径だけを許可範囲まで縮める。
 			const float scale = allowedRadius / std::sqrt(distanceSquared);
 			cursorPosition_.x = center.x + offsetX * scale;
 			cursorPosition_.z = center.z + offsetZ * scale;
@@ -259,6 +269,7 @@ namespace Prototype {
 		Enemy* enemy = enemyManager_->FindNearestTargetable(cursorPosition_, settings_.selectionRadius);
 
 		if (energy && enemy) {
+			// 両方が範囲内なら距離で比較し、同距離では防衛を優先してEnemyを選ぶ。
 			const Vector3 energyOffset = energy->GetPosition() - cursorPosition_;
 			const Vector3 enemyOffset = enemy->GetPosition() - cursorPosition_;
 			const float energyDistanceSquared = energyOffset.x * energyOffset.x + energyOffset.z * energyOffset.z;
@@ -274,6 +285,7 @@ namespace Prototype {
 	}
 
 	void LockOnController::StartLockOn() {
+		// 待機Unitがいない場合は、対象を選べてもチャージを開始しない。
 		if (!HasValidSelection() || unitManager_->GetAvailableCount() == 0) {
 			return;
 		}
@@ -283,17 +295,20 @@ namespace Prototype {
 	}
 
 	void LockOnController::UpdateLockOn(float deltaTime) {
+		// 対象が他処理で消えた場合はEnergyを消費せずキャンセルする。
 		if (!HasValidSelection()) {
 			CancelLockOn();
 			return;
 		}
 
 		if (inputCommand_->IsCommandActive(kLockOnPushCommand)) {
+			// 最大値で止め、長時間保持しても要求Energyが上限を越えないようにする。
 			lockOnSeconds_ = (std::min)(
 				lockOnSeconds_ + (std::max)(deltaTime, 0.0f),
 				settings_.maxLockOnSeconds);
 		}
 
+		// 離した瞬間に現在のチャージ量を確定し、1体だけ派遣する。
 		if (inputCommand_->IsCommandActive(kLockOnReleaseCommand)) {
 			CompleteLockOn();
 		}
@@ -301,6 +316,7 @@ namespace Prototype {
 
 	void LockOnController::CompleteLockOn() {
 		const int32_t requestedEnergy = CalculateRequestedEnergy();
+		// 選択種別に応じてManagerの入口だけを切り替え、消費処理はUnitへ任せる。
 		const bool dispatched = selectedEnemy_
 			? unitManager_->DispatchToEnemy(selectedEnemy_, requestedEnergy)
 			: unitManager_->DispatchToEnergy(selectedEnergy_, requestedEnergy);
@@ -308,6 +324,7 @@ namespace Prototype {
 		isCharging_ = false;
 		lockOnSeconds_ = 0.0f;
 
+		// 対象予約などが失敗した場合は、現在位置でもう一度候補を検索する。
 		if (!dispatched) {
 			UpdateSelection();
 		}
@@ -323,6 +340,7 @@ namespace Prototype {
 		if (lockOnSeconds_ >= settings_.maxLockOnSeconds) {
 			return 1.0f;
 		}
+		// 短押し猶予内は必ず0とし、単発クリックによる1Energy消費を防ぐ。
 		if (lockOnSeconds_ <= settings_.chargeStartSeconds) {
 			return 0.0f;
 		}
@@ -339,6 +357,7 @@ namespace Prototype {
 	}
 
 	int32_t LockOnController::CalculateRequestedEnergy() const {
+		// 正数のstatic_castは小数点以下を切り捨てるため、低チャージの繰り上がりがない。
 		return static_cast<int32_t>(
 			static_cast<float>(settings_.maxChargeEnergyCost) * CalculateChargeRatio());
 	}
@@ -352,6 +371,7 @@ namespace Prototype {
 		if (selectedEnergy_ == energy && selectedEnemy_ == enemy) {
 			return;
 		}
+		// 前の対象を通常色へ戻してから、新しい対象だけを強調する。
 		if (selectedEnergy_) {
 			selectedEnergy_->SetHighlighted(false);
 		}
@@ -370,6 +390,7 @@ namespace Prototype {
 	}
 
 	void LockOnController::DrawLockOnGuide() {
+		// 通常モデルとは別に、選択半径・対象・派遣経路をデバッグ線で確認できるようにする。
 		debugRenderer_->AddCircle(
 			cursorPosition_,
 			{ 0.0f, 1.0f, 0.0f },

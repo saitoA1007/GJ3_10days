@@ -20,11 +20,13 @@ namespace Prototype {
 		assert(rocket_ != nullptr && "Prototype unit requires a rocket");
 		assert(settings_ != nullptr && "Prototype unit requires settings");
 
+		// 設定はManager側で共有し、個体は行動状態と描画情報だけを所有する。
 		modelComponent_ = std::make_unique<ModelComponent>(model);
 		modelComponent_->materialData_->enableLighting = true;
 	}
 
 	void Unit::Initialize() {
+		// 再初期化前に確保していたEnergyがあれば、消さずに地面へ戻す。
 		if (targetEnergy_ && targetEnergy_->IsActive()) {
 			targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
 		}
@@ -38,6 +40,7 @@ namespace Prototype {
 	}
 
 	void Unit::Update(float deltaTime) {
+		// 各状態の責務を分け、遷移は到達・衝突が成立した関数内だけで行う。
 		switch (state_) {
 		case UnitState::Stored:
 			return;
@@ -69,6 +72,7 @@ namespace Prototype {
 	}
 
 	bool Unit::DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy) {
+		// 対象予約が成功してからEnergyを消費し、派遣失敗時の誤消費を防ぐ。
 		if (!target || !IsAvailable() || !target->TryReserve()) {
 			return false;
 		}
@@ -83,6 +87,7 @@ namespace Prototype {
 	}
 
 	bool Unit::DispatchToEnemy(Enemy* target, int32_t requestedEnergy) {
+		// 敵も予約制にし、同じ敵へ複数体が同時出撃するのを防ぐ。
 		if (!target || !IsAvailable() || !target->TryReserveForAttack()) {
 			return false;
 		}
@@ -101,6 +106,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 運搬物だけを接触地点へ残し、Unitはプールから削除せず再出撃可能にする。
 		targetEnergy_->DropOnGround(position_);
 		targetEnergy_ = nullptr;
 		ReturnToStorageAfterDefeat();
@@ -108,6 +114,7 @@ namespace Prototype {
 	}
 
 	void Unit::Recall() {
+		// 対象側に残った予約を必ず解除し、選択不能なオブジェクトを作らない。
 		if (targetEnergy_ && targetEnergy_->IsActive()) {
 			targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
 		}
@@ -130,6 +137,7 @@ namespace Prototype {
 	}
 
 	void Unit::UpdateMovingToEnergy(float deltaTime) {
+		// 他処理で予約が解除された場合は、無効なポインタを追わず帰還扱いにする。
 		if (!targetEnergy_ || !targetEnergy_->IsReserved()) {
 			Recall();
 			return;
@@ -140,6 +148,7 @@ namespace Prototype {
 
 		const float pickupRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
 		if (DistanceSquaredXZ(position_, targetEnergy_->GetPosition()) <= pickupRadiusSquared) {
+			// 回収成立後は同じEnergyを保持したまま帰還状態へ遷移する。
 			if (targetEnergy_->BeginCarry()) {
 				targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
 				state_ = UnitState::ReturningToRocket;
@@ -163,8 +172,10 @@ namespace Prototype {
 			return;
 		}
 
+		// 衝突時点の距離帯に対応したEnergyを敵から生成する。
 		EnergyPickup* droppedEnergy = targetEnemy_->DefeatAndDropEnergy();
 		targetEnemy_ = nullptr;
+		// スタミナが残っていれば勝利して即運搬、なければ相打ちでEnergyだけを残す。
 		if (stamina_ > 0.0f &&
 			droppedEnergy != nullptr &&
 			droppedEnergy->TryReserve() &&
@@ -190,6 +201,7 @@ namespace Prototype {
 
 		const float deliveryRadiusSquared = settings_->deliveryRadius * settings_->deliveryRadius;
 		if (DistanceSquaredXZ(position_, rocket_->GetPosition()) <= deliveryRadiusSquared) {
+			// DeliverはEnergy個体をプールへ戻し、返された獲得量だけをRocketへ加算する。
 			rocket_->DepositEnergy(targetEnergy_->Deliver());
 			targetEnergy_ = nullptr;
 			state_ = UnitState::Stored;
@@ -198,6 +210,7 @@ namespace Prototype {
 	}
 
 	void Unit::AllocateStamina(int32_t requestedEnergy) {
+		// EnergyChange.amountは消費時に負数なので、符号を反転してスタミナ残量にする。
 		const EnergyChange allocated = rocket_->AllocateEnergyToUnit((std::max)(requestedEnergy, 0));
 		stamina_ = static_cast<float>(-allocated.amount);
 	}
@@ -220,6 +233,7 @@ namespace Prototype {
 		}
 
 		direction.Normalize();
+		// スタミナが1以上ではなく、わずかでも残っていれば高速移動を選ぶ。
 		const float speed = stamina_ > 0.0f ? settings_->boostedSpeed : settings_->normalSpeed;
 		const float moveDistance = (std::min)(speed * (std::max)(deltaTime, 0.0f), distance);
 		position_ += direction * moveDistance;
@@ -232,6 +246,7 @@ namespace Prototype {
 		}
 
 		const float distanceFromRocket = std::sqrt(DistanceSquaredXZ(position_, rocket_->GetPosition()));
+		// ロケットから離れるほど倍率を線形に増やし、遠距離派遣のコストを高くする。
 		const float distanceMultiplier = 1.0f + distanceFromRocket * settings_->distanceDrainRate;
 		const float consumed = settings_->staminaDrainPerSecond * distanceMultiplier * (std::max)(deltaTime, 0.0f);
 		stamina_ = (std::max)(stamina_ - consumed, 0.0f);
@@ -246,6 +261,7 @@ namespace Prototype {
 	void Unit::SyncModel() {
 		modelComponent_->worldTransform_.transform_.scale = settings_->scale;
 		modelComponent_->worldTransform_.transform_.translate = position_;
+		// 水色なら高速移動可能、通常色ならスタミナ切れであることを示す。
 		modelComponent_->materialData_->color = stamina_ > 0.0f
 			? settings_->staminaColor
 			: settings_->normalColor;

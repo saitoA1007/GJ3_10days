@@ -28,6 +28,7 @@ ProtoScene::ProtoScene() {
 		1280,
 		720);
 
+	// 生成順には依存関係がある。FieldとRocketを先に作り、各Managerへ非所有参照を渡す。
 	auto* fieldCircleModel = modelManager_->GetNameByModel("fieldCircle.obj");
 	field_ = gameObjectManager_->AddObject<Prototype::Field>(fieldCircleModel);
 
@@ -68,6 +69,7 @@ ProtoScene::ProtoScene() {
 		unitManager_,
 		lockOnController_);
 
+	// ScoreViewを再利用するため、0.obj～9.objを数字順に配列へ格納する。
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
 		digitModels[digit] = modelManager_->GetNameByModel(std::to_string(digit) + ".obj");
@@ -103,6 +105,7 @@ void ProtoScene::Draw() {
 }
 
 void ProtoScene::RegisterInputCommands() {
+	// デバイス差をここで吸収し、LockOnControllerはコマンド名だけを参照する。
 	inputCommand_->RegisterCommand("ProtoCursorUp", {
 		{ InputState::KeyPush, DIK_W },
 	});

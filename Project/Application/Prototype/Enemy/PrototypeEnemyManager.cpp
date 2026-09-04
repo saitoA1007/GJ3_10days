@@ -32,6 +32,7 @@ namespace Prototype {
 		assert(energySpawner != nullptr && "Prototype enemy manager requires an energy spawner");
 		assert(unitManager != nullptr && "Prototype enemy manager requires a unit manager");
 
+		// 実行中のnew/deleteを避けるため、最大候補数を最初にまとめて確保する。
 		const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 		enemies_.reserve(safeCapacity);
 		for (size_t i = 0; i < safeCapacity; ++i) {
@@ -63,10 +64,12 @@ namespace Prototype {
 		ApplyDebugParameters();
 		gameplayEnabled_ = true;
 		spawnTimer_ = 0.0f;
+		// シーン再初期化時に前回の敵状態や予約を残さない。
 		for (auto& enemy : enemies_) {
 			enemy->Reset();
 		}
 
+		// Playing開始前でも初期配置だけは作り、GameFlowが移動可否を管理する。
 		for (int32_t i = 0; i < settings_.initialCount; ++i) {
 			SpawnOne();
 		}
@@ -82,6 +85,7 @@ namespace Prototype {
 			enemy->Update(FpsCounter::gameDeltaTime);
 		}
 
+		// 生成間隔を超えたフレームで1体だけ追加し、上限到達時はSpawnOneが拒否する。
 		spawnTimer_ += FpsCounter::gameDeltaTime;
 		if (spawnTimer_ >= settings_.spawnInterval) {
 			spawnTimer_ = 0.0f;
@@ -111,6 +115,7 @@ namespace Prototype {
 			return false;
 		}
 
+		// 非アクティブな個体を再利用する。
 		auto available = std::find_if(enemies_.begin(), enemies_.end(), [](const auto& enemy) {
 			return !enemy->IsActive();
 		});
@@ -127,6 +132,7 @@ namespace Prototype {
 		const float safeMaxDistance = (std::max)(maxDistance, 0.0f);
 		float nearestDistanceSquared = safeMaxDistance * safeMaxDistance;
 
+		// sqrtを避け、XZ距離の二乗のまま最短個体を比較する。
 		for (const auto& enemy : enemies_) {
 			if (!enemy->IsTargetable()) {
 				continue;
@@ -180,6 +186,7 @@ namespace Prototype {
 	}
 
 	Vector3 EnemyManager::MakeSpawnPosition() const {
+		// 角度だけをランダム化し、全個体をOuterBufferの円周上へ出現させる。
 		const float angle = RandomGenerator::Get<float>(0.0f, TWO_PI);
 		const float radius = field_->GetRadius(FieldZone::OuterBuffer);
 		const Vector3 center = field_->GetSettings().center;
