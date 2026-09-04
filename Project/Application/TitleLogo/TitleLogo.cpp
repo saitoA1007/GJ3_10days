@@ -11,6 +11,7 @@
 #include "Model.h"
 #include "ModelComponent.h"
 #include "ModelManager.h"
+#include "RandomGenerator.h"
 #include "RenderQueue.h"
 
 using namespace GameEngine;
@@ -86,10 +87,12 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	debugParameter_.Register("ShakeFrequencyY", shakeFrequencyY_, 4, "Animation");
 	debugParameter_.Register("MoveDuration", moveDuration_, 5, "Animation");
 	debugParameter_.Register("MoveInterval", moveInterval_, 6, "Animation");
-	debugParameter_.Register("MoveDistance", moveDistance_, 7, "Animation");
-	debugParameter_.Register("BottomScalingDuration", bottomScalingDuration_, 8, "Animation");
-	debugParameter_.Register("BottomScalingStart", bottomScalingStart_, 9, "Animation");
-	debugParameter_.Register("BottomScalingEnd", bottomScalingEnd_, 10, "Animation");
+	debugParameter_.Register("MoveShakeAmplitude", moveShakeAmplitude_, 7, "Animation");
+	debugParameter_.Register("MoveRotationSpeed", moveRotationSpeed_, 8, "Animation");
+	debugParameter_.Register("MoveDistance", moveDistance_, 9, "Animation");
+	debugParameter_.Register("BottomScalingDuration", bottomScalingDuration_, 10, "Animation");
+	debugParameter_.Register("BottomScalingStart", bottomScalingStart_, 11, "Animation");
+	debugParameter_.Register("BottomScalingEnd", bottomScalingEnd_, 12, "Animation");
 	debugParameter_.Apply();
 }
 
@@ -145,6 +148,7 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 
 		if (shakeTimer_.IsFinished()) {
 			RestorePartTranslations();
+			RandomizeMoveRotationDirections();
 			animationState_ = AnimationState::Moving;
 			moveTimer_.Start(GetMoveSequenceDuration(), false);
 			return;
@@ -208,7 +212,25 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 					: (localElapsed >= 0.0f ? 1.0f : 0.0f);
 				const float easedProgress = Apply(partProgress, EaseType::kEaseInQuart);
 				const Vector3 partOffset = {0.0f, 0.0f, moveDistance_ * easedProgress};
-				parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i] + partOffset;
+
+				// この文字が移動している間だけ、固定強度でXYZ方向へ揺らす。
+				Vector3 shakeOffset{};
+				if (localElapsed >= 0.0f && localElapsed < partDuration) {
+					const float phase = static_cast<float>(i) * 1.7f;
+					shakeOffset = {
+						std::sin(localElapsed * shakeFrequencyX_ + phase) * moveShakeAmplitude_,
+						std::cos(localElapsed * shakeFrequencyY_ + phase) * moveShakeAmplitude_,
+						std::sin(localElapsed * (shakeFrequencyX_ + shakeFrequencyY_) * 0.5f + phase) * moveShakeAmplitude_
+					};
+				}
+				parts_[i]->worldTransform_.transform_.translate =
+					partAnimationOrigins_[i] + partOffset + shakeOffset;
+
+				// 移動開始から完了まで、各軸にランダムな方向で回転を加える。
+				const float rotationTime = std::clamp(localElapsed, 0.0f, partDuration);
+				parts_[i]->worldTransform_.transform_.rotate =
+					partAnimationOriginRotations_[i] +
+					partMoveRotationDirections_[i] * (moveRotationSpeed_ * rotationTime);
 			}
 		}
 
@@ -245,6 +267,7 @@ void TitleLogo::CaptureAnimationOrigins() {
 	for (std::size_t i = 0; i < parts_.size(); ++i) {
 		if (parts_[i]) {
 			partAnimationOrigins_[i] = parts_[i]->worldTransform_.transform_.translate;
+			partAnimationOriginRotations_[i] = parts_[i]->worldTransform_.transform_.rotate;
 		}
 	}
 }
@@ -254,6 +277,16 @@ void TitleLogo::RestorePartTranslations() {
 		if (parts_[i]) {
 			parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i];
 		}
+	}
+}
+
+void TitleLogo::RandomizeMoveRotationDirections() {
+	for (auto& direction : partMoveRotationDirections_) {
+		direction = {
+			RandomGenerator::Get<int>(0, 1) == 0 ? -1.0f : 1.0f,
+			RandomGenerator::Get<int>(0, 1) == 0 ? -1.0f : 1.0f,
+			RandomGenerator::Get<int>(0, 1) == 0 ? -1.0f : 1.0f
+		};
 	}
 }
 

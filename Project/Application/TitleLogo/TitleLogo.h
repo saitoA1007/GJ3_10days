@@ -42,6 +42,7 @@ private:
 	void UpdateTransforms();
 	void CaptureAnimationOrigins();
 	void RestorePartTranslations();
+	void RandomizeMoveRotationDirections();
 	float GetMoveSequenceDuration() const;
 
 	static constexpr std::size_t kPartCount = 4;
@@ -60,6 +61,8 @@ private:
 	float shakeFrequencyY_ = 47.0f;
 	float moveDuration_ = 1.25f;
 	float moveInterval_ = 0.15f;
+	float moveShakeAmplitude_ = 0.05f;
+	float moveRotationSpeed_ = 4.0f;
 	float moveDistance_ = 180.0f;
 
 	AnimationState animationState_ = AnimationState::Idle;
@@ -68,4 +71,6 @@ private:
 	GameTimer moveTimer_;
 	Vector3 bottomAnimationOrigin_{};
 	std::array<Vector3, kPartCount> partAnimationOrigins_{};
+	std::array<Vector3, kPartCount> partAnimationOriginRotations_{};
+	std::array<Vector3, kPartCount> partMoveRotationDirections_{};
 };
