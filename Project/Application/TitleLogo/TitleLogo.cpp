@@ -1,5 +1,6 @@
 #include "TitleLogo.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <numbers>
@@ -180,15 +181,27 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 	case AnimationState::Moving: {
 		moveTimer_.SetDuration(moveDuration_);
 		moveTimer_.Update(deltaTime);
-		const float progress = Apply(moveTimer_.GetProgress(), EaseType::kEaseInCubic);
-		const Vector3 moveOffset = {0.0f, 0.0f, moveDistance_ * progress};
+		const float sequenceProgress = moveTimer_.GetProgress();
 
+		// bottomは演出全体を通して奥へ移動する。
 		if (bottom_) {
-			bottom_->worldTransform_.transform_.translate = bottomAnimationOrigin_ + moveOffset;
+			const float bottomProgress = Apply(sequenceProgress, EaseType::kEaseInCubic);
+			const Vector3 bottomOffset = {0.0f, 0.0f, moveDistance_ * bottomProgress};
+			bottom_->worldTransform_.transform_.translate = bottomAnimationOrigin_ + bottomOffset;
 		}
+
+		// 移動時間を4分割し、t0からt3まで1つずつ順番に奥へ移動する。
+		const float partCount = static_cast<float>(parts_.size());
 		for (std::size_t i = 0; i < parts_.size(); ++i) {
 			if (parts_[i]) {
-				parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i] + moveOffset;
+				const float partProgress = std::clamp(
+					sequenceProgress * partCount - static_cast<float>(i),
+					0.0f,
+					1.0f
+				);
+				const float easedProgress = Apply(partProgress, EaseType::kEaseInBack);
+				const Vector3 partOffset = {0.0f, 0.0f, moveDistance_ * easedProgress};
+				parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i] + partOffset;
 			}
 		}
 
