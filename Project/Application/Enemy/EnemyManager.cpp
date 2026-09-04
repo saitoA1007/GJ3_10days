@@ -4,6 +4,7 @@
 #include <RandomGenerator.h>
 #include <FPSCounter.h>
 #include <ImGuiManager.h>
+#include <Application/Utils/Binary/BinaryManager.h>
 
 #include <numbers>
 
@@ -17,6 +18,14 @@ EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model)
 	}
 
 	auto presetFiles = SF::SearchFiles("Assets/Binary/Preset/", ".bin");
+
+	typeMap_["Straight_S"] = EnemyType::Straight_S;
+	typeMap_["Straight_M"] = EnemyType::Straight_M;
+	typeMap_["Straight_L"] = EnemyType::Straight_L;
+	typeMap_["Round"] = EnemyType::Round;
+	typeMap_["Snake"] = EnemyType::Snake;
+
+	LoadPreset();
 }
 
 void EnemyManager::Initialize() {
@@ -83,10 +92,24 @@ void EnemyManager::Update() {
 #endif
 
 	//出現処理
-	popTimer_ += GameEngine::FpsCounter::deltaTime;
-	if (popTimer_ > popInterval_) {
-		popTimer_ = 0.0f;
-		Pop(1, getRandomPos(fieldSize), EnemyType::Straight_S);
+	if (stageTimer_ == 0.0f && GameEngine::FpsCounter::deltaTime > 0.0f) {
+		auto& fase = stageDataMap_[currentStageName_].fases[currentFaseIndex_];
+		for (int i = 0; i < (int)presetDataMap_[fase.name].enemyPositions.size(); ++i) {
+			EnemyType type = static_cast<EnemyType>(i);
+			for (const auto& transform : presetDataMap_[fase.name].enemyPositions[i]) {
+				Vector2 pos = { transform.translate.x, transform.translate.z };
+				Pop(1, pos, type);
+			}
+		}
+	}
+
+	stageTimer_ += GameEngine::FpsCounter::deltaTime;
+	if (stageDataMap_[currentStageName_].fases[currentFaseIndex_].time <= stageTimer_) {
+		currentFaseIndex_++;
+		if (currentFaseIndex_ >= stageDataMap_[currentStageName_].fases.size()) {
+			currentFaseIndex_ = 0;
+		}
+		stageTimer_ = 0.0f;
 	}
 
 	//更新処理
@@ -139,6 +162,15 @@ void EnemyManager::DebugUpdate() {
 }
 
 void EnemyManager::SetStage(const std::string& stageName) {
+	const auto& it = stageDataMap_.find(stageName);
+	if (it == stageDataMap_.end()) {
+		SF::error("[EnemyManager::SetStage()]: Stage not found: " + stageName, "Enemy");
+		return;
+	}
+
+	currentStageName_ = stageName;
+	stageTimer_ = 0.0f;
+	currentFaseIndex_ = 0;
 }
 
 void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
@@ -169,5 +201,66 @@ int EnemyManager::GetCurrentNum() {
 }
 
 void EnemyManager::LoadPreset() {
+	auto files = SF::SearchFiles("Resources/Binary/Preset/", ".bin");
 
+	BinaryManager bin;
+	for (const auto& file : files) {
+		std::filesystem::path path = file;
+		if (!bin.Boot("Preset/" + file)) {
+			SF::error("[EnemyManager::LoadPreset()]: Failed to load preset file: " + file, "Enemy");
+			continue;
+		}
+
+		//最初に識別用の文字列が入っているので読み飛ばす。
+		bin.Reverse<std::string>();
+
+		Preset preset;
+		preset.enemyPositions.resize(size_t(EnemyType::Count));
+		
+		uint32_t enemyCount = bin.Reverse<uint32_t>();
+		for (uint32_t i = 0; i < enemyCount; ++i) {
+			std::string enemyTypeName = bin.Reverse<std::string>();
+			int enemyType = static_cast<int>(typeMap_[enemyTypeName]);
+
+			uint32_t positionCount = bin.Reverse<uint32_t>();
+			std::vector<Transform> positions;
+			for (uint32_t j = 0; j < positionCount; ++j) {
+				Transform pos = bin.Reverse<Transform>();
+				positions.push_back(pos);
+			}
+
+			preset.enemyPositions[enemyType] = positions;
+		}
+		presetDataMap_[path.stem().string()] = preset;
+	}
+
+	auto stageFiles = SF::SearchFiles("Resources/Binary/StageData/", ".bin");
+	for (const auto& file : stageFiles) {
+		if (!bin.Boot("StageData/" + file)) {
+			SF::error("[EnemyManager::LoadPreset()]: Failed to load stage data file: " + file, "Enemy");
+			continue;
+		}
+
+		std::filesystem::path path = file;
+
+		StageData stageData;
+
+		int presetNum = bin.Reverse<int>();
+		stageData.fases.resize(presetNum);
+		for (int i = 0; i < presetNum; ++i) {
+			stageData.fases[i].name = bin.Reverse<std::string>();
+			stageData.fases[i].time = bin.Reverse<float>();
+			stageData.fases[i].rotation = bin.Reverse<float>();
+		}
+
+		if (stageData.fases.empty()) {
+			SF::error("[EnemyManager::LoadPreset()]: Stage data file has no fases: " + file, "Enemy");
+			continue;
+		}
+
+		stageData.hpRatio = bin.Reverse<float>();
+		stageData.minEnemyCount = bin.Reverse<int>();
+
+		stageDataMap_[path.stem().string()] = stageData;
+	}
 }
