@@ -574,6 +574,8 @@
     <ClCompile Include="EngineSource\3D\Material\BlackHoleMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleRingMaterial.cpp" />
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\HyperspaceMaterial.cpp" />
+    <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1122,6 +1124,8 @@
     <ClInclude Include="EngineSource\3D\Material\BlackHoleMaterial.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleRingMaterial.h" />
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
+    <ClInclude Include="EngineSource\3D\Material\HyperspaceMaterial.h" />
+    <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
@@ -1149,6 +1153,7 @@
     <FxCompile Include="Resources\Shaders\Raytracing\chsUniverse.hlsl" />
     <FxCompile Include="Resources\Shaders\Raytracing\chsBlackHole.hlsl" />
     <FxCompile Include="Resources\Shaders\Raytracing\chsBlackHoleRing.hlsl" />
+    <FxCompile Include="Resources\Shaders\Raytracing\chsHyperspace.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />

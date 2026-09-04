@@ -49,6 +49,7 @@ void RaytracingPipeline::CreateStateObject() {
 	LibraryResult universeResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsUniverse.hlsl");
 	LibraryResult BlackHoleResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsBlackHole.hlsl");
 	LibraryResult BlackHoleRingResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsBlackHoleRing.hlsl");
+	LibraryResult HyperspaceResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsHyperspace.hlsl");
 
 	// 初期化処理
 	stateObjectBuilder_.Initialize();
@@ -61,6 +62,7 @@ void RaytracingPipeline::CreateStateObject() {
 	stateObjectBuilder_.AddDXILLibrary(universeResult.blob.Get(), universeResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(BlackHoleResult.blob.Get(), BlackHoleResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(BlackHoleRingResult.blob.Get(), BlackHoleRingResult.exportNames);
+	stateObjectBuilder_.AddDXILLibrary(HyperspaceResult.blob.Get(), HyperspaceResult.exportNames);
 
 	// ヒットグループを設定
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::DefaultModel, L"MainObjectCHS");
@@ -68,6 +70,7 @@ void RaytracingPipeline::CreateStateObject() {
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::UniverseModel, L"MainUniverseCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::BlackHoleModel, L"MainBlackHoleLensCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::BlackHoleRingModel, L"MainBlackHoleRingCHS");
+	stateObjectBuilder_.AddHitGroup(AppHitGroups::HyperspaceModel, L"MainHyperspaceCHS");
 
 	// シェーダー設定
 	const uint32_t MaxPayloadSize = sizeof(float) * 3 + sizeof(uint32_t) + sizeof(float);
@@ -165,6 +168,15 @@ void RaytracingPipeline::CreateShaderTable() {
 		ShaderRecord blackHoleRingRecord;
 		auto& blackHoleRingTable = blackHoleRingRecord.SetIdentifier(blackHoleRingId);
 		shaderTableBuilder_.HitGroup().AddRecord(std::move(blackHoleRingRecord));
+
+		// ハイパースペース
+		auto hyperspaceId = rtsoProps->GetShaderIdentifier(AppHitGroups::HyperspaceModel.c_str());
+		if (hyperspaceId == nullptr) {
+			assert(false && "Not found ShaderIdentifier");
+		}
+		ShaderRecord hyperspaceRecord;
+		auto& hyperspaceTable = hyperspaceRecord.SetIdentifier(hyperspaceId);
+		shaderTableBuilder_.HitGroup().AddRecord(std::move(hyperspaceRecord));
 	}
 
 	// テーブルを設定する
