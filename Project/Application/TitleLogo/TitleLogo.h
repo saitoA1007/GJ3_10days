@@ -32,6 +32,8 @@ public:
 
 private:
 	enum class AnimationState {
+		Falling,
+		FadingBottom,
 		Idle,
 		Shaking,
 		Moving,
@@ -43,6 +45,7 @@ private:
 	void CaptureAnimationOrigins();
 	void RestorePartTranslations();
 	void RandomizeMoveRotationDirections();
+	float GetFallSequenceDuration() const;
 	float GetMoveSequenceDuration() const;
 
 	static constexpr std::size_t kPartCount = 4;
@@ -53,6 +56,10 @@ private:
 	float bottomScalingDuration_ = 1.0f;
 	Vector3 bottomScalingStart_{ 1.0f, 1.0f };
 	Vector3 bottomScalingEnd_{ 1.0f, 1.0f };
+	float fallDuration_ = 0.6f;
+	float fallInterval_ = 0.15f;
+	float fallStartOffsetY_ = 7.0f;
+	float bottomFadeDuration_ = 0.6f;
 
 	float shakeDuration_ = 1.0f;
 	float shakeStartAmplitude_ = 0.0f;
@@ -65,7 +72,9 @@ private:
 	float moveRotationSpeed_ = 4.0f;
 	float moveDistance_ = 180.0f;
 
-	AnimationState animationState_ = AnimationState::Idle;
+	AnimationState animationState_ = AnimationState::Falling;
+	GameTimer fallTimer_;
+	GameTimer bottomFadeTimer_;
 	GameTimer shakeTimer_;
 	GameTimer bottomScalingTimer_;
 	GameTimer moveTimer_;

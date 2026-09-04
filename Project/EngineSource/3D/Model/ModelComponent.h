@@ -21,6 +21,9 @@ namespace GameEngine {
 		// 更新処理
 		void Update();
 
+		// モデルが持つ全マテリアルの透明度を設定する
+		void SetAlpha(float alpha);
+
 		// 描画処理
 		void Draw(RenderQueue* renderQueue, const Draw3dType& drawType = Draw3dType::Default, const std::string& passName = "DefaultPass");
 
