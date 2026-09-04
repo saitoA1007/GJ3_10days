@@ -22,5 +22,5 @@ void SetupScenes(SceneRegistry& factory) {
     factory.RegisterScene<StageSelectScene>("StageSelect");
 
     // 立ち上げ時に起動するシーン
-    factory.SetDefaultScene("Title");
+    factory.SetDefaultScene("Game");
 }
