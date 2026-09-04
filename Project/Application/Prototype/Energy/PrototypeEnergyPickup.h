@@ -51,6 +51,10 @@ namespace Prototype {
 			float fallHeight,
 			float fallSpeed,
 			const EnergyTypeSettings& typeSettings);
+		void SpawnOnGround(
+			EnergySize size,
+			const Vector3& groundPosition,
+			const EnergyTypeSettings& typeSettings);
 		void Reset();
 		void Update(float deltaTime);
 		void Draw(GameEngine::RenderQueue* renderQueue);

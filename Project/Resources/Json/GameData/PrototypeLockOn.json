@@ -2,7 +2,8 @@
     "PrototypeLockOn": {
         "Charge": {
             "MaxEnergyCost": 30,
-            "MaxSeconds": 3.0
+            "MaxSeconds": 3.0,
+            "StartSeconds": 0.2
         },
         "Color": {
             "ChargeColor": [
@@ -25,17 +26,17 @@
             ]
         },
         "Cursor": {
-            "CursorSpeed": 10.0,
+            "CursorSpeed": 24.0,
             "FieldEdgeMargin": 0.5,
             "GroundHeight": 0.25,
-            "ModelHeightOffset": 0.06,
+            "ModelHeightOffset": 0.05999999865889549,
             "ModelScale": [
                 1.0,
                 1.0,
                 1.0
             ],
             "MouseMoveThreshold": 0.009999999776482582,
-            "SelectionRadius": 1.0
+            "SelectionRadius": 2.0
         },
         "SceneName": "Proto"
     }

@@ -17,6 +17,8 @@ namespace GameEngine {
 }
 
 namespace Prototype {
+	class Enemy;
+	class EnemyManager;
 	class EnergyPickup;
 	class EnergySpawner;
 	class Field;
@@ -29,6 +31,7 @@ namespace Prototype {
 		float groundHeight = 0.35f;
 		float fieldEdgeMargin = 0.5f;
 		float maxLockOnSeconds = 3.0f;
+		float chargeStartSeconds = 0.2f;
 		int32_t maxChargeEnergyCost = 30;
 		float mouseMoveThreshold = 0.01f;
 		Vector3 cursorModelScale = { 1.0f, 1.0f, 1.0f };
@@ -52,6 +55,7 @@ namespace Prototype {
 			Field* field,
 			Rocket* rocket,
 			EnergySpawner* energySpawner,
+			EnemyManager* enemyManager,
 			UnitManager* unitManager,
 			const LockOnSettings& settings = {});
 		~LockOnController() override = default;
@@ -60,9 +64,12 @@ namespace Prototype {
 		void Update() override;
 		void DebugUpdate() override;
 		void Draw() override;
+		void SetGameplayEnabled(bool enabled);
+		bool IsGameplayEnabled() const { return gameplayEnabled_; }
 
 		const Vector3& GetCursorPosition() const { return cursorPosition_; }
 		EnergyPickup* GetSelectedEnergy() const { return selectedEnergy_; }
+		Enemy* GetSelectedEnemy() const { return selectedEnemy_; }
 		float GetLockOnSeconds() const { return lockOnSeconds_; }
 		bool IsCharging() const { return isCharging_; }
 
@@ -78,8 +85,10 @@ namespace Prototype {
 		void UpdateLockOn(float deltaTime);
 		void CompleteLockOn();
 		void CancelLockOn();
+		float CalculateChargeRatio() const;
 		int32_t CalculateRequestedEnergy() const;
-		void SetSelectedEnergy(EnergyPickup* energy);
+		bool HasValidSelection() const;
+		void SetSelection(EnergyPickup* energy, Enemy* enemy);
 		void DrawLockOnGuide();
 		void DrawDebugWindow();
 
@@ -91,12 +100,15 @@ namespace Prototype {
 		Field* field_ = nullptr;
 		Rocket* rocket_ = nullptr;
 		EnergySpawner* energySpawner_ = nullptr;
+		EnemyManager* enemyManager_ = nullptr;
 		UnitManager* unitManager_ = nullptr;
 		LockOnSettings settings_;
 		std::unique_ptr<GameEngine::DebugParameter> debugParameter_;
 		Vector3 cursorPosition_ = {};
 		EnergyPickup* selectedEnergy_ = nullptr;
+		Enemy* selectedEnemy_ = nullptr;
 		float lockOnSeconds_ = 0.0f;
 		bool isCharging_ = false;
+		bool gameplayEnabled_ = true;
 	};
 }

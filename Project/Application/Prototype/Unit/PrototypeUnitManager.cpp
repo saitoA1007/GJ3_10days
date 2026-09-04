@@ -6,6 +6,7 @@
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
 
+#include "Application/Prototype/Enemy/PrototypeEnemy.h"
 #include "Application/Prototype/Energy/PrototypeEnergyPickup.h"
 #include "Application/Prototype/Rocket/PrototypeRocket.h"
 
@@ -33,6 +34,7 @@ namespace Prototype {
 		debugParameter_->Register("BoostedSpeed", settings_.unit.boostedSpeed, 1, "Move");
 		debugParameter_->Register("PickupRadius", settings_.unit.pickupRadius, 2, "Move");
 		debugParameter_->Register("DeliveryRadius", settings_.unit.deliveryRadius, 3, "Move");
+		debugParameter_->Register("Radius", settings_.unit.collisionRadius, 0, "Collision");
 		debugParameter_->Register("DrainPerSecond", settings_.unit.staminaDrainPerSecond, 0, "Stamina");
 		debugParameter_->Register("DistanceDrainRate", settings_.unit.distanceDrainRate, 1, "Stamina");
 		debugParameter_->Register("Normal", settings_.unit.normalColor, 0, "Color");
@@ -44,6 +46,7 @@ namespace Prototype {
 
 	void UnitManager::Initialize() {
 		ApplyDebugParameters();
+		gameplayEnabled_ = true;
 		for (auto& unit : units_) {
 			unit->Initialize();
 		}
@@ -52,6 +55,10 @@ namespace Prototype {
 	void UnitManager::Update() {
 		ApplyDebugParameters();
 		ApplyUnitCount();
+		if (!gameplayEnabled_) {
+			return;
+		}
+
 		for (size_t i = 0; i < GetUnitCount(); ++i) {
 			units_[i]->Update(FpsCounter::gameDeltaTime);
 		}
@@ -73,7 +80,7 @@ namespace Prototype {
 	}
 
 	bool UnitManager::DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy) {
-		if (!target || !target->IsTargetable()) {
+		if (!gameplayEnabled_ || !target || !target->IsTargetable()) {
 			return false;
 		}
 
@@ -83,6 +90,41 @@ namespace Prototype {
 			}
 		}
 		return false;
+	}
+
+	bool UnitManager::DispatchToEnemy(Enemy* target, int32_t requestedEnergy) {
+		if (!gameplayEnabled_ || !target || !target->IsTargetable()) {
+			return false;
+		}
+
+		for (size_t i = 0; i < GetUnitCount(); ++i) {
+			if (units_[i]->IsAvailable()) {
+				return units_[i]->DispatchToEnemy(target, requestedEnergy);
+			}
+		}
+		return false;
+	}
+
+	Unit* UnitManager::FindNearestCarryingUnit(const Vector3& position, float maxDistance) const {
+		Unit* nearest = nullptr;
+		const float safeMaxDistance = (std::max)(maxDistance, 0.0f);
+		float nearestDistanceSquared = safeMaxDistance * safeMaxDistance;
+
+		for (size_t i = 0; i < GetUnitCount(); ++i) {
+			Unit* unit = units_[i].get();
+			if (!unit->IsCarryingEnergy()) {
+				continue;
+			}
+
+			const Vector3 offset = unit->GetPosition() - position;
+			const float distanceSquared = offset.x * offset.x + offset.z * offset.z;
+			if (distanceSquared <= nearestDistanceSquared) {
+				nearest = unit;
+				nearestDistanceSquared = distanceSquared;
+			}
+		}
+
+		return nearest;
 	}
 
 	void UnitManager::RecallAll() {
@@ -102,7 +144,10 @@ namespace Prototype {
 	}
 
 	size_t UnitManager::GetDeployedCount() const {
-		return GetUnitCount() - GetAvailableCount();
+		return static_cast<size_t>(std::count_if(
+			units_.begin(),
+			units_.begin() + GetUnitCount(),
+			[](const auto& unit) { return unit->IsDeployed(); }));
 	}
 
 	void UnitManager::ApplyDebugParameters() {
@@ -119,6 +164,7 @@ namespace Prototype {
 		settings_.unit.boostedSpeed = (std::max)(settings_.unit.boostedSpeed, settings_.unit.normalSpeed);
 		settings_.unit.pickupRadius = (std::max)(settings_.unit.pickupRadius, 0.0f);
 		settings_.unit.deliveryRadius = (std::max)(settings_.unit.deliveryRadius, 0.0f);
+		settings_.unit.collisionRadius = (std::max)(settings_.unit.collisionRadius, 0.0f);
 		settings_.unit.staminaDrainPerSecond = (std::max)(settings_.unit.staminaDrainPerSecond, 0.0f);
 		settings_.unit.distanceDrainRate = (std::max)(settings_.unit.distanceDrainRate, 0.0f);
 	}

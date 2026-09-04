@@ -13,12 +13,14 @@ namespace GameEngine {
 }
 
 namespace Prototype {
+	class Enemy;
 	class EnergyPickup;
 	class Rocket;
 
 	enum class UnitState : uint8_t {
 		Stored,
 		MovingToEnergy,
+		MovingToEnemy,
 		ReturningToRocket,
 	};
 
@@ -30,6 +32,7 @@ namespace Prototype {
 		float boostedSpeed = 5.0f;
 		float pickupRadius = 0.45f;
 		float deliveryRadius = 1.6f;
+		float collisionRadius = 0.6f;
 		float staminaDrainPerSecond = 2.0f;
 		float distanceDrainRate = 0.08f;
 		Vector4 normalColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -49,17 +52,30 @@ namespace Prototype {
 		void Draw(GameEngine::RenderQueue* renderQueue);
 
 		bool DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy);
+		bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
+		bool DefeatAndDropEnergy();
 		void Recall();
 
 		bool IsAvailable() const { return state_ == UnitState::Stored; }
+		bool IsDeployed() const {
+			return state_ == UnitState::MovingToEnergy ||
+				state_ == UnitState::MovingToEnemy ||
+				state_ == UnitState::ReturningToRocket;
+		}
+		bool IsCarryingEnergy() const;
 		UnitState GetState() const { return state_; }
 		const Vector3& GetPosition() const { return position_; }
+		float GetCollisionRadius() const { return settings_->collisionRadius; }
 		float GetStamina() const { return stamina_; }
 		EnergyPickup* GetTargetEnergy() const { return targetEnergy_; }
+		Enemy* GetTargetEnemy() const { return targetEnemy_; }
 
 	private:
 		void UpdateMovingToEnergy(float deltaTime);
+		void UpdateMovingToEnemy(float deltaTime);
 		void UpdateReturningToRocket(float deltaTime);
+		void AllocateStamina(int32_t requestedEnergy);
+		void ReturnToStorageAfterDefeat();
 		void MoveTowards(const Vector3& target, float deltaTime);
 		void ConsumeStamina(float deltaTime);
 		float DistanceSquaredXZ(const Vector3& a, const Vector3& b) const;
@@ -70,6 +86,7 @@ namespace Prototype {
 		std::unique_ptr<GameEngine::ModelComponent> modelComponent_;
 		UnitState state_ = UnitState::Stored;
 		EnergyPickup* targetEnergy_ = nullptr;
+		Enemy* targetEnemy_ = nullptr;
 		Vector3 position_ = {};
 		float stamina_ = 0.0f;
 	};

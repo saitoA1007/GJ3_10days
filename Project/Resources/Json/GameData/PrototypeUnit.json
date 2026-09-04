@@ -1,5 +1,8 @@
 {
     "PrototypeUnit": {
+        "Collision": {
+            "Radius": 0.6
+        },
         "Color": {
             "Normal": [
                 1.0,

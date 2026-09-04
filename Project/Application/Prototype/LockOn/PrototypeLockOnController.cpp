@@ -12,6 +12,8 @@
 #include "InputCommand.h"
 #include "MyMath.h"
 
+#include "Application/Prototype/Enemy/PrototypeEnemy.h"
+#include "Application/Prototype/Enemy/PrototypeEnemyManager.h"
 #include "Application/Prototype/Energy/PrototypeEnergyPickup.h"
 #include "Application/Prototype/Energy/PrototypeEnergySpawner.h"
 #include "Application/Prototype/Field/PrototypeField.h"
@@ -43,6 +45,7 @@ namespace Prototype {
 		Field* field,
 		Rocket* rocket,
 		EnergySpawner* energySpawner,
+		EnemyManager* enemyManager,
 		UnitManager* unitManager,
 		const LockOnSettings& settings)
 		: input_(input),
@@ -52,6 +55,7 @@ namespace Prototype {
 		field_(field),
 		rocket_(rocket),
 		energySpawner_(energySpawner),
+		enemyManager_(enemyManager),
 		unitManager_(unitManager),
 		settings_(settings) {
 		assert(input_ != nullptr && "Prototype lock-on requires input");
@@ -62,6 +66,7 @@ namespace Prototype {
 		assert(field_ != nullptr && "Prototype lock-on requires a field");
 		assert(rocket_ != nullptr && "Prototype lock-on requires a rocket");
 		assert(energySpawner_ != nullptr && "Prototype lock-on requires an energy spawner");
+		assert(enemyManager_ != nullptr && "Prototype lock-on requires an enemy manager");
 		assert(unitManager_ != nullptr && "Prototype lock-on requires a unit manager");
 
 		cursorModel_ = std::make_unique<ModelComponent>(cursorModel);
@@ -76,7 +81,8 @@ namespace Prototype {
 		debugParameter_->Register("ModelScale", settings_.cursorModelScale, 5, "Cursor");
 		debugParameter_->Register("ModelHeightOffset", settings_.cursorModelHeightOffset, 6, "Cursor");
 		debugParameter_->Register("MaxSeconds", settings_.maxLockOnSeconds, 0, "Charge");
-		debugParameter_->Register("MaxEnergyCost", settings_.maxChargeEnergyCost, 1, "Charge");
+		debugParameter_->Register("StartSeconds", settings_.chargeStartSeconds, 1, "Charge");
+		debugParameter_->Register("MaxEnergyCost", settings_.maxChargeEnergyCost, 2, "Charge");
 		debugParameter_->Register("CursorColor", settings_.cursorColor, 0, "Color");
 		debugParameter_->Register("TargetColor", settings_.targetColor, 1, "Color");
 		debugParameter_->Register("ChargeColor", settings_.chargeColor, 2, "Color");
@@ -87,7 +93,8 @@ namespace Prototype {
 
 	void LockOnController::Initialize() {
 		ApplyDebugParameters();
-		SetSelectedEnergy(nullptr);
+		gameplayEnabled_ = true;
+		SetSelection(nullptr, nullptr);
 		cursorPosition_ = rocket_->GetPosition();
 		cursorPosition_.y = settings_.groundHeight;
 		lockOnSeconds_ = 0.0f;
@@ -97,6 +104,11 @@ namespace Prototype {
 
 	void LockOnController::Update() {
 		ApplyDebugParameters();
+		if (!gameplayEnabled_) {
+			SyncCursorModel();
+			return;
+		}
+
 		UpdateCursor(FpsCounter::gameDeltaTime);
 
 		if (isCharging_) {
@@ -113,12 +125,27 @@ namespace Prototype {
 	void LockOnController::DebugUpdate() {
 		ApplyDebugParameters();
 		SyncCursorModel();
-		DrawLockOnGuide();
+		if (gameplayEnabled_) {
+			DrawLockOnGuide();
+		}
 		DrawDebugWindow();
 	}
 
 	void LockOnController::Draw() {
-		cursorModel_->DrawRaytracing(renderQueue_);
+		if (gameplayEnabled_) {
+			cursorModel_->DrawRaytracing(renderQueue_);
+		}
+	}
+
+	void LockOnController::SetGameplayEnabled(bool enabled) {
+		if (gameplayEnabled_ == enabled) {
+			return;
+		}
+
+		gameplayEnabled_ = enabled;
+		if (!gameplayEnabled_) {
+			CancelLockOn();
+		}
 	}
 
 	void LockOnController::ApplyDebugParameters() {
@@ -131,6 +158,10 @@ namespace Prototype {
 		settings_.selectionRadius = (std::max)(settings_.selectionRadius, 0.0f);
 		settings_.fieldEdgeMargin = (std::max)(settings_.fieldEdgeMargin, 0.0f);
 		settings_.maxLockOnSeconds = (std::max)(settings_.maxLockOnSeconds, 0.01f);
+		settings_.chargeStartSeconds = (std::clamp)(
+			settings_.chargeStartSeconds,
+			0.0f,
+			settings_.maxLockOnSeconds);
 		settings_.maxChargeEnergyCost = (std::max)(settings_.maxChargeEnergyCost, 0);
 		settings_.mouseMoveThreshold = (std::max)(settings_.mouseMoveThreshold, 0.0f);
 		settings_.cursorModelScale.x = (std::max)(settings_.cursorModelScale.x, 0.0f);
@@ -224,11 +255,26 @@ namespace Prototype {
 	}
 
 	void LockOnController::UpdateSelection() {
-		SetSelectedEnergy(energySpawner_->FindNearestAvailable(cursorPosition_, settings_.selectionRadius));
+		EnergyPickup* energy = energySpawner_->FindNearestAvailable(cursorPosition_, settings_.selectionRadius);
+		Enemy* enemy = enemyManager_->FindNearestTargetable(cursorPosition_, settings_.selectionRadius);
+
+		if (energy && enemy) {
+			const Vector3 energyOffset = energy->GetPosition() - cursorPosition_;
+			const Vector3 enemyOffset = enemy->GetPosition() - cursorPosition_;
+			const float energyDistanceSquared = energyOffset.x * energyOffset.x + energyOffset.z * energyOffset.z;
+			const float enemyDistanceSquared = enemyOffset.x * enemyOffset.x + enemyOffset.z * enemyOffset.z;
+			if (enemyDistanceSquared <= energyDistanceSquared) {
+				energy = nullptr;
+			} else {
+				enemy = nullptr;
+			}
+		}
+
+		SetSelection(energy, enemy);
 	}
 
 	void LockOnController::StartLockOn() {
-		if (!selectedEnergy_ || !selectedEnergy_->IsTargetable() || unitManager_->GetAvailableCount() == 0) {
+		if (!HasValidSelection() || unitManager_->GetAvailableCount() == 0) {
 			return;
 		}
 
@@ -237,7 +283,7 @@ namespace Prototype {
 	}
 
 	void LockOnController::UpdateLockOn(float deltaTime) {
-		if (!selectedEnergy_ || !selectedEnergy_->IsTargetable()) {
+		if (!HasValidSelection()) {
 			CancelLockOn();
 			return;
 		}
@@ -254,9 +300,11 @@ namespace Prototype {
 	}
 
 	void LockOnController::CompleteLockOn() {
-		EnergyPickup* target = selectedEnergy_;
-		const bool dispatched = unitManager_->DispatchToEnergy(target, CalculateRequestedEnergy());
-		SetSelectedEnergy(nullptr);
+		const int32_t requestedEnergy = CalculateRequestedEnergy();
+		const bool dispatched = selectedEnemy_
+			? unitManager_->DispatchToEnemy(selectedEnemy_, requestedEnergy)
+			: unitManager_->DispatchToEnergy(selectedEnergy_, requestedEnergy);
+		SetSelection(nullptr, nullptr);
 		isCharging_ = false;
 		lockOnSeconds_ = 0.0f;
 
@@ -268,26 +316,56 @@ namespace Prototype {
 	void LockOnController::CancelLockOn() {
 		isCharging_ = false;
 		lockOnSeconds_ = 0.0f;
-		SetSelectedEnergy(nullptr);
+		SetSelection(nullptr, nullptr);
+	}
+
+	float LockOnController::CalculateChargeRatio() const {
+		if (lockOnSeconds_ >= settings_.maxLockOnSeconds) {
+			return 1.0f;
+		}
+		if (lockOnSeconds_ <= settings_.chargeStartSeconds) {
+			return 0.0f;
+		}
+
+		const float chargeDuration = settings_.maxLockOnSeconds - settings_.chargeStartSeconds;
+		if (chargeDuration <= 0.0f) {
+			return 0.0f;
+		}
+
+		return (std::clamp)(
+			(lockOnSeconds_ - settings_.chargeStartSeconds) / chargeDuration,
+			0.0f,
+			1.0f);
 	}
 
 	int32_t LockOnController::CalculateRequestedEnergy() const {
-		const float chargeRatio = (std::clamp)(lockOnSeconds_ / settings_.maxLockOnSeconds, 0.0f, 1.0f);
-		return static_cast<int32_t>(std::round(
-			static_cast<float>(settings_.maxChargeEnergyCost) * chargeRatio));
+		return static_cast<int32_t>(
+			static_cast<float>(settings_.maxChargeEnergyCost) * CalculateChargeRatio());
 	}
 
-	void LockOnController::SetSelectedEnergy(EnergyPickup* energy) {
-		if (selectedEnergy_ == energy) {
+	bool LockOnController::HasValidSelection() const {
+		return (selectedEnergy_ && selectedEnergy_->IsTargetable()) ||
+			(selectedEnemy_ && selectedEnemy_->IsTargetable());
+	}
+
+	void LockOnController::SetSelection(EnergyPickup* energy, Enemy* enemy) {
+		if (selectedEnergy_ == energy && selectedEnemy_ == enemy) {
 			return;
 		}
 		if (selectedEnergy_) {
 			selectedEnergy_->SetHighlighted(false);
 		}
+		if (selectedEnemy_) {
+			selectedEnemy_->SetHighlighted(false);
+		}
 
 		selectedEnergy_ = energy;
+		selectedEnemy_ = enemy;
 		if (selectedEnergy_) {
 			selectedEnergy_->SetHighlighted(true);
+		}
+		if (selectedEnemy_) {
+			selectedEnemy_->SetHighlighted(true);
 		}
 	}
 
@@ -299,13 +377,17 @@ namespace Prototype {
 			settings_.cursorColor,
 			32);
 
-		if (!selectedEnergy_) {
+		if (!selectedEnergy_ && !selectedEnemy_) {
 			return;
 		}
 
-		Vector3 targetPosition = selectedEnergy_->GetPosition();
+		Vector3 targetPosition = selectedEnemy_
+			? selectedEnemy_->GetPosition()
+			: selectedEnergy_->GetPosition();
 		targetPosition.y += 0.08f;
-		const float targetRadius = selectedEnergy_->GetScale() + 0.25f;
+		const float targetRadius = selectedEnemy_
+			? selectedEnemy_->GetDisplayScale() + 0.25f
+			: selectedEnergy_->GetScale() + 0.25f;
 		debugRenderer_->AddCircle(
 			targetPosition,
 			{ 0.0f, 1.0f, 0.0f },
@@ -315,7 +397,7 @@ namespace Prototype {
 		debugRenderer_->AddLine(rocket_->GetPosition(), targetPosition, settings_.targetColor);
 
 		if (isCharging_) {
-			const float ratio = lockOnSeconds_ / settings_.maxLockOnSeconds;
+			const float ratio = CalculateChargeRatio();
 			debugRenderer_->AddCircle(
 				targetPosition,
 				{ 0.0f, 1.0f, 0.0f },
@@ -336,9 +418,10 @@ namespace Prototype {
 		ImGui::Text("LockOn: Left Click / Space / Pad A");
 		ImGui::Text("Available Units: %zu", unitManager_->GetAvailableCount());
 		ImGui::Text("Rocket Energy: %d", rocket_->GetEnergy());
-		ImGui::Text("Selected: %s", selectedEnergy_ ? "Energy" : "None");
+		const char* selectedType = selectedEnemy_ ? "Enemy" : (selectedEnergy_ ? "Energy" : "None");
+		ImGui::Text("Selected: %s", selectedType);
 		ImGui::Text("Charge: %.2f / %.2f sec", lockOnSeconds_, settings_.maxLockOnSeconds);
-		const float chargeRatio = (std::clamp)(lockOnSeconds_ / settings_.maxLockOnSeconds, 0.0f, 1.0f);
+		const float chargeRatio = CalculateChargeRatio();
 		ImGui::Text("Charge Ratio: %.0f%%", chargeRatio * 100.0f);
 		ImGui::Text("Requested Energy: %d / %d", CalculateRequestedEnergy(), settings_.maxChargeEnergyCost);
 

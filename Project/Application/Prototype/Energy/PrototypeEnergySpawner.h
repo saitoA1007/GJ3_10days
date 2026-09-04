@@ -41,8 +41,11 @@ namespace Prototype {
 		void Update() override;
 		void DebugUpdate() override;
 		void Draw() override;
+		void SetGameplayEnabled(bool enabled) { gameplayEnabled_ = enabled; }
+		bool IsGameplayEnabled() const { return gameplayEnabled_; }
 
 		bool SpawnInZone(FieldZone zone);
+		EnergyPickup* SpawnOnGround(EnergySize size, const Vector3& position);
 		EnergyPickup* FindNearestAvailable(const Vector3& position, float maxDistance);
 
 		size_t GetActiveCount() const;
@@ -68,5 +71,6 @@ namespace Prototype {
 		};
 		std::unique_ptr<GameEngine::DebugParameter> debugParameter_;
 		float spawnTimer_ = 0.0f;
+		bool gameplayEnabled_ = true;
 	};
 }

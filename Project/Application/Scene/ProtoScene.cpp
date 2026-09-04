@@ -1,7 +1,12 @@
 #include "ProtoScene.h"
 
+#include <string>
+
+#include "Application/Prototype/Enemy/PrototypeEnemyManager.h"
 #include "Application/Prototype/Energy/PrototypeEnergySpawner.h"
+#include "Application/Prototype/EnergyView/PrototypeEnergyView.h"
 #include "Application/Prototype/Field/PrototypeField.h"
+#include "Application/Prototype/GameFlow/PrototypeGameFlow.h"
 #include "Application/Prototype/LockOn/PrototypeLockOnController.h"
 #include "Application/Prototype/Rocket/PrototypeRocket.h"
 #include "Application/Prototype/Unit/PrototypeUnitManager.h"
@@ -34,6 +39,15 @@ ProtoScene::ProtoScene() {
 
 	auto* unitModel = modelManager_->GetNameByModel("unit.obj");
 	unitManager_ = gameObjectManager_->AddObject<Prototype::UnitManager>(unitModel, rocket_);
+
+	auto* enemyModel = modelManager_->GetNameByModel("enemy.obj");
+	enemyManager_ = gameObjectManager_->AddObject<Prototype::EnemyManager>(
+		enemyModel,
+		field_,
+		rocket_,
+		energySpawner_,
+		unitManager_);
+
 	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");
 	lockOnController_ = gameObjectManager_->AddObject<Prototype::LockOnController>(
 		input_,
@@ -44,7 +58,24 @@ ProtoScene::ProtoScene() {
 		field_,
 		rocket_,
 		energySpawner_,
+		enemyManager_,
 		unitManager_);
+
+	gameFlowController_ = gameObjectManager_->AddObject<Prototype::GameFlowController>(
+		rocket_,
+		energySpawner_,
+		enemyManager_,
+		unitManager_,
+		lockOnController_);
+
+	ScoreView::DigitModels digitModels{};
+	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
+		digitModels[digit] = modelManager_->GetNameByModel(std::to_string(digit) + ".obj");
+	}
+	energyView_ = gameObjectManager_->AddObject<Prototype::EnergyView>(
+		digitModels,
+		mainCamera_.get(),
+		rocket_);
 }
 
 void ProtoScene::Initialize() {

@@ -172,6 +172,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player\Player.cpp" />
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="Application\Scene\ProtoScene.cpp" />
+	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemy.cpp" />
+	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemyManager.cpp" />
+	<ClCompile Include="Application\Prototype\EnergyView\PrototypeEnergyView.cpp" />
+	<ClCompile Include="Application\Prototype\GameFlow\PrototypeGameFlow.cpp" />
     <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp" />
     <ClCompile Include="Application\Prototype\Energy\PrototypeEnergyPickup.cpp" />
     <ClCompile Include="Application\Prototype\Energy\PrototypeEnergySpawner.cpp" />
@@ -447,6 +451,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h" />
     <ClInclude Include="Application\Scene\StageSelectScene.h" />
     <ClInclude Include="Application\Scene\ProtoScene.h" />
+	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemy.h" />
+	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemyManager.h" />
+	<ClInclude Include="Application\Prototype\EnergyView\PrototypeEnergyView.h" />
+	<ClInclude Include="Application\Prototype\GameFlow\PrototypeGameFlow.h" />
     <ClInclude Include="Application\Prototype\Field\PrototypeField.h" />
     <ClInclude Include="Application\Prototype\Energy\PrototypeEnergyPickup.h" />
     <ClInclude Include="Application\Prototype\Energy\PrototypeEnergySpawner.h" />

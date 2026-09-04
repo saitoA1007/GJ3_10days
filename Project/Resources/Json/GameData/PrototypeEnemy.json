@@ -1,0 +1,35 @@
+{
+    "PrototypeEnemy": {
+        "Collision": {
+            "Radius": 0.800000011920929
+        },
+        "Color": {
+            "Body": [
+                1.0,
+                0.3499999940395355,
+                0.3499999940395355,
+                1.0
+            ]
+        },
+        "Move": {
+            "Speed": 1.0
+        },
+        "SceneName": "Proto",
+        "Spawn": {
+            "InitialCount": 3,
+            "Interval": 4.0,
+            "MaxActiveCount": 20
+        },
+        "Target": {
+            "SearchRadius": 8.0
+        },
+        "Transform": {
+            "GroundHeight": 0.25,
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
+    }
+}

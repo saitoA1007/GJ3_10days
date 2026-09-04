@@ -11,6 +11,7 @@
 #include "PrototypeUnit.h"
 
 namespace Prototype {
+	class Enemy;
 	class EnergyPickup;
 	class Rocket;
 
@@ -34,8 +35,12 @@ namespace Prototype {
 		void Update() override;
 		void DebugUpdate() override;
 		void Draw() override;
+		void SetGameplayEnabled(bool enabled) { gameplayEnabled_ = enabled; }
+		bool IsGameplayEnabled() const { return gameplayEnabled_; }
 
 		bool DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy);
+		bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
+		Unit* FindNearestCarryingUnit(const Vector3& position, float maxDistance) const;
 		void RecallAll();
 
 		size_t GetAvailableCount() const;
@@ -53,5 +58,6 @@ namespace Prototype {
 		std::vector<std::unique_ptr<Unit>> units_;
 		UnitManagerSettings settings_;
 		std::unique_ptr<GameEngine::DebugParameter> debugParameter_;
+		bool gameplayEnabled_ = true;
 	};
 }

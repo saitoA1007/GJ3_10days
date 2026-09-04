@@ -32,6 +32,20 @@ namespace Prototype {
 		SyncModel();
 	}
 
+	void EnergyPickup::SpawnOnGround(
+		EnergySize size,
+		const Vector3& groundPosition,
+		const EnergyTypeSettings& typeSettings) {
+		size_ = size;
+		state_ = EnergyState::OnGround;
+		typeSettings_ = typeSettings;
+		groundY_ = groundPosition.y;
+		fallSpeed_ = 0.0f;
+		position_ = groundPosition;
+		isHighlighted_ = false;
+		SyncModel();
+	}
+
 	void EnergyPickup::Reset() {
 		state_ = EnergyState::Inactive;
 		position_ = {};

@@ -59,6 +59,7 @@ namespace Prototype {
 
 	void EnergySpawner::Initialize() {
 		ApplyDebugParameters();
+		gameplayEnabled_ = true;
 		spawnTimer_ = 0.0f;
 		for (auto& pickup : pickups_) {
 			pickup->Reset();
@@ -73,6 +74,10 @@ namespace Prototype {
 
 	void EnergySpawner::Update() {
 		ApplyDebugParameters();
+		if (!gameplayEnabled_) {
+			return;
+		}
+
 		UpdatePickups(FpsCounter::gameDeltaTime);
 
 		spawnTimer_ += FpsCounter::gameDeltaTime;
@@ -95,6 +100,9 @@ namespace Prototype {
 	}
 
 	bool EnergySpawner::SpawnInZone(FieldZone zone) {
+		if (!gameplayEnabled_) {
+			return false;
+		}
 		if (zone != FieldZone::Near && zone != FieldZone::Middle && zone != FieldZone::Far) {
 			return false;
 		}
@@ -117,6 +125,25 @@ namespace Prototype {
 			settings_.fallSpeed,
 			typeSettings_[static_cast<size_t>(size)]);
 		return true;
+	}
+
+	EnergyPickup* EnergySpawner::SpawnOnGround(EnergySize size, const Vector3& position) {
+		const size_t sizeIndex = static_cast<size_t>(size);
+		if (sizeIndex >= typeSettings_.size()) {
+			return nullptr;
+		}
+
+		auto available = std::find_if(pickups_.begin(), pickups_.end(), [](const auto& pickup) {
+			return !pickup->IsActive();
+		});
+		if (available == pickups_.end()) {
+			return nullptr;
+		}
+
+		Vector3 groundPosition = position;
+		groundPosition.y = settings_.groundHeight;
+		(*available)->SpawnOnGround(size, groundPosition, typeSettings_[sizeIndex]);
+		return available->get();
 	}
 
 	EnergyPickup* EnergySpawner::FindNearestAvailable(const Vector3& position, float maxDistance) {
