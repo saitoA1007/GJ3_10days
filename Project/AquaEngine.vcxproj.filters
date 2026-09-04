@@ -30,6 +30,12 @@
     <Filter Include="Application\Scene\Transition">
       <UniqueIdentifier>{e4a44b89-668f-46e4-a870-f3f9d9b5d3eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Prototype">
+      <UniqueIdentifier>{4d7de956-6606-42ec-b421-4bd5b134346a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\Field">
+      <UniqueIdentifier>{38c02e8a-8f56-4f7c-b78f-7d697779cd54}</UniqueIdentifier>
+    </Filter>
     <Filter Include="EngineSource">
       <UniqueIdentifier>{f8ed931d-59ae-469c-b602-a18b3d78668e}</UniqueIdentifier>
     </Filter>
@@ -522,6 +528,12 @@
     <ClCompile Include="EngineSource\Graphics\Core\SceneRenderManager.cpp" />
     <ClCompile Include="EngineSource\3D\ParticleSystem\ModulesControl.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\Scene\ProtoScene.cpp">
+      <Filter>Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp">
+      <Filter>Application\Prototype\Field</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
@@ -1060,6 +1072,12 @@
     <ClInclude Include="EngineSource\3D\ParticleSystem\ParticleModules.h" />
     <ClInclude Include="EngineSource\3D\ParticleSystem\ModulesControl.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
+    <ClInclude Include="Application\Scene\ProtoScene.h">
+      <Filter>Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Field\PrototypeField.h">
+      <Filter>Application\Prototype\Field</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Utils\GameTimer.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
