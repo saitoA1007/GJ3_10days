@@ -228,11 +228,11 @@ DrainPerSecond × (1 + ロケットからの距離 × DistanceDrainRate)
 | 項目 | 現在値 | 変更される内容 | 補正・注意点 |
 |---|---:|---|---|
 | `CursorSpeed` | 24.0 | WASD・左スティックでのカーソル移動速度 | 最低0 |
-| `SelectionRadius` | 2.0 | Energy・Enemyを検索する半径 | 最低0 |
+| `SelectionRadius` | 2.0 | Energy・Enemyを検索する半径。cursor.objの表示スケールも同じ比率で変化 | 最低0 |
 | `GroundHeight` | 0.25 | カーソルが動くXZ平面のY座標 | 即時反映 |
 | `FieldEdgeMargin` | 0.5 | 最外周から内側へ設ける移動制限の余白 | 最低0 |
 | `MouseMoveThreshold` | 0.01 | マウス移動として認識する最小デルタ | 最低0 |
-| `ModelScale` | `(1.0, 1.0, 1.0)` | cursor.objの表示倍率 | 0未満の各成分は0へ補正 |
+| `ModelScale` | `(1.0, 1.0, 1.0)` | `SelectionRadius`へ掛けるcursor.objの軸別補正倍率 | 0未満の各成分は0へ補正 |
 | `ModelHeightOffset` | 0.06 | カーソルモデルを地面から浮かせるY差 | 即時反映 |
 
 ### Charge

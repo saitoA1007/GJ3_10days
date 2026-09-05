@@ -2,12 +2,12 @@
     "PrototypeEnergy": {
         "SceneName": "Proto",
         "Spawn": {
-            "FallHeight": 10.0,
+            "FallHeight": 1.0,
             "FallSpeed": 5.0,
             "GroundHeight": 0.25,
             "InitialCountPerZone": 1,
-            "MaxActiveCount": 30,
-            "SpawnInterval": 2.5
+            "MaxActiveCount": 12,
+            "SpawnInterval": 5.0
         },
         "Type": {
             "Large": {

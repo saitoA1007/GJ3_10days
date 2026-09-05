@@ -16,8 +16,8 @@
         },
         "SceneName": "Proto",
         "Spawn": {
-            "InitialCount": 3,
-            "Interval": 4.0,
+            "InitialCount": 1,
+            "Interval": 3.0,
             "MaxActiveCount": 20
         },
         "Target": {

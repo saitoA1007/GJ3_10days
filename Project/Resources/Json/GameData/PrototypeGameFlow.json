@@ -3,7 +3,7 @@
         "SceneName": "Proto",
         "Time": {
             "GameDuration": 120.0,
-            "InitialDelay": 3.0
+            "InitialDelay": 1.0
         }
     }
 }

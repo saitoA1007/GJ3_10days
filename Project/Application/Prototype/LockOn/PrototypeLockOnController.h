@@ -35,7 +35,7 @@ namespace Prototype {
 		float chargeStartSeconds = 0.2f;                       // 単発クリックを0消費にする短押し猶予
 		int32_t maxChargeEnergyCost = 30;                      // 最大チャージ時に要求するエネルギー
 		float mouseMoveThreshold = 0.01f;                      // マウス移動として扱う最小デルタ
-		Vector3 cursorModelScale = { 1.0f, 1.0f, 1.0f };       // cursor.objの表示倍率
+		Vector3 cursorModelScale = { 1.0f, 1.0f, 1.0f };       // SelectionRadiusへ掛ける軸別の表示補正倍率
 		float cursorModelHeightOffset = 0.06f;                 // 地面への埋まりを防ぐ追加Y座標
 		Vector4 cursorColor = { 0.25f, 1.00f, 0.45f, 1.0f };  // 通常カーソル色
 		Vector4 targetColor = { 1.00f, 0.95f, 0.25f, 1.0f };  // 選択対象ガイド色
@@ -129,7 +129,7 @@ namespace Prototype {
 		/// @brief カーソルを最外周円の内側へ収める。
 		void ClampCursorToField();
 
-		/// @brief 論理位置と色をcursor.objへ反映する。
+		/// @brief 論理位置、選択半径に連動するスケール、色をcursor.objへ反映する。
 		void SyncCursorModel();
 
 		/// @brief 範囲内で最も近いEnergyまたはEnemyを選ぶ。

@@ -254,7 +254,12 @@ namespace Prototype {
 	}
 
 	void LockOnController::SyncCursorModel() {
-		cursorModel_->worldTransform_.transform_.scale = settings_.cursorModelScale;
+		// 選択範囲と見た目の大きさを一致させ、ModelScaleはモデル固有の補正倍率として使う。
+		cursorModel_->worldTransform_.transform_.scale = {
+			settings_.cursorModelScale.x * settings_.selectionRadius,
+			settings_.cursorModelScale.y * settings_.selectionRadius,
+			settings_.cursorModelScale.z * settings_.selectionRadius,
+		};
 		cursorModel_->worldTransform_.transform_.translate = {
 			cursorPosition_.x,
 			cursorPosition_.y + settings_.cursorModelHeightOffset,
