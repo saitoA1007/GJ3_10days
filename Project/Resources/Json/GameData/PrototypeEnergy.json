@@ -1,0 +1,45 @@
+{
+    "PrototypeEnergy": {
+        "SceneName": "Proto",
+        "Spawn": {
+            "FallHeight": 1.0,
+            "FallSpeed": 5.0,
+            "GroundHeight": 0.25,
+            "InitialCountPerZone": 1,
+            "MaxActiveCount": 12,
+            "SpawnInterval": 5.0
+        },
+        "Type": {
+            "Large": {
+                "Color": [
+                    0.9200000166893005,
+                    0.3499999940395355,
+                    1.0,
+                    1.0
+                ],
+                "Scale": 1.0,
+                "Value": 50
+            },
+            "Medium": {
+                "Color": [
+                    0.25,
+                    0.8500000238418579,
+                    1.0,
+                    1.0
+                ],
+                "Scale": 0.699999988079071,
+                "Value": 25
+            },
+            "Small": {
+                "Color": [
+                    1.0,
+                    0.8799999952316284,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "Scale": 0.5,
+                "Value": 10
+            }
+        }
+    }
+}

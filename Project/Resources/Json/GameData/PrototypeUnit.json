@@ -1,0 +1,52 @@
+{
+    "PrototypeUnit": {
+        "Collision": {
+            "Radius": 0.6000000238418579
+        },
+        "Color": {
+            "Normal": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "WithStamina": [
+                0.25,
+                0.8500000238418579,
+                1.0,
+                1.0
+            ]
+        },
+        "Manager": {
+            "UnitCount": 5
+        },
+        "Move": {
+            "BoostedSpeed": 5.0,
+            "DeliveryRadius": 1.600000023841858,
+            "NormalSpeed": 1.5,
+            "PickupRadius": 0.5
+        },
+        "SceneName": "Proto",
+        "Stamina": {
+            "DistanceDrainRate": 0.10000000149011612,
+            "DrainPerSecond": 2.0
+        },
+        "Transform": {
+            "CarryOffset": [
+                0.0,
+                1.4500000476837158,
+                0.0
+            ],
+            "LaunchOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                0.699999988079071,
+                0.699999988079071,
+                0.699999988079071
+            ]
+        }
+    }
+}

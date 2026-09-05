@@ -30,6 +30,33 @@
     <Filter Include="Application\Scene\Transition">
       <UniqueIdentifier>{e4a44b89-668f-46e4-a870-f3f9d9b5d3eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Prototype">
+      <UniqueIdentifier>{4d7de956-6606-42ec-b421-4bd5b134346a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\Field">
+      <UniqueIdentifier>{38c02e8a-8f56-4f7c-b78f-7d697779cd54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\Rocket">
+      <UniqueIdentifier>{dd43b3a8-65c4-49ed-9565-bfc1539f3f9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\Energy">
+      <UniqueIdentifier>{997cd2ae-f15d-40c8-9bcc-c3db35194fd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\Unit">
+      <UniqueIdentifier>{80cd08ef-da2f-4859-953c-ec7ba10c6ca0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\LockOn">
+      <UniqueIdentifier>{c625222a-c76e-4645-b6dc-17a174a0e139}</UniqueIdentifier>
+    </Filter>
+	<Filter Include="Application\Prototype\Enemy">
+	  <UniqueIdentifier>{c42ac6d5-7dd6-42e5-b955-e60a59e1190d}</UniqueIdentifier>
+	</Filter>
+	<Filter Include="Application\Prototype\GameFlow">
+	  <UniqueIdentifier>{059bce63-0b25-4f4c-9863-ff199cba3a44}</UniqueIdentifier>
+	</Filter>
+	<Filter Include="Application\Prototype\EnergyView">
+	  <UniqueIdentifier>{07a27709-1114-4fb9-9e74-80451026bfdb}</UniqueIdentifier>
+	</Filter>
     <Filter Include="EngineSource">
       <UniqueIdentifier>{f8ed931d-59ae-469c-b602-a18b3d78668e}</UniqueIdentifier>
     </Filter>
@@ -522,6 +549,45 @@
     <ClCompile Include="EngineSource\Graphics\Core\SceneRenderManager.cpp" />
     <ClCompile Include="EngineSource\3D\ParticleSystem\ModulesControl.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\Scene\ProtoScene.cpp">
+      <Filter>Application\Scene</Filter>
+    </ClCompile>
+	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemy.cpp">
+	  <Filter>Application\Prototype\Enemy</Filter>
+	</ClCompile>
+	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemyManager.cpp">
+	  <Filter>Application\Prototype\Enemy</Filter>
+	</ClCompile>
+	<ClCompile Include="Application\Prototype\EnergyView\PrototypeEnergyView.cpp">
+	  <Filter>Application\Prototype\EnergyView</Filter>
+	</ClCompile>
+	<ClCompile Include="Application\Prototype\GameFlow\PrototypeGameFlow.cpp">
+	  <Filter>Application\Prototype\GameFlow</Filter>
+	</ClCompile>
+    <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp">
+      <Filter>Application\Prototype\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Energy\PrototypeEnergyPickup.cpp">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Energy\PrototypeEnergySpawner.cpp">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\LockOn\PrototypeLockOnController.cpp">
+      <Filter>Application\Prototype\LockOn</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Rocket\PrototypeRocket.cpp">
+      <Filter>Application\Prototype\Rocket</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Rocket\RocketEnergy.cpp">
+      <Filter>Application\Prototype\Rocket</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Unit\PrototypeUnit.cpp">
+      <Filter>Application\Prototype\Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Unit\PrototypeUnitManager.cpp">
+      <Filter>Application\Prototype\Unit</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
@@ -1062,6 +1128,45 @@
     <ClInclude Include="EngineSource\3D\ParticleSystem\ParticleModules.h" />
     <ClInclude Include="EngineSource\3D\ParticleSystem\ModulesControl.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
+    <ClInclude Include="Application\Scene\ProtoScene.h">
+      <Filter>Application\Scene</Filter>
+    </ClInclude>
+	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemy.h">
+	  <Filter>Application\Prototype\Enemy</Filter>
+	</ClInclude>
+	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemyManager.h">
+	  <Filter>Application\Prototype\Enemy</Filter>
+	</ClInclude>
+	<ClInclude Include="Application\Prototype\EnergyView\PrototypeEnergyView.h">
+	  <Filter>Application\Prototype\EnergyView</Filter>
+	</ClInclude>
+	<ClInclude Include="Application\Prototype\GameFlow\PrototypeGameFlow.h">
+	  <Filter>Application\Prototype\GameFlow</Filter>
+	</ClInclude>
+    <ClInclude Include="Application\Prototype\Field\PrototypeField.h">
+      <Filter>Application\Prototype\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Energy\PrototypeEnergyPickup.h">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Energy\PrototypeEnergySpawner.h">
+      <Filter>Application\Prototype\Energy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\LockOn\PrototypeLockOnController.h">
+      <Filter>Application\Prototype\LockOn</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Rocket\PrototypeRocket.h">
+      <Filter>Application\Prototype\Rocket</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Rocket\RocketEnergy.h">
+      <Filter>Application\Prototype\Rocket</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Unit\PrototypeUnit.h">
+      <Filter>Application\Prototype\Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Unit\PrototypeUnitManager.h">
+      <Filter>Application\Prototype\Unit</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Utils\GameTimer.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />

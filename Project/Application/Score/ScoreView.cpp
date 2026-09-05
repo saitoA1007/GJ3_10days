@@ -9,8 +9,11 @@
 #include "MyMath.h"
 #include "RenderQueue.h"
 
-ScoreView::ScoreView(const DigitModels& models, const GameEngine::Camera* camera)
-	: models_(models), camera_(camera) {
+ScoreView::ScoreView(
+	const DigitModels& models,
+	const GameEngine::Camera* camera,
+	const std::string& parameterGroupName)
+	: models_(models), camera_(camera), debugParameter_(parameterGroupName) {
 	assert(camera_);
 	for (const auto* model : models_) {
 		assert(model && "Number models 0.obj through 9.obj must be loaded.");
@@ -20,6 +23,7 @@ ScoreView::ScoreView(const DigitModels& models, const GameEngine::Camera* camera
 	debugParameter_.Register("Scale", scale_, 1);
 	debugParameter_.Register("DigitSpacing", digitSpacing_, 2);
 	debugParameter_.Register("HideLeadingZeros", hideLeadingZeros_, 3);
+	debugParameter_.Register("Color", color_, 4);
 
 	for (int i = 0; i < kDigitCount; ++i) {
 		// NumberのXZ平面と読み込み時のX反転を補正した向きを初期値にする。
@@ -29,6 +33,7 @@ ScoreView::ScoreView(const DigitModels& models, const GameEngine::Camera* camera
 		debugParameter_.Register("Rotate", digitRotations_[i], 1, group);
 	}
 	debugParameter_.Apply();
+	material_.SetColor(color_);
 	SetValue(0);
 }
 
@@ -42,6 +47,7 @@ void ScoreView::SetValue(int value) {
 
 void ScoreView::Update() {
 	debugParameter_.ApplyIfDirty();
+	material_.SetColor(color_);
 }
 
 void ScoreView::Draw(GameEngine::RenderQueue* renderQueue) {
@@ -67,6 +73,6 @@ void ScoreView::Draw(GameEngine::RenderQueue* renderQueue) {
 		}
 		const Vector3 position = position_ + Vector3{ digitSpacing_ * static_cast<float>(i), 0.0f, 0.0f } + digitTranslations_[i];
 		digitTransforms_[i].UpdateWorldMatrix(GameEngine::Math::MakeAffineMatrix(scale, digitRotations_[i], position) * cameraWorld);
-		renderQueue->SubmitModel(model, digitTransforms_[i], 1.0f, &material_.GetMaterialBuffer());
+		renderQueue->SubmitModel(model, digitTransforms_[i], color_.w, &material_.GetMaterialBuffer());
 	}
 }

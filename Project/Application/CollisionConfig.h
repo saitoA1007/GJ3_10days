@@ -7,6 +7,8 @@ static inline const uint32_t kCollisionAttributePlayer = 0b1;
 static inline const uint32_t kCollisionAttributePikumi = 0b1;
 // タワー陣営
 static inline const uint32_t kCollisionAttributeTower = 0b1;
+// ロケット陣営
+static inline const uint32_t kCollisionAttributeRocket = 0b1;
 // 敵陣営
 static inline const uint32_t kCollisionAttributeEnemy = 0b1 << 1;
 // 地形陣営
@@ -27,4 +29,5 @@ enum class CollisionTypeID : uint32_t {
 	kWind,    // ボスの風攻撃
 	kHeart,   // 回復
 	kBoundaryWall, // 移動範囲制限用の壁
+	kRocket,  // ロケット
 };

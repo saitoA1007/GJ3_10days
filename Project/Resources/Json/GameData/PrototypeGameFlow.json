@@ -1,0 +1,9 @@
+{
+    "PrototypeGameFlow": {
+        "SceneName": "Proto",
+        "Time": {
+            "GameDuration": 180.0,
+            "InitialDelay": 1.0
+        }
+    }
+}
