@@ -91,11 +91,11 @@
 
 | 項目 | 現在値 | 変更される内容 | 補正・注意点 |
 |---|---:|---|---|
-| `SpawnInterval` | 2.5 | ランダムな領域へEnergyを1個生成する間隔 | 最低0.1秒 |
-| `FallHeight` | 10.0 | 地面からの生成高度 | 最低0。次に空中生成する個体から反映 |
+| `SpawnInterval` | 5.0 | ランダムな領域へEnergyを1個生成する間隔 | 最低0.1秒 |
+| `FallHeight` | 1.0 | 地面からの生成高度 | 最低0。次に空中生成する個体から反映 |
 | `FallSpeed` | 5.0 | 1秒あたりの落下距離 | 最低0.01。次に空中生成する個体から反映 |
 | `GroundHeight` | 0.25 | 着地・敵ドロップ時のY座標 | 次に生成する個体から反映 |
-| `MaxActiveCount` | 30 | 落下中・地上・予約・運搬中を含む同時存在上限 | 1～プール容量。値を下げても既存個体は削除しない |
+| `MaxActiveCount` | 12 | 落下中・地上・予約・運搬中を含む同時存在上限 | 1～プール容量。値を下げても既存個体は削除しない |
 | `InitialCountPerZone` | 1 | 開始時にNear・Middle・Farへ配置する個数 | 次回初期化時に反映。最大は`MaxActiveCount / 3` |
 
 自動生成先はNear・Middle・Farからランダムに選ばれます。Centerと各Bufferには空からEnergyが降りません。
@@ -152,11 +152,11 @@
 |---|---|---:|---|---|
 | `Move` | `NormalSpeed` | 1.5 | スタミナ切れ時の移動速度 | 最低0 |
 | `Move` | `BoostedSpeed` | 5.0 | スタミナがある間の移動速度 | `NormalSpeed`以上へ補正 |
-| `Move` | `PickupRadius` | 0.45 | Energy回収が成立する距離 | 最低0 |
+| `Move` | `PickupRadius` | 0.5 | Energy回収が成立する距離 | 最低0 |
 | `Move` | `DeliveryRadius` | 1.6 | ロケットへの納品が成立する距離 | 最低0 |
 | `Collision` | `Radius` | 0.6 | Enemyとの接触判定半径 | 最低0 |
 | `Stamina` | `DrainPerSecond` | 2.0 | 1秒あたりの基本スタミナ消費量 | 最低0 |
-| `Stamina` | `DistanceDrainRate` | 0.08 | ロケットからの距離による追加消費倍率 | 最低0 |
+| `Stamina` | `DistanceDrainRate` | 0.1 | ロケットからの距離による追加消費倍率 | 最低0 |
 
 スタミナの1秒あたり消費量は、概ね次の式で決まります。
 
@@ -189,8 +189,8 @@ DrainPerSecond × (1 + ロケットからの距離 × DistanceDrainRate)
 
 | グループ | 項目 | 現在値 | 変更される内容 | 補正・注意点 |
 |---|---|---:|---|---|
-| `Spawn` | `Interval` | 4.0 | 敵を1体生成する間隔 | 最低0.1秒 |
-| `Spawn` | `InitialCount` | 3 | 開始時に最外周へ配置する数 | 次回初期化時に反映。0～`MaxActiveCount` |
+| `Spawn` | `Interval` | 3.0 | 敵を1体生成する間隔 | 最低0.1秒 |
+| `Spawn` | `InitialCount` | 1 | 開始時に最外周へ配置する数 | 次回初期化時に反映。0～`MaxActiveCount` |
 | `Spawn` | `MaxActiveCount` | 20 | 同時に存在できる敵数 | 1～プール容量。値を下げても既存の敵は削除しない |
 | `Transform` | `Scale` | `(1.0, 1.0, 1.0)` | 敵モデルの表示倍率 | 0未満の各成分は0へ補正 |
 | `Transform` | `GroundHeight` | 0.25 | 新しく出現する敵のY座標 | 既存の敵位置は変更しない |
@@ -291,7 +291,7 @@ DrainPerSecond × (1 + ロケットからの距離 × DistanceDrainRate)
 | 項目 | 現在値 | 変更される内容 | 反映タイミング・注意点 |
 |---|---:|---|---|
 | `GameDuration` | 120.0 | Playingフェーズの制限時間 | 最低0.1秒。現在進行中の残り時間は書き換えず、次回初期化時に反映 |
-| `InitialDelay` | 3.0 | ReadyからPlayingまでの待機時間 | 最低0。次回初期化時に反映 |
+| `InitialDelay` | 1.0 | ReadyからPlayingまでの待機時間 | 最低0。次回初期化時に反映 |
 
 ### フェーズ
 
