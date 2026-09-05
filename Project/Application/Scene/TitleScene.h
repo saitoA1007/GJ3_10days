@@ -6,6 +6,8 @@
 
 #include "Application/Scene/Transition/Fade.h"
 
+#include "../Utils/GameTimer.h"
+
 class TitleLogo;
 class HyperspaceEffect;
 
@@ -66,4 +68,9 @@ private: // シーン機能
 
 	// タイトルロゴ
 	std::unique_ptr<TitleLogo> titleLogo_;
+
+	GameTimer hyperspaceAudioTimer_;
+	bool isHyperspaceAudioPlayed_ = false;
+
+	GameTimer bgmAudioTimer_;
 };

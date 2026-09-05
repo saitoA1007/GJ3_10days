@@ -14,6 +14,16 @@ namespace GameEngine {
 	class RenderQueue;
 }
 
+enum class AnimationState {
+	Falling,
+	Appearing,
+	FadingBottom,
+	Idle,
+	Shaking,
+	Moving,
+	Finished,
+};
+
 /// <summary>
 /// タイトルロゴを構成するモデルをまとめて管理する。
 /// </summary>
@@ -30,20 +40,15 @@ public:
 	void ResetAnimation();
 	bool IsAnimationFinished() const;
 
-private:
-	enum class AnimationState {
-		Falling,
-		FadingBottom,
-		Idle,
-		Shaking,
-		Moving,
-		Finished,
-	};
+	AnimationState GetAnimationState() const { return animationState_; }
 
+private:
+	
 	void UpdateAnimation(float deltaTime);
 	void UpdateTransforms();
 	void CaptureAnimationOrigins();
-	void RestorePartTranslations();
+	void RestorePartTransforms();
+	void RestoreIdleTransforms();
 	void RandomizeMoveRotationDirections();
 	float GetFallSequenceDuration() const;
 	float GetMoveSequenceDuration() const;
@@ -59,7 +64,20 @@ private:
 	float fallDuration_ = 0.6f;
 	float fallInterval_ = 0.15f;
 	float fallStartOffsetY_ = 7.0f;
+	float fallSoundLeadTime_ = 0.08f;
+	float appearDuration_ = 0.65f;
+	float appearStartDepth_ = 2.0f;
+	float appearPeakScale_ = 1.18f;
 	float bottomFadeDuration_ = 0.6f;
+	float idleHopDuration_ = 0.55f;
+	float idleInterval_ = 0.12f;
+	float idleLoopDelay_ = 1.0f;
+	float idleHopHeight_ = 0.32f;
+	float idleScaleAmount_ = 0.06f;
+	float idleRockAngle_ = 0.055f;
+	float idleBottomCycleDuration_ = 2.2f;
+	float idleBottomMoveAmplitude_ = 0.06f;
+	float idleBottomScaleAmount_ = 0.025f;
 
 	float shakeDuration_ = 1.0f;
 	float shakeStartAmplitude_ = 0.0f;
@@ -74,12 +92,22 @@ private:
 
 	AnimationState animationState_ = AnimationState::Falling;
 	GameTimer fallTimer_;
+	GameTimer appearTimer_;
 	GameTimer bottomFadeTimer_;
 	GameTimer shakeTimer_;
 	GameTimer bottomScalingTimer_;
 	GameTimer moveTimer_;
+
+	GameTimer playBgmTimer_;
+	bool bgmPlayed_ = false;
+
+	float idleElapsedTime_ = 0.0f;
+	float idleBottomElapsedTime_ = 0.0f;
 	Vector3 bottomAnimationOrigin_{};
+	Vector3 bottomAnimationOriginScale_{};
 	std::array<Vector3, kPartCount> partAnimationOrigins_{};
+	std::array<Vector3, kPartCount> partAnimationOriginScales_{};
 	std::array<Vector3, kPartCount> partAnimationOriginRotations_{};
 	std::array<Vector3, kPartCount> partMoveRotationDirections_{};
+	std::array<bool, kPartCount> partFallSoundPlayed_{};
 };

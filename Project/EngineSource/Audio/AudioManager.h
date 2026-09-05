@@ -105,6 +105,13 @@ namespace GameEngine {
 		void Play(uint32_t soundHandle, float volume, bool isloop);
 
 		/// <summary>
+		/// 再生中の音声の音量を変更
+		/// </summary>
+		/// <param name="soundHandle"></param>
+		/// <param name="volume">0.0f～1.0f</param>
+		void SetVolume(uint32_t soundHandle, float volume);
+
+		/// <summary>
 		/// 音声を止める
 		/// </summary>
 		/// <param name="soundHandle"></param>

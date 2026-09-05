@@ -610,6 +610,47 @@ namespace GameEngine {
 			return scaleMatrix * localRotateMatrix * billboardMatrix * translateMatrix;
 		}
 
+		Matrix4x4 MakeYAxisBillboardRotateMatrix(const Vector3& translate, const Matrix4x4& cameraMatrix) {
+
+			// カメラのワールド座標
+			Vector3 cameraPosition = { cameraMatrix.m[3][0], cameraMatrix.m[3][1], cameraMatrix.m[3][2] };
+
+			// カメラからオブジェクトへの方向をXZ平面に投影する
+			float dirX = translate.x - cameraPosition.x;
+			float dirZ = translate.z - cameraPosition.z;
+
+			// XZ平面での長さの二乗
+			float lengthSq = dirX * dirX + dirZ * dirZ;
+
+			// 真上、真下から見ている場合はカメラの前方向で代用する
+			if (lengthSq < 1.0e-6f) {
+				dirX = cameraMatrix.m[2][0];
+				dirZ = cameraMatrix.m[2][2];
+				lengthSq = dirX * dirX + dirZ * dirZ;
+				// それでも求まらない場合は単位行列を返す
+				if (lengthSq < 1.0e-6f) {
+					return Matrix4x4::MakeIdentity();
+				}
+			}
+
+			// Y軸周りの回転角を求める
+			float yaw = std::atan2f(dirX, dirZ);
+			return Math::MakeRotateYMatrix(yaw);
+		}
+
+		Matrix4x4 MakeYAxisBillboardMatrix(const Vector3& scale, const Vector3& translate, const Matrix4x4& cameraMatrix) {
+
+			// Y軸ビルボードの回転行列を作成
+			Matrix4x4 billboardMatrix = Math::MakeYAxisBillboardRotateMatrix(translate, cameraMatrix);
+
+			// ST行列を作成
+			Matrix4x4 scaleMatrix = Math::MakeScaleMatrix(scale);
+			Matrix4x4 translateMatrix = Math::MakeTranslateMatrix(translate);
+
+			// 行列の更新
+			return scaleMatrix * billboardMatrix * translateMatrix;
+		}
+
 		Matrix4x4 MakeDirectionalBillboardMatrix(const Vector3& scale, const Vector3& translate, const Matrix4x4& cameraMatrix, const Matrix4x4& viewMatrix, const Vector3& velocity, float rotateZ) {
 			// 1. ビルボード行列（カメラの回転をコピーしてZ軸回転などをリセット）
 			Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(0.0f);

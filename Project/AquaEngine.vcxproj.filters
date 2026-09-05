@@ -650,6 +650,7 @@
     <ClCompile Include="Application\LockOn\LockOnController.cpp" />
     <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
     <ClCompile Include="Application\GameFlow\GameFlow.cpp" />
+    <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1247,6 +1248,7 @@
     <ClInclude Include="Application\LockOn\LockOnController.h" />
     <ClInclude Include="Application\EnergyView\EnergyView.h" />
     <ClInclude Include="Application\GameFlow\GameFlow.h" />
+    <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

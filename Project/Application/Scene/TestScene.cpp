@@ -5,6 +5,7 @@
 #include "FPSCounter.h"
 #include "Application/CollisionConfig.h"
 #include "Application/Field/ImpactDetectionEffect.h"
+#include "Application/Effect/EnemySpawnEffect.h"
 using namespace GameEngine;
 
 TestScene::~TestScene() {}
@@ -58,6 +59,14 @@ TestScene::TestScene() {
 	effectModel_ = modelManager_->GetNameByModel("plane.obj");
 	effectModel_->SetDefaultIsEnableLight(false);
 	gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_);
+
+	auto* sModel = modelManager_->GetNameByModel("beam.gltf");
+	sModel->SetDefaultIsEnableLight(false);
+	auto* rModel = modelManager_->GetNameByModel("RushPower.obj");
+	rModel->SetDefaultIsEnableLight(false);
+	uint32_t rGH = textureManager_->GetHandleByName("Ring_01.png");
+	uint32_t pGH = textureManager_->GetHandleByName("Power.png");
+	gameObjectManager_->AddObject<EnemySpawnEffect>(sModel,effectModel_, rModel,rGH, pGH);
 
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);

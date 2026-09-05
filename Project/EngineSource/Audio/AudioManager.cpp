@@ -1,4 +1,5 @@
 #include "AudioManager.h"
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
 #include "ConvertString.h"
@@ -179,41 +180,54 @@ AudioManager::SoundData AudioManager::SoundLoadMp3(const std::wstring path) {
 	soundData.type = MP3;
 	soundData.name = ConvertString(path);
 
+	HRESULT hr;
+
 	// ソースリーダーの作成
 	IMFSourceReader* pMFSourceReader{ nullptr };
-	MFCreateSourceReaderFromURL(path.c_str(), NULL, &pMFSourceReader);
+	hr = MFCreateSourceReaderFromURL(path.c_str(), NULL, &pMFSourceReader);
+	if (FAILED(hr)) {
+		LogManager::GetInstance().Log("MFCreateSourceReaderFromURL failed: " + soundData.name + " hr=" + std::to_string(hr));
+		assert(SUCCEEDED(hr));
+		return soundData;
+	}
 
 	// メディアタイプを取得
 	IMFMediaType* pMFMediaType{ nullptr };
 	MFCreateMediaType(&pMFMediaType);
 	pMFMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 	pMFMediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
-	pMFSourceReader->SetCurrentMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), nullptr, pMFMediaType);
+	hr = pMFSourceReader->SetCurrentMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), nullptr, pMFMediaType);
+	assert(SUCCEEDED(hr));
 
 	pMFMediaType->Release();
 	pMFMediaType = nullptr;
-	pMFSourceReader->GetCurrentMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), &pMFMediaType);
+	hr = pMFSourceReader->GetCurrentMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), &pMFMediaType);
+	assert(SUCCEEDED(hr));
 
 	WAVEFORMATEX* waveFormat{ nullptr };
-	MFCreateWaveFormatExFromMFMediaType(pMFMediaType, &waveFormat, nullptr);
+	hr = MFCreateWaveFormatExFromMFMediaType(pMFMediaType, &waveFormat, nullptr);
+	assert(SUCCEEDED(hr));
 
 	// データ読み込み
 	std::vector<BYTE> bufferData;
 	while (true) {
 		IMFSample* pMFSample{ nullptr };
 		DWORD dwStreamFlags = 0;
-		pMFSourceReader->ReadSample(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), 0, nullptr, &dwStreamFlags, nullptr, &pMFSample);
+		hr = pMFSourceReader->ReadSample(static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), 0, nullptr, &dwStreamFlags, nullptr, &pMFSample);
+		assert(SUCCEEDED(hr));
 
 		if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
 			break;
 		}
 
 		IMFMediaBuffer* pMFMediaBuffer{ nullptr };
-		pMFSample->ConvertToContiguousBuffer(&pMFMediaBuffer);
+		hr = pMFSample->ConvertToContiguousBuffer(&pMFMediaBuffer);
+		assert(SUCCEEDED(hr));
 
 		BYTE* pBuffer = nullptr;
 		DWORD cbCurrentLength = 0;
-		pMFMediaBuffer->Lock(&pBuffer, nullptr, &cbCurrentLength);
+		hr = pMFMediaBuffer->Lock(&pBuffer, nullptr, &cbCurrentLength);
+		assert(SUCCEEDED(hr));
 		// データを一時バッファに追加
 		bufferData.insert(bufferData.end(), pBuffer, pBuffer + cbCurrentLength);
 
@@ -224,13 +238,9 @@ AudioManager::SoundData AudioManager::SoundLoadMp3(const std::wstring path) {
 
 	}
 
-	// 読み込んだデータをメモリにコピー
-	BYTE* pAudioData = new BYTE[bufferData.size()];
-	memcpy(pAudioData, bufferData.data(), bufferData.size());
-
 	soundData.wfex = *waveFormat;
 	soundData.pBuffer = std::move(bufferData);
-	soundData.bufferSize = static_cast<UINT32>(bufferData.size());
+	soundData.bufferSize = static_cast<UINT32>(soundData.pBuffer.size());
 
 	// 解放処理
 	CoTaskMemFree(waveFormat);
@@ -255,6 +265,15 @@ void AudioManager::Play(uint32_t soundHandle, float volume, bool isloop) {
 	} else {
 		SoundPlayWave(soundHandle, isloop);
 	}
+}
+
+void AudioManager::SetVolume(uint32_t soundHandle, float volume) {
+	auto it = activeVoices_.find(soundHandle);
+	if (it == activeVoices_.end() || it->second == nullptr) {
+		return;
+	}
+
+	it->second->SetVolume(std::clamp(volume, 0.0f, 1.0f));
 }
 
 void AudioManager::Stop(const uint32_t& soundHandle) {
@@ -294,7 +313,12 @@ void AudioManager::SoundPlayMp3(const uint32_t& soundHandle, bool isloop) {
 	const SoundData& soundData = soundData_[soundHandle];
 
 	IXAudio2SourceVoice* pSourceVoice{ nullptr };
-	xAudio2_->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+	result = xAudio2_->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+	if (FAILED(result)) {
+		LogManager::GetInstance().Log("CreateSourceVoice failed for MP3: " + soundData.name + " hr=" + std::to_string(result));
+		assert(SUCCEEDED(result));
+		return;
+	}
 
 	XAUDIO2_BUFFER buffer{ 0 };
 	buffer.pAudioData = soundData.pBuffer.data();
@@ -304,7 +328,9 @@ void AudioManager::SoundPlayMp3(const uint32_t& soundHandle, bool isloop) {
 
 	// 再生する
 	result = pSourceVoice->SubmitSourceBuffer(&buffer);
+	assert(SUCCEEDED(result));
 	result = pSourceVoice->Start();
+	assert(SUCCEEDED(result));
 
 	// 管理テーブルに登録
 	activeVoices_[soundHandle] = pSourceVoice;
