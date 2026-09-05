@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.2.40",
+		"generator":"Khronos glTF Blender I/O v5.2.39",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -21,37 +21,17 @@
 		},
 		{
 			"mesh":1,
-			"name":"Cylinder",
-			"scale":[
-				0.6519601345062256,
-				0.058201760053634644,
-				0.6519601345062256
-			],
-			"translation":[
-				0,
-				0.11153644323348999,
-				0
-			]
+			"name":"Cylinder"
 		},
 		{
 			"mesh":2,
-			"name":"Sphere",
-			"scale":[
-				0.4178066849708557,
-				0.4178066849708557,
-				0.4178066849708557
-			],
-			"translation":[
-				0,
-				0.9955355525016785,
-				0
-			]
+			"name":"Sphere"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"Material.003",
+			"name":"Material.002",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0,
@@ -65,7 +45,7 @@
 		},
 		{
 			"doubleSided":true,
-			"name":"Material.001",
+			"name":"Material.004",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.046285759657621384,
@@ -80,7 +60,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Cube.002",
+			"name":"Cube.001",
 			"primitives":[
 				{
 					"attributes":{
@@ -93,7 +73,7 @@
 			]
 		},
 		{
-			"name":"Cylinder",
+			"name":"Cylinder.001",
 			"primitives":[
 				{
 					"attributes":{
@@ -106,7 +86,7 @@
 			]
 		},
 		{
-			"name":"Sphere.001",
+			"name":"Sphere.002",
 			"primitives":[
 				{
 					"attributes":{
@@ -151,23 +131,23 @@
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":1390,
+			"count":1392,
 			"max":[
-				0.9873961806297302,
-				1.6592981815338135,
-				0.9842933416366577
+				0.6437429189682007,
+				0.208110511302948,
+				0.6417199969291687
 			],
 			"min":[
-				-0.975106418132782,
-				-1.0000001192092896,
-				-0.9876729846000671
+				-0.635730504989624,
+				0.05333467572927475,
+				-0.6439234018325806
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":4,
 			"componentType":5126,
-			"count":1390,
+			"count":1392,
 			"type":"VEC3"
 		},
 		{
@@ -181,14 +161,14 @@
 			"componentType":5126,
 			"count":1132,
 			"max":[
-				1.0076258182525635,
-				0.9798207879066467,
-				0.9894985556602478
+				0.42099279165267944,
+				1.4049112796783447,
+				0.41341909766197205
 			],
 			"min":[
-				-0.9869861602783203,
-				-2.3644471168518066,
-				-0.9935621023178101
+				-0.41236943006515503,
+				0.007653713226318359,
+				-0.4151168763637543
 			],
 			"type":"VEC3"
 		},
@@ -226,44 +206,44 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":16680,
+			"byteLength":16704,
 			"byteOffset":1065744,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":16680,
-			"byteOffset":1082424,
+			"byteLength":16704,
+			"byteOffset":1082448,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":2832,
-			"byteOffset":1099104,
+			"byteOffset":1099152,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":13584,
-			"byteOffset":1101936,
+			"byteOffset":1101984,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":13584,
-			"byteOffset":1115520,
+			"byteOffset":1115568,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":2358,
-			"byteOffset":1129104,
+			"byteOffset":1129152,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":1131464,
+			"byteLength":1131512,
 			"uri":"Unit.bin"
 		}
 	]
