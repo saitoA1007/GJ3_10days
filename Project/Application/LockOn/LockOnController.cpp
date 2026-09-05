@@ -12,8 +12,8 @@
 #include "InputCommand.h"
 #include "MyMath.h"
 
-//#include "Application/Enemy/Enemy.h"
-//#include "Application/Enemy/EnemyManager.h"
+#include "Application/Enemy/Enemy.h"
+#include "Application/Enemy/EnemyManager.h"
 #include "Application/Energy/EnergyPickup.h"
 #include "Application/Energy/EnergySpawner.h"
 #include "Application/Field/Field.h"
@@ -46,7 +46,7 @@ LockOnController::LockOnController(
 	Field* field,
 	Rocket* rocket,
 	EnergySpawner* energySpawner,
-	//EnemyManager* enemyManager,
+	EnemyManager* enemyManager,
 	UnitManager* unitManager,
 	const LockOnSettings& settings)
 	: input_(input),
@@ -56,7 +56,7 @@ LockOnController::LockOnController(
 	field_(field),
 	rocket_(rocket),
 	energySpawner_(energySpawner),
-	//enemyManager_(enemyManager),
+	enemyManager_(enemyManager),
 	unitManager_(unitManager),
 	settings_(settings) {
 	assert(input_ != nullptr && "lock-on requires input");
@@ -67,7 +67,7 @@ LockOnController::LockOnController(
 	assert(field_ != nullptr && "lock-on requires a field");
 	assert(rocket_ != nullptr && "lock-on requires a rocket");
 	assert(energySpawner_ != nullptr && "lock-on requires an energy spawner");
-	//assert(enemyManager_ != nullptr && "lock-on requires an enemy manager");
+	assert(enemyManager_ != nullptr && "lock-on requires an enemy manager");
 	assert(unitManager_ != nullptr && "lock-on requires a unit manager");
 
 	// カーソルは画面上で色を判別しやすいよう、ライティングの影響を受けない。
@@ -93,10 +93,11 @@ LockOnController::LockOnController(
 	SetUpdateOrder(30);
 }
 
-void LockOnController::Initialize() {
+void LockOnController::Initialize() 
+{
 	ApplyDebugParameters();
 	gameplayEnabled_ = true;
-	SetSelection(nullptr/*, nullptr*/);
+	SetSelection(nullptr, nullptr);
 	cursorPosition_ = rocket_->GetPosition();
 	cursorPosition_.y = settings_.groundHeight;
 	lockOnSeconds_ = 0.0f;
@@ -299,24 +300,24 @@ void LockOnController::SyncCursorModel()
 void LockOnController::UpdateSelection()
 {
 	EnergyPickup* energy = energySpawner_->FindNearestAvailable(cursorPosition_, settings_.selectionRadius);
-	//Enemy* enemy = enemyManager_->FindNearestTargetable(cursorPosition_, settings_.selectionRadius);
+	Enemy* enemy = enemyManager_->FindNearestTargetable(cursorPosition_, settings_.selectionRadius);
 
-	//if (energy && enemy) {
-	//	// 両方が範囲内なら距離で比較し、同距離では防衛を優先してEnemyを選ぶ。
-	//	const Vector3 energyOffset = energy->GetPosition() - cursorPosition_;
-	//	const Vector3 enemyOffset = enemy->GetPosition() - cursorPosition_;
-	//	const float energyDistanceSquared = energyOffset.x * energyOffset.x + energyOffset.z * energyOffset.z;
-	//	const float enemyDistanceSquared = enemyOffset.x * enemyOffset.x + enemyOffset.z * enemyOffset.z;
-	//	if (enemyDistanceSquared <= energyDistanceSquared)
-	//	{
-	//		energy = nullptr;
-	//	}
-	//	else {
-	//		enemy = nullptr;
-	//	}
-	//}
+	if (energy && enemy) {
+		// 両方が範囲内なら距離で比較し、同距離では防衛を優先してEnemyを選ぶ。
+		const Vector3 energyOffset = energy->GetPosition() - cursorPosition_;
+		const Vector3 enemyOffset = enemy->GetPosition() - cursorPosition_;
+		const float energyDistanceSquared = energyOffset.x * energyOffset.x + energyOffset.z * energyOffset.z;
+		const float enemyDistanceSquared = enemyOffset.x * enemyOffset.x + enemyOffset.z * enemyOffset.z;
+		if (enemyDistanceSquared <= energyDistanceSquared)
+		{
+			energy = nullptr;
+		}
+		else {
+			enemy = nullptr;
+		}
+	}
 
-	SetSelection(energy/*, enemy*/);
+	SetSelection(energy, enemy);
 }
 
 void LockOnController::StartLockOn()
@@ -357,17 +358,21 @@ void LockOnController::UpdateLockOn(float deltaTime)
 void LockOnController::CompleteLockOn()
 {
 	const int32_t requestedEnergy = CalculateRequestedEnergy();
-	// 選択種別に応じてManagerの入口だけを切り替え、消費処理はUnitへ任せる。
+
 	bool dispatched = false;
 	if (selectedEnergy_)
 	{
 		dispatched = unitManager_->DispatchToEnergy(selectedEnergy_, requestedEnergy);
 	}
-	SetSelection(nullptr/*, nullptr*/);
+	else if (selectedEnemy_)
+	{
+		dispatched = unitManager_->DispatchToEnemy(selectedEnemy_, requestedEnergy);
+	}
+
+	SetSelection(nullptr, nullptr);
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
 
-	// 対象予約などが失敗した場合は、現在位置でもう一度候補を検索する。
 	if (!dispatched)
 	{
 		UpdateSelection();
@@ -378,7 +383,7 @@ void LockOnController::CancelLockOn()
 {
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
-	SetSelection(nullptr/*, nullptr*/);
+	SetSelection(nullptr, nullptr);
 }
 
 float LockOnController::CalculateChargeRatio() const
@@ -414,13 +419,13 @@ int32_t LockOnController::CalculateRequestedEnergy() const
 
 bool LockOnController::HasValidSelection() const
 {
-	return (selectedEnergy_ && selectedEnergy_->IsTargetable())/* ||
-		(selectedEnemy_ && selectedEnemy_->IsTargetable())*/;
+	return (selectedEnergy_ && selectedEnergy_->IsTargetable()) ||
+		(selectedEnemy_ && selectedEnemy_->IsTargetable());
 }
 
-void LockOnController::SetSelection(EnergyPickup* energy/*, Enemy* enemy*/)
+void LockOnController::SetSelection(EnergyPickup* energy, Enemy* enemy)
 {
-	if (selectedEnergy_ == energy/* && selectedEnemy_ == enemy*/)
+	if (selectedEnergy_ == energy && selectedEnemy_ == enemy)
 	{
 		return;
 	}
@@ -429,25 +434,27 @@ void LockOnController::SetSelection(EnergyPickup* energy/*, Enemy* enemy*/)
 	{
 		selectedEnergy_->SetHighlighted(false);
 	}
-	/*if (selectedEnemy_) 
+	if (selectedEnemy_) 
 	{
 		selectedEnemy_->SetHighlighted(false);
-	}*/
+	}
 
 	selectedEnergy_ = energy;
-	//selectedEnemy_ = enemy;
+	selectedEnemy_ = enemy;
 	if (selectedEnergy_)
 	{
 		selectedEnergy_->SetHighlighted(true);
 	}
-	/*if (selectedEnemy_)
+	if (selectedEnemy_)
 	{
 		selectedEnemy_->SetHighlighted(true);
-	}*/
+	}
 }
 
 void LockOnController::DrawLockOnGuide()
 {
+	if (!debugRenderer_) return;
+
 	// 通常モデルとは別に、選択半径・対象・派遣経路をデバッグ線で確認できるようにする。
 	debugRenderer_->AddCircle(
 		cursorPosition_,
@@ -456,30 +463,34 @@ void LockOnController::DrawLockOnGuide()
 		settings_.cursorColor,
 		32);
 
-	if (!selectedEnergy_/* && !selectedEnemy_*/)
+	if (!selectedEnergy_ && !selectedEnemy_)
 	{
 		return;
 	}
 
-	Vector3 targetPosition = selectedEnergy_->GetPosition();
-	targetPosition.y += 0.08f;
-	const float targetRadius = selectedEnergy_->GetScale() + 0.25f;
-	/*Vector3 targetPosition = selectedEnemy_
+	// 選択中対象（敵優先）の位置と半径を取得
+	Vector3 targetPosition = selectedEnemy_
 		? selectedEnemy_->GetPosition()
 		: selectedEnergy_->GetPosition();
 	targetPosition.y += 0.08f;
+
 	const float targetRadius = selectedEnemy_
 		? selectedEnemy_->GetDisplayScale() + 0.25f
-		: selectedEnergy_->GetScale() + 0.25f;*/
+		: selectedEnergy_->GetScale() + 0.25f;
+
 	debugRenderer_->AddCircle(
 		targetPosition,
 		{ 0.0f, 1.0f, 0.0f },
 		targetRadius,
 		settings_.targetColor,
 		32);
-	debugRenderer_->AddLine(rocket_->GetPosition(), targetPosition, settings_.targetColor);
 
-	if (isCharging_) 
+	if (rocket_)
+	{
+		debugRenderer_->AddLine(rocket_->GetPosition(), targetPosition, settings_.targetColor);
+	}
+
+	if (isCharging_)
 	{
 		const float ratio = CalculateChargeRatio();
 		debugRenderer_->AddCircle(
@@ -504,9 +515,10 @@ void LockOnController::DrawDebugWindow()
 	ImGui::Text("LockOn: Left Click / Space / Pad A");
 	ImGui::Text("Available Units: %zu", unitManager_->GetAvailableCount());
 	ImGui::Text("Rocket Energy: %d", rocket_->GetEnergy());
-	/*const char* selectedType = selectedEnemy_ ? "Enemy" : (selectedEnergy_ ? "Energy" : "None");*/
-	const char* selectedType = selectedEnergy_ ? "Energy" : "None";
+
+	const char* selectedType = selectedEnemy_ ? "Enemy" : (selectedEnergy_ ? "Energy" : "None");
 	ImGui::Text("Selected: %s", selectedType);
+
 	ImGui::Text("Charge: %.2f / %.2f sec", lockOnSeconds_, settings_.maxLockOnSeconds);
 	const float chargeRatio = CalculateChargeRatio();
 	ImGui::Text("Charge Ratio: %.0f%%", chargeRatio * 100.0f);

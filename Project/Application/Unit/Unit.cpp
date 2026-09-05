@@ -8,6 +8,7 @@
 
 #include "Application/Energy/EnergyPickup.h"
 #include "Application/Rocket/Rocket.h"
+#include "Application/Enemy/Enemy.h"
 
 using namespace GameEngine;
 
@@ -32,7 +33,7 @@ void Unit::Initialize()
 	}
 
 	targetEnergy_ = nullptr;
-	//targetEnemy_ = nullptr;
+	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
@@ -48,9 +49,9 @@ void Unit::Update(float deltaTime)
 	case UnitState::MovingToEnergy:
 		UpdateMovingToEnergy(deltaTime);
 		break;
-	//case UnitState::MovingToEnemy:
-	//	UpdateMovingToEnemy(deltaTime);
-	//	break;
+	case UnitState::MovingToEnemy:
+		UpdateMovingToEnemy(deltaTime);
+		break;
 	case UnitState::ReturningToRocket:
 		UpdateReturningToRocket(deltaTime);
 		break;
@@ -86,28 +87,28 @@ bool Unit::DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy)
 	AllocateStamina(requestedEnergy);
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	targetEnergy_ = target;
-	//targetEnemy_ = nullptr;
+	targetEnemy_ = nullptr;
 	state_ = UnitState::MovingToEnergy;
 	SyncModel();
 	return true;
 }
 
-//bool Unit::DispatchToEnemy(Enemy* target, int32_t requestedEnergy) 
-//{
-//	// 敵も予約制にし、同じ敵へ複数体が同時出撃するのを防ぐ。
-//	if (!target || !IsAvailable()/* || !target->TryReserveForAttack()*/) 
-//	{
-//		return false;
-//	}
-//
-//	AllocateStamina(requestedEnergy);
-//	position_ = rocket_->GetPosition() + settings_->launchOffset;
-//	targetEnergy_ = nullptr;
-//	//targetEnemy_ = target;
-//	state_ = UnitState::MovingToEnemy;
-//	SyncModel();
-//	return true;
-//}
+bool Unit::DispatchToEnemy(Enemy* target, int32_t requestedEnergy) 
+{
+	// 敵も予約制にし、同じ敵へ複数体が同時出撃するのを防ぐ。
+	if (!target || !IsAvailable() || !target->TryReserveForAttack()) 
+	{
+		return false;
+	}
+
+	AllocateStamina(requestedEnergy);
+	position_ = rocket_->GetPosition() + settings_->launchOffset;
+	targetEnergy_ = nullptr;
+	targetEnemy_ = target;
+	state_ = UnitState::MovingToEnemy;
+	SyncModel();
+	return true;
+}
 
 bool Unit::DefeatAndDropEnergy() 
 {
@@ -130,13 +131,13 @@ void Unit::Recall()
 	{
 		targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
 	}
-	/*if (targetEnemy_)
+	if (targetEnemy_)
 	{
 		targetEnemy_->CancelAttackReservation();
-	}*/
+	}
 
 	targetEnergy_ = nullptr;
-	//targetEnemy_ = nullptr;
+	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
@@ -175,40 +176,40 @@ void Unit::UpdateMovingToEnergy(float deltaTime) {
 	}
 }
 
-//void Unit::UpdateMovingToEnemy(float deltaTime) 
-//{
-//	if (!targetEnemy_ || !targetEnemy_->IsActive()) 
-//	{
-//		Recall();
-//		return;
-//	}
-//
-//	MoveTowards(targetEnemy_->GetPosition(), deltaTime);
-//	ConsumeStamina(deltaTime);
-//
-//	const float hitDistance = settings_->collisionRadius + targetEnemy_->GetCollisionRadius();
-//	if (DistanceSquaredXZ(position_, targetEnemy_->GetPosition()) > hitDistance * hitDistance)
-//	{
-//		return;
-//	}
-//
-//	// 衝突時点の距離帯に対応したEnergyを敵から生成する。
-//	EnergyPickup* droppedEnergy = targetEnemy_->DefeatAndDropEnergy();
-//	targetEnemy_ = nullptr;
-//	// スタミナが残っていれば勝利して即運搬、なければ相打ちでEnergyだけを残す。
-//	if (stamina_ > 0.0f &&
-//		droppedEnergy != nullptr &&
-//		droppedEnergy->TryReserve() &&
-//		droppedEnergy->BeginCarry())
-//	{
-//		targetEnergy_ = droppedEnergy;
-//		targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
-//		state_ = UnitState::ReturningToRocket;
-//		return;
-//	}
-//
-//	ReturnToStorageAfterDefeat();
-//}
+void Unit::UpdateMovingToEnemy(float deltaTime) 
+{
+	if (!targetEnemy_ || !targetEnemy_->IsActive()) 
+	{
+		Recall();
+		return;
+	}
+
+	MoveTowards(targetEnemy_->GetPosition(), deltaTime);
+	ConsumeStamina(deltaTime);
+
+	const float hitDistance = settings_->collisionRadius + targetEnemy_->GetCollisionRadius();
+	if (DistanceSquaredXZ(position_, targetEnemy_->GetPosition()) > hitDistance * hitDistance)
+	{
+		return;
+	}
+
+	// 衝突時点の距離帯に対応したEnergyを敵から生成する。
+	EnergyPickup* droppedEnergy = targetEnemy_->DefeatAndDropEnergy();
+	targetEnemy_ = nullptr;
+	// スタミナが残っていれば勝利して即運搬、なければ相打ちでEnergyだけを残す。
+	if (stamina_ > 0.0f &&
+		droppedEnergy != nullptr &&
+		droppedEnergy->TryReserve() &&
+		droppedEnergy->BeginCarry())
+	{
+		targetEnergy_ = droppedEnergy;
+		targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+		state_ = UnitState::ReturningToRocket;
+		return;
+	}
+
+	ReturnToStorageAfterDefeat();
+}
 
 void Unit::UpdateReturningToRocket(float deltaTime)
 {
@@ -243,7 +244,7 @@ void Unit::AllocateStamina(int32_t requestedEnergy)
 void Unit::ReturnToStorageAfterDefeat()
 {
 	targetEnergy_ = nullptr;
-	//targetEnemy_ = nullptr;
+	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;

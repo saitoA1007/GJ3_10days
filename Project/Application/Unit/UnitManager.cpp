@@ -6,7 +6,7 @@
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
 
-//#include "Application/Enemy/Enemy.h"
+#include "Application/Enemy/Enemy.h"
 #include "Application/Energy/EnergyPickup.h"
 #include "Application/Rocket/Rocket.h"
 
@@ -108,22 +108,22 @@ bool UnitManager::DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy
 	return false;
 }
 
-//bool UnitManager::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
-//{
-//	if (!gameplayEnabled_ || !target || !target->IsTargetable())
-//	{
-//		return false;
-//	}
-//
-//	for (size_t i = 0; i < GetUnitCount(); ++i) 
-//	{
-//		if (units_[i]->IsAvailable())
-//		{
-//			return units_[i]->DispatchToEnemy(target, requestedEnergy);
-//		}
-//	}
-//	return false;
-//}
+bool UnitManager::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
+{
+	if (!gameplayEnabled_ || !target || !target->IsTargetable())
+	{
+		return false;
+	}
+
+	for (size_t i = 0; i < GetUnitCount(); ++i) 
+	{
+		if (units_[i]->IsAvailable())
+		{
+			return units_[i]->DispatchToEnemy(target, requestedEnergy);
+		}
+	}
+	return false;
+}
 
 Unit* UnitManager::FindNearestCarryingUnit(const Vector3& position, float maxDistance) const 
 {

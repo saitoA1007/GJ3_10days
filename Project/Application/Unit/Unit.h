@@ -13,7 +13,7 @@ namespace GameEngine
 	class RenderQueue;
 }
 
-//class Enemy;
+class Enemy;
 class EnergyPickup;
 class Rocket;
 
@@ -22,7 +22,7 @@ enum class UnitState : uint8_t
 {
 	Stored,            // ロケット内で待機中。再出撃可能
 	MovingToEnergy,    // 予約したEnergyへ移動中
-	//MovingToEnemy,     // 予約したEnemyへ移動中
+	MovingToEnemy,     // 予約したEnemyへ移動中
 	ReturningToRocket, // Energyを頭上に載せて帰還中
 };
 
@@ -76,7 +76,7 @@ public:
 	/// @param[in] target 攻撃対象。
 	/// @param[in] requestedEnergy スタミナへ割り当てる要求量。
 	/// @return 対象を予約して出撃できた場合はtrue。
-	//bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
+	bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
 
 	/// @brief 運搬物をその場へ落とし、ユニットを待機状態へ戻す。
 	/// @return 運搬中のユニットを倒せた場合はtrue。
@@ -93,7 +93,7 @@ public:
 	/// @return 移動または帰還状態ならtrue。
 	bool IsDeployed() const {
 		return state_ == UnitState::MovingToEnergy ||
-			/*state_ == UnitState::MovingToEnemy ||*/
+			state_ == UnitState::MovingToEnemy ||
 			state_ == UnitState::ReturningToRocket;
 	}
 	/// @brief エネルギーを持って帰還中か判定する。
@@ -122,7 +122,7 @@ public:
 
 	/// @brief 現在の攻撃対象を取得する。
 	/// @return 対象の敵。存在しなければnullptr。
-	//Enemy* GetTargetEnemy() const { return targetEnemy_; }
+	Enemy* GetTargetEnemy() const { return targetEnemy_; }
 
 private:
 	/// @brief 対象へ接近し、範囲内で運搬を開始する。
@@ -131,7 +131,7 @@ private:
 
 	/// @brief 敵へ接近し、スタミナに応じて勝敗を処理する。
 	/// @param[in] deltaTime 前フレームからの経過秒数。
-	//void UpdateMovingToEnemy(float deltaTime);
+	void UpdateMovingToEnemy(float deltaTime);
 
 	/// @brief 運搬物を追従させ、ロケットへ納品する。
 	/// @param[in] deltaTime 前フレームからの経過秒数。
@@ -167,7 +167,7 @@ private:
 	std::unique_ptr<GameEngine::ModelComponent> modelComponent_; // unit.objの描画情報
 	UnitState state_ = UnitState::Stored;                        // 現在の行動状態
 	EnergyPickup* targetEnergy_ = nullptr;                       // 回収対象または運搬中のEnergy
-	//Enemy* targetEnemy_ = nullptr;                               // 攻撃対象のEnemy
+	Enemy* targetEnemy_ = nullptr;                               // 攻撃対象のEnemy
 	Vector3 position_ = {};                                      // 現在のワールド座標
 	float stamina_ = 0.0f;                                      // 高速移動に使える残量
 };
