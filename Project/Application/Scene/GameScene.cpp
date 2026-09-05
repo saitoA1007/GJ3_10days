@@ -65,8 +65,8 @@ GameScene::GameScene() {
 	auto tower = gameObjectManager_->AddObject<Tower>(towerModel);
 
 	// プレイヤー
-	auto* playerModel = modelManager_->GetNameByModel("cube.obj");
-	auto* pikumiModel = modelManager_->GetNameByModel("sphere.obj");
+	auto* playerModel = modelManager_->GetNameByModel("Player.gltf");
+	auto* pikumiModel = modelManager_->GetNameByModel("Unit.gltf");
 	auto* rightHandModel = modelManager_->GetNameByModel("playerHand.gltf");
 	auto* trajectryModel = modelManager_->GetNameByModel("sphere.obj");
 	playerModel->SetDefaultIsEnableLight(true);
