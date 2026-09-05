@@ -7,6 +7,8 @@ using namespace GameEngine;
 #include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
 #include "Application//Energy/EnergySpawner.h"
+#include "Application/EnergyView/EnergyView.h"
+#include "Application/GameFlow/GameFlow.h"
 #include "Application//LockOn/LockOnController.h"
 #include "Application//Rocket/Rocket.h"
 #include "Application//Unit/UnitManager.h"
@@ -71,22 +73,6 @@ GameScene::GameScene() {
 	uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
 
-	// タワー
-	//auto* towerModel = modelManager_->GetNameByModel("cube.obj");
-	//towerModel->SetDefaultIsEnableLight(true);
-	//auto tower = gameObjectManager_->AddObject<Tower>(towerModel);
-
-	// プレイヤー
-	//auto* playerModel = modelManager_->GetNameByModel("Player.gltf");
-	//auto* pikumiModel = modelManager_->GetNameByModel("Unit.gltf");
-	//auto* rightHandModel = modelManager_->GetNameByModel("playerHand.gltf");
-	//auto* trajectryModel = modelManager_->GetNameByModel("sphere.obj");
-	//playerModel->SetDefaultIsEnableLight(true);
-	//pikumiModel->SetDefaultIsEnableLight(true);
-	//rightHandModel->SetDefaultIsEnableLight(true);
-	//trajectryModel->SetDefaultIsEnableLight(true);
-	//player_ = gameObjectManager_->AddObject<Player>(inputCommand_, playerModel, pikumiModel, rightHandModel, trajectryModel, field, impactEffect);
-
 	auto* rocketModel = modelManager_->GetNameByModel("rocket.obj");
 	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
 
@@ -126,6 +112,19 @@ GameScene::GameScene() {
 	enemies->SetOnEnemyDefeated([this]() {
 		score_.Add(kScorePerEnemy);
 	});
+
+
+	gameFlowController_ = gameObjectManager_->AddObject<GameFlowController>(
+		rocket_,
+		energySpawner_,
+		//enemyManager_,
+		unitManager_,
+		lockOnController_);
+
+	energyView_ = gameObjectManager_->AddObject<EnergyView>(
+		digitModels,
+		mainCamera_.get(),
+		rocket_);
   
   enemies->SetStage("Test");
 

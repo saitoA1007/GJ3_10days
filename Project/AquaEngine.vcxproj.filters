@@ -648,6 +648,8 @@
     <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
     <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
     <ClCompile Include="Application\LockOn\LockOnController.cpp" />
+    <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
+    <ClCompile Include="Application\GameFlow\GameFlow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1243,6 +1245,8 @@
     <ClInclude Include="Application\Energy\EnergyPickup.h" />
     <ClInclude Include="Application\Energy\EnergySpawner.h" />
     <ClInclude Include="Application\LockOn\LockOnController.h" />
+    <ClInclude Include="Application\EnergyView\EnergyView.h" />
+    <ClInclude Include="Application\GameFlow\GameFlow.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

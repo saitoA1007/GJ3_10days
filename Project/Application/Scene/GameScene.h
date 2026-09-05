@@ -10,7 +10,9 @@
 class Player;
 class ScoreView;
 class EnergySpawner;
+class EnergyView;
 class Field;
+class GameFlowController;
 class LockOnController;
 class Rocket;
 class UnitManager;
@@ -73,11 +75,13 @@ private: // シーン機能
 	// 終了フラグ
 	bool isFinished_ = false;
 	Player* player_ = nullptr;
-	Field* field_ = nullptr;                            
+	Field* field_ = nullptr;                             
 	Rocket* rocket_ = nullptr;                           
 	EnergySpawner* energySpawner_ = nullptr;             
-	UnitManager* unitManager_ = nullptr;                  
+	UnitManager* unitManager_ = nullptr;                 
 	LockOnController* lockOnController_ = nullptr;       
+	GameFlowController* gameFlowController_ = nullptr;   
+	EnergyView* energyView_ = nullptr;
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;

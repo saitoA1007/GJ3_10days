@@ -162,9 +162,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
+    <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
     <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
     <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
+    <ClCompile Include="Application\GameFlow\GameFlow.cpp" />
     <ClCompile Include="Application\LockOn\LockOnController.cpp" />
     <ClCompile Include="Application\Unit\Unit.cpp" />
     <ClCompile Include="Application\Unit\UnitManager.cpp" />
@@ -447,12 +449,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
+    <ClInclude Include="Application\EnergyView\EnergyView.h" />
     <ClInclude Include="Application\Energy\EnergyPickup.h" />
     <ClInclude Include="Application\Energy\EnergySpawner.h" />
     <ClInclude Include="Application\Field\FieldEffect.h" />
     <ClInclude Include="Application\GameCamera\GameCamera.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
+    <ClInclude Include="Application\GameFlow\GameFlow.h" />
     <ClInclude Include="Application\LockOn\LockOnController.h" />
     <ClInclude Include="Application\Unit\Pikumi.h" />
     <ClInclude Include="Application\Unit\Unit.h" />
