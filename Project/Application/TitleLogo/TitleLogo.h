@@ -14,6 +14,15 @@ namespace GameEngine {
 	class RenderQueue;
 }
 
+enum class AnimationState {
+	Falling,
+	FadingBottom,
+	Idle,
+	Shaking,
+	Moving,
+	Finished,
+};
+
 /// <summary>
 /// タイトルロゴを構成するモデルをまとめて管理する。
 /// </summary>
@@ -30,16 +39,10 @@ public:
 	void ResetAnimation();
 	bool IsAnimationFinished() const;
 
-private:
-	enum class AnimationState {
-		Falling,
-		FadingBottom,
-		Idle,
-		Shaking,
-		Moving,
-		Finished,
-	};
+	AnimationState GetAnimationState() const { return animationState_; }
 
+private:
+	
 	void UpdateAnimation(float deltaTime);
 	void UpdateTransforms();
 	void CaptureAnimationOrigins();

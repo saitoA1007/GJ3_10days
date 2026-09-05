@@ -6,6 +6,7 @@
 #include "Application/CollisionConfig.h"
 #include "Application/TitleLogo/TitleLogo.h"
 #include "Application/Effect/HyperspaceEffect.h"
+#include "AudioManager.h"
 using namespace GameEngine;
 
 TitleScene::~TitleScene() {}
@@ -55,8 +56,14 @@ void TitleScene::Update() {
 
 	// Decision入力を受けたらタイトル終了演出を開始する。
 	if (inputCommand_->IsCommandActive("Decision")) {
-		titleLogo_->AnimationStart();
-		hyperspaceEffect_->StartAnimation();
+		if (titleLogo_->GetAnimationState() == AnimationState::Idle) {
+			auto& audioManager = AudioManager::GetInstance();
+			const uint32_t titleDecisionHandle = audioManager.GetHandleByName("hyperSpace.mp3");
+			audioManager.Play(titleDecisionHandle, 1.0f, false);
+
+			titleLogo_->AnimationStart();
+			hyperspaceEffect_->StartAnimation();
+		}
 	}
 
 	// タイトルロゴの更新処理
