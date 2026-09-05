@@ -37,7 +37,7 @@
             ],
             "Translate": [
                 0.0,
-                -0.10000000149011612,
+                -0.20000000298023224,
                 -4.900000095367432
             ]
         },
@@ -46,6 +46,17 @@
             "FallDuration": 1.0,
             "FallInterval": 0.20000000298023224,
             "FallStartOffsetY": 10.0
+        },
+        "IdleAnimation": {
+            "BottomCycleDuration": 2.0,
+            "BottomMoveAmplitude": 0.05000000074505806,
+            "BottomScaleAmount": 0.0,
+            "HopDuration": 0.4000000059604645,
+            "HopHeight": 0.5,
+            "Interval": 0.15000000596046448,
+            "LoopDelay": 1.5,
+            "RockAngle": 0.054999999701976776,
+            "ScaleAmount": 0.10000000149011612
         },
         "SceneName": "Title",
         "T0": {
