@@ -362,6 +362,10 @@ namespace GameEngine {
 			return std::min(a, b);
 		}
 
+		float Min(float a, float b) {
+			return std::min(a, b);
+		}
+
 		Vector4 MinVector4(Vector4 pos1, Vector4 pos2) {
 			return Vector4(std::min(pos1.x, pos2.x), std::min(pos1.y, pos2.y), std::min(pos1.z, pos2.z), std::min(pos1.w, pos2.w));
 		}

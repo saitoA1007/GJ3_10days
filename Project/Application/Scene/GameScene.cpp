@@ -68,6 +68,13 @@ GameScene::GameScene() {
 	planeXZModel->SetDefaultIsEnableLight(false);
 	field_ = gameObjectManager_->AddObject<Field>(fieldModel);
 
+	//Enemy
+	auto enemyModel = modelManager_->GetNameByModel("Enemy.gltf");
+	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(128, enemyModel);
+	enemyManager_->SetOnEnemyDefeated([this]() {
+		score_.Add(kScorePerEnemy);
+		});
+
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
 	uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
@@ -92,7 +99,7 @@ GameScene::GameScene() {
 		field_,
 		rocket_,
 		energySpawner_,
-		//enemyManager_,
+		enemyManager_,
 		unitManager_);
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
@@ -106,14 +113,6 @@ GameScene::GameScene() {
 	// スコア表示
 	scoreView_ = std::make_unique<ScoreView>(digitModels, gameCamera->GetCamera());
 
-	//Enemy
-	auto enemyModel = modelManager_->GetNameByModel("Enemy.gltf");
-	auto* enemies = gameObjectManager_->AddObject<EnemyManager>(128, enemyModel);
-	enemies->SetOnEnemyDefeated([this]() {
-		score_.Add(kScorePerEnemy);
-	});
-
-
 	gameFlowController_ = gameObjectManager_->AddObject<GameFlowController>(
 		rocket_,
 		energySpawner_,
@@ -126,7 +125,7 @@ GameScene::GameScene() {
 		mainCamera_.get(),
 		rocket_);
   
-  enemies->SetStage("Test");
+  enemyManager_->SetStage("Test");
 
 	// ブラックホールのテスト
 	auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");

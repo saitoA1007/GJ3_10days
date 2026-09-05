@@ -10,7 +10,7 @@
 
 #include "Unit.h"
 
-//class Enemy;
+class Enemy;
 class EnergyPickup;
 class Rocket;
 
@@ -65,7 +65,7 @@ public:
 	/// @param[in] target 攻撃対象。
 	/// @param[in] requestedEnergy スタミナへ割り当てる要求量。
 	/// @return 派遣できた場合はtrue。
-	/*bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);*/
+	bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
 
 	/// @brief 指定位置の索敵範囲内にいる、最も近い運搬ユニットを探す。
 	/// @param[in] position 検索中心のワールド座標。

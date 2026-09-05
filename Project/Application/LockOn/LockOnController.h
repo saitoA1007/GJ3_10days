@@ -17,8 +17,8 @@ namespace GameEngine
 	class InputCommand;
 }
 
-//class Enemy;
-//class EnemyManager;
+class Enemy;
+class EnemyManager;
 class EnergyPickup;
 class EnergySpawner;
 class Field;
@@ -68,7 +68,7 @@ public:
 		Field* field,
 		Rocket* rocket,
 		EnergySpawner* energySpawner,
-		//EnemyManager* enemyManager,
+		EnemyManager* enemyManager,
 		UnitManager* unitManager,
 		const LockOnSettings& settings = {});
 	~LockOnController() override = default;
@@ -103,7 +103,7 @@ public:
 
 	/// @brief 現在選択中の敵を取得する。
 	/// @return 選択中の敵。未選択ならnullptr。
-	//Enemy* GetSelectedEnemy() const { return selectedEnemy_; }
+	Enemy* GetSelectedEnemy() const { return selectedEnemy_; }
 
 	/// @brief 現在の入力保持時間を取得する。
 	/// @return 入力を保持した秒数。
@@ -165,7 +165,7 @@ private:
 	/// @brief 選択解除と強調表示を一括で切り替える。
 	/// @param[in] energy 新しく選択するエネルギー。選ばない場合はnullptr。
 	/// @param[in] enemy 新しく選択する敵。選ばない場合はnullptr。
-	void SetSelection(EnergyPickup* energy/*, Enemy* enemy*/);
+	void SetSelection(EnergyPickup* energy, Enemy* enemy);
 
 	/// @brief 検索範囲・選択対象・チャージ量をデバッグ描画する。
 	void DrawLockOnGuide();
@@ -181,13 +181,13 @@ private:
 	Field* field_ = nullptr;                                       // カーソル移動範囲の参照先
 	Rocket* rocket_ = nullptr;                                     // 派遣線の始点と消費元
 	EnergySpawner* energySpawner_ = nullptr;                       // 選択可能なEnergyの検索先
-	//EnemyManager* enemyManager_ = nullptr;                         // 選択可能なEnemyの検索先
+	EnemyManager* enemyManager_ = nullptr;                         // 選択可能なEnemyの検索先
 	UnitManager* unitManager_ = nullptr;                           // 派遣処理の依頼先
 	LockOnSettings settings_;                                      // Registerから編集される設定
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;   // 設定とParameter Inspectorの接続
 	Vector3 cursorPosition_ = {};                                  // フィールドXZ平面上のカーソル座標
 	EnergyPickup* selectedEnergy_ = nullptr;                       // 現在選択中のEnergy
-	//Enemy* selectedEnemy_ = nullptr;                               // 現在選択中のEnemy
+	Enemy* selectedEnemy_ = nullptr;                               // 現在選択中のEnemy
 	float lockOnSeconds_ = 0.0f;                                  // 今回の入力を保持した秒数
 	bool isCharging_ = false;                                      // ロックオン入力を保持中か
 	bool gameplayEnabled_ = true;                                 // Ready・TimeUp・Pause中はfalse

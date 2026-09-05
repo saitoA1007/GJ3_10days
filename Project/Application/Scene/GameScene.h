@@ -10,6 +10,7 @@
 class Player;
 class ScoreView;
 class EnergySpawner;
+class EnemyManager;
 class EnergyView;
 class Field;
 class GameFlowController;
@@ -77,7 +78,8 @@ private: // シーン機能
 	Player* player_ = nullptr;
 	Field* field_ = nullptr;                             
 	Rocket* rocket_ = nullptr;                           
-	EnergySpawner* energySpawner_ = nullptr;             
+	EnergySpawner* energySpawner_ = nullptr;   
+	EnemyManager* enemyManager_ = nullptr;
 	UnitManager* unitManager_ = nullptr;                 
 	LockOnController* lockOnController_ = nullptr;       
 	GameFlowController* gameFlowController_ = nullptr;   

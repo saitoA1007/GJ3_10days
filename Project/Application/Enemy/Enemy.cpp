@@ -5,6 +5,12 @@
 #include <Application/Unit/Unit.h>
 #include <Application/Utils/ShigeFunc.h>
 
+#include "Application/Energy/EnergyPickup.h"
+#include "Application/Energy/EnergySpawner.h"
+#include "Application/Field/Field.h"
+#include "Application/Rocket/Rocket.h"
+#include "Application/Unit/UnitManager.h"
+
 Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	GameEngine::UserData userData;
 	userData.typeID = uint32_t(CollisionTypeID::kEnemy);
@@ -19,29 +25,15 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			return;
 		}
 
-		switch (result.userData.typeID) {
-		case  uint32_t(CollisionTypeID::kPlayer):
-
+		switch (result.userData.typeID) 
+		{
+		case uint32_t(CollisionTypeID::kPlayer):
 			break;
+
 		case uint32_t(CollisionTypeID::kUnit):
 		{
-			//auto pikumi = result.userData.As<Pikumi>();
-
-			//if (!pikumi) {
-			//	SF::warn("Enemy::OnCollisionEnter: Pikumi pointer is null.", "Enemy");
-			//	return;
-			//}
-
-			//Vector2 velocity = pikumi->GetVelocity();
-			//float speed = velocity.Length();
-
-			//速度が遅いとダメージを受けないようにする
-			/*if (speed < 3.f) {
-				return;
-			}*/
-
 			hp_--;
-			damageTimer_ = 0;
+			damageTimer_ = 0.0f;
 
 			if (hp_ <= 0) {
 				wasDefeated_ = true;
@@ -49,22 +41,25 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			}
 			break;
 		}
+
 		case uint32_t(CollisionTypeID::kRocket):
-			// タワーに当たった場合の処理
+			// ロケット到達時：ダメージ通知を与えて消滅
+			if (context_.rocket) {
+				context_.rocket->ReceiveEnemyHit();
+			}
 			hp_ = 0;
 			isDead_ = true;
 			break;
 		}
-	});
+		});
 
 	data_->transform.translate.y = 0.0f;
 	data_->color = { 1.0f, 0.4f, 0.6f, 1.0f };
-
 	collider_.SetActive(false);
 }
 
-void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
-	//パラメータのリセット
+void Enemy::SetUp(Vector2 position, Config config, EnemyType type) 
+{
 	config_ = config;
 	type_ = type;
 	snakeSpeed_ = 0.0f;
@@ -82,9 +77,11 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
 	isActive_ = true;
 	isDead_ = false;
 	wasDefeated_ = false;
+	isReservedForAttack_ = false;
+	isHighlighted_ = false;
+	targetUnit_ = nullptr;
 
 	hp_ = config_.hp;
-
 	damageTimer_ = 100.f;
 	snakeTimer_ = 0.0f;
 
@@ -93,37 +90,57 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
 }
 
 
-void Enemy::Initialize() {
+void Enemy::Initialize()
+{
 	isActive_ = false;
 	isDead_ = true;
 	wasDefeated_ = false;
+	isReservedForAttack_ = false;
+	isHighlighted_ = false;
+	targetUnit_ = nullptr;
+
 	data_->transform.scale = {};
 	collider_.SetActive(false);
 }
 
 void Enemy::Update() {
-	//移動処理
-	if (type_ == EnemyType::Round) {
-		RoundMovement();
-	} else {
-		DefaultMovement();
+	if (!isActive_ || isDead_) return;
+
+	// 運搬中ユニットの索敵
+	UpdateTarget();
+
+	// 移動（運搬ユニットがいればユニットへ、いなければ独自の軌道移動）
+	if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
+		TrackingMovement(GameEngine::FpsCounter::deltaTime);
+	}
+	else {
+		if (type_ == EnemyType::Round) {
+			RoundMovement();
+		}
+		else {
+			DefaultMovement();
+		}
 	}
 
 	collider_.SetWorldPosition(data_->transform.translate);
 
-	//暫定的な死亡判定
-	{
-		if (distance_ < 0.2f) {
-			isDead_ = true;
+	// ロケット到達等の距離判定
+	if (distance_ < 0.2f) {
+		if (context_.rocket) {
+			context_.rocket->ReceiveEnemyHit();
 		}
-
+		isDead_ = true;
 	}
 
-	//当たった時の色変化処理
+	// 被弾・ハイライト等の色変化
 	damageTimer_ += GameEngine::FpsCounter::deltaTime;
 	if (damageTimer_ < damageTime_) {
 		data_->color = config_.hitColor_;
-	} else {
+	}
+	else if (isHighlighted_) {
+		data_->color = config_.highlightColor_;
+	}
+	else {
 		data_->color = config_.normalColor_;
 	}
 }
@@ -136,28 +153,110 @@ void Enemy::DeadUpdate() {
 
 void Enemy::DefaultMovement() {
 	distance_ -= config_.speed_ * GameEngine::FpsCounter::deltaTime;
-
 	Vector2 localPos = {};
 
 	snakeTimer_ += GameEngine::FpsCounter::deltaTime;
-	localPos += { distance_, std::sin(snakeTimer_* snakeSpeed_) * snakeWidth_ };
+	localPos += { distance_, std::sin(snakeTimer_* snakeSpeed_)* snakeWidth_ };
 
 	Vector2 position = SF::RotDir(localPos, direction_);
-
 	data_->transform.translate.x = position.x;
 	data_->transform.translate.z = position.y;
 }
 
 void Enemy::RoundMovement() {
 	distance_ -= config_.speed_ * GameEngine::FpsCounter::deltaTime;
-
 	Vector2 localPos = {};
 
 	roundTimer_ += GameEngine::FpsCounter::deltaTime;
 	localPos += { std::cos(roundTimer_* roundSpeed_)* distance_, std::sin(roundTimer_* roundSpeed_)* distance_ };
 
 	Vector2 position = SF::RotDir(localPos, direction_);
-
 	data_->transform.translate.x = position.x;
 	data_->transform.translate.z = position.y;
+}
+
+void Enemy::TrackingMovement(float deltaTime) {
+	Vector3 targetPos = targetUnit_->GetPosition();
+	Vector3 currentPos = GetPosition();
+	Vector3 dir = targetPos - currentPos;
+	dir.y = 0.0f;
+
+	float dist = dir.Length();
+	if (dist > 0.0001f) {
+		dir.Normalize();
+		float moveDist = GameEngine::Math::Min(config_.speed_ * deltaTime, dist);
+		data_->transform.translate += dir * moveDist;
+
+		// 距離をロケット中心からの距離へ再計算
+		Vector2 pos2D = { data_->transform.translate.x, data_->transform.translate.z };
+		distance_ = pos2D.Length();
+	}
+}
+
+void Enemy::UpdateTarget() {
+	if (!context_.unitManager) return;
+
+	// 追跡中のユニットがエネルギー運搬をやめた場合はターゲット解除
+	if (targetUnit_) {
+		if (!targetUnit_->IsCarryingEnergy()) {
+			targetUnit_ = nullptr;
+		}
+	}
+
+	// ターゲットがいない場合のみ、新たな運搬ユニットを検索
+	if (!targetUnit_) {
+		targetUnit_ = context_.unitManager->FindNearestCarryingUnit(GetPosition(), searchRadius_);
+	}
+}
+
+bool Enemy::TryReserveForAttack() {
+	if (!IsTargetable()) return false;
+	isReservedForAttack_ = true;
+	isHighlighted_ = false;
+	return true;
+}
+
+void Enemy::CancelAttackReservation() {
+	if (!isActive_) return;
+	isReservedForAttack_ = false;
+}
+
+void Enemy::SetHighlighted(bool highlighted) {
+	if (!isActive_) return;
+	isHighlighted_ = highlighted;
+}
+
+EnergyPickup* Enemy::DefeatAndDropEnergy() {
+	if (!isActive_ || isDead_) return nullptr;
+
+	// 撃破フラグと死亡フラグを即座に立て、コライダーを無効化
+	wasDefeated_ = true;
+	isDead_ = true;
+	isActive_ = false;
+	collider_.SetActive(false);
+	data_->transform.scale = {}; // 見た目も即時非表示
+
+	// energySpawner が設定されている場合のみエナジーをドロップ
+	if (context_.energySpawner) {
+		Vector3 dropPos = GetPosition();
+		EnergySize size = GetDropEnergySize();
+		return context_.energySpawner->SpawnOnGround(size, dropPos);
+	}
+
+	return nullptr;
+}
+
+EnergySize Enemy::GetDropEnergySize() const {
+	if (!context_.field) return EnergySize::Small;
+
+	switch (context_.field->GetZone(GetPosition())) {
+	case FieldZone::Center:
+	case FieldZone::Near:
+		return EnergySize::Small;
+	case FieldZone::NearBuffer:
+	case FieldZone::Middle:
+		return EnergySize::Medium;
+	default:
+		return EnergySize::Large;
+	}
 }
