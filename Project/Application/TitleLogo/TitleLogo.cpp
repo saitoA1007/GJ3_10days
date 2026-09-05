@@ -83,7 +83,10 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	debugParameter_.Register("FallDuration", fallDuration_, 0, "EntranceAnimation");
 	debugParameter_.Register("FallInterval", fallInterval_, 1, "EntranceAnimation");
 	debugParameter_.Register("FallStartOffsetY", fallStartOffsetY_, 2, "EntranceAnimation");
-	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 3, "EntranceAnimation");
+	debugParameter_.Register("AppearDuration", appearDuration_, 3, "EntranceAnimation");
+	debugParameter_.Register("AppearStartDepth", appearStartDepth_, 4, "EntranceAnimation");
+	debugParameter_.Register("AppearPeakScale", appearPeakScale_, 5, "EntranceAnimation");
+	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 6, "EntranceAnimation");
 
 	// 入力待ち中に、左の文字から順番に跳ねるループ演出の調整値を登録する。
 	debugParameter_.Register("HopDuration", idleHopDuration_, 0, "IdleAnimation");
@@ -134,6 +137,7 @@ void TitleLogo::ResetAnimation() {
 	CaptureAnimationOrigins();
 	animationState_ = AnimationState::Falling;
 	fallTimer_.Start(GetFallSequenceDuration(), false);
+	appearTimer_.Reset();
 	bottomFadeTimer_.Reset();
 	shakeTimer_.Reset();
 	moveTimer_.Reset();
@@ -141,11 +145,12 @@ void TitleLogo::ResetAnimation() {
 	idleElapsedTime_ = 0.0f;
 	idleBottomElapsedTime_ = 0.0f;
 
-	// t0～t3を画面上側の待機位置へ移動し、Bottomは透明にしておく。
+	// t0～t3を元のサイズのまま上側かつ少し奥へ移動し、Bottomは透明にしておく。
 	for (std::size_t i = 0; i < parts_.size(); ++i) {
 		if (parts_[i]) {
 			parts_[i]->worldTransform_.transform_.translate =
-				partAnimationOrigins_[i] + Vector3{ 0.0f, fallStartOffsetY_, 0.0f };
+				partAnimationOrigins_[i] + Vector3{ 0.0f, fallStartOffsetY_, appearStartDepth_ };
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i];
 		}
 	}
 	if (bottom_) {
@@ -208,11 +213,39 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 				partAnimationOrigins_[i] + Vector3{
 					0.0f,
 					fallStartOffsetY_ * (1.0f - easedProgress),
-					0.0f
+					appearStartDepth_
 				};
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i];
 		}
 
 		if (fallTimer_.IsFinished()) {
+			animationState_ = AnimationState::Appearing;
+			appearTimer_.Start(appearDuration_, false);
+		}
+		return;
+	}
+
+	case AnimationState::Appearing: {
+		appearTimer_.SetDuration(appearDuration_);
+		appearTimer_.Update(deltaTime);
+
+		// 手前へ飛び出しながら一度大きく膨らみ、元のサイズと位置へ収める。
+		const float progress = Apply(appearTimer_.GetProgress(), EaseType::kEaseOutBack);
+		const float depthOffset = Lerp(appearStartDepth_, 0.0f, progress);
+		const float scaleProgress = std::sin(
+			std::numbers::pi_v<float> * appearTimer_.GetProgress());
+		const float scale = Lerp(1.0f, (std::max)(appearPeakScale_, 1.0f), scaleProgress);
+		for (std::size_t i = 0; i < parts_.size(); ++i) {
+			if (!parts_[i]) {
+				continue;
+			}
+
+			parts_[i]->worldTransform_.transform_.translate =
+				partAnimationOrigins_[i] + Vector3{ 0.0f, 0.0f, depthOffset };
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i] * scale;
+		}
+
+		if (appearTimer_.IsFinished()) {
 			RestorePartTransforms();
 			animationState_ = AnimationState::FadingBottom;
 			bottomFadeTimer_.Start(bottomFadeDuration_, false);

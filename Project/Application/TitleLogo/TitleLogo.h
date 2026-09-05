@@ -16,6 +16,7 @@ namespace GameEngine {
 
 enum class AnimationState {
 	Falling,
+	Appearing,
 	FadingBottom,
 	Idle,
 	Shaking,
@@ -63,6 +64,9 @@ private:
 	float fallDuration_ = 0.6f;
 	float fallInterval_ = 0.15f;
 	float fallStartOffsetY_ = 7.0f;
+	float appearDuration_ = 0.65f;
+	float appearStartDepth_ = 2.0f;
+	float appearPeakScale_ = 1.18f;
 	float bottomFadeDuration_ = 0.6f;
 	float idleHopDuration_ = 0.55f;
 	float idleInterval_ = 0.12f;
@@ -87,6 +91,7 @@ private:
 
 	AnimationState animationState_ = AnimationState::Falling;
 	GameTimer fallTimer_;
+	GameTimer appearTimer_;
 	GameTimer bottomFadeTimer_;
 	GameTimer shakeTimer_;
 	GameTimer bottomScalingTimer_;

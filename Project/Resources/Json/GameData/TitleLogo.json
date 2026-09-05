@@ -42,6 +42,9 @@
             ]
         },
         "EntranceAnimation": {
+            "AppearDuration": 0.65,
+            "AppearPeakScale": 1.18,
+            "AppearStartDepth": 2.0,
             "BottomFadeDuration": 0.5,
             "FallDuration": 1.0,
             "FallInterval": 0.20000000298023224,
