@@ -2,7 +2,7 @@
 #include <Vector2.h>
 #include <FPSCounter.h>
 #include <Application/CollisionConfig.h>
-#include <Application/Pikumi/Pikumi.h>
+#include <Application/Unit/Unit.h>
 #include <Application/Utils/ShigeFunc.h>
 
 Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
@@ -10,7 +10,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	userData.typeID = uint32_t(CollisionTypeID::kEnemy);
 	userData.object = this;
 	collider_.SetCollisionAttribute(uint32_t(CollisionTypeID::kEnemy));
-	collider_.SetCollisionMask(uint32_t(CollisionTypeID::kPlayer) | uint32_t(CollisionTypeID::kPikumi) | uint32_t(CollisionTypeID::kTower));
+	collider_.SetCollisionMask(uint32_t(CollisionTypeID::kPlayer) | uint32_t(CollisionTypeID::kUnit) | uint32_t(CollisionTypeID::kRocket));
 	collider_.SetUserData(userData);
 	collider_.SetRadius(2.0f);
 
@@ -23,22 +23,22 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 		case  uint32_t(CollisionTypeID::kPlayer):
 
 			break;
-		case uint32_t(CollisionTypeID::kPikumi):
+		case uint32_t(CollisionTypeID::kUnit):
 		{
-			auto pikumi = result.userData.As<Pikumi>();
+			//auto pikumi = result.userData.As<Pikumi>();
 
-			if (!pikumi) {
-				SF::warn("Enemy::OnCollisionEnter: Pikumi pointer is null.", "Enemy");
-				return;
-			}
+			//if (!pikumi) {
+			//	SF::warn("Enemy::OnCollisionEnter: Pikumi pointer is null.", "Enemy");
+			//	return;
+			//}
 
-			Vector2 velocity = pikumi->GetVelocity();
-			float speed = velocity.Length();
+			//Vector2 velocity = pikumi->GetVelocity();
+			//float speed = velocity.Length();
 
 			//速度が遅いとダメージを受けないようにする
-			if (speed < 3.f) {
+			/*if (speed < 3.f) {
 				return;
-			}
+			}*/
 
 			hp_--;
 			damageTimer_ = 0;
@@ -49,7 +49,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			}
 			break;
 		}
-		case uint32_t(CollisionTypeID::kTower):
+		case uint32_t(CollisionTypeID::kRocket):
 			// タワーに当たった場合の処理
 			hp_ = 0;
 			isDead_ = true;

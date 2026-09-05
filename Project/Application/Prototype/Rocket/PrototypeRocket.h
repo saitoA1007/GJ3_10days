@@ -11,7 +11,7 @@
 #include "ModelComponent.h"
 #include "Vector3.h"
 
-#include "RocketEnergy.h"
+#include "PrototypeRocketEnergy.h"
 
 namespace Prototype {
 
@@ -27,7 +27,8 @@ namespace Prototype {
 	};
 
 	/// @brief フィールド中央に配置するプロトタイプ用ロケット。
-	class Rocket final : public GameEngine::IGameObject {
+	class Rocket final : public GameEngine::IGameObject
+	{
 	public:
 		/// @brief エネルギー変化をUIや演出へ通知するコールバック。
 		using EnergyChangedCallback = std::function<void(const EnergyChange&)>;

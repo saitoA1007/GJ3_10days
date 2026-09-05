@@ -48,15 +48,15 @@
     <Filter Include="Application\Prototype\LockOn">
       <UniqueIdentifier>{c625222a-c76e-4645-b6dc-17a174a0e139}</UniqueIdentifier>
     </Filter>
-	<Filter Include="Application\Prototype\Enemy">
-	  <UniqueIdentifier>{c42ac6d5-7dd6-42e5-b955-e60a59e1190d}</UniqueIdentifier>
-	</Filter>
-	<Filter Include="Application\Prototype\GameFlow">
-	  <UniqueIdentifier>{059bce63-0b25-4f4c-9863-ff199cba3a44}</UniqueIdentifier>
-	</Filter>
-	<Filter Include="Application\Prototype\EnergyView">
-	  <UniqueIdentifier>{07a27709-1114-4fb9-9e74-80451026bfdb}</UniqueIdentifier>
-	</Filter>
+    <Filter Include="Application\Prototype\Enemy">
+      <UniqueIdentifier>{c42ac6d5-7dd6-42e5-b955-e60a59e1190d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\GameFlow">
+      <UniqueIdentifier>{059bce63-0b25-4f4c-9863-ff199cba3a44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\EnergyView">
+      <UniqueIdentifier>{07a27709-1114-4fb9-9e74-80451026bfdb}</UniqueIdentifier>
+    </Filter>
     <Filter Include="EngineSource">
       <UniqueIdentifier>{f8ed931d-59ae-469c-b602-a18b3d78668e}</UniqueIdentifier>
     </Filter>
@@ -552,18 +552,18 @@
     <ClCompile Include="Application\Scene\ProtoScene.cpp">
       <Filter>Application\Scene</Filter>
     </ClCompile>
-	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemy.cpp">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClCompile>
-	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemyManager.cpp">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClCompile>
-	<ClCompile Include="Application\Prototype\EnergyView\PrototypeEnergyView.cpp">
-	  <Filter>Application\Prototype\EnergyView</Filter>
-	</ClCompile>
-	<ClCompile Include="Application\Prototype\GameFlow\PrototypeGameFlow.cpp">
-	  <Filter>Application\Prototype\GameFlow</Filter>
-	</ClCompile>
+    <ClCompile Include="Application\Prototype\Enemy\PrototypeEnemy.cpp">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Enemy\PrototypeEnemyManager.cpp">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\EnergyView\PrototypeEnergyView.cpp">
+      <Filter>Application\Prototype\EnergyView</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\GameFlow\PrototypeGameFlow.cpp">
+      <Filter>Application\Prototype\GameFlow</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp">
       <Filter>Application\Prototype\Field</Filter>
     </ClCompile>
@@ -579,7 +579,7 @@
     <ClCompile Include="Application\Prototype\Rocket\PrototypeRocket.cpp">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Prototype\Rocket\RocketEnergy.cpp">
+    <ClCompile Include="Application\Prototype\Rocket\PrototypeRocketEnergy.cpp">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClCompile>
     <ClCompile Include="Application\Prototype\Unit\PrototypeUnit.cpp">
@@ -615,7 +615,7 @@
     <ClCompile Include="Application\Player\Player.cpp" />
     <ClCompile Include="Application\Player\PlayerStateMove.cpp" />
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
-    <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
+    <ClCompile Include="Application\Unit\Pikumi.cpp" />
     <ClCompile Include="Application\Field\Field.cpp" />
     <ClCompile Include="Application\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Application\Score\Score.cpp">
@@ -632,7 +632,6 @@
       <Filter>Application\TitleLogo</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
-    <ClCompile Include="Application\Tower\Tower.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
@@ -642,6 +641,13 @@
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\HyperspaceMaterial.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
+    <ClCompile Include="Application\Unit\Unit.cpp" />
+    <ClCompile Include="Application\Unit\UnitManager.cpp" />
+    <ClCompile Include="Application\Rocket\Rocket.cpp" />
+    <ClCompile Include="Application\Rocket\RocketEnergy.cpp" />
+    <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
+    <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
+    <ClCompile Include="Application\LockOn\LockOnController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1131,18 +1137,18 @@
     <ClInclude Include="Application\Scene\ProtoScene.h">
       <Filter>Application\Scene</Filter>
     </ClInclude>
-	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemy.h">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClInclude>
-	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemyManager.h">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClInclude>
-	<ClInclude Include="Application\Prototype\EnergyView\PrototypeEnergyView.h">
-	  <Filter>Application\Prototype\EnergyView</Filter>
-	</ClInclude>
-	<ClInclude Include="Application\Prototype\GameFlow\PrototypeGameFlow.h">
-	  <Filter>Application\Prototype\GameFlow</Filter>
-	</ClInclude>
+    <ClInclude Include="Application\Prototype\Enemy\PrototypeEnemy.h">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Enemy\PrototypeEnemyManager.h">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\EnergyView\PrototypeEnergyView.h">
+      <Filter>Application\Prototype\EnergyView</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\GameFlow\PrototypeGameFlow.h">
+      <Filter>Application\Prototype\GameFlow</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Prototype\Field\PrototypeField.h">
       <Filter>Application\Prototype\Field</Filter>
     </ClInclude>
@@ -1158,7 +1164,7 @@
     <ClInclude Include="Application\Prototype\Rocket\PrototypeRocket.h">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Prototype\Rocket\RocketEnergy.h">
+    <ClInclude Include="Application\Prototype\Rocket\PrototypeRocketEnergy.h">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClInclude>
     <ClInclude Include="Application\Prototype\Unit\PrototypeUnit.h">
@@ -1203,7 +1209,7 @@
     <ClInclude Include="Application\Player\IPlayerState.h" />
     <ClInclude Include="Application\Player\PlayerStateMove.h" />
     <ClInclude Include="Application\Player\PlayerStateIdle.h" />
-    <ClInclude Include="Application\Pikumi\Pikumi.h" />
+    <ClInclude Include="Application\Unit\Pikumi.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\Score\Score.h">
@@ -1220,7 +1226,6 @@
       <Filter>Application\TitleLogo</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\StageSelectScene.h" />
-    <ClInclude Include="Application\Tower\Tower.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
     <ClInclude Include="Application\Utils\Binary\BinaryManager.h" />
@@ -1231,6 +1236,13 @@
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\HyperspaceMaterial.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
+    <ClInclude Include="Application\Unit\Unit.h" />
+    <ClInclude Include="Application\Unit\UnitManager.h" />
+    <ClInclude Include="Application\Rocket\Rocket.h" />
+    <ClInclude Include="Application\Rocket\RocketEnergy.h" />
+    <ClInclude Include="Application\Energy\EnergyPickup.h" />
+    <ClInclude Include="Application\Energy\EnergySpawner.h" />
+    <ClInclude Include="Application\LockOn\LockOnController.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

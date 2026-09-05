@@ -9,6 +9,11 @@
 
 class Player;
 class ScoreView;
+class EnergySpawner;
+class Field;
+class LockOnController;
+class Rocket;
+class UnitManager;
 
 namespace GameEngine
 {
@@ -61,9 +66,18 @@ public:
 
 private: // シーン機能
 
+	/// カメラ行列を更新してRenderQueueへ設定
+	void UpdateCamera();
+
+	std::unique_ptr<GameEngine::Camera> mainCamera_;                // 3D描画とマウスレイ投影に使うカメラ
 	// 終了フラグ
 	bool isFinished_ = false;
 	Player* player_ = nullptr;
+	Field* field_ = nullptr;                            
+	Rocket* rocket_ = nullptr;                           
+	EnergySpawner* energySpawner_ = nullptr;             
+	UnitManager* unitManager_ = nullptr;                  
+	LockOnController* lockOnController_ = nullptr;       
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
