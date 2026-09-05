@@ -71,4 +71,6 @@ private: // シーン機能
 
 	GameTimer hyperspaceAudioTimer_;
 	bool isHyperspaceAudioPlayed_ = false;
+
+	GameTimer bgmAudioTimer_;
 };

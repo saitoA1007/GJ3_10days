@@ -42,12 +42,13 @@
             ]
         },
         "EntranceAnimation": {
-            "AppearDuration": 0.65,
-            "AppearPeakScale": 1.18,
+            "AppearDuration": 0.6499999761581421,
+            "AppearPeakScale": 1.1799999475479126,
             "AppearStartDepth": 2.0,
             "BottomFadeDuration": 0.5,
             "FallDuration": 1.0,
             "FallInterval": 0.20000000298023224,
+            "FallSoundLeadTime": 0.6000000238418579,
             "FallStartOffsetY": 10.0
         },
         "IdleAnimation": {

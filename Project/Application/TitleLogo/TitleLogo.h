@@ -64,6 +64,7 @@ private:
 	float fallDuration_ = 0.6f;
 	float fallInterval_ = 0.15f;
 	float fallStartOffsetY_ = 7.0f;
+	float fallSoundLeadTime_ = 0.08f;
 	float appearDuration_ = 0.65f;
 	float appearStartDepth_ = 2.0f;
 	float appearPeakScale_ = 1.18f;
@@ -96,6 +97,10 @@ private:
 	GameTimer shakeTimer_;
 	GameTimer bottomScalingTimer_;
 	GameTimer moveTimer_;
+
+	GameTimer playBgmTimer_;
+	bool bgmPlayed_ = false;
+
 	float idleElapsedTime_ = 0.0f;
 	float idleBottomElapsedTime_ = 0.0f;
 	Vector3 bottomAnimationOrigin_{};

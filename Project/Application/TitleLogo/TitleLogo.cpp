@@ -84,10 +84,11 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	debugParameter_.Register("FallDuration", fallDuration_, 0, "EntranceAnimation");
 	debugParameter_.Register("FallInterval", fallInterval_, 1, "EntranceAnimation");
 	debugParameter_.Register("FallStartOffsetY", fallStartOffsetY_, 2, "EntranceAnimation");
-	debugParameter_.Register("AppearDuration", appearDuration_, 3, "EntranceAnimation");
-	debugParameter_.Register("AppearStartDepth", appearStartDepth_, 4, "EntranceAnimation");
-	debugParameter_.Register("AppearPeakScale", appearPeakScale_, 5, "EntranceAnimation");
-	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 6, "EntranceAnimation");
+	debugParameter_.Register("FallSoundLeadTime", fallSoundLeadTime_, 3, "EntranceAnimation");
+	debugParameter_.Register("AppearDuration", appearDuration_, 4, "EntranceAnimation");
+	debugParameter_.Register("AppearStartDepth", appearStartDepth_, 5, "EntranceAnimation");
+	debugParameter_.Register("AppearPeakScale", appearPeakScale_, 6, "EntranceAnimation");
+	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 7, "EntranceAnimation");
 
 	// 入力待ち中に、左の文字から順番に跳ねるループ演出の調整値を登録する。
 	debugParameter_.Register("HopDuration", idleHopDuration_, 0, "IdleAnimation");
@@ -166,6 +167,15 @@ bool TitleLogo::IsAnimationFinished() const {
 }
 
 void TitleLogo::Update() {
+
+	playBgmTimer_.Update(FpsCounter::deltaTime);
+	if (playBgmTimer_.IsFinished() && !bgmPlayed_) {
+		bgmPlayed_ = true;
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t titleBGM = audioManager.GetHandleByName("titleBGM.mp3");
+		audioManager.Play(titleBGM, 1.0f, true);
+	}
+
 	// Idle中の見た目を基準姿勢へ戻してから設定変更を反映し、値の累積を防ぐ。
 	if (animationState_ == AnimationState::Idle) {
 		RestoreIdleTransforms();
@@ -200,6 +210,8 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 		const float elapsed = fallTimer_.GetElapsedTime();
 		const float partDuration = (std::max)(fallDuration_, 0.0f);
 		const float interval = (std::max)(fallInterval_, 0.0f);
+		const float soundLeadTime = std::clamp(fallSoundLeadTime_, 0.0f, partDuration);
+		const float soundTriggerTime = partDuration - soundLeadTime;
 		for (std::size_t i = 0; i < parts_.size(); ++i) {
 			if (!parts_[i]) {
 				continue;
@@ -219,8 +231,8 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 				};
 			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i];
 
-			// 各文字が着地した瞬間に、一度だけ落下音を鳴らす。
-			if (!partFallSoundPlayed_[i] && localElapsed >= partDuration) {
+			// 各文字が完全に着地する少し前に、一度だけ落下音を鳴らす。
+			if (!partFallSoundPlayed_[i] && localElapsed >= soundTriggerTime) {
 				auto& audioManager = AudioManager::GetInstance();
 				const uint32_t fallSoundHandle = audioManager.GetHandleByName("titleLogoFall.mp3");
 				audioManager.Play(fallSoundHandle, 1.0f, false);
@@ -233,8 +245,13 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 			auto& audioManager = AudioManager::GetInstance();
 			const uint32_t scalingSoundHandle = audioManager.GetHandleByName("titleLogoScaling.mp3");
 			audioManager.Play(scalingSoundHandle, 1.0f, false);
+
 			animationState_ = AnimationState::Appearing;
 			appearTimer_.Start(appearDuration_, false);
+
+			if (!playBgmTimer_.IsActive()){
+				playBgmTimer_.Start(1.0f);
+			}
 		}
 		return;
 	}

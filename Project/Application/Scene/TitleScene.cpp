@@ -66,12 +66,26 @@ void TitleScene::Update() {
 			if (!hyperspaceAudioTimer_.IsActive()) {
 				hyperspaceAudioTimer_.Start(0.25f);
 			}
+
+			if (!bgmAudioTimer_.IsActive()) {
+				bgmAudioTimer_.Start(1.0f);
+			}
 		}
 	}
 
 	// タイトルロゴの更新処理
 	titleLogo_->Update();
 	hyperspaceAudioTimer_.Update();
+	bgmAudioTimer_.Update();
+
+	{
+		if(bgmAudioTimer_.IsActive()) {
+			auto& audioManager = AudioManager::GetInstance();
+			const uint32_t titleBGM = audioManager.GetHandleByName("titleBGM.mp3");
+			audioManager.SetVolume(titleBGM, 1.0f - bgmAudioTimer_.GetProgress());
+		}
+	}
+
 	if (hyperspaceAudioTimer_.IsFinished() && !isHyperspaceAudioPlayed_) {
 		auto& audioManager = AudioManager::GetInstance();
 		const uint32_t titleDecisionHandle = audioManager.GetHandleByName("titleHyperSpace.mp3");
@@ -82,6 +96,9 @@ void TitleScene::Update() {
 	// ロゴが画面奥まで移動し終えたらシーン遷移を許可する。
 	if (titleLogo_->IsAnimationFinished()) {
 		isFinished_ = true;
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t titleBGM = audioManager.GetHandleByName("titleBGM.mp3");
+		audioManager.Stop(titleBGM);
 	}
 }
 
