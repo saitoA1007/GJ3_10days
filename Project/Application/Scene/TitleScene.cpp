@@ -58,16 +58,26 @@ void TitleScene::Update() {
 	if (inputCommand_->IsCommandActive("Decision")) {
 		if (titleLogo_->GetAnimationState() == AnimationState::Idle) {
 			auto& audioManager = AudioManager::GetInstance();
-			const uint32_t titleDecisionHandle = audioManager.GetHandleByName("hyperSpace.mp3");
-			audioManager.Play(titleDecisionHandle, 0.8f, false);
+			const uint32_t titleDecisionHandle = audioManager.GetHandleByName("titleDecision.mp3");
+			audioManager.Play(titleDecisionHandle, 1.0f, false);
 
 			titleLogo_->AnimationStart();
 			hyperspaceEffect_->StartAnimation();
+			if (!hyperspaceAudioTimer_.IsActive()) {
+				hyperspaceAudioTimer_.Start(0.25f);
+			}
 		}
 	}
 
 	// タイトルロゴの更新処理
 	titleLogo_->Update();
+	hyperspaceAudioTimer_.Update();
+	if (hyperspaceAudioTimer_.IsFinished() && !isHyperspaceAudioPlayed_) {
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t titleDecisionHandle = audioManager.GetHandleByName("titleHyperSpace.mp3");
+		audioManager.Play(titleDecisionHandle, 1.0f, false);
+		isHyperspaceAudioPlayed_ = true;
+	}
 
 	// ロゴが画面奥まで移動し終えたらシーン遷移を許可する。
 	if (titleLogo_->IsAnimationFinished()) {
