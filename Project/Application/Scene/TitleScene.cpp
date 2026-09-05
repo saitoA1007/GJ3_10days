@@ -59,7 +59,7 @@ void TitleScene::Update() {
 		if (titleLogo_->GetAnimationState() == AnimationState::Idle) {
 			auto& audioManager = AudioManager::GetInstance();
 			const uint32_t titleDecisionHandle = audioManager.GetHandleByName("hyperSpace.mp3");
-			audioManager.Play(titleDecisionHandle, 1.0f, false);
+			audioManager.Play(titleDecisionHandle, 0.8f, false);
 
 			titleLogo_->AnimationStart();
 			hyperspaceEffect_->StartAnimation();

@@ -85,6 +85,17 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	debugParameter_.Register("FallStartOffsetY", fallStartOffsetY_, 2, "EntranceAnimation");
 	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 3, "EntranceAnimation");
 
+	// 入力待ち中に、左の文字から順番に跳ねるループ演出の調整値を登録する。
+	debugParameter_.Register("HopDuration", idleHopDuration_, 0, "IdleAnimation");
+	debugParameter_.Register("Interval", idleInterval_, 1, "IdleAnimation");
+	debugParameter_.Register("LoopDelay", idleLoopDelay_, 2, "IdleAnimation");
+	debugParameter_.Register("HopHeight", idleHopHeight_, 3, "IdleAnimation");
+	debugParameter_.Register("ScaleAmount", idleScaleAmount_, 4, "IdleAnimation");
+	debugParameter_.Register("RockAngle", idleRockAngle_, 5, "IdleAnimation");
+	debugParameter_.Register("BottomCycleDuration", idleBottomCycleDuration_, 6, "IdleAnimation");
+	debugParameter_.Register("BottomMoveAmplitude", idleBottomMoveAmplitude_, 7, "IdleAnimation");
+	debugParameter_.Register("BottomScaleAmount", idleBottomScaleAmount_, 8, "IdleAnimation");
+
 	// タイトル終了演出の調整値をImGuiへ登録する。
 	debugParameter_.Register("ShakeDuration", shakeDuration_, 0, "Animation");
 	debugParameter_.Register("ShakeStartAmplitude", shakeStartAmplitude_, 1, "Animation");
@@ -109,7 +120,8 @@ void TitleLogo::AnimationStart() {
 		return;
 	}
 
-	// Decision時点のImGui設定値を演出の基準位置として使用する。
+	// Idle演出のオフセットを外し、Decision時点の設定値を終了演出の基準姿勢にする。
+	RestoreIdleTransforms();
 	debugParameter_.ApplyIfDirty();
 	CaptureAnimationOrigins();
 	animationState_ = AnimationState::Shaking;
@@ -126,6 +138,8 @@ void TitleLogo::ResetAnimation() {
 	shakeTimer_.Reset();
 	moveTimer_.Reset();
 	bottomScalingTimer_.Reset();
+	idleElapsedTime_ = 0.0f;
+	idleBottomElapsedTime_ = 0.0f;
 
 	// t0～t3を画面上側の待機位置へ移動し、Bottomは透明にしておく。
 	for (std::size_t i = 0; i < parts_.size(); ++i) {
@@ -145,13 +159,28 @@ bool TitleLogo::IsAnimationFinished() const {
 }
 
 void TitleLogo::Update() {
-	debugParameter_.ApplyIfDirty();
+	// Idle中の見た目を基準姿勢へ戻してから設定変更を反映し、値の累積を防ぐ。
+	if (animationState_ == AnimationState::Idle) {
+		RestoreIdleTransforms();
+		if (debugParameter_.ApplyIfDirty()) {
+			CaptureAnimationOrigins();
+		}
+	} else {
+		debugParameter_.ApplyIfDirty();
+	}
 	UpdateAnimation(FpsCounter::deltaTime);
 	UpdateTransforms();
 }
 
 void TitleLogo::DebugUpdate() {
-	debugParameter_.ApplyIfDirty();
+	if (animationState_ == AnimationState::Idle) {
+		RestoreIdleTransforms();
+		if (debugParameter_.ApplyIfDirty()) {
+			CaptureAnimationOrigins();
+		}
+	} else {
+		debugParameter_.ApplyIfDirty();
+	}
 	UpdateTransforms();
 }
 
@@ -184,7 +213,7 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 		}
 
 		if (fallTimer_.IsFinished()) {
-			RestorePartTranslations();
+			RestorePartTransforms();
 			animationState_ = AnimationState::FadingBottom;
 			bottomFadeTimer_.Start(bottomFadeDuration_, false);
 		}
@@ -201,11 +230,70 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 			if (bottom_) {
 				bottom_->SetAlpha(1.0f);
 			}
+			idleElapsedTime_ = 0.0f;
+			idleBottomElapsedTime_ = 0.0f;
 			animationState_ = AnimationState::Idle;
 		}
 		return;
 
-	case AnimationState::Idle:
+	case AnimationState::Idle: {
+		// Bottomは文字のウェーブとは別周期で、常にゆっくり上下・拡縮させる。
+		const float bottomCycleDuration = (std::max)(idleBottomCycleDuration_, 0.0f);
+		if (bottom_ && bottomCycleDuration > 0.0f) {
+			idleBottomElapsedTime_ += (std::max)(deltaTime, 0.0f);
+			idleBottomElapsedTime_ = std::fmod(idleBottomElapsedTime_, bottomCycleDuration);
+			const float phase = std::numbers::pi_v<float> * 2.0f
+				* idleBottomElapsedTime_ / bottomCycleDuration;
+			const float wave = std::sin(phase);
+
+			bottom_->worldTransform_.transform_.translate =
+				bottomAnimationOrigin_ + Vector3{ 0.0f, idleBottomMoveAmplitude_ * wave, 0.0f };
+			bottom_->worldTransform_.transform_.scale =
+				bottomAnimationOriginScale_ * (1.0f + idleBottomScaleAmount_ * wave);
+		}
+
+		const float hopDuration = (std::max)(idleHopDuration_, 0.0f);
+		const float interval = (std::max)(idleInterval_, 0.0f);
+		const float sequenceDuration = hopDuration + interval * static_cast<float>(kPartCount - 1);
+		const float loopDuration = sequenceDuration + (std::max)(idleLoopDelay_, 0.0f);
+
+		if (hopDuration <= 0.0f || loopDuration <= 0.0f) {
+			RestorePartTransforms();
+			return;
+		}
+
+		idleElapsedTime_ += (std::max)(deltaTime, 0.0f);
+		idleElapsedTime_ = std::fmod(idleElapsedTime_, loopDuration);
+
+		for (std::size_t i = 0; i < parts_.size(); ++i) {
+			if (!parts_[i]) {
+				continue;
+			}
+
+			const float localElapsed = idleElapsedTime_ - interval * static_cast<float>(i);
+			if (localElapsed < 0.0f || localElapsed >= hopDuration) {
+				continue;
+			}
+
+			const float progress = std::clamp(localElapsed / hopDuration, 0.0f, 1.0f);
+			// 上昇は軽く、着地は少し速めにして、左から右へ弾むウェーブを作る。
+			const float hopProgress = progress < 0.45f
+				? Apply(progress / 0.45f, EaseType::kEaseOutCubic)
+				: 1.0f - Apply((progress - 0.45f) / 0.55f, EaseType::kEaseInQuad);
+			const float scale = 1.0f + idleScaleAmount_ * std::sin(std::numbers::pi_v<float> * progress);
+			const float rock = idleRockAngle_
+				* std::sin(std::numbers::pi_v<float> * 2.0f * progress)
+				* hopProgress;
+
+			parts_[i]->worldTransform_.transform_.translate =
+				partAnimationOrigins_[i] + Vector3{ 0.0f, idleHopHeight_ * hopProgress, 0.0f };
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i] * scale;
+			parts_[i]->worldTransform_.transform_.rotate =
+				partAnimationOriginRotations_[i] + Vector3{ 0.0f, 0.0f, rock };
+		}
+		return;
+	}
+
 	case AnimationState::Finished:
 		return;
 
@@ -215,7 +303,7 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 		shakeTimer_.Update(deltaTime);
 
 		if (shakeTimer_.IsFinished()) {
-			RestorePartTranslations();
+			RestorePartTransforms();
 			RandomizeMoveRotationDirections();
 			animationState_ = AnimationState::Moving;
 			moveTimer_.Start(GetMoveSequenceDuration(), false);
@@ -337,20 +425,32 @@ void TitleLogo::UpdateTransforms() {
 void TitleLogo::CaptureAnimationOrigins() {
 	if (bottom_) {
 		bottomAnimationOrigin_ = bottom_->worldTransform_.transform_.translate;
+		bottomAnimationOriginScale_ = bottom_->worldTransform_.transform_.scale;
 	}
 	for (std::size_t i = 0; i < parts_.size(); ++i) {
 		if (parts_[i]) {
 			partAnimationOrigins_[i] = parts_[i]->worldTransform_.transform_.translate;
+			partAnimationOriginScales_[i] = parts_[i]->worldTransform_.transform_.scale;
 			partAnimationOriginRotations_[i] = parts_[i]->worldTransform_.transform_.rotate;
 		}
 	}
 }
 
-void TitleLogo::RestorePartTranslations() {
+void TitleLogo::RestorePartTransforms() {
 	for (std::size_t i = 0; i < parts_.size(); ++i) {
 		if (parts_[i]) {
 			parts_[i]->worldTransform_.transform_.translate = partAnimationOrigins_[i];
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i];
+			parts_[i]->worldTransform_.transform_.rotate = partAnimationOriginRotations_[i];
 		}
+	}
+}
+
+void TitleLogo::RestoreIdleTransforms() {
+	RestorePartTransforms();
+	if (bottom_) {
+		bottom_->worldTransform_.transform_.translate = bottomAnimationOrigin_;
+		bottom_->worldTransform_.transform_.scale = bottomAnimationOriginScale_;
 	}
 }
 

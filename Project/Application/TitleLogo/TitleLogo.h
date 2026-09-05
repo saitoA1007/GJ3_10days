@@ -46,7 +46,8 @@ private:
 	void UpdateAnimation(float deltaTime);
 	void UpdateTransforms();
 	void CaptureAnimationOrigins();
-	void RestorePartTranslations();
+	void RestorePartTransforms();
+	void RestoreIdleTransforms();
 	void RandomizeMoveRotationDirections();
 	float GetFallSequenceDuration() const;
 	float GetMoveSequenceDuration() const;
@@ -63,6 +64,15 @@ private:
 	float fallInterval_ = 0.15f;
 	float fallStartOffsetY_ = 7.0f;
 	float bottomFadeDuration_ = 0.6f;
+	float idleHopDuration_ = 0.55f;
+	float idleInterval_ = 0.12f;
+	float idleLoopDelay_ = 1.0f;
+	float idleHopHeight_ = 0.32f;
+	float idleScaleAmount_ = 0.06f;
+	float idleRockAngle_ = 0.055f;
+	float idleBottomCycleDuration_ = 2.2f;
+	float idleBottomMoveAmplitude_ = 0.06f;
+	float idleBottomScaleAmount_ = 0.025f;
 
 	float shakeDuration_ = 1.0f;
 	float shakeStartAmplitude_ = 0.0f;
@@ -81,8 +91,12 @@ private:
 	GameTimer shakeTimer_;
 	GameTimer bottomScalingTimer_;
 	GameTimer moveTimer_;
+	float idleElapsedTime_ = 0.0f;
+	float idleBottomElapsedTime_ = 0.0f;
 	Vector3 bottomAnimationOrigin_{};
+	Vector3 bottomAnimationOriginScale_{};
 	std::array<Vector3, kPartCount> partAnimationOrigins_{};
+	std::array<Vector3, kPartCount> partAnimationOriginScales_{};
 	std::array<Vector3, kPartCount> partAnimationOriginRotations_{};
 	std::array<Vector3, kPartCount> partMoveRotationDirections_{};
 };
