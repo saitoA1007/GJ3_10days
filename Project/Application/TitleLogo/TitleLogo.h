@@ -104,4 +104,5 @@ private:
 	std::array<Vector3, kPartCount> partAnimationOriginScales_{};
 	std::array<Vector3, kPartCount> partAnimationOriginRotations_{};
 	std::array<Vector3, kPartCount> partMoveRotationDirections_{};
+	std::array<bool, kPartCount> partFallSoundPlayed_{};
 };

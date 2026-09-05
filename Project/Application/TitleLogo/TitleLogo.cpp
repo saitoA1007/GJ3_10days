@@ -8,6 +8,7 @@
 
 #include "EasingManager.h"
 #include "FPSCounter.h"
+#include "AudioManager.h"
 #include "Model.h"
 #include "ModelComponent.h"
 #include "ModelManager.h"
@@ -144,6 +145,7 @@ void TitleLogo::ResetAnimation() {
 	bottomScalingTimer_.Reset();
 	idleElapsedTime_ = 0.0f;
 	idleBottomElapsedTime_ = 0.0f;
+	partFallSoundPlayed_.fill(false);
 
 	// t0～t3を元のサイズのまま上側かつ少し奥へ移動し、Bottomは透明にしておく。
 	for (std::size_t i = 0; i < parts_.size(); ++i) {
@@ -216,9 +218,21 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 					appearStartDepth_
 				};
 			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i];
+
+			// 各文字が着地した瞬間に、一度だけ落下音を鳴らす。
+			if (!partFallSoundPlayed_[i] && localElapsed >= partDuration) {
+				auto& audioManager = AudioManager::GetInstance();
+				const uint32_t fallSoundHandle = audioManager.GetHandleByName("titleLogoFall.mp3");
+				audioManager.Play(fallSoundHandle, 1.0f, false);
+				partFallSoundPlayed_[i] = true;
+			}
 		}
 
 		if (fallTimer_.IsFinished()) {
+			// 4文字が揃い、手前へ拡大し始めるタイミングで登場音を鳴らす。
+			auto& audioManager = AudioManager::GetInstance();
+			const uint32_t scalingSoundHandle = audioManager.GetHandleByName("titleLogoScaling.mp3");
+			audioManager.Play(scalingSoundHandle, 1.0f, false);
 			animationState_ = AnimationState::Appearing;
 			appearTimer_.Start(appearDuration_, false);
 		}
