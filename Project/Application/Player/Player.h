@@ -6,7 +6,6 @@
 #include "ModelComponent.h"
 #include "DebugParameter.h"
 #include "InputCommand.h"
-#include "Application/Pikumi/Pikumi.h"
 
 // 前方宣言
 namespace GameEngine 
@@ -57,7 +56,6 @@ private:
 	void UpdateMoveAnimation();
 	void UpdateRightHandAnimation();
 	void DrawTrajectory();
-	float CalculateDistanceToFieldBoundary(const Vector3& startPos, const Vector3& direction) const;
 
 	// パラメータ機能
 	std::unique_ptr<GameEngine::DebugParameter> debugParame_;
@@ -78,7 +76,6 @@ private:
 	std::unique_ptr<IPlayerState> currentState_;
 
 	GameEngine::Model* pikumiModel_ = nullptr;
-	std::vector<std::unique_ptr<Pikumi>> pikumis_;
 
 	// フィールドのポインタ
 	Field* field_ = nullptr;

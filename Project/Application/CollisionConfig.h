@@ -20,14 +20,13 @@ static inline const uint32_t kCollisionAttributeTerrain = 0b1 << 2;
 enum class CollisionTypeID : uint32_t {
 	kDefault, // 通常
 	kPlayer,  // プレイヤー
-	kPikumi,  // ピクミ
+	kUnit,  // ユニット
 	kEnemy,	  // 敵
-	kTower,   // タワー
+	kRocket,   // ロケット
 	kWall,    // 壁
 	kGround,  // 地面
 	kIceFall, // つらら
 	kWind,    // ボスの風攻撃
 	kHeart,   // 回復
 	kBoundaryWall, // 移動範囲制限用の壁
-	kRocket,  // ロケット
 };
