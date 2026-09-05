@@ -48,15 +48,15 @@
     <Filter Include="Application\Prototype\LockOn">
       <UniqueIdentifier>{c625222a-c76e-4645-b6dc-17a174a0e139}</UniqueIdentifier>
     </Filter>
-	<Filter Include="Application\Prototype\Enemy">
-	  <UniqueIdentifier>{c42ac6d5-7dd6-42e5-b955-e60a59e1190d}</UniqueIdentifier>
-	</Filter>
-	<Filter Include="Application\Prototype\GameFlow">
-	  <UniqueIdentifier>{059bce63-0b25-4f4c-9863-ff199cba3a44}</UniqueIdentifier>
-	</Filter>
-	<Filter Include="Application\Prototype\EnergyView">
-	  <UniqueIdentifier>{07a27709-1114-4fb9-9e74-80451026bfdb}</UniqueIdentifier>
-	</Filter>
+    <Filter Include="Application\Prototype\Enemy">
+      <UniqueIdentifier>{c42ac6d5-7dd6-42e5-b955-e60a59e1190d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\GameFlow">
+      <UniqueIdentifier>{059bce63-0b25-4f4c-9863-ff199cba3a44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Prototype\EnergyView">
+      <UniqueIdentifier>{07a27709-1114-4fb9-9e74-80451026bfdb}</UniqueIdentifier>
+    </Filter>
     <Filter Include="EngineSource">
       <UniqueIdentifier>{f8ed931d-59ae-469c-b602-a18b3d78668e}</UniqueIdentifier>
     </Filter>
@@ -552,18 +552,18 @@
     <ClCompile Include="Application\Scene\ProtoScene.cpp">
       <Filter>Application\Scene</Filter>
     </ClCompile>
-	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemy.cpp">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClCompile>
-	<ClCompile Include="Application\Prototype\Enemy\PrototypeEnemyManager.cpp">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClCompile>
-	<ClCompile Include="Application\Prototype\EnergyView\PrototypeEnergyView.cpp">
-	  <Filter>Application\Prototype\EnergyView</Filter>
-	</ClCompile>
-	<ClCompile Include="Application\Prototype\GameFlow\PrototypeGameFlow.cpp">
-	  <Filter>Application\Prototype\GameFlow</Filter>
-	</ClCompile>
+    <ClCompile Include="Application\Prototype\Enemy\PrototypeEnemy.cpp">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\Enemy\PrototypeEnemyManager.cpp">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\EnergyView\PrototypeEnergyView.cpp">
+      <Filter>Application\Prototype\EnergyView</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Prototype\GameFlow\PrototypeGameFlow.cpp">
+      <Filter>Application\Prototype\GameFlow</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Prototype\Field\PrototypeField.cpp">
       <Filter>Application\Prototype\Field</Filter>
     </ClCompile>
@@ -642,6 +642,7 @@
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\HyperspaceMaterial.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
+    <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1131,18 +1132,18 @@
     <ClInclude Include="Application\Scene\ProtoScene.h">
       <Filter>Application\Scene</Filter>
     </ClInclude>
-	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemy.h">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClInclude>
-	<ClInclude Include="Application\Prototype\Enemy\PrototypeEnemyManager.h">
-	  <Filter>Application\Prototype\Enemy</Filter>
-	</ClInclude>
-	<ClInclude Include="Application\Prototype\EnergyView\PrototypeEnergyView.h">
-	  <Filter>Application\Prototype\EnergyView</Filter>
-	</ClInclude>
-	<ClInclude Include="Application\Prototype\GameFlow\PrototypeGameFlow.h">
-	  <Filter>Application\Prototype\GameFlow</Filter>
-	</ClInclude>
+    <ClInclude Include="Application\Prototype\Enemy\PrototypeEnemy.h">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\Enemy\PrototypeEnemyManager.h">
+      <Filter>Application\Prototype\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\EnergyView\PrototypeEnergyView.h">
+      <Filter>Application\Prototype\EnergyView</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Prototype\GameFlow\PrototypeGameFlow.h">
+      <Filter>Application\Prototype\GameFlow</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Prototype\Field\PrototypeField.h">
       <Filter>Application\Prototype\Field</Filter>
     </ClInclude>
@@ -1231,6 +1232,7 @@
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\HyperspaceMaterial.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
+    <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
