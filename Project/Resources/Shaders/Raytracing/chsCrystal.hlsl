@@ -169,9 +169,7 @@ void MainCrystalCHS(inout Payload payload, MyAttribute attrib)
         worldNormal = -worldNormal;
     }
 
-    //-----------------------------------------------------------------------
     // ディゾルブ
-    //-----------------------------------------------------------------------
     // オブジェクト空間の座標を基準にすることで、模様がモデルに貼り付いたまま動く
     float dissolveMask = SampleDissolveMask(material, vtx.position.xyz, transformedUV.xy);
 
@@ -195,9 +193,7 @@ void MainCrystalCHS(inout Payload payload, MyAttribute attrib)
     // ディゾルブが始まっていないときは光らせない
     dissolveEdge *= step(0.001f, material.dissolveThreshold);
 
-    //-----------------------------------------------------------------------
-    // 宇宙の映り込み
-    //-----------------------------------------------------------------------
+    // 宇宙
     float ior = max(material.ior, 1.0f);
 
     // 内部に閉じ込めた宇宙。屈折方向で見るのでモデルを回すと中の宇宙が動く
@@ -233,15 +229,10 @@ void MainCrystalCHS(inout Payload payload, MyAttribute attrib)
     float3 surfaceColor = sceneReflect + surfaceUniverse * material.universeIntensity;
     float3 crystalColor = lerp(innerColor, surfaceColor, fresnel);
 
-    //-----------------------------------------------------------------------
-    // 輪郭の発光
-    //-----------------------------------------------------------------------
+    // リムライト
     float rimFactor = pow(1.0f - NdotV, max(material.rimPower, 0.001f));
     crystalColor += material.rimColor.rgb * rimFactor * material.rimIntensity;
 
-    //-----------------------------------------------------------------------
-    // 合成
-    //-----------------------------------------------------------------------
     // 半分溶けた部分は背後を透かして薄くする
     if (alpha < 0.999f)
     {
