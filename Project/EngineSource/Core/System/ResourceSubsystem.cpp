@@ -45,6 +45,9 @@ void ResourceSubsystem::LoadAllResources() {
 
 	// アニメーションデータをロード
 	animationManager_->RegisterAnimation("Walk", "walk.gltf", "Resources/Models/Walk");
+	animationManager_->RegisterAnimation("mousukosi", "mousukosi0.gltf", "Resources/Models/ResultMoji/mousukosi");
+	animationManager_->RegisterAnimation("tyakuriku", "tyakuriku0.gltf", "Resources/Models/ResultMoji/tyakuriku");
+	animationManager_->RegisterAnimation("tobisugi", "tobisugi0.gltf", "Resources/Models/ResultMoji/tobisugi");
 	
 	// 音声データを全てロードする
 	AudioManager::GetInstance().LoadAllAudio();

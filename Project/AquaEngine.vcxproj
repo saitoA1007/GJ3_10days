@@ -163,6 +163,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
+    <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
     <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
     <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
     <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
@@ -202,6 +203,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Score\ScoreView.cpp" />
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
+    <ClCompile Include="Application\Utils\GamingColor.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Enemy\Enemy.cpp" />
@@ -441,6 +443,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
     </ClCompile>
     <ClCompile Include="Application\Utils\ShigeFunc.cpp" />
+    <ClCompile Include="Application\Result\ResultMessage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -451,6 +454,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
+    <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
     <ClInclude Include="Application\EnergyView\EnergyView.h" />
     <ClInclude Include="Application\Energy\EnergyPickup.h" />
     <ClInclude Include="Application\Energy\EnergySpawner.h" />
@@ -492,6 +496,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Utils\Binary\BinaryManager.h" />
     <ClInclude Include="Application\Utils\Binary\Value.h" />
     <ClInclude Include="Application\Utils\GameTimer.h" />
+    <ClInclude Include="Application\Utils\GamingColor.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Enemy\Enemy.h" />
@@ -748,6 +753,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Externals\imgui\imstb_textedit.h" />
     <ClInclude Include="Externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Application\Utils\ShigeFunc.h" />
+    <ClInclude Include="Application\Result\ResultMessage.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Externals\imgui\imgui_bezier_math.inl" />

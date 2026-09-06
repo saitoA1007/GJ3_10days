@@ -12,6 +12,10 @@
                 0.5,
                 0.5
             ],
+            "CameraShakeEndAmplitude": 0.10000000149011612,
+            "CameraShakeFrequencyX": 71.0,
+            "CameraShakeFrequencyY": 57.0,
+            "CameraShakeStartAmplitude": 0.0,
             "MoveDistance": 360.0,
             "MoveDuration": 1.0,
             "MoveInterval": 0.05000000074505806,
@@ -50,6 +54,13 @@
             "FallInterval": 0.20000000298023224,
             "FallSoundLeadTime": 0.6000000238418579,
             "FallStartOffsetY": 10.0
+        },
+        "GamingColor": {
+            "Brightness": 1.0,
+            "ColorSpacing": -0.10000000149011612,
+            "CycleSpeed": 0.15000000596046448,
+            "Saturation": 1.0,
+            "SelfIlluminated": true
         },
         "IdleAnimation": {
             "BottomCycleDuration": 2.0,

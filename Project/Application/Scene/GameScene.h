@@ -88,6 +88,10 @@ private: // シーン機能
 	std::unique_ptr<ScoreView> scoreView_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 
+	// シーンライト
+	float intensity_ = 1.0f;
+	Vector3 dir_ = { 0.0f,-1.0f,0.0f };
+	Vector4 lightColor_ = { 1.0f,1.0f,1.0f,1.0f };
 private:
 
 	/// <summary>

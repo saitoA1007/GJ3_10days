@@ -1,6 +1,7 @@
 #include "GameScene.h"
 using namespace GameEngine;
-
+#include "ImguiManager.h"
+#include "ParticleBehavior.h"
 #include "PostProcess/PostEffectData.h"
 #include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
@@ -18,6 +19,7 @@ using namespace GameEngine;
 #include "ControllerVibration.h"
 #include "FPSCounter.h"
 #include "Application/Effect/BlackHoleEffect.h"
+#include "Application/Effect/SpawnFieldEffect.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -57,15 +59,6 @@ GameScene::GameScene() {
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("fieldCircle.obj");
 	fieldModel->SetDefaultIsEnableLight(true);
-	// ポール
-	auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
-	poleModel->SetDefaultIsEnableLight(false);
-	// 円
-	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
-	circleModel->SetDefaultIsEnableLight(false);
-	// 宇宙を映す平面
-	auto* planeXZModel = modelManager_->GetNameByModel("halfDome.gltf");
-	planeXZModel->SetDefaultIsEnableLight(false);
 	field_ = gameObjectManager_->AddObject<Field>(fieldModel);
 
 	//Enemy
@@ -80,10 +73,10 @@ GameScene::GameScene() {
 	uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
 
-	auto* rocketModel = modelManager_->GetNameByModel("rocket.obj");
+	auto* rocketModel = modelManager_->GetNameByModel("Rocket.gltf");
 	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
 
-	auto* energyModel = modelManager_->GetNameByModel("energy.obj");
+	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
 	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_);
 
 	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
@@ -125,12 +118,39 @@ GameScene::GameScene() {
 		mainCamera_.get(),
 		rocket_);
   
-  enemyManager_->SetStage("Test");
+	enemyManager_->SetStage("Test");
+
+	//==============================================
+	// これより下はエフェクトのテストで書いています
+	//==============================================
 
 	// ブラックホールのテスト
-	auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
+	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+
+	//// ポール
+	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
+	//poleModel->SetDefaultIsEnableLight(false);
+	//// 円
+	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
+	circleModel->SetDefaultIsEnableLight(false);
+	// 宇宙を映す平面
+	auto* halfDomeModel = modelManager_->GetNameByModel("halfDome.gltf");
+	halfDomeModel->SetDefaultIsEnableLight(false);
+
+	// 出現位置のテスト
+	auto* ring1Model = modelManager_->GetNameByModel("fieldRingLv1.gltf");
+	auto* ring2Model = modelManager_->GetNameByModel("fieldRingLv2.gltf");
+	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
+	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model, halfDomeModel, circleModel);
+
+	// エフェクト用モデル
+	auto* effectModel = modelManager_->GetNameByModel("plane.obj");
+	effectModel->SetDefaultIsEnableLight(false);
+	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingOneEffect", 32, textureManager_, effectModel);
+	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingTwoEffect", 128, textureManager_, effectModel);
+	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingThreeEffect", 128, textureManager_, effectModel);
 }
 
 void GameScene::Initialize() {
@@ -157,6 +177,22 @@ void GameScene::Update() {
 	{
 		controllerVibration_->Stop();
 	}
+
+	// ライト調整
+#ifdef USE_IMGUI
+	auto* light = renderQueue_->GetLightManager();
+
+	ImGui::Begin("SceneLight");
+	ImGui::DragFloat3("lightDir", &dir_.x, 0.1f);
+	ImGui::DragFloat("lightIntensity", &intensity_, 0.1f);
+	ImGui::ColorEdit4("lightColor", &lightColor_.x);
+	dir_.Normalize();
+
+	light->SetDirectionalDirction(dir_);
+	light->SetDirectionalIntensity(intensity_);
+	light->SetDirectionalColor(lightColor_);
+	ImGui::End();
+#endif
 }
 
 void GameScene::DebugUpdate()

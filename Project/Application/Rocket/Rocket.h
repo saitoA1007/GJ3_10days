@@ -16,8 +16,9 @@
 /// @brief ロケットの配置とエネルギー消費に関する調整値。
 struct RocketSettings 
 {
+	Vector3 scale = { 1.0f, 1.0f, 1.0f };     // Rocket.gltfの表示倍率
+	Vector3 rotation = { 0.0f, 0.0f, 0.0f };  // Rocket.gltfの回転（ラジアン）
 	Vector3 position = { 0.0f, 0.25f, 0.0f }; // フィールド中央のワールド座標
-	Vector3 scale = { 1.0f, 1.0f, 1.0f };     // rocket.objの表示倍率
 	float colliderRadius = 1.5f;                // 敵到達判定の球半径
 	float colliderOffsetY = 1.75f;              // モデル原点から球中心までのY差
 	int32_t initialEnergy = 0;                   // シーン開始時の保有量
@@ -116,7 +117,7 @@ private:
 
 	RocketSettings settings_;                                  // Registerから編集される設定
 	RocketEnergy energy_;                                      // 値の加算・安全な消費を担当する小クラス
-	std::unique_ptr<GameEngine::ModelComponent> modelComponent_;// rocket.objの描画情報
+	std::unique_ptr<GameEngine::ModelComponent> modelComponent_;// Rocket.gltfの描画情報
 	GameEngine::SphereCollider collider_;                       // 敵の到達検出に使う球Collider
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;// 設定とParameter Inspectorの接続
 	EnergyChangedCallback onEnergyChanged_;                     // UIや演出向けの任意通知先
