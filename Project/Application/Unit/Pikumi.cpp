@@ -31,7 +31,7 @@ Pikumi::Pikumi(GameEngine::Model* model, ImpactDetectionEffect* impactDetectionE
     collider_.SetCollisionMask(kCollisionAttributeEnemy | kCollisionAttributePlayer | kCollisionAttributePikumi);
 
     UserData userData;
-    userData.typeID = static_cast<uint32_t>(CollisionTypeID::kPikumi);
+    userData.typeID = static_cast<uint32_t>(CollisionTypeID::kUnit);
     userData.object = this;
     collider_.SetUserData(userData);
 
@@ -211,21 +211,21 @@ void Pikumi::OnCollisionEnter(const GameEngine::CollisionResult& result)
     }
 
     // Pikumi 同士の判定条件チェック
-    if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPikumi) && !isPikumiCollisionEnabled_)
+    if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kUnit) && !isPikumiCollisionEnabled_)
     {
         return;
     }
     if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy) ||
         result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer) ||
-        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kTower))
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kRocket))
     {
         isPikumiCollisionEnabled_ = true;
     }
 
     if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy) ||
         result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPlayer) ||
-        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kPikumi) ||
-        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kTower))
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kUnit) ||
+        result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kRocket))
     {
         if (state_ == PikumiState::kThrown)
         {

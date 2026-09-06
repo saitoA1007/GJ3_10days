@@ -1,0 +1,33 @@
+{
+    "Rocket": {
+        "Collider": {
+            "OffsetY": 1.75,
+            "Radius": 1.5
+        },
+        "Debug": {
+            "ChangeAmount": 10
+        },
+        "Energy": {
+            "EnemyHitLoss": 10,
+            "InitialEnergy": 0
+        },
+        "SceneName": "Game",
+        "Transform": {
+            "Rotate": [
+                0.0,
+                3.140000104904175,
+                0.0
+            ],
+            "Scale": [
+                3.0,
+                3.0,
+                3.0
+            ],
+            "Translate": [
+                0.0,
+                5.5,
+                0.0
+            ]
+        }
+    }
+}

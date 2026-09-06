@@ -4,6 +4,14 @@
 #include <Vector2.h>
 #include <Collider.h>
 
+class Rocket;
+class Unit;
+class UnitManager;
+class EnergyPickup;
+class EnergySpawner;
+class Field;
+enum class EnergySize : uint8_t;
+
 enum class EnemyType {
 	Straight_S,	//対象にまっすぐ近づく 小さい
 	Straight_M,	//対象にまっすぐ近づく 中くらい
@@ -18,21 +26,31 @@ enum class EnemyType {
 //EnemyManagerで更新を呼び出したいので、GameObjectManagerに登録しない。
 class Enemy : public GameEngine::IGameObject {
 public:
-
 	struct Config {
 		float speed_ = 2.0f;
 		int hp = 1;
 		float size_ = 1.0f;
 		Vector4 normalColor_ = { 1.0f, 0.4f, 0.6f, 1.0f };
 		Vector4 hitColor_ = { 0.9f, 0.0f, 0.0f, 1.0f };
+		Vector4 highlightColor_ = { 1.0f, 0.9f, 0.4f, 1.0f }; // ハイライト用の色
+	};
+
+	/// 外部参照をまとめて保持する構造体
+	struct Context {
+		Field* field = nullptr;
+		Rocket* rocket = nullptr;
+		EnergySpawner* energySpawner = nullptr;
+		UnitManager* unitManager = nullptr;
 	};
 
 public:
-
 	Enemy(GameEngine::WorldTransforms::TransformData* data);
-	~Enemy() {};
+	~Enemy() = default;
 
 	static void SetCollisionRadius(float radius) { collisionRadius_ = radius; }
+
+	// 外部システムの参照を設定
+	void SetContext(const Context& context) { context_ = context; }
 
 	void SetUp(Vector2 position, Config config, EnemyType type);
 
@@ -42,16 +60,32 @@ public:
 
 	Vector3 GetPosition() const { return data_->transform.translate; }
 	bool WasDefeated() const { return wasDefeated_; }
-	//SetUp後に呼び出す。
+
 	void SetSnake(float width, float speed) { snakeWidth_ = width; snakeSpeed_ = speed; }
 	void SetRound(float speed) { roundSpeed_ = speed; }
-
 	void SetDamageTime(float time) { damageTime_ = time; }
 
-private:
+	// LockOn / ユニット派遣用連携機能
+	bool IsTargetable() const { return isActive_ && !isDead_ && !isReservedForAttack_; }
+	bool TryReserveForAttack();
+	void CancelAttackReservation();
+	void SetHighlighted(bool highlighted);
+	float GetDisplayScale() const { return config_.size_; }
+	/// XZ平面上の当たり判定半径を取得（基本半径 × スケール）
+	float GetCollisionRadius() const { return collisionRadius_ * config_.size_; }
 
+	// 撃破時エネルギー生成
+	EnergyPickup* DefeatAndDropEnergy();
+	// 運搬ユニットを追跡中かどうかを取得
+	bool IsTargetingCarrier() const { return isActive_ && !isDead_ && (targetUnit_ != nullptr); }
+
+private:
 	void DefaultMovement();
 	void RoundMovement();
+	void TrackingMovement(float deltaTime); // 運搬ユニット追跡移動
+
+	void UpdateTarget();
+	EnergySize GetDropEnergySize() const;
 
 	void Destroy() override {
 		isActive_ = false;
@@ -60,18 +94,27 @@ private:
 
 	static inline float collisionRadius_ = 1.f;
 
-	GameEngine::WorldTransforms::TransformData* data_;
+	GameEngine::WorldTransforms::TransformData* data_ = nullptr;
 	GameEngine::SphereCollider collider_;
 
-	//対象との距離
+	Context context_; // 外部システムへの参照
+
+	// 対象との距離・方向
 	float distance_ = 0.0f;
 	Vector2 direction_ = { 0.0f, 0.0f };
 
 	int hp_ = 1;
 	bool wasDefeated_ = false;
+	bool isReservedForAttack_ = false; // ユニット攻撃の予約状態
+	bool isHighlighted_ = false;        // ロックオンハイライト中か
+
 	float damageTimer_ = 0.0f;
 	float snakeTimer_ = 0.0f;
 	float roundTimer_ = 0.0f;
+
+	// 追跡用
+	Unit* targetUnit_ = nullptr; // 追跡中の運搬ユニット
+	float searchRadius_ = 8.0f;  // 運搬ユニットの索敵範囲
 
 	//=== 設定項目 ====================================================
 	float damageTime_ = 0.02f;

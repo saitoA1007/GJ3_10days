@@ -8,6 +8,7 @@
 
 #include "EasingManager.h"
 #include "FPSCounter.h"
+#include "AudioManager.h"
 #include "Model.h"
 #include "ModelComponent.h"
 #include "ModelManager.h"
@@ -34,9 +35,6 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	Model* bottomModel = modelManager->GetNameByModel("bottom.obj");
 	assert(bottomModel && "Title logo model bottom.obj must be loaded.");
 	if (bottomModel) {
-		// bottom.objが使用する全マテリアルのライティングを無効化する。
-		bottomModel->SetDefaultIsEnableLight(false, "TitleLogo");
-		bottomModel->SetDefaultIsEnableLight(false, "Material.001");
 		bottom_ = std::make_unique<ModelComponent>(bottomModel);
 		bottom_->worldTransform_.Initialize({
 			{1.0f, 1.0f, 1.0f},
@@ -53,7 +51,6 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 			continue;
 		}
 
-		model->SetDefaultIsEnableLight(false);
 		parts_[i] = std::make_unique<ModelComponent>(model);
 		parts_[i]->worldTransform_.Initialize({
 			{kScale, kScale, kScale},
@@ -83,7 +80,11 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	debugParameter_.Register("FallDuration", fallDuration_, 0, "EntranceAnimation");
 	debugParameter_.Register("FallInterval", fallInterval_, 1, "EntranceAnimation");
 	debugParameter_.Register("FallStartOffsetY", fallStartOffsetY_, 2, "EntranceAnimation");
-	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 3, "EntranceAnimation");
+	debugParameter_.Register("FallSoundLeadTime", fallSoundLeadTime_, 3, "EntranceAnimation");
+	debugParameter_.Register("AppearDuration", appearDuration_, 4, "EntranceAnimation");
+	debugParameter_.Register("AppearStartDepth", appearStartDepth_, 5, "EntranceAnimation");
+	debugParameter_.Register("AppearPeakScale", appearPeakScale_, 6, "EntranceAnimation");
+	debugParameter_.Register("BottomFadeDuration", bottomFadeDuration_, 7, "EntranceAnimation");
 
 	// 入力待ち中に、左の文字から順番に跳ねるループ演出の調整値を登録する。
 	debugParameter_.Register("HopDuration", idleHopDuration_, 0, "IdleAnimation");
@@ -110,7 +111,20 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	debugParameter_.Register("BottomScalingDuration", bottomScalingDuration_, 10, "Animation");
 	debugParameter_.Register("BottomScalingStart", bottomScalingStart_, 11, "Animation");
 	debugParameter_.Register("BottomScalingEnd", bottomScalingEnd_, 12, "Animation");
+	debugParameter_.Register("CameraShakeStartAmplitude", cameraShakeStartAmplitude_, 13, "Animation");
+	debugParameter_.Register("CameraShakeEndAmplitude", cameraShakeEndAmplitude_, 14, "Animation");
+	debugParameter_.Register("CameraShakeFrequencyX", cameraShakeFrequencyX_, 15, "Animation");
+	debugParameter_.Register("CameraShakeFrequencyY", cameraShakeFrequencyY_, 16, "Animation");
+
+	// タイトルロゴ全体のゲーミングカラー調整値を登録する。
+	auto& gamingColorSettings = gamingColor_.GetSettings();
+	debugParameter_.Register("CycleSpeed", gamingColorSettings.cycleSpeed, 0, "GamingColor");
+	debugParameter_.Register("Saturation", gamingColorSettings.saturation, 1, "GamingColor");
+	debugParameter_.Register("Brightness", gamingColorSettings.brightness, 2, "GamingColor");
+	debugParameter_.Register("ColorSpacing", gamingColorSettings.colorSpacing, 3, "GamingColor");
+	debugParameter_.Register("SelfIlluminated", gamingColorSettings.selfIlluminated, 4, "GamingColor");
 	debugParameter_.Apply();
+	UpdateGamingColor(0.0f);
 }
 
 TitleLogo::~TitleLogo() = default;
@@ -134,18 +148,21 @@ void TitleLogo::ResetAnimation() {
 	CaptureAnimationOrigins();
 	animationState_ = AnimationState::Falling;
 	fallTimer_.Start(GetFallSequenceDuration(), false);
+	appearTimer_.Reset();
 	bottomFadeTimer_.Reset();
 	shakeTimer_.Reset();
 	moveTimer_.Reset();
 	bottomScalingTimer_.Reset();
 	idleElapsedTime_ = 0.0f;
 	idleBottomElapsedTime_ = 0.0f;
+	partFallSoundPlayed_.fill(false);
 
-	// t0～t3を画面上側の待機位置へ移動し、Bottomは透明にしておく。
+	// t0～t3を元のサイズのまま上側かつ少し奥へ移動し、Bottomは透明にしておく。
 	for (std::size_t i = 0; i < parts_.size(); ++i) {
 		if (parts_[i]) {
 			parts_[i]->worldTransform_.transform_.translate =
-				partAnimationOrigins_[i] + Vector3{ 0.0f, fallStartOffsetY_, 0.0f };
+				partAnimationOrigins_[i] + Vector3{ 0.0f, fallStartOffsetY_, appearStartDepth_ };
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i];
 		}
 	}
 	if (bottom_) {
@@ -158,7 +175,35 @@ bool TitleLogo::IsAnimationFinished() const {
 	return animationState_ == AnimationState::Finished;
 }
 
+Vector3 TitleLogo::GetCameraShakeOffset() const {
+	if (animationState_ != AnimationState::Shaking) {
+		return {};
+	}
+
+	// ロゴのシェイクと同じ進行率で強さを上げ、異なる周期でカメラを揺らす。
+	const float strength = Lerp(
+		cameraShakeStartAmplitude_,
+		cameraShakeEndAmplitude_,
+		shakeTimer_.GetProgress()
+	);
+	const float elapsed = shakeTimer_.GetElapsedTime();
+	return {
+		std::sin(elapsed * cameraShakeFrequencyX_) * strength,
+		std::cos(elapsed * cameraShakeFrequencyY_) * strength,
+		0.0f
+	};
+}
+
 void TitleLogo::Update() {
+
+	playBgmTimer_.Update(FpsCounter::deltaTime);
+	if (playBgmTimer_.IsFinished() && !bgmPlayed_) {
+		bgmPlayed_ = true;
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t titleBGM = audioManager.GetHandleByName("titleBGM.mp3");
+		audioManager.Play(titleBGM, 1.0f, true);
+	}
+
 	// Idle中の見た目を基準姿勢へ戻してから設定変更を反映し、値の累積を防ぐ。
 	if (animationState_ == AnimationState::Idle) {
 		RestoreIdleTransforms();
@@ -169,6 +214,7 @@ void TitleLogo::Update() {
 		debugParameter_.ApplyIfDirty();
 	}
 	UpdateAnimation(FpsCounter::deltaTime);
+	UpdateGamingColor(FpsCounter::deltaTime);
 	UpdateTransforms();
 }
 
@@ -181,6 +227,7 @@ void TitleLogo::DebugUpdate() {
 	} else {
 		debugParameter_.ApplyIfDirty();
 	}
+	UpdateGamingColor(0.0f);
 	UpdateTransforms();
 }
 
@@ -193,6 +240,8 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 		const float elapsed = fallTimer_.GetElapsedTime();
 		const float partDuration = (std::max)(fallDuration_, 0.0f);
 		const float interval = (std::max)(fallInterval_, 0.0f);
+		const float soundLeadTime = std::clamp(fallSoundLeadTime_, 0.0f, partDuration);
+		const float soundTriggerTime = partDuration - soundLeadTime;
 		for (std::size_t i = 0; i < parts_.size(); ++i) {
 			if (!parts_[i]) {
 				continue;
@@ -208,11 +257,56 @@ void TitleLogo::UpdateAnimation(float deltaTime) {
 				partAnimationOrigins_[i] + Vector3{
 					0.0f,
 					fallStartOffsetY_ * (1.0f - easedProgress),
-					0.0f
+					appearStartDepth_
 				};
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i];
+
+			// 各文字が完全に着地する少し前に、一度だけ落下音を鳴らす。
+			if (!partFallSoundPlayed_[i] && localElapsed >= soundTriggerTime) {
+				auto& audioManager = AudioManager::GetInstance();
+				const uint32_t fallSoundHandle = audioManager.GetHandleByName("titleLogoFall.mp3");
+				audioManager.Play(fallSoundHandle, 1.0f, false);
+				partFallSoundPlayed_[i] = true;
+			}
 		}
 
 		if (fallTimer_.IsFinished()) {
+			// 4文字が揃い、手前へ拡大し始めるタイミングで登場音を鳴らす。
+			auto& audioManager = AudioManager::GetInstance();
+			const uint32_t scalingSoundHandle = audioManager.GetHandleByName("titleLogoScaling.mp3");
+			audioManager.Play(scalingSoundHandle, 1.0f, false);
+
+			animationState_ = AnimationState::Appearing;
+			appearTimer_.Start(appearDuration_, false);
+
+			if (!playBgmTimer_.IsActive()){
+				playBgmTimer_.Start(1.0f);
+			}
+		}
+		return;
+	}
+
+	case AnimationState::Appearing: {
+		appearTimer_.SetDuration(appearDuration_);
+		appearTimer_.Update(deltaTime);
+
+		// 手前へ飛び出しながら一度大きく膨らみ、元のサイズと位置へ収める。
+		const float progress = Apply(appearTimer_.GetProgress(), EaseType::kEaseOutBack);
+		const float depthOffset = Lerp(appearStartDepth_, 0.0f, progress);
+		const float scaleProgress = std::sin(
+			std::numbers::pi_v<float> * appearTimer_.GetProgress());
+		const float scale = Lerp(1.0f, (std::max)(appearPeakScale_, 1.0f), scaleProgress);
+		for (std::size_t i = 0; i < parts_.size(); ++i) {
+			if (!parts_[i]) {
+				continue;
+			}
+
+			parts_[i]->worldTransform_.transform_.translate =
+				partAnimationOrigins_[i] + Vector3{ 0.0f, 0.0f, depthOffset };
+			parts_[i]->worldTransform_.transform_.scale = partAnimationOriginScales_[i] * scale;
+		}
+
+		if (appearTimer_.IsFinished()) {
 			RestorePartTransforms();
 			animationState_ = AnimationState::FadingBottom;
 			bottomFadeTimer_.Start(bottomFadeDuration_, false);
@@ -461,6 +555,19 @@ void TitleLogo::RandomizeMoveRotationDirections() {
 			RandomGenerator::Get<int>(0, 1) == 0 ? -1.0f : 1.0f,
 			RandomGenerator::Get<int>(0, 1) == 0 ? -1.0f : 1.0f
 		};
+	}
+}
+
+void TitleLogo::UpdateGamingColor(float deltaTime) {
+	gamingColor_.Update(deltaTime);
+	if (bottom_) {
+		gamingColor_.Apply(*bottom_);
+	}
+
+	for (std::size_t i = 0; i < parts_.size(); ++i) {
+		if (parts_[i]) {
+			gamingColor_.Apply(*parts_[i], i + 1);
+		}
 	}
 }
 

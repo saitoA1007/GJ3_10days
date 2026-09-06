@@ -24,6 +24,12 @@ namespace GameEngine {
 		// モデルが持つ全マテリアルの透明度を設定する
 		void SetAlpha(float alpha);
 
+		// モデルが持つ全マテリアルのRGBを、現在の透明度を保ったまま設定する
+		void SetColor(const Vector3& color);
+
+		// モデルが持つ全マテリアルのライティング設定を変更する
+		void SetEnableLighting(bool enabled);
+
 		// 描画処理
 		void Draw(RenderQueue* renderQueue, const Draw3dType& drawType = Draw3dType::Default, const std::string& passName = "DefaultPass");
 

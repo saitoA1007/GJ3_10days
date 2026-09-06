@@ -7,6 +7,7 @@
 #include "DebugParameter.h"
 #include "Vector3.h"
 #include "../Utils/GameTimer.h"
+#include "../Utils/GamingColor.h"
 
 namespace GameEngine {
 	class ModelComponent;
@@ -16,6 +17,7 @@ namespace GameEngine {
 
 enum class AnimationState {
 	Falling,
+	Appearing,
 	FadingBottom,
 	Idle,
 	Shaking,
@@ -38,6 +40,7 @@ public:
 	void AnimationStart();
 	void ResetAnimation();
 	bool IsAnimationFinished() const;
+	Vector3 GetCameraShakeOffset() const;
 
 	AnimationState GetAnimationState() const { return animationState_; }
 
@@ -49,6 +52,7 @@ private:
 	void RestorePartTransforms();
 	void RestoreIdleTransforms();
 	void RandomizeMoveRotationDirections();
+	void UpdateGamingColor(float deltaTime);
 	float GetFallSequenceDuration() const;
 	float GetMoveSequenceDuration() const;
 
@@ -63,6 +67,10 @@ private:
 	float fallDuration_ = 0.6f;
 	float fallInterval_ = 0.15f;
 	float fallStartOffsetY_ = 7.0f;
+	float fallSoundLeadTime_ = 0.08f;
+	float appearDuration_ = 0.65f;
+	float appearStartDepth_ = 2.0f;
+	float appearPeakScale_ = 1.18f;
 	float bottomFadeDuration_ = 0.6f;
 	float idleHopDuration_ = 0.55f;
 	float idleInterval_ = 0.12f;
@@ -84,13 +92,23 @@ private:
 	float moveShakeAmplitude_ = 0.05f;
 	float moveRotationSpeed_ = 4.0f;
 	float moveDistance_ = 180.0f;
+	float cameraShakeStartAmplitude_ = 0.0f;
+	float cameraShakeEndAmplitude_ = 0.1f;
+	float cameraShakeFrequencyX_ = 71.0f;
+	float cameraShakeFrequencyY_ = 57.0f;
+	GamingColor gamingColor_;
 
 	AnimationState animationState_ = AnimationState::Falling;
 	GameTimer fallTimer_;
+	GameTimer appearTimer_;
 	GameTimer bottomFadeTimer_;
 	GameTimer shakeTimer_;
 	GameTimer bottomScalingTimer_;
 	GameTimer moveTimer_;
+
+	GameTimer playBgmTimer_;
+	bool bgmPlayed_ = false;
+
 	float idleElapsedTime_ = 0.0f;
 	float idleBottomElapsedTime_ = 0.0f;
 	Vector3 bottomAnimationOrigin_{};
@@ -99,4 +117,5 @@ private:
 	std::array<Vector3, kPartCount> partAnimationOriginScales_{};
 	std::array<Vector3, kPartCount> partAnimationOriginRotations_{};
 	std::array<Vector3, kPartCount> partMoveRotationDirections_{};
+	std::array<bool, kPartCount> partFallSoundPlayed_{};
 };

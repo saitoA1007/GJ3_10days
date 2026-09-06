@@ -7,6 +7,11 @@
 #include "Enemy.h"
 #include "EnemyRenderer.h"
 
+class Field;
+class Rocket;
+class EnergySpawner;
+class UnitManager;
+
 class EnemyManager : public GameEngine::IGameObject {
 public:
 
@@ -21,17 +26,34 @@ public:
 	void SetStage(const std::string& stageName);
 	void Pop(int num, Vector2 position, EnemyType type);
 
-	int GetCurrentNum();
-
 	void SetOnEnemyDefeated(std::function<void()> callback) {
 		onEnemyDefeated_ = std::move(callback);
 	}
+
+	// 外部システムの参照をまとめて登録
+	void SetContext(Field* field, Rocket* rocket, EnergySpawner* energySpawner, UnitManager* unitManager);
+	// カーソル位置から最も近いターゲット可能な敵を検索
+	Enemy* FindNearestTargetable(const Vector3& position, float maxDistance) const;
+
+	// ゲームプレイの更新有効フラグ切替
+	void SetGameplayEnabled(bool enabled) { gameplayEnabled_ = enabled; }
+	bool IsGameplayEnabled() const { return gameplayEnabled_; }
+
+	// 現在アクティブな敵の数を取得
+	size_t GetActiveCount() const { return activeEnemies_.size(); }
+	int GetCurrentNum() const { return static_cast<int>(activeEnemies_.size()); }
+
+	// 運搬ユニットを追跡中の敵の数を取得
+	size_t GetCarrierTargetCount() const;
 
 private:
 
 	void LoadPreset();
 
 	const uint32_t maxEnemyNum_ = 0;
+
+	// 外部参照コンテキスト
+	Enemy::Context context_;
 
 	std::vector<int> freeEnemyIndices_;
 	GameEngine::WorldTransforms worldTransforms_;
@@ -47,6 +69,7 @@ private:
 	EnemyRenderer renderer_ = EnemyRenderer(renderQueue_);
 
 	float popTimer_ = 0.0f;
+	bool gameplayEnabled_ = true;
 
 private:
 
