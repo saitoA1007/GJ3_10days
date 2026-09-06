@@ -41,7 +41,7 @@ Field::Field(GameEngine::Model* model, GameEngine::Model* poleModel, GameEngine:
         std::unique_ptr<ModelComponent> frame = std::make_unique<ModelComponent>(poleModel);
 
         float rad = i * (1.0f / std::numbers::pi_v<float>);
-        float radius = 20.0f;
+        float radius = 40.0f;
 
         float x = radius * std::sinf(rad);
         float z = radius * std::cosf(rad);
@@ -58,7 +58,7 @@ Field::Field(GameEngine::Model* model, GameEngine::Model* poleModel, GameEngine:
     for (uint32_t i = 0; i < 8; ++i) {
         std::unique_ptr<ModelComponent> circle = std::make_unique<ModelComponent>(circleModel);
 
-        circle->worldTransform_.transform_.scale = { 20.0f,0.1f,20.0f };
+        circle->worldTransform_.transform_.scale = { 40.0f,0.1f,40.0f };
         circle->worldTransform_.transform_.translate = { 0.0f,i * -5.0f,0.0f };
 
         circle->worldTransform_.UpdateTransformMatrix();

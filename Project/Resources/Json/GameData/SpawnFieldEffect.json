@@ -1,0 +1,59 @@
+{
+    "SpawnFieldEffect": {
+        "Ring0": {
+            "InnerRadius": 8.600000381469727,
+            "OuterRadius": 11.4399995803833,
+            "ScrollSpeed": 0.10000000149011612,
+            "densityPower": 1.1200000047683716,
+            "dissolveEdge": 1.4199999570846558,
+            "dissolveThreshold": 1.5800000429153442,
+            "driftSpeed": 1.899999976158142,
+            "emissionIntensity": 0.9800000190734863,
+            "glowColor": [
+                0.0,
+                1.0,
+                0.3166022300720215,
+                0.9843137264251709
+            ],
+            "noiseJitter": 1.0299999713897705,
+            "noiseScale": 30.0
+        },
+        "Ring1": {
+            "InnerRadius": 18.700000762939453,
+            "OuterRadius": 20.31999969482422,
+            "ScrollSpeed": 0.10000000149011612,
+            "densityPower": 1.9199999570846558,
+            "dissolveEdge": 0.7200000286102295,
+            "dissolveThreshold": 1.4800000190734863,
+            "driftSpeed": 0.7699999809265137,
+            "emissionIntensity": 1.0299999713897705,
+            "glowColor": [
+                0.0,
+                0.47876453399658203,
+                1.0,
+                1.0
+            ],
+            "noiseJitter": 1.5499999523162842,
+            "noiseScale": 40.0
+        },
+        "Ring2": {
+            "InnerRadius": 28.649999618530273,
+            "OuterRadius": 31.190000534057617,
+            "ScrollSpeed": 0.10000000149011612,
+            "densityPower": 1.7000000476837158,
+            "dissolveEdge": 1.190000057220459,
+            "dissolveThreshold": 1.590000033378601,
+            "driftSpeed": 0.41999998688697815,
+            "emissionIntensity": 1.0299999713897705,
+            "glowColor": [
+                0.9343628883361816,
+                0.0,
+                1.0,
+                1.0
+            ],
+            "noiseJitter": 1.2300000190734863,
+            "noiseScale": 50.0
+        },
+        "SceneName": "Game"
+    }
+}

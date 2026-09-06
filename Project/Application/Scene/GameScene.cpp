@@ -13,6 +13,7 @@ using namespace GameEngine;
 #include "ControllerVibration.h"
 #include "FPSCounter.h"
 #include "Application/Effect/BlackHoleEffect.h"
+#include "Application/Effect/SpawnFieldEffect.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -96,9 +97,14 @@ GameScene::GameScene() {
   enemies->SetStage("Test");
 
 	// ブラックホールのテスト
-	auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
+	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+
+	auto* ring1Model = modelManager_->GetNameByModel("fieldRingLv1.gltf");
+	auto* ring2Model = modelManager_->GetNameByModel("fieldRingLv2.gltf");
+	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
+	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model);
 }
 
 void GameScene::Initialize() {

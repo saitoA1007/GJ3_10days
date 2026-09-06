@@ -79,14 +79,19 @@ void EnemySpawnEffect::Update() {
 		cameraMatrix = renderQueue_->GetDebugCameraWorldMatrix();
 	}
 
-	baseWorld_.UpdateTransformMatrix();
+	//baseWorld_.UpdateTransformMatrix();
 
-	outPlaneModel_.worldTransform_.UpdateWorldMatrix(
-		Math::MakeYAxisBillboardMatrix(outPlaneModel_.worldTransform_.transform_.scale, outPlaneModel_.worldTransform_.transform_.translate, cameraMatrix));
+	baseWorld_.UpdateWorldMatrix(
+		Math::MakeYAxisBillboardMatrix(baseWorld_.transform_.scale, baseWorld_.transform_.translate, cameraMatrix));
 
-	basePlaneModel_.worldTransform_.UpdateWorldMatrix(
-		Math::MakeYAxisBillboardMatrix(basePlaneModel_.worldTransform_.transform_.scale, basePlaneModel_.worldTransform_.transform_.translate, cameraMatrix));
+	//outPlaneModel_.worldTransform_.UpdateWorldMatrix(
+	//	Math::MakeYAxisBillboardMatrix(outPlaneModel_.worldTransform_.transform_.scale, outPlaneModel_.worldTransform_.transform_.translate, cameraMatrix));
+	//
+	//basePlaneModel_.worldTransform_.UpdateWorldMatrix(
+	//	Math::MakeYAxisBillboardMatrix(basePlaneModel_.worldTransform_.transform_.scale, basePlaneModel_.worldTransform_.transform_.translate, cameraMatrix));
 
+	outPlaneModel_.Update();
+	basePlaneModel_.Update();
 	beamModel_.Update();
 	waveModel_.Update();
 	// uvの更新
