@@ -17,7 +17,7 @@
 
 using namespace GameEngine;
 
-TitleLogo::TitleLogo(ModelManager* modelManager) {
+TitleLogo::TitleLogo(ModelManager* modelManager, bool isPadConnected) {
 	assert(modelManager);
 
 	constexpr float kScale = 0.75f;
@@ -32,8 +32,9 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	};
 
 	// 4文字をまとめる下地を、文字より少し奥に配置する。
-	Model* bottomModel = modelManager->GetNameByModel("bottom.obj");
-	assert(bottomModel && "Title logo model bottom.obj must be loaded.");
+	const char* bottomModelName = isPadConnected ? "bottom.obj" : "bottom0.obj";
+	Model* bottomModel = modelManager->GetNameByModel(bottomModelName);
+	assert(bottomModel && "Title logo bottom model must be loaded.");
 	if (bottomModel) {
 		bottom_ = std::make_unique<ModelComponent>(bottomModel);
 		bottom_->worldTransform_.Initialize({

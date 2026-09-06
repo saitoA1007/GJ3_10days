@@ -40,7 +40,7 @@ TitleScene::TitleScene() {
 	renderQueue_->SetSkyboxTexture(skyboxGH);
 
 	// タイトルロゴを構成するt0.obj～t3.objを生成
-	titleLogo_ = std::make_unique<TitleLogo>(modelManager_);
+	titleLogo_ = std::make_unique<TitleLogo>(modelManager_, input_->IsPadConnected());
 
 	auto* halfDomeModel = modelManager_->GetNameByModel("halfDome.gltf");
 	halfDomeModel->SetDefaultIsEnableLight(false);
