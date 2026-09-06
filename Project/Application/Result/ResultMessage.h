@@ -24,6 +24,7 @@ public:
 
 	void DebugUpdate() override;
 
+	//Typeに沿ったAnimationを起動して描画する。
 	void Boot(Type type);
 
 private:
