@@ -1,0 +1,139 @@
+{
+    "fieldRingThreeEffect": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    0.3088803291320801,
+                    0.0,
+                    1.0,
+                    1.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 1.0,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": true,
+                "MaxLifeTime": 5.920000076293945,
+                "MinLifeTime": 4.650000095367432
+            },
+            "RotateEmit": {
+                "Enable": false
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": true,
+                "RangeScale": {
+                    "_Max": [
+                        0.5600000023841858,
+                        0.0,
+                        0.0
+                    ],
+                    "_Min": [
+                        0.1599999964237213,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "SeparateAxes": false
+            },
+            "ShapeEmit": {
+                "Enable": true,
+                "Shape": {
+                    "_ShapeType": "Circle",
+                    "_boxSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "_emitFromShell": true,
+                    "_radius": 29.0
+                }
+            },
+            "SpawnCoolTime": 0.20000000298023224,
+            "SpawnMaxCount": 8,
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": {
+                    "_TextureName": "circle.png"
+                }
+            },
+            "VelocityEmit": {
+                "Enable": false
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInQuad"
+                },
+                "Enable": true,
+                "EndAlpha": 0.0
+            },
+            "Attraction": {
+                "Damping": 4.0,
+                "Enable": true,
+                "Strength": 2.5,
+                "TargetPos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "RotationByVelocity": {
+                "Enable": true
+            },
+            "SizeOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInOutBounce"
+                },
+                "Enable": true,
+                "EndSize": 0.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "AttractionSpeed": 3.0,
+                "AxisSpeed": 4.5,
+                "CenterPos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Enable": true,
+                "RotationSpeed": 4.159999847412109
+            }
+        },
+        "SceneName": "Game"
+    }
+}

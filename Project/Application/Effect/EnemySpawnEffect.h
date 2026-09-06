@@ -3,6 +3,10 @@
 #include "IGameObject.h"
 #include "ModelComponent.h"
 
+namespace GameEngine {
+	class TextureManager;
+}
+
 class EnemySpawnEffect : public GameEngine::IGameObject {
 public:
 
@@ -12,7 +16,7 @@ public:
 	};
 
 public:
-	EnemySpawnEffect(GameEngine::Model* model, GameEngine::Model* planeModel, GameEngine::Model* waveModel, uint32_t outGH, uint32_t waveGH);
+	EnemySpawnEffect(GameEngine::Model* model, GameEngine::Model* planeModel, GameEngine::Model* waveModel, GameEngine::TextureManager* textureManager);
 
 	void Initialize() override;
 	void Update() override;
@@ -48,6 +52,10 @@ private:
 	// ウェーブ
 	GameEngine::ModelComponent waveModel_;
 	Transform waveUvtransform_ = { {1.0f,1.0f,1.0f},{},{} };
+
+	GameEngine::ModelComponent mainPlaneModel_;
+	Transform mainUvtransform_ = { {1.0f,1.0f,1.0f},{},{} };
+	float scrollSpeed_ = 0.0f;
 
 	Phase phase_ = Phase::kIn;
 

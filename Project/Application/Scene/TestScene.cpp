@@ -64,9 +64,7 @@ TestScene::TestScene() {
 	sModel->SetDefaultIsEnableLight(false);
 	auto* rModel = modelManager_->GetNameByModel("RushPower.obj");
 	rModel->SetDefaultIsEnableLight(false);
-	uint32_t rGH = textureManager_->GetHandleByName("Ring_01.png");
-	uint32_t pGH = textureManager_->GetHandleByName("Power.png");
-	gameObjectManager_->AddObject<EnemySpawnEffect>(sModel,effectModel_, rModel,rGH, pGH);
+	gameObjectManager_->AddObject<EnemySpawnEffect>(sModel,effectModel_, rModel, textureManager_);
 
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
