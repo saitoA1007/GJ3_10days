@@ -24,6 +24,18 @@ public:
 
 public:
 
+	void Start(Vector3 pos) {
+		baseWorld_.transform_.translate.x = pos.x;
+		baseWorld_.transform_.translate.z = pos.z;
+	}
+
+	void Reset() {
+		phase_ = Phase::kIn;
+		timer_ = 0.0f;
+	}
+
+public:
+
 	// 基準位置
 	GameEngine::WorldTransform baseWorld_;
 

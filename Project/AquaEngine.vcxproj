@@ -164,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
+    <ClCompile Include="Application\Enemy\EnemyEffectManager.cpp" />
     <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
     <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
     <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
@@ -456,6 +457,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
     <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
+    <ClInclude Include="Application\Enemy\EnemyEffectManager.h" />
     <ClInclude Include="Application\EnergyView\EnergyView.h" />
     <ClInclude Include="Application\Energy\EnergyPickup.h" />
     <ClInclude Include="Application\Energy\EnergySpawner.h" />
