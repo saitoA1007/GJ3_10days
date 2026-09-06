@@ -5,10 +5,14 @@
 #include <FPSCounter.h>
 #include <ImGuiManager.h>
 #include <Application/Utils/Binary/BinaryManager.h>
+#include "EnemyEffectManager.h"
 
 #include <numbers>
 
-EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model) : maxEnemyNum_(maxEnemyNum) {
+EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model, EnemyEffectManager* effectManager) : maxEnemyNum_(maxEnemyNum) {
+	// 敵の演出管理機能を取得
+	effectManager_ = effectManager;
+
 	renderer_.SetModel(model);
 	worldTransforms_.Initialize(maxEnemyNum_, {});
 
@@ -216,6 +220,8 @@ void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 		activeEnemies_[index] = enemies_[index].get();
 		enemies_[index]->SetActive(true);
 		enemies_[index]->SetUp(position, configList_[static_cast<int>(type)], type);
+		// 敵の登場演出
+		effectManager_->StartSpawnEffect(Vector3(position.x,0.0f, position.y));
 
 		if (type == EnemyType::Snake) {
 			enemies_[index]->SetSnake(swingWidth_, snakeSpeed_);

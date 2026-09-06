@@ -7,6 +7,7 @@
 #include "ModelComponent.h"
 #include "Vector3.h"
 #include "Vector4.h"
+#include "CrystalMaterial.h"
 
 namespace GameEngine 
 {
@@ -41,6 +42,8 @@ struct EnergyTypeSettings
 	float scale = 1.0f;                              // モデルの一様スケール
 	int32_t value = 10;                              // ロケットへ届けたときの増加量
 	Vector4 color = { 1.0f, 0.9f, 0.2f, 1.0f };     // 通常時の表示色
+	Vector4 rimColor = { 0.45f,0.75f,1.0f,1.0f };           // 輪郭の発光色
+	Vector4 dissolveEdgeColor = { 1.0f,0.55f,0.15f,1.0f };  // ディゾルブ境界の発光色
 };
 
 /// @brief フィールドに落下し、ユニットによって運ばれるエネルギー。
@@ -150,5 +153,8 @@ private:
 	float groundY_ = 0.0f;                                      // 落下終了・再配置に使う地面の高さ
 	float fallSpeed_ = 0.0f;                                    // 1秒あたりの落下距離
 	bool isHighlighted_ = false;                                 // カーソル選択中か
+
+	// マテリアル
+	GameEngine::CrystalMaterial material_;
 };
 

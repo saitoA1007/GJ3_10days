@@ -25,7 +25,7 @@ EnemySpawnEffect::EnemySpawnEffect(GameEngine::Model* model, GameEngine::Model* 
 	waveModel_.worldTransform_.SetParent(&baseWorld_);
 	mainPlaneModel_.worldTransform_.SetParent(&baseWorld_);
 
-	baseWorld_.transform_.scale = { 2.0f,8.0f,2.0f };
+	baseWorld_.transform_.scale = { 2.0f,32.0f,2.0f };
 
 	// 登録
 	Register();
@@ -44,7 +44,7 @@ void EnemySpawnEffect::Update() {
 
 		timer_ += FpsCounter::gameDeltaTime / kInMaxTime_;
 
-		baseWorld_.transform_.translate.y = Lerp(kInStartPos_, 8.0f, timer_, EaseType::kEaseInCubic);
+		baseWorld_.transform_.translate.y = Lerp(kInStartPos_, 32.0f, timer_, EaseType::kEaseInCubic);
 
 		float scale = Lerp(0.0f, kInEndScale_, timer_, EaseType::kEaseInCubic);
 		baseWorld_.transform_.scale.x = scale;
@@ -53,14 +53,13 @@ void EnemySpawnEffect::Update() {
 		if (timer_ >= 1.0f) {
 			phase_ = Phase::kEnd;
 			timer_ = 0.0f;
-			baseWorld_.transform_.translate.y = 8.0f;
+			baseWorld_.transform_.translate.y = 32.0f;
 		}
 
 		break;
 	}
 
 	case EnemySpawnEffect::Phase::kEnd: {
-
 		timer_ += FpsCounter::gameDeltaTime / kEndMaxTime_;
 
 		float scale = Lerp(kInEndScale_, 0.0f, timer_, EaseType::kEaseInOutBounce);
@@ -70,12 +69,12 @@ void EnemySpawnEffect::Update() {
 		waveModel_.worldTransform_.transform_.rotate.y += 50.0f * FpsCounter::gameDeltaTime;
 
 		if (timer_ >= 1.0f) {
-			phase_ = Phase::kIn;
-			timer_ = 0.0f;
 			scale = 0.0f;
 			baseWorld_.transform_.scale.x = scale;
 			baseWorld_.transform_.scale.z = scale;
 			waveModel_.worldTransform_.transform_.rotate.y = 0.0f;
+			// 終了
+			isActive_ = false;
 		}
 		break;
 	}
