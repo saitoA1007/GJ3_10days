@@ -2,11 +2,24 @@
 #include "FPSCounter.h"
 using namespace GameEngine;
 
-SpawnFieldEffect::SpawnFieldEffect(GameEngine::Model* ring1Model, GameEngine::Model* ring2Model, GameEngine::Model* ring3Model, GameEngine::Model* halfDomeModel)
+SpawnFieldEffect::SpawnFieldEffect(GameEngine::Model* ring1Model, GameEngine::Model* ring2Model, GameEngine::Model* ring3Model,
+	GameEngine::Model* halfDomeModel, GameEngine::Model* circleModel)
 	: universeModel_(halfDomeModel) {
 
 	universeModel_.SetHitGroup(2);
 	universeModel_.SetBufferMaterial(0, universeMaterial_.GetMaterialSrvIndex());
+
+	// 円
+	circleModels_.reserve(8);
+	for (uint32_t i = 0; i < 8; ++i) {
+		std::unique_ptr<ModelComponent> circle = std::make_unique<ModelComponent>(circleModel);
+
+		circle->worldTransform_.transform_.scale = { 35.0f,0.1f,35.0f };
+		circle->worldTransform_.transform_.translate = { 0.0f,i * -5.0f,0.0f };
+
+		circle->worldTransform_.UpdateTransformMatrix();
+		circleModels_.push_back(std::move(circle));
+	}
 
 	// メモリを確保
 	materials_.resize(3);
@@ -69,6 +82,14 @@ void SpawnFieldEffect::Update() {
 		underRingModels_[i]->Update();
 	}
 
+	// 色を切り替え
+	colorTime_ += FpsCounter::gameDeltaTime;
+	for (uint32_t i = 0; i < circleModels_.size(); ++i) {
+		float h = colorTime_ / colorCycle_ + colorOffset_ * i;
+		Vector3 rgb = Math::HSVtoRGB(h, 1.0f, 1.0f);
+		circleModels_[i]->materialData_->color = { rgb.x, rgb.y, rgb.z, 1.0f };
+	}
+
 	universeModel_.Update();
 }
 
@@ -80,10 +101,16 @@ void SpawnFieldEffect::Draw() {
 		ringModels_[i]->DrawCustomRaytracing(renderQueue_);
 		underRingModels_[i]->DrawRaytracing(renderQueue_);
 	}
+
+	// 円
+	//for (auto& circle : circleModels_) {
+	//	circle->DrawRaytracing(renderQueue_);
+	//}
 }
 
 void SpawnFieldEffect::Register() {
 	debugParame_ = std::make_unique<GameEngine::DebugParameter>("SpawnFieldEffect");
+	// エネルギーのスポーン演出
 	for (uint32_t i = 0; i < 3; ++i) {
 		std::string subGroup = "Ring" + std::to_string(i);
 		debugParame_->Register("InnerRadius", materials_[i].materialData_->innerRadius, 0, subGroup);
@@ -98,6 +125,7 @@ void SpawnFieldEffect::Register() {
 		debugParame_->Register("emissionIntensity", materials_[i].materialData_->emissionIntensity, 9, subGroup);
 		debugParame_->Register("glowColor", glowColors_[i], 10, subGroup);
 	}
+	// 宇宙
 	debugParame_->Register("radius", universeMaterial_.materialData_->radius, 1, "UniverseMaterial");
 	debugParame_->Register("swirl", universeMaterial_.materialData_->swirl, 1, "UniverseMaterial");
 	debugParame_->Register("scale", universeMaterial_.materialData_->scale, 1, "UniverseMaterial");
@@ -105,5 +133,8 @@ void SpawnFieldEffect::Register() {
 	debugParame_->Register("UniversePos", universeMaterial_.materialData_->UniversePos, 1, "UniverseMaterial");
 	debugParame_->Register("Pos", universeModel_.worldTransform_.transform_.translate, 1, "UniverseTransform");
 	debugParame_->Register("scale", universeModel_.worldTransform_.transform_.scale, 1, "UniverseTransform");
+	// 色の遷移
+	debugParame_->Register("Cycle", colorCycle_, 1, "Color");
+	debugParame_->Register("Offset", colorOffset_, 1, "Color");
 	debugParame_->Apply();
 }

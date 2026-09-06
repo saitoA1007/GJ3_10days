@@ -133,8 +133,8 @@ GameScene::GameScene() {
 	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
 	//poleModel->SetDefaultIsEnableLight(false);
 	//// 円
-	//auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
-	//circleModel->SetDefaultIsEnableLight(false);
+	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
+	circleModel->SetDefaultIsEnableLight(false);
 	// 宇宙を映す平面
 	auto* halfDomeModel = modelManager_->GetNameByModel("halfDome.gltf");
 	halfDomeModel->SetDefaultIsEnableLight(false);
@@ -143,7 +143,7 @@ GameScene::GameScene() {
 	auto* ring1Model = modelManager_->GetNameByModel("fieldRingLv1.gltf");
 	auto* ring2Model = modelManager_->GetNameByModel("fieldRingLv2.gltf");
 	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
-	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model, halfDomeModel);
+	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model, halfDomeModel, circleModel);
 
 	// エフェクト用モデル
 	auto* effectModel = modelManager_->GetNameByModel("plane.obj");

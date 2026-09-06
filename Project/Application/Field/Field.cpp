@@ -62,10 +62,10 @@ void Field::DebugUpdate()
 void Field::Draw() 
 {
 	// 大きな円から描画し、小さな円を上に重ねて各領域を見せる。
-	for (size_t i = kFieldZoneCount; i-- > 0;)
-	{
-		zoneModels_[i]->DrawRaytracing(renderQueue_);
-	}
+	//for (size_t i = kFieldZoneCount; i-- > 0;)
+	//{
+	//	zoneModels_[i]->DrawRaytracing(renderQueue_);
+	//}
 }
 
 FieldZone Field::GetZone(const Vector3& worldPosition) const 
