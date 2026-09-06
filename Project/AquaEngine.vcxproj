@@ -433,6 +433,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
     </ClCompile>
     <ClCompile Include="Application\Utils\ShigeFunc.cpp" />
+    <ClCompile Include="Application\Result\ResultMessage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -732,6 +733,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Externals\imgui\imstb_textedit.h" />
     <ClInclude Include="Externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Application\Utils\ShigeFunc.h" />
+    <ClInclude Include="Application\Result\ResultMessage.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Externals\imgui\imgui_bezier_math.inl" />

@@ -1,0 +1,27 @@
+{
+    "ResultMessage": {
+        "Animation": {
+            "Diray": 0.15000000596046448,
+            "Timer": 0.0
+        },
+        "SceneName": "Game",
+        "Transform": {
+            "Mergin": 1.8799999952316284,
+            "Rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Translate": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    }
+}

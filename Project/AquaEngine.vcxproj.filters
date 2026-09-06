@@ -643,6 +643,7 @@
     <ClCompile Include="EngineSource\3D\Material\HyperspaceMaterial.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
+    <ClCompile Include="Application\Result\ResultMessage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1233,6 +1234,7 @@
     <ClInclude Include="EngineSource\3D\Material\HyperspaceMaterial.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
+    <ClInclude Include="Application\Result\ResultMessage.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
