@@ -12,7 +12,7 @@ using namespace GameEngine;
 Rocket::Rocket(Model* model, const RocketSettings& settings)
 	: settings_(settings), energy_(settings.initialEnergy)
 {
-	assert(model != nullptr && "rocket requires rocket.obj");
+	assert(model != nullptr && "rocket requires Rocket.gltf");
 	modelComponent_ = std::make_unique<ModelComponent>(model);
 	modelComponent_->materialData_->enableLighting = true;
 
@@ -26,8 +26,9 @@ Rocket::Rocket(Model* model, const RocketSettings& settings)
 		});
 
 	debugParameter_ = std::make_unique<DebugParameter>("Rocket");
-	debugParameter_->Register("Position", settings_.position, 0, "Transform");
-	debugParameter_->Register("Scale", settings_.scale, 1, "Transform");
+	debugParameter_->Register("Scale", settings_.scale, 0, "Transform");
+	debugParameter_->Register("Rotate", settings_.rotation, 1, "Transform");
+	debugParameter_->Register("Translate", settings_.position, 2, "Transform");
 	debugParameter_->Register("Radius", settings_.colliderRadius, 0, "Collider");
 	debugParameter_->Register("OffsetY", settings_.colliderOffsetY, 1, "Collider");
 	debugParameter_->Register("InitialEnergy", settings_.initialEnergy, 0, "Energy");
@@ -112,6 +113,7 @@ void Rocket::SyncComponents()
 {
 	// 見た目と当たり判定が別座標にならないよう、同じ設定から毎回同期する。
 	modelComponent_->worldTransform_.transform_.scale = settings_.scale;
+	modelComponent_->worldTransform_.transform_.rotate = settings_.rotation;
 	modelComponent_->worldTransform_.transform_.translate = settings_.position;
 	modelComponent_->Update();
 

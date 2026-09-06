@@ -80,7 +80,7 @@ GameScene::GameScene() {
 	uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
 
-	auto* rocketModel = modelManager_->GetNameByModel("rocket.obj");
+	auto* rocketModel = modelManager_->GetNameByModel("Rocket.gltf");
 	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
 
 	auto* energyModel = modelManager_->GetNameByModel("energy.obj");
