@@ -589,6 +589,7 @@
       <Filter>Application\Prototype\Unit</Filter>
     </ClCompile>
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
+    <ClCompile Include="Application\Utils\GamingColor.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
     <ClCompile Include="EngineSource\Core\StaticGameObject.cpp" />
@@ -1177,6 +1178,7 @@
       <Filter>Application\Prototype\Unit</Filter>
     </ClInclude>
     <ClInclude Include="Application\Utils\GameTimer.h" />
+    <ClInclude Include="Application\Utils\GamingColor.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
     <ClInclude Include="EngineSource\Core\StaticGameObject.h" />

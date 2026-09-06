@@ -35,9 +35,6 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	Model* bottomModel = modelManager->GetNameByModel("bottom.obj");
 	assert(bottomModel && "Title logo model bottom.obj must be loaded.");
 	if (bottomModel) {
-		// bottom.objが使用する全マテリアルのライティングを無効化する。
-		bottomModel->SetDefaultIsEnableLight(false, "TitleLogo");
-		bottomModel->SetDefaultIsEnableLight(false, "Material.001");
 		bottom_ = std::make_unique<ModelComponent>(bottomModel);
 		bottom_->worldTransform_.Initialize({
 			{1.0f, 1.0f, 1.0f},
@@ -54,7 +51,6 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 			continue;
 		}
 
-		model->SetDefaultIsEnableLight(false);
 		parts_[i] = std::make_unique<ModelComponent>(model);
 		parts_[i]->worldTransform_.Initialize({
 			{kScale, kScale, kScale},
@@ -115,7 +111,20 @@ TitleLogo::TitleLogo(ModelManager* modelManager) {
 	debugParameter_.Register("BottomScalingDuration", bottomScalingDuration_, 10, "Animation");
 	debugParameter_.Register("BottomScalingStart", bottomScalingStart_, 11, "Animation");
 	debugParameter_.Register("BottomScalingEnd", bottomScalingEnd_, 12, "Animation");
+	debugParameter_.Register("CameraShakeStartAmplitude", cameraShakeStartAmplitude_, 13, "Animation");
+	debugParameter_.Register("CameraShakeEndAmplitude", cameraShakeEndAmplitude_, 14, "Animation");
+	debugParameter_.Register("CameraShakeFrequencyX", cameraShakeFrequencyX_, 15, "Animation");
+	debugParameter_.Register("CameraShakeFrequencyY", cameraShakeFrequencyY_, 16, "Animation");
+
+	// タイトルロゴ全体のゲーミングカラー調整値を登録する。
+	auto& gamingColorSettings = gamingColor_.GetSettings();
+	debugParameter_.Register("CycleSpeed", gamingColorSettings.cycleSpeed, 0, "GamingColor");
+	debugParameter_.Register("Saturation", gamingColorSettings.saturation, 1, "GamingColor");
+	debugParameter_.Register("Brightness", gamingColorSettings.brightness, 2, "GamingColor");
+	debugParameter_.Register("ColorSpacing", gamingColorSettings.colorSpacing, 3, "GamingColor");
+	debugParameter_.Register("SelfIlluminated", gamingColorSettings.selfIlluminated, 4, "GamingColor");
 	debugParameter_.Apply();
+	UpdateGamingColor(0.0f);
 }
 
 TitleLogo::~TitleLogo() = default;
@@ -166,6 +175,25 @@ bool TitleLogo::IsAnimationFinished() const {
 	return animationState_ == AnimationState::Finished;
 }
 
+Vector3 TitleLogo::GetCameraShakeOffset() const {
+	if (animationState_ != AnimationState::Shaking) {
+		return {};
+	}
+
+	// ロゴのシェイクと同じ進行率で強さを上げ、異なる周期でカメラを揺らす。
+	const float strength = Lerp(
+		cameraShakeStartAmplitude_,
+		cameraShakeEndAmplitude_,
+		shakeTimer_.GetProgress()
+	);
+	const float elapsed = shakeTimer_.GetElapsedTime();
+	return {
+		std::sin(elapsed * cameraShakeFrequencyX_) * strength,
+		std::cos(elapsed * cameraShakeFrequencyY_) * strength,
+		0.0f
+	};
+}
+
 void TitleLogo::Update() {
 
 	playBgmTimer_.Update(FpsCounter::deltaTime);
@@ -186,6 +214,7 @@ void TitleLogo::Update() {
 		debugParameter_.ApplyIfDirty();
 	}
 	UpdateAnimation(FpsCounter::deltaTime);
+	UpdateGamingColor(FpsCounter::deltaTime);
 	UpdateTransforms();
 }
 
@@ -198,6 +227,7 @@ void TitleLogo::DebugUpdate() {
 	} else {
 		debugParameter_.ApplyIfDirty();
 	}
+	UpdateGamingColor(0.0f);
 	UpdateTransforms();
 }
 
@@ -525,6 +555,19 @@ void TitleLogo::RandomizeMoveRotationDirections() {
 			RandomGenerator::Get<int>(0, 1) == 0 ? -1.0f : 1.0f,
 			RandomGenerator::Get<int>(0, 1) == 0 ? -1.0f : 1.0f
 		};
+	}
+}
+
+void TitleLogo::UpdateGamingColor(float deltaTime) {
+	gamingColor_.Update(deltaTime);
+	if (bottom_) {
+		gamingColor_.Apply(*bottom_);
+	}
+
+	for (std::size_t i = 0; i < parts_.size(); ++i) {
+		if (parts_[i]) {
+			gamingColor_.Apply(*parts_[i], i + 1);
+		}
 	}
 }
 

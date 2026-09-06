@@ -202,6 +202,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Score\ScoreView.cpp" />
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
+    <ClCompile Include="Application\Utils\GamingColor.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Enemy\Enemy.cpp" />
@@ -492,6 +493,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Utils\Binary\BinaryManager.h" />
     <ClInclude Include="Application\Utils\Binary\Value.h" />
     <ClInclude Include="Application\Utils\GameTimer.h" />
+    <ClInclude Include="Application\Utils\GamingColor.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Enemy\Enemy.h" />

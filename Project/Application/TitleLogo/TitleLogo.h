@@ -7,6 +7,7 @@
 #include "DebugParameter.h"
 #include "Vector3.h"
 #include "../Utils/GameTimer.h"
+#include "../Utils/GamingColor.h"
 
 namespace GameEngine {
 	class ModelComponent;
@@ -39,6 +40,7 @@ public:
 	void AnimationStart();
 	void ResetAnimation();
 	bool IsAnimationFinished() const;
+	Vector3 GetCameraShakeOffset() const;
 
 	AnimationState GetAnimationState() const { return animationState_; }
 
@@ -50,6 +52,7 @@ private:
 	void RestorePartTransforms();
 	void RestoreIdleTransforms();
 	void RandomizeMoveRotationDirections();
+	void UpdateGamingColor(float deltaTime);
 	float GetFallSequenceDuration() const;
 	float GetMoveSequenceDuration() const;
 
@@ -89,6 +92,11 @@ private:
 	float moveShakeAmplitude_ = 0.05f;
 	float moveRotationSpeed_ = 4.0f;
 	float moveDistance_ = 180.0f;
+	float cameraShakeStartAmplitude_ = 0.0f;
+	float cameraShakeEndAmplitude_ = 0.1f;
+	float cameraShakeFrequencyX_ = 71.0f;
+	float cameraShakeFrequencyY_ = 57.0f;
+	GamingColor gamingColor_;
 
 	AnimationState animationState_ = AnimationState::Falling;
 	GameTimer fallTimer_;
