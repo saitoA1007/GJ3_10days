@@ -639,6 +639,7 @@
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleRingMaterial.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\CrystalMaterial.cpp" />
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\HyperspaceMaterial.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
@@ -1240,6 +1241,7 @@
     <ClInclude Include="Application\Field\FieldEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleMaterial.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleRingMaterial.h" />
+    <ClInclude Include="EngineSource\3D\Material\CrystalMaterial.h" />
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\HyperspaceMaterial.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />

@@ -68,6 +68,12 @@ TestScene::TestScene() {
 
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
+
+	auto* cModel = modelManager_->GetNameByModel("Crystal.gltf");
+	cModel->SetDefaultIsEnableLight(false);
+	m_ = std::make_unique<ModelComponent>(cModel);
+	m_->SetHitGroup(6);
+	m_->SetBufferMaterial(0, mat_.GetMaterialSrvIndex());
 }
 
 void TestScene::Initialize() {
@@ -84,6 +90,10 @@ void TestScene::Update() {
 	// アニメーションの更新処理
 	walkAnimator_->ComputeUpdate();
 
+	m_->Update();
+
+	mat_.materialData_->time += FpsCounter::gameDeltaTime;
+
 	DebugUpdate();
 }
 
@@ -93,8 +103,8 @@ void TestScene::DebugUpdate() {
 
 	ImGui::Begin("test");
 
-	//ImGui::DragFloat3("PlayerPos", &m_->worldTransform_.transform_.translate.x, 0.1f);
-	//ImGui::DragFloat3("PlayerScale", &m_->worldTransform_.transform_.scale.x, 0.1f);
+	ImGui::DragFloat3("PlayerPos", &m_->worldTransform_.transform_.translate.x, 0.1f);
+	ImGui::DragFloat3("PlayerScale", &m_->worldTransform_.transform_.scale.x, 0.1f);
 	ImGui::ColorEdit4("PlayerColor", &playerColor_.x);
 
 	ImGui::DragFloat3("lightDir", &dir_.x, 0.1f);
@@ -108,6 +118,49 @@ void TestScene::DebugUpdate() {
 	light->SetDirectionalColor(lightColor_);
 	world_.UpdateTransformMatrix();
 	model_->SetDefaultColor(playerColor_);
+
+	if (ImGui::CollapsingHeader("Crystal Material", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+		// 1. カラー設定
+		if (ImGui::TreeNode("Color Settings")) {
+			ImGui::ColorEdit4("Base Color", &mat_.materialData_->baseColor.x);
+			ImGui::ColorEdit4("Rim Color", &mat_.materialData_->rimColor.x);
+			ImGui::ColorEdit4("Dissolve Edge Color", &mat_.materialData_->dissolveEdgeColor.x);
+			ImGui::TreePop();
+		}
+
+		// 2. ディゾルブ (消滅) エフェクト
+		if (ImGui::TreeNode("Dissolve Settings")) {
+			ImGui::SliderFloat("Threshold", &mat_.materialData_->dissolveThreshold, 0.0f, 1.0f);
+			ImGui::DragFloat("Edge Width", &mat_.materialData_->dissolveEdgeWidth, 0.005f, 0.0f, 1.0f);
+			ImGui::DragFloat("Noise Scale", &mat_.materialData_->dissolveNoiseScale, 0.1f, 0.0f, 100.0f);
+			ImGui::InputScalar("Dissolve Tex Handle", ImGuiDataType_U32, &mat_.materialData_->dissolveTextureHandle);
+			ImGui::TreePop();
+		}
+
+		// 3. リムライト
+		if (ImGui::TreeNode("Rim Light Settings")) {
+			ImGui::DragFloat("Rim Power", &mat_.materialData_->rimPower, 0.1f, 0.0f, 50.0f);
+			ImGui::DragFloat("Rim Intensity", &mat_.materialData_->rimIntensity, 0.05f, 0.0f, 10.0f);
+			ImGui::TreePop();
+		}
+
+		// 4. 屈折・宇宙エフェクト
+		if (ImGui::TreeNode("Refraction & Universe")) {
+			ImGui::SliderFloat("IOR (Index of Refraction)", &mat_.materialData_->ior, 1.0f, 3.0f);
+			ImGui::SliderFloat("Fresnel Strength", &mat_.materialData_->fresnelStrength, 0.0f, 1.0f);
+			ImGui::DragFloat("Universe Intensity", &mat_.materialData_->universeIntensity, 0.05f, 0.0f, 10.0f);
+			ImGui::DragFloat("Universe Scale", &mat_.materialData_->universeScale, 0.1f, 0.0f, 100.0f);
+			ImGui::TreePop();
+		}
+
+		// 6. システム・その他パラメータ
+		if (ImGui::TreeNode("System / Textures")) {
+			ImGui::DragFloat("Time", &mat_.materialData_->time, 0.01f);
+			ImGui::InputScalar("Albedo Tex Handle", ImGuiDataType_U32, &mat_.materialData_->textureHandle);
+			ImGui::TreePop();
+		}
+	}
 	ImGui::End();
 #endif
 }
@@ -119,4 +172,6 @@ void TestScene::Draw() {
 
 	// 地面を描画
 	renderQueue_->SubmitRaytracingModel(terrainModel_, terrainWorld_);
+
+	m_->DrawCustomRaytracing(renderQueue_);
 }
