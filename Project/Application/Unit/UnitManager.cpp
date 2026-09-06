@@ -28,9 +28,10 @@ UnitManager::UnitManager(Model* unitModel, Rocket* rocket, size_t capacity)
 
 	debugParameter_ = std::make_unique<DebugParameter>("Unit");
 	debugParameter_->Register("UnitCount", settings_.unitCount, 0, "Manager");
-	debugParameter_->Register("LaunchOffset", settings_.unit.launchOffset, 0, "Transform");
-	debugParameter_->Register("Scale", settings_.unit.scale, 1, "Transform");
-	debugParameter_->Register("CarryOffset", settings_.unit.carryOffset, 2, "Transform");
+	debugParameter_->Register("GroundY", settings_.unit.groundY, 0, "Transform");
+	debugParameter_->Register("LaunchOffset", settings_.unit.launchOffset, 1, "Transform");
+	debugParameter_->Register("Scale", settings_.unit.scale, 2, "Transform");
+	debugParameter_->Register("CarryOffset", settings_.unit.carryOffset, 3, "Transform");
 	debugParameter_->Register("NormalSpeed", settings_.unit.normalSpeed, 0, "Move");
 	debugParameter_->Register("BoostedSpeed", settings_.unit.boostedSpeed, 1, "Move");
 	debugParameter_->Register("PickupRadius", settings_.unit.pickupRadius, 2, "Move");
@@ -67,7 +68,7 @@ void UnitManager::Update()
 	// capacity全体ではなく、Registerで指定された先頭unitCount体だけを稼働させる。
 	for (size_t i = 0; i < GetUnitCount(); ++i)
 	{
-		units_[i]->Update(FpsCounter::gameDeltaTime);
+		units_[i]->Update();
 	}
 }
 
@@ -86,7 +87,7 @@ void UnitManager::Draw()
 {
 	for (size_t i = 0; i < GetUnitCount(); ++i)
 	{
-		units_[i]->Draw(renderQueue_);
+		units_[i]->Draw();
 	}
 }
 
