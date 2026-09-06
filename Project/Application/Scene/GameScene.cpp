@@ -1,6 +1,6 @@
 #include "GameScene.h"
 using namespace GameEngine;
-
+#include "ImguiManager.h"
 #include "ParticleBehavior.h"
 #include "PostProcess/PostEffectData.h"
 #include <Application/Enemy/EnemyManager.h>
@@ -76,7 +76,7 @@ GameScene::GameScene() {
 	auto* rocketModel = modelManager_->GetNameByModel("Rocket.gltf");
 	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
 
-	auto* energyModel = modelManager_->GetNameByModel("energy.obj");
+	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
 	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_);
 
 	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
@@ -177,6 +177,22 @@ void GameScene::Update() {
 	{
 		controllerVibration_->Stop();
 	}
+
+	// ライト調整
+#ifdef USE_IMGUI
+	auto* light = renderQueue_->GetLightManager();
+
+	ImGui::Begin("SceneLight");
+	ImGui::DragFloat3("lightDir", &dir_.x, 0.1f);
+	ImGui::DragFloat("lightIntensity", &intensity_, 0.1f);
+	ImGui::ColorEdit4("lightColor", &lightColor_.x);
+	dir_.Normalize();
+
+	light->SetDirectionalDirction(dir_);
+	light->SetDirectionalIntensity(intensity_);
+	light->SetDirectionalColor(lightColor_);
+	ImGui::End();
+#endif
 }
 
 void GameScene::DebugUpdate()

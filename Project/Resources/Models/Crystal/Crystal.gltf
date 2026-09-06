@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.2.40",
+		"generator":"Khronos glTF Blender I/O v4.4.56",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -18,6 +18,22 @@
 			"name":"Sphere"
 		}
 	],
+	"materials":[
+		{
+			"doubleSided":true,
+			"name":"\u30de\u30c6\u30ea\u30a2\u30eb",
+			"pbrMetallicRoughness":{
+				"baseColorFactor":[
+					0.800000011920929,
+					0.800000011920929,
+					0.800000011920929,
+					1
+				],
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
+		}
+	],
 	"meshes":[
 		{
 			"name":"Sphere",
@@ -28,7 +44,8 @@
 						"NORMAL":1,
 						"TEXCOORD_0":2
 					},
-					"indices":3
+					"indices":3,
+					"material":0
 				}
 			]
 		}
@@ -37,7 +54,7 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":54,
+			"count":56,
 			"max":[
 				0.4348248541355133,
 				0.7373250722885132,
@@ -53,13 +70,13 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":54,
+			"count":56,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":54,
+			"count":56,
 			"type":"VEC2"
 		},
 		{
@@ -72,32 +89,32 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":648,
+			"byteLength":672,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":648,
-			"byteOffset":648,
+			"byteLength":672,
+			"byteOffset":672,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":432,
-			"byteOffset":1296,
+			"byteLength":448,
+			"byteOffset":1344,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":120,
-			"byteOffset":1728,
+			"byteOffset":1792,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":1848,
+			"byteLength":1912,
 			"uri":"Crystal.bin"
 		}
 	]
