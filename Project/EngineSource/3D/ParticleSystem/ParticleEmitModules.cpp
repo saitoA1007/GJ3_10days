@@ -156,6 +156,20 @@ void ShapeEmitModule::Create(ParticleData& particleData) {
 		particleData.transform.translate = RandomGenerator::GetVector3(centerPos - half, centerPos + half);
 		break;
 	}
+
+	case EmitShapeType::Circle: {
+		// XZ平面上の角度をランダムに決める
+		float angle = RandomGenerator::Get(0.0f, 2.0f * std::numbers::pi_v<float>);
+
+		float radius = emitterShape_.radius;
+		if (!emitterShape_.emitFromShell) {
+			// 内部に均等に散らすため、平方根を取ってから半径を掛ける
+			radius *= std::sqrt(RandomGenerator::Get(0.0f, 1.0f));
+		}
+
+		particleData.transform.translate = centerPos + Vector3(std::cos(angle) * radius, 0.0f, std::sin(angle) * radius);
+		break;
+	}
 	}
 }
 

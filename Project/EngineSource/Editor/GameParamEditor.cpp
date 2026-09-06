@@ -172,7 +172,7 @@ void GameParamEditor::DeserializeGroupFromJson(Group& group, const json& node) {
 				EaseType data;
 				std::string typeStr = itItem->at("_EaseType").get<std::string>();
 				for (int i = 0; i < static_cast<int>(EaseType::kMaxCount); ++i) {
-					if (typeStr == ShapeTypeNames[i]) {
+					if (typeStr == EaseTypeNames[i]) {
 						data = static_cast<EaseType>(i);
 						break;
 					}

@@ -1,6 +1,7 @@
 #include "GameScene.h"
 using namespace GameEngine;
 
+#include "ParticleBehavior.h"
 #include "PostProcess/PostEffectData.h"
 #include <Application/Enemy/EnemyManager.h>
 #include "Application/Player/Player.h"
@@ -94,17 +95,25 @@ GameScene::GameScene() {
 		score_.Add(kScorePerEnemy);
 	});
   
-  enemies->SetStage("Test");
+	enemies->SetStage("Test");
 
 	// ブラックホールのテスト
 	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
 	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
 	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
 
+	// 出現位置のテスト
 	auto* ring1Model = modelManager_->GetNameByModel("fieldRingLv1.gltf");
 	auto* ring2Model = modelManager_->GetNameByModel("fieldRingLv2.gltf");
 	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
 	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model);
+
+	// エフェクト用モデル
+	auto* effectModel = modelManager_->GetNameByModel("plane.obj");
+	effectModel->SetDefaultIsEnableLight(false);
+	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingOneEffect", 32, textureManager_, effectModel);
+	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingTwoEffect", 128, textureManager_, effectModel);
+	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingThreeEffect", 128, textureManager_, effectModel);
 }
 
 void GameScene::Initialize() {
