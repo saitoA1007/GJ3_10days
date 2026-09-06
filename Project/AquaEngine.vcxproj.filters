@@ -654,6 +654,7 @@
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
+    <ClCompile Include="Application\Result\ShuffleNumber.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1255,6 +1256,7 @@
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
     <ClInclude Include="Application\Result\ResultMessage.h" />
+    <ClInclude Include="Application\Result\ShuffleNumber.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

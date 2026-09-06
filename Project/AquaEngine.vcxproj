@@ -170,6 +170,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
     <ClCompile Include="Application\GameFlow\GameFlow.cpp" />
     <ClCompile Include="Application\LockOn\LockOnController.cpp" />
+    <ClCompile Include="Application\Result\ShuffleNumber.cpp" />
     <ClCompile Include="Application\Unit\Unit.cpp" />
     <ClCompile Include="Application\Unit\UnitManager.cpp" />
     <ClCompile Include="Application\Rocket\Rocket.cpp" />
@@ -464,6 +465,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="Application\GameFlow\GameFlow.h" />
     <ClInclude Include="Application\LockOn\LockOnController.h" />
+    <ClInclude Include="Application\Result\ShuffleNumber.h" />
     <ClInclude Include="Application\Unit\Pikumi.h" />
     <ClInclude Include="Application\Unit\Unit.h" />
     <ClInclude Include="Application\Unit\UnitManager.h" />
