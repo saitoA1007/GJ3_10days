@@ -9,7 +9,7 @@ namespace GameEngine {
 
 	class Camera {
 	public:
-		Camera() = default;
+		Camera();
 		~Camera();
 
 		/// <summary>

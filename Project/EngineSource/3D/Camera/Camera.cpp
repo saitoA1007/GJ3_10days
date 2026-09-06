@@ -4,6 +4,23 @@
 
 using namespace GameEngine;
 
+Camera::Camera() {
+	transform_ = { {1.0f,1.0f,1.0f}, };
+	worldMatrix_ = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+
+	// 定数バッファの作成
+	constBuffer_.Create();
+	cameraForGPU_ = constBuffer_.GetData();
+
+	// 単位行列を書き込んでおく
+	cameraForGPU_->worldPosition = GetWorldPosition();
+	cameraForGPU_->vpMatrix = Matrix4x4::MakeIdentity();
+	cameraForGPU_->mtxViewInv = Matrix4x4::MakeIdentity();
+	cameraForGPU_->mtxProjInv = Matrix4x4::MakeIdentity();
+	cameraForGPU_->viewMatrix = Matrix4x4::MakeIdentity();
+	cameraForGPU_->projectionMatrix = Matrix4x4::MakeIdentity();
+}
+
 Camera::~Camera() {
 	
 }
@@ -14,19 +31,7 @@ void Camera::Initialize(const Transform& transform, int kClientWidth, int kClien
 	worldMatrix_ = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 	viewMatrix_ = Math::InverseMatrix(worldMatrix_);
 	projectionMatrix_ = Math::MakePerspectiveFovMatrix(0.45f, static_cast<float>(kClientWidth) / static_cast<float>(kClientHeight), 0.1f, 200.0f);
-	VPMatrix_ = viewMatrix_ * projectionMatrix_;
-
-
-	// 定数バッファの作成
-	constBuffer_.Create();
-	cameraForGPU_ = constBuffer_.GetData();
-	// 単位行列を書き込んでおく
-	cameraForGPU_->worldPosition = GetWorldPosition();
-	cameraForGPU_->vpMatrix = Matrix4x4::MakeIdentity();
-	cameraForGPU_->mtxViewInv = Matrix4x4::MakeIdentity();
-	cameraForGPU_->mtxProjInv = Matrix4x4::MakeIdentity();
-	cameraForGPU_->viewMatrix = Matrix4x4::MakeIdentity();
-	cameraForGPU_->projectionMatrix = Matrix4x4::MakeIdentity();
+	VPMatrix_ = viewMatrix_ * projectionMatrix_;	
 }
 
 void Camera::Update() {
