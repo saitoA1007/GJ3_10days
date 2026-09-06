@@ -32,12 +32,43 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 
 		case uint32_t(CollisionTypeID::kUnit):
 		{
-			hp_--;
-			damageTimer_ = 0.0f;
+			Unit* hitUnit = static_cast<Unit*>(result.userData.object);
+			if (!hitUnit) break;
 
-			if (hp_ <= 0) {
-				wasDefeated_ = true;
-				isDead_ = true;
+			// UnitがEnergyを持って運搬中に当たった場合
+			if (hitUnit->IsCarryingEnergy())
+			{
+				// 敵の勝ち
+				// Unitは死に、運んでいたEnergyも消滅
+				hitUnit->DefeatAndDropEnergy(); 
+			}
+			// UnitがEnergyを持っていない場合
+			else
+			{
+				if (hitUnit->GetStamina() > 0.0f)
+				{
+					// スタミナが0より大きい場合：Unitの勝ち
+					hp_ = 0;
+					damageTimer_ = 0.0f;
+
+					if (hp_ <= 0) {
+						// 敵を倒し、ドロップしたEnergyのポインタを受け取る
+						EnergyPickup* droppedEnergy = this->DefeatAndDropEnergy();
+						if (droppedEnergy) 
+						{
+							// Unitに拾わせて帰還させる
+							hitUnit->StartCarryingEnergy(droppedEnergy);
+						}
+					}
+				}
+				else
+				{
+					// スタミナが0の場合：相打ち
+					// 強制的にEnemyをキルしてEnergyをドロップさせる
+					this->DefeatAndDropEnergy();
+					// Unitも死んで待機状態に戻る
+					hitUnit->ReturnToStorageAfterDefeat();
+				}
 			}
 			break;
 		}

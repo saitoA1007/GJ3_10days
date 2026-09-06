@@ -13,7 +13,7 @@ class EnergySpawner;
 class EnemyManager;
 class EnergyView;
 class Field;
-class GameFlowController;
+class GameFlow;
 class LockOnController;
 class Rocket;
 class UnitManager;
@@ -82,7 +82,7 @@ private: // シーン機能
 	EnemyManager* enemyManager_ = nullptr;
 	UnitManager* unitManager_ = nullptr;                 
 	LockOnController* lockOnController_ = nullptr;       
-	GameFlowController* gameFlowController_ = nullptr;   
+	GameFlow* gameFlow_ = nullptr;   
 	EnergyView* energyView_ = nullptr;
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;

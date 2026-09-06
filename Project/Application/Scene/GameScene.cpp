@@ -106,19 +106,27 @@ GameScene::GameScene() {
 	// スコア表示
 	scoreView_ = std::make_unique<ScoreView>(digitModels, gameCamera->GetCamera());
 
-	gameFlowController_ = gameObjectManager_->AddObject<GameFlowController>(
+	enemyManager_->SetContext(
+		field_,
 		rocket_,
 		energySpawner_,
-		//enemyManager_,
-		unitManager_,
-		lockOnController_);
+		unitManager_
+	);
+	enemyManager_->SetStage("Test");
+
+	GameFlowContext flowContext{};
+	flowContext.rocket = rocket_;
+	flowContext.energySpawner = energySpawner_;
+	flowContext.enemyManager = enemyManager_;
+	flowContext.unitManager = unitManager_;
+	flowContext.lockOnController = lockOnController_;
+
+	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,
 		mainCamera_.get(),
 		rocket_);
-  
-	enemyManager_->SetStage("Test");
 
 	//==============================================
 	// これより下はエフェクトのテストで書いています

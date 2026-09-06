@@ -6,198 +6,171 @@
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
 
-//#include "Application/Enemy/EnemyManager.h"
+#include "Application/Enemy/EnemyManager.h"
 #include "Application/Energy/EnergySpawner.h"
 #include "Application/LockOn/LockOnController.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/Unit/UnitManager.h"
 
+#include "OpeningPhase.h"
+#include "PlayingPhase.h"
+#include "TutorialPhase.h"
+#include "LaunchPhase.h"
+#include "ResultPhase.h"
+
 using namespace GameEngine;
 
-GameFlowController::GameFlowController(
-	Rocket* rocket,
-	EnergySpawner* energySpawner,
-	//EnemyManager* enemyManager,
-	UnitManager* unitManager,
-	LockOnController* lockOnController,
-	const GameFlowSettings& settings)
-	: rocket_(rocket),
-	energySpawner_(energySpawner),
-	//enemyManager_(enemyManager),
-	unitManager_(unitManager),
-	lockOnController_(lockOnController),
-	settings_(settings) {
-	assert(rocket_ != nullptr && "game flow requires a rocket");
-	assert(energySpawner_ != nullptr && "game flow requires an energy spawner");
-	//assert(enemyManager_ != nullptr && "game flow requires an enemy manager");
-	assert(unitManager_ != nullptr && "game flow requires a unit manager");
-	assert(lockOnController_ != nullptr && "game flow requires a lock-on controller");
+GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& settings)
+	: context_(context), settings_(settings)
+{
+	context_.settings = &settings_;
 
-	debugParameter_ = std::make_unique<DebugParameter>("GameFlow");
-	debugParameter_->Register("GameDuration", settings_.gameDuration, 0, "Time");
-	debugParameter_->Register("InitialDelay", settings_.initialDelay, 1, "Time");
+	// DebugParameterの登録
+	debugParameter_ = std::make_unique<GameEngine::DebugParameter>("GameFlow");
+	debugParameter_->Register("OpeningDuration", settings_.openingDuration, 0, "Time");
+	debugParameter_->Register("GameDuration", settings_.gameDuration, 1, "Time");
+	debugParameter_->Register("LaunchDuration", settings_.launchDuration, 2, "Time");
 	debugParameter_->Apply();
-	SanitizeSettings();
+
 	SetUpdateOrder(0);
 }
 
-void GameFlowController::Initialize()
+void GameFlow::Initialize()
 {
 	ApplyDebugParameters();
-	initialDelayRemaining_ = settings_.initialDelay;
-	remainingTime_ = settings_.gameDuration;
-	finalEnergy_ = 0;
+	currentPhaseIndex_ = 0;
 	debugPaused_ = false;
-	// 待機時間が0ならReadyを飛ばしてすぐPlayingを開始する。
-	phase_ = initialDelayRemaining_ > 0.0f ? GamePhase::Ready : GamePhase::Playing;
+
+	// パラメータを反映した状態でフェーズシーケンスを構築
+	BuildPhases();
+
+	if (!phases_.empty())
+	{
+		phases_[0]->OnEnter(context_);
+	}
 	ApplyGameplayState();
 }
 
-void GameFlowController::Update() 
+void GameFlow::BuildPhases()
+{
+	phases_.clear();
+
+	// OPフェーズ 
+	phases_.push_back(std::make_unique<OpeningPhase>());
+
+	// チュートリアルフェーズ
+	phases_.push_back(std::make_unique<TutorialPhase>());
+
+	// プレイフェーズ 
+	phases_.push_back(std::make_unique<PlayingPhase>());
+
+	// 打ち上げ演出フェーズ
+	phases_.push_back(std::make_unique<LaunchPhase>());
+
+	// リザルト画面フェーズ
+	phases_.push_back(std::make_unique<ResultPhase>());
+}
+
+void GameFlow::Update()
 {
 	ApplyDebugParameters();
-	if (debugPaused_) 
+
+	if (debugPaused_ || currentPhaseIndex_ >= phases_.size())
 	{
 		return;
 	}
 
-	// フェーズごとに扱うタイマーを限定し、TimeUp後は値を変化させない。
-	const float deltaTime = (std::max)(FpsCounter::gameDeltaTime, 0.0f);
-	switch (phase_) {
-	case GamePhase::Ready:
-		initialDelayRemaining_ = (std::max)(initialDelayRemaining_ - deltaTime, 0.0f);
-		if (initialDelayRemaining_ <= 0.0f)
-		{
-			StartPlaying();
-		}
-		break;
-	case GamePhase::Playing:
-		remainingTime_ = (std::max)(remainingTime_ - deltaTime, 0.0f);
-		if (remainingTime_ <= 0.0f) 
-		{
-			FinishPlaying();
-		}
-		break;
-	case GamePhase::TimeUp:
-	case GamePhase::Launching:
-	case GamePhase::Result:
-		break;
-	}
-}
-
-void GameFlowController::DebugUpdate() 
-{
-	ApplyDebugParameters();
-	DrawDebugWindow();
-}
-
-void GameFlowController::ForceTimeUp() 
-{
-	if (phase_ == GamePhase::Ready || phase_ == GamePhase::Playing)
+	IGamePhase* current = phases_[currentPhaseIndex_].get();
+	if (current->OnUpdate(context_))
 	{
-		FinishPlaying();
+		AdvanceToNextPhase();
 	}
 }
 
-float GameFlowController::GetRemainingRatio() const
+void GameFlow::ApplyDebugParameters()
 {
-	if (settings_.gameDuration <= 0.0f) 
+	if (debugParameter_)
 	{
-		return 0.0f;
+		debugParameter_->ApplyIfDirty();
 	}
-	return (std::clamp)(remainingTime_ / settings_.gameDuration, 0.0f, 1.0f);
-}
-
-void GameFlowController::ApplyDebugParameters() 
-{
-	debugParameter_->ApplyIfDirty();
-	SanitizeSettings();
-}
-
-void GameFlowController::SanitizeSettings() 
-{
+	settings_.openingDuration = (std::max)(settings_.openingDuration, 0.0f);
 	settings_.gameDuration = (std::max)(settings_.gameDuration, 0.1f);
-	settings_.initialDelay = (std::max)(settings_.initialDelay, 0.0f);
+	settings_.launchDuration = (std::max)(settings_.launchDuration, 0.0f);
 }
 
-void GameFlowController::StartPlaying() 
+void GameFlow::AdvanceToNextPhase()
 {
-	phase_ = GamePhase::Playing;
-	ApplyGameplayState();
-}
+	if (currentPhaseIndex_ >= phases_.size()) return;
 
-void GameFlowController::FinishPlaying()
-{
-	remainingTime_ = 0.0f;
-	// 発射・リザルトで同じ値を使えるよう、時間切れの瞬間に固定する。
-	finalEnergy_ = rocket_->GetEnergy();
-	phase_ = GamePhase::TimeUp;
-	debugPaused_ = false;
-	ApplyGameplayState();
-}
+	phases_[currentPhaseIndex_]->OnExit(context_);
+	currentPhaseIndex_++;
 
-void GameFlowController::ApplyGameplayState()
-{
-	// このクラスを唯一の停止判断元にし、各Managerの稼働状態を揃える。
-	const bool enabled = phase_ == GamePhase::Playing && !debugPaused_;
-	energySpawner_->SetGameplayEnabled(enabled);
-	//enemyManager_->SetGameplayEnabled(enabled);
-	unitManager_->SetGameplayEnabled(enabled);
-	lockOnController_->SetGameplayEnabled(enabled);
-}
-
-const char* GameFlowController::GetPhaseName() const
-{
-	switch (phase_) {
-	case GamePhase::Ready:
-		return "Ready";
-	case GamePhase::Playing:
-		return "Playing";
-	case GamePhase::TimeUp:
-		return "TimeUp";
-	case GamePhase::Launching:
-		return "Launching";
-	case GamePhase::Result:
-		return "Result";
-	default:
-		return "Unknown";
+	if (currentPhaseIndex_ < phases_.size())
+	{
+		phases_[currentPhaseIndex_]->OnEnter(context_);
+		ApplyGameplayState();
 	}
 }
 
-void GameFlowController::DrawDebugWindow() 
+void GameFlow::ChangePhase(size_t index)
 {
+	if (index >= phases_.size() || index == currentPhaseIndex_) return;
+
+	if (currentPhaseIndex_ < phases_.size())
+	{
+		phases_[currentPhaseIndex_]->OnExit(context_);
+	}
+
+	currentPhaseIndex_ = index;
+	phases_[currentPhaseIndex_]->OnEnter(context_);
+	ApplyGameplayState();
+}
+
+void GameFlow::ApplyGameplayState()
+{
+	IGamePhase* current = GetCurrentPhase();
+	const bool enabled = current ? (current->IsGameplayEnabled() && !debugPaused_) : false;
+
+	if (context_.energySpawner)    context_.energySpawner->SetGameplayEnabled(enabled);
+	if (context_.enemyManager)     context_.enemyManager->SetGameplayEnabled(enabled);
+	if (context_.unitManager)      context_.unitManager->SetGameplayEnabled(enabled);
+	if (context_.lockOnController) context_.lockOnController->SetGameplayEnabled(enabled);
+}
+
+void GameFlow::DebugUpdate()
+{
+	ApplyDebugParameters();
 #ifdef USE_IMGUI
-	if (!ImGui::Begin("Game Flow"))
+	if (ImGui::Begin("Game Flow"))
 	{
-		ImGui::End();
-		return;
-	}
+		IGamePhase* current = GetCurrentPhase();
+		ImGui::Text("Phase [%zu / %zu]: %s",
+			currentPhaseIndex_ + 1, phases_.size(),
+			current ? current->GetName() : "Finished");
 
-	ImGui::Text("Phase: %s", GetPhaseName());
-	if (phase_ == GamePhase::Ready)
-	{
-		ImGui::Text("Starts In: %.2f sec", initialDelayRemaining_);
-	}
-	ImGui::Text("Remaining: %.2f / %.2f sec", remainingTime_, settings_.gameDuration);
-	if (phase_ == GamePhase::TimeUp) 
-	{
-		ImGui::Text("Final Energy: %d", finalEnergy_);
-	}
-
-	if (phase_ == GamePhase::Ready || phase_ == GamePhase::Playing)
-	{
-		if (ImGui::Button(debugPaused_ ? "Resume" : "Pause")) 
+		if (ImGui::Button("Skip Phase")) AdvanceToNextPhase();
+		ImGui::SameLine();
+		if (ImGui::Button(debugPaused_ ? "Resume" : "Pause"))
 		{
 			debugPaused_ = !debugPaused_;
 			ApplyGameplayState();
 		}
-		ImGui::SameLine();
-		if (ImGui::Button("Force Time Up")) 
+
+		ImGui::Separator();
+		ImGui::Text("Phase List:");
+		for (size_t i = 0; i < phases_.size(); ++i)
 		{
-			ForceTimeUp();
+			if (i == currentPhaseIndex_)
+				ImGui::TextColored(ImVec4(0, 1, 0, 1), "> %zu: %s", i, phases_[i]->GetName());
+			else
+				ImGui::Text("  %zu: %s", i, phases_[i]->GetName());
+
+			ImGui::SameLine();
+			char label[32];
+			sprintf_s(label, "Jump##%zu", i);
+			if (ImGui::Button(label)) ChangePhase(i);
 		}
 	}
-
 	ImGui::End();
 #endif
 }

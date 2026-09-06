@@ -1,0 +1,9 @@
+{
+    "GameFlow": {
+        "SceneName": "Game",
+        "Time": {
+            "GameDuration": 60.0,
+            "OpeningDuration": 3.0
+        }
+    }
+}
