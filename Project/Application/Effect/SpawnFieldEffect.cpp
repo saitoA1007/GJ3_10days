@@ -2,8 +2,13 @@
 #include "FPSCounter.h"
 using namespace GameEngine;
 
-SpawnFieldEffect::SpawnFieldEffect(GameEngine::Model* ring1Model, GameEngine::Model* ring2Model, GameEngine::Model* ring3Model) {
+SpawnFieldEffect::SpawnFieldEffect(GameEngine::Model* ring1Model, GameEngine::Model* ring2Model, GameEngine::Model* ring3Model, GameEngine::Model* halfDomeModel)
+	: universeModel_(halfDomeModel) {
 
+	universeModel_.SetHitGroup(2);
+	universeModel_.SetBufferMaterial(0, universeMaterial_.GetMaterialSrvIndex());
+
+	// メモリを確保
 	materials_.resize(3);
 	glowColors_.resize(3);
 
@@ -54,6 +59,7 @@ void SpawnFieldEffect::Update() {
 	}
 
 	// 時間を更新
+	universeMaterial_.materialData_->time += FpsCounter::gameDeltaTime;
 	for (uint32_t i = 0; i < 3; ++i) {
 		materials_[i].materialData_->time += FpsCounter::gameDeltaTime;
 	}
@@ -62,9 +68,13 @@ void SpawnFieldEffect::Update() {
 		ringModels_[i]->Update();
 		underRingModels_[i]->Update();
 	}
+
+	universeModel_.Update();
 }
 
 void SpawnFieldEffect::Draw() {
+
+	universeModel_.DrawCustomRaytracing(renderQueue_);
 
 	for (uint32_t i = 0; i < 3; ++i) {
 		ringModels_[i]->DrawCustomRaytracing(renderQueue_);
@@ -88,5 +98,12 @@ void SpawnFieldEffect::Register() {
 		debugParame_->Register("emissionIntensity", materials_[i].materialData_->emissionIntensity, 9, subGroup);
 		debugParame_->Register("glowColor", glowColors_[i], 10, subGroup);
 	}
+	debugParame_->Register("radius", universeMaterial_.materialData_->radius, 1, "UniverseMaterial");
+	debugParame_->Register("swirl", universeMaterial_.materialData_->swirl, 1, "UniverseMaterial");
+	debugParame_->Register("scale", universeMaterial_.materialData_->scale, 1, "UniverseMaterial");
+	debugParame_->Register("strength", universeMaterial_.materialData_->strength, 1, "UniverseMaterial");
+	debugParame_->Register("UniversePos", universeMaterial_.materialData_->UniversePos, 1, "UniverseMaterial");
+	debugParame_->Register("Pos", universeModel_.worldTransform_.transform_.translate, 1, "UniverseTransform");
+	debugParame_->Register("scale", universeModel_.worldTransform_.transform_.scale, 1, "UniverseTransform");
 	debugParame_->Apply();
 }

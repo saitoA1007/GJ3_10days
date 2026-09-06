@@ -54,6 +54,28 @@
             "noiseJitter": 1.2300000190734863,
             "noiseScale": 50.0
         },
-        "SceneName": "Game"
+        "SceneName": "Game",
+        "UniverseMaterial": {
+            "UniversePos": [
+                0.0,
+                0.0
+            ],
+            "radius": 48.0,
+            "scale": 0.019999999552965164,
+            "strength": 1.0,
+            "swirl": 1.0
+        },
+        "UniverseTransform": {
+            "Pos": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                70.0,
+                70.0,
+                70.0
+            ]
+        }
     }
 }

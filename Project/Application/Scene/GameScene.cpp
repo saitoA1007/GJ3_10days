@@ -59,15 +59,6 @@ GameScene::GameScene() {
 	// フィールド
 	auto* fieldModel = modelManager_->GetNameByModel("fieldCircle.obj");
 	fieldModel->SetDefaultIsEnableLight(true);
-	// ポール
-	auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
-	poleModel->SetDefaultIsEnableLight(false);
-	// 円
-	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
-	circleModel->SetDefaultIsEnableLight(false);
-	// 宇宙を映す平面
-	auto* planeXZModel = modelManager_->GetNameByModel("halfDome.gltf");
-	planeXZModel->SetDefaultIsEnableLight(false);
 	field_ = gameObjectManager_->AddObject<Field>(fieldModel);
 
 	//Enemy
@@ -127,18 +118,32 @@ GameScene::GameScene() {
 		mainCamera_.get(),
 		rocket_);
   
-  enemyManager_->SetStage("Test");
+	enemyManager_->SetStage("Test");
+
+	//==============================================
+	// これより下はエフェクトのテストで書いています
+	//==============================================
 
 	// ブラックホールのテスト
 	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
 	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
 	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
 
+	//// ポール
+	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
+	//poleModel->SetDefaultIsEnableLight(false);
+	//// 円
+	//auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
+	//circleModel->SetDefaultIsEnableLight(false);
+	// 宇宙を映す平面
+	auto* halfDomeModel = modelManager_->GetNameByModel("halfDome.gltf");
+	halfDomeModel->SetDefaultIsEnableLight(false);
+
 	// 出現位置のテスト
 	auto* ring1Model = modelManager_->GetNameByModel("fieldRingLv1.gltf");
 	auto* ring2Model = modelManager_->GetNameByModel("fieldRingLv2.gltf");
 	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
-	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model);
+	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model, halfDomeModel);
 
 	// エフェクト用モデル
 	auto* effectModel = modelManager_->GetNameByModel("plane.obj");
