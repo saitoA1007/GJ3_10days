@@ -664,6 +664,7 @@
     <ClCompile Include="Application\Enemy\EnemyEffectManager.cpp" />
     <ClCompile Include="Application\Effect\MoonObject.cpp" />
     <ClCompile Include="Application\GameCamera\ResultMoveCamera.cpp" />
+    <ClCompile Include="Application\Effect\RocketEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1276,6 +1277,7 @@
     <ClInclude Include="Application\Enemy\EnemyEffectManager.h" />
     <ClInclude Include="Application\Effect\MoonObject.h" />
     <ClInclude Include="Application\GameCamera\ResultMoveCamera.h" />
+    <ClInclude Include="Application\Effect\RocketEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

@@ -86,6 +86,37 @@ namespace GameEngine {
 		EaseType easeType_ = EaseType::kLinear;
 	};
 
+	// 色変化
+	class ColorOverLifeTimeModule : public IParticleModule {
+	public:
+		~ColorOverLifeTimeModule() = default;
+
+		void Register(DebugParameter* param) override {
+			int index = 1;
+			std::string subGroup = groupName_ + "/" + mainSubGroupName_;
+			param->Register("EndColor", endRGB_, index++, subGroup);
+			param->Register("EaseType", easeType_, index++, subGroup);
+		}
+
+		void Remove(DebugParameter* param) override {
+			std::string subGroup = groupName_ + "/" + mainSubGroupName_;
+			param->RemoveItem("EndColor", subGroup);
+			param->RemoveItem("EaseType", subGroup);
+		}
+
+		void Update(ParticleData& particleData, [[maybe_unused]] float time) override;
+
+		// 外部から色を設定する
+		void SetHSV(const Vector3& endRGB) {
+			endRGB_ = { endRGB.x,endRGB.y,endRGB.z };
+		}
+
+	private:
+		// 色相、彩度、明度
+		Vector4 endRGB_ = { 1.0f, 1.0f, 1.0f,1.0f };
+		EaseType easeType_ = EaseType::kLinear;
+	};
+
 	// 引力モジュール
 	class AttractionModule : public IParticleModule {
 	public:
