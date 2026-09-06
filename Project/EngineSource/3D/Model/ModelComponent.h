@@ -59,6 +59,10 @@ namespace GameEngine {
 			refBuffers_[i].SetInstanceMask(mask);
 		}
 
+		Material& GetMaterial() {
+			return defaultMaterials_[0];
+		}
+
 	public:
 
 		// モデルが持つワールド行列

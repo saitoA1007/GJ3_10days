@@ -656,6 +656,7 @@
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
     <ClCompile Include="Application\Enemy\EnemyEffectManager.cpp" />
+    <ClCompile Include="Application\Effect\MoonObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1259,6 +1260,7 @@
     <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
     <ClInclude Include="Application\Result\ResultMessage.h" />
     <ClInclude Include="Application\Enemy\EnemyEffectManager.h" />
+    <ClInclude Include="Application\Effect\MoonObject.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

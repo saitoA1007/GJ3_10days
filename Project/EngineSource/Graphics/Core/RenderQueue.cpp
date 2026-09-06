@@ -383,9 +383,9 @@ void RenderQueue::SubmitRaytracingFracture(Model* model, FractureInstance& fract
             // blasを登録
             data.blas = blas;
             // 使用するヒットグループを設定
-            data.hitGroupIndexOffset = 1;
+            data.hitGroupIndexOffset = 0;
             // 氷のヒットグループを使うため、影レイでも氷として扱う
-            data.instanceMask = static_cast<uint32_t>(RayInstanceMask::kRayMaskIce);
+            data.instanceMask = static_cast<uint32_t>(RayInstanceMask::kRayMaskOpaque);
             // 使用するデータを設定
             data.instanceID = buffer->GetChunkRefIndex(chunkId);
             // 座標

@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "WorldTransform.h"
 #include "IceMaterial.h"
+#include "Material.h"
 #include "DebugParameter.h"
 #include "FractureDamageController.h"
 
@@ -27,6 +28,8 @@ namespace GameEngine {
 		// 描画処理
 		void Draw() override;
 
+		void NewDraw(Material* material);
+
 	public:
 
 		// 静的な破片を元の位置へ戻し、無傷の状態へ復元するアニメーションを開始する
@@ -45,6 +48,13 @@ namespace GameEngine {
 
 		// 当たり判定のコールバック関数
 		void OnCollisionEnter(const GameEngine::CollisionResult& result);
+
+		void SetMaterial(Material* material) {
+			for (auto& [groupName, chunks] : model_->GetFractureChunks()) {
+				PackedGeometryBuffer* buffer = model_->GetFractureBuffers().at(groupName).get();
+				buffer->SetBufferMaterial(material->GetMaterialSrvIndex(), static_cast<uint32_t>(RayInstanceMask::kRayMaskOpaque));
+			}
+		}
 
 	public:
 

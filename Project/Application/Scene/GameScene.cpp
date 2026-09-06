@@ -21,6 +21,7 @@ using namespace GameEngine;
 #include "FPSCounter.h"
 #include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
+#include "Application/Effect/MoonObject.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -147,6 +148,13 @@ GameScene::GameScene() {
 	auto* ring2Model = modelManager_->GetNameByModel("fieldRingLv2.gltf");
 	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
 	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model, halfDomeModel, circleModel);
+
+	// 月のオブジェクト
+	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
+	auto* fructureModel = modelManager_->GetNameByModel("fractureMoon.gltf");
+	uint32_t moonGH = textureManager_->GetHandleByName("moon_meteor_01_diff_1k.jpg");
+	uint32_t moonNorGH = textureManager_->GetHandleByName("moon_meteor_01_nor_gl_1k.png");
+	gameObjectManager_->AddObject<MoonObject>(sphereModel, fructureModel, moonGH, moonNorGH);
 
 	// エフェクト用モデル
 	auto* effectModel = modelManager_->GetNameByModel("plane.obj");
