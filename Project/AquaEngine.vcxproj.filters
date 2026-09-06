@@ -660,6 +660,7 @@
     <ClCompile Include="Application\GameFlow\OpeningPhase.cpp" />
     <ClCompile Include="Application\GameFlow\LaunchPhase.cpp" />
     <ClCompile Include="Application\GameFlow\ResultPhase.cpp" />
+    <ClCompile Include="Application\Result\ShuffleNumber.cpp" />
     <ClCompile Include="Application\Enemy\EnemyEffectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -1269,6 +1270,7 @@
     <ClInclude Include="Application\GameFlow\PlayingPhase.h" />
     <ClInclude Include="Application\GameFlow\LaunchPhase.h" />
     <ClInclude Include="Application\GameFlow\ResultPhase.h" />
+    <ClInclude Include="Application\Result\ShuffleNumber.h" />
     <ClInclude Include="Application\Enemy\EnemyEffectManager.h" />
   </ItemGroup>
   <ItemGroup>

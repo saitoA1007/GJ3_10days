@@ -21,6 +21,7 @@ using namespace GameEngine;
 #include "FPSCounter.h"
 #include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
+#include <Application/result/ShuffleNumber.h>
 
 // 後で別クラスに纏めて消す
 namespace
@@ -162,6 +163,8 @@ GameScene::GameScene() {
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingOneEffect", 32, textureManager_, effectModel);
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingTwoEffect", 128, textureManager_, effectModel);
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingThreeEffect", 128, textureManager_, effectModel);
+
+	gameObjectManager_->AddObject<ShuffleNumber>(modelManager_);
 }
 
 void GameScene::Initialize() {
