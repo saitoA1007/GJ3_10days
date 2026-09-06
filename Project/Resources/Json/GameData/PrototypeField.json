@@ -53,6 +53,10 @@
             "NearBuffer": 15.0,
             "OuterBuffer": 35.0
         },
-        "SceneName": "Proto"
+        "SceneName": "Proto",
+        "SpawnAngle": {
+            "CenterAngleDegrees": 270.0,
+            "RangeDegrees": 180.0
+        }
     }
 }

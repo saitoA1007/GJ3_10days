@@ -6,8 +6,6 @@
 
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
-#include "MyMath.h"
-#include "RandomGenerator.h"
 
 #include "Application/Prototype/Energy/PrototypeEnergySpawner.h"
 #include "Application/Prototype/Field/PrototypeField.h"
@@ -186,8 +184,8 @@ namespace Prototype {
 	}
 
 	Vector3 EnemyManager::MakeSpawnPosition() const {
-		// 角度だけをランダム化し、全個体をOuterBufferの円周上へ出現させる。
-		const float angle = RandomGenerator::Get<float>(0.0f, TWO_PI);
+		// Fieldで指定された扇形内から角度を選び、OuterBufferの円周上へ出現させる。
+		const float angle = field_->SampleSpawnAngleRadians();
 		const float radius = field_->GetRadius(FieldZone::OuterBuffer);
 		const Vector3 center = field_->GetSettings().center;
 		return {

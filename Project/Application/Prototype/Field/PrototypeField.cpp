@@ -1,6 +1,11 @@
 #include "PrototypeField.h"
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+
+#include "MyMath.h"
+#include "RandomGenerator.h"
 
 using namespace GameEngine;
 
@@ -38,7 +43,10 @@ namespace Prototype {
 			debugParameter_->Register(kZoneNames[i], settings_.radii[i], static_cast<int>(i), "Radius");
 			debugParameter_->Register(kZoneNames[i], settings_.colors[i], static_cast<int>(i), "Color");
 		}
+		debugParameter_->Register("CenterAngleDegrees", settings_.spawnCenterAngleDegrees, 0, "SpawnAngle");
+		debugParameter_->Register("RangeDegrees", settings_.spawnAngleRangeDegrees, 1, "SpawnAngle");
 		debugParameter_->Apply();
+		SanitizeSettings();
 	}
 
 	void Field::Initialize() {
@@ -47,6 +55,7 @@ namespace Prototype {
 
 	void Field::Update() {
 		if (debugParameter_->ApplyIfDirty()) {
+			SanitizeSettings();
 			ApplySettings();
 		}
 	}
@@ -89,6 +98,29 @@ namespace Prototype {
 		}
 
 		return settings_.radii[index];
+	}
+
+	float Field::SampleSpawnAngleRadians() const {
+		constexpr float kDegreesToRadians = TWO_PI / 360.0f;
+		const float centerAngle = settings_.spawnCenterAngleDegrees * kDegreesToRadians;
+		const float halfRange = settings_.spawnAngleRangeDegrees * 0.5f * kDegreesToRadians;
+		if (halfRange <= 0.0f) {
+			return centerAngle;
+		}
+
+		return RandomGenerator::Get<float>(centerAngle - halfRange, centerAngle + halfRange);
+	}
+
+	void Field::SanitizeSettings() {
+		// 0度なら中心方向の直線上、360度なら従来どおり全周から生成する。
+		if (!std::isfinite(settings_.spawnAngleRangeDegrees)) {
+			settings_.spawnAngleRangeDegrees = 360.0f;
+		}
+		settings_.spawnAngleRangeDegrees = (std::clamp)(settings_.spawnAngleRangeDegrees, 0.0f, 360.0f);
+		if (!std::isfinite(settings_.spawnCenterAngleDegrees)) {
+			settings_.spawnCenterAngleDegrees = 0.0f;
+		}
+		settings_.spawnCenterAngleDegrees = std::remainder(settings_.spawnCenterAngleDegrees, 360.0f);
 	}
 
 	void Field::ApplySettings() {

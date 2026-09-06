@@ -40,6 +40,17 @@
 
 半径は`Center < Near < NearBuffer < Middle < MiddleBuffer < Far < OuterBuffer`の順を維持してください。順番が崩れると、領域判定やEnergyの生成範囲が正しくなくなります。
 
+### SpawnAngle
+
+Energyの自然生成とEnemyの出現に共通する、XZ平面上の扇形範囲を調整します。
+
+| 項目 | 現在値 | 変更される内容 |
+|---|---:|---|
+| `CenterAngleDegrees` | 0.0 | 生成範囲の中心方向。0度は+X、90度は+Z |
+| `RangeDegrees` | 360.0 | 生成する角度幅。0～360度に補正され、180度なら半円に限定 |
+
+たとえば`CenterAngleDegrees = 90`、`RangeDegrees = 180`にすると、EnergyとEnemyは主に+Z側の半円内へ生成されます。Enemy撃破時のEnergyドロップは撃破位置に出るため、この制限の対象外です。
+
 ### Color
 
 | 項目 | 現在値 | 変更される内容 |

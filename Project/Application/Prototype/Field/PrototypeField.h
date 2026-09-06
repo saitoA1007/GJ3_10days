@@ -32,6 +32,8 @@ namespace Prototype {
 	/// @brief 表示と領域判定で共有するフィールド設定。
 	struct FieldSettings {
 		Vector3 center = { 0.0f, 0.0f, 0.0f }; // すべての円が共有する中心座標
+		float spawnCenterAngleDegrees = 0.0f;   // 生成扇形の中心角。0度は+X、90度は+Z
+		float spawnAngleRangeDegrees = 360.0f;  // EnergyとEnemyを生成する角度幅
 		// FieldZone と同じく、中心から外側へ向かう順番。
 		std::array<float, kFieldZoneCount> radii = {
 			5.0f,  // Center
@@ -94,7 +96,14 @@ namespace Prototype {
 		/// @return フィールド設定への参照。
 		const FieldSettings& GetSettings() const { return settings_; }
 
+		/// @brief フィールドの生成扇形からランダムなXZ角度を取得する。
+		/// @return +Xを0度、+Zを90度とするラジアン角度。
+		float SampleSpawnAngleRadians() const;
+
 	private:
+		/// @brief 生成角度の設定を安全な範囲へ補正する。
+		void SanitizeSettings();
+
 		/// @brief 半径・色・重なり順を7枚のモデルへ反映する。
 		void ApplySettings();
 

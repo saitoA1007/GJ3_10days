@@ -6,7 +6,6 @@
 
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
-#include "MyMath.h"
 #include "RandomGenerator.h"
 
 using namespace GameEngine;
@@ -248,7 +247,7 @@ namespace Prototype {
 			minRadius * minRadius,
 			maxRadius * maxRadius);
 		const float radius = std::sqrt(radiusSquared);
-		const float angle = RandomGenerator::Get<float>(0.0f, TWO_PI);
+		const float angle = field_->SampleSpawnAngleRadians();
 		const Vector3 center = field_->GetSettings().center;
 
 		return {
