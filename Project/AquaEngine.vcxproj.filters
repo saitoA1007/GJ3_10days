@@ -652,6 +652,7 @@
     <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
     <ClCompile Include="Application\GameFlow\GameFlow.cpp" />
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
+    <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -1252,6 +1253,7 @@
     <ClInclude Include="Application\EnergyView\EnergyView.h" />
     <ClInclude Include="Application\GameFlow\GameFlow.h" />
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
+    <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
     <ClInclude Include="Application\Result\ResultMessage.h" />
   </ItemGroup>
   <ItemGroup>

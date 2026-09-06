@@ -3,13 +3,19 @@
 #include "EasingManager.h"
 #include "MyMath.h"
 #include "ModelManager.h"
+#include "TextureManager.h"
 using namespace GameEngine;
 
-EnemySpawnEffect::EnemySpawnEffect(GameEngine::Model* model, GameEngine::Model* planeModel, GameEngine::Model* waveModel, uint32_t outGH, uint32_t waveGH)
-	: beamModel_(model), basePlaneModel_(planeModel), outPlaneModel_(planeModel), waveModel_(waveModel) {
+EnemySpawnEffect::EnemySpawnEffect(GameEngine::Model* model, GameEngine::Model* planeModel, GameEngine::Model* waveModel, GameEngine::TextureManager* textureManager)
+	: beamModel_(model), basePlaneModel_(planeModel), outPlaneModel_(planeModel), waveModel_(waveModel), mainPlaneModel_(planeModel) {
+
+	uint32_t outGH = textureManager->GetHandleByName("Ring_01.png");
+	uint32_t waveGH = textureManager->GetHandleByName("Power.png");
+	uint32_t mainGH = textureManager->GetHandleByName("tilingNoise.png");
 
 	outPlaneModel_.materialData_->textureHandle = outGH;
 	waveModel_.materialData_->textureHandle = waveGH;
+	mainPlaneModel_.materialData_->textureHandle = mainGH;
 	basePlaneModel_.materialData_->textureHandle = 0;
 
 	// ペアレント化
@@ -17,6 +23,7 @@ EnemySpawnEffect::EnemySpawnEffect(GameEngine::Model* model, GameEngine::Model* 
 	basePlaneModel_.worldTransform_.SetParent(&baseWorld_);
 	outPlaneModel_.worldTransform_.SetParent(&baseWorld_);
 	waveModel_.worldTransform_.SetParent(&baseWorld_);
+	mainPlaneModel_.worldTransform_.SetParent(&baseWorld_);
 
 	baseWorld_.transform_.scale = { 2.0f,8.0f,2.0f };
 
@@ -74,30 +81,32 @@ void EnemySpawnEffect::Update() {
 	}
 	}
 
+	mainUvtransform_.translate.y += scrollSpeed_ * FpsCounter::gameDeltaTime;
+
 	Matrix4x4 cameraMatrix = renderQueue_->GetMainCamera().GetWorldMatrix();
 	if (renderQueue_->GetUseDebugCamera()) {
 		cameraMatrix = renderQueue_->GetDebugCameraWorldMatrix();
 	}
 
-	baseWorld_.UpdateTransformMatrix();
+	baseWorld_.UpdateWorldMatrix(
+		Math::MakeYAxisBillboardMatrix(baseWorld_.transform_.scale, baseWorld_.transform_.translate, cameraMatrix));
 
-	outPlaneModel_.worldTransform_.UpdateWorldMatrix(
-		Math::MakeYAxisBillboardMatrix(outPlaneModel_.worldTransform_.transform_.scale, outPlaneModel_.worldTransform_.transform_.translate, cameraMatrix));
-
-	basePlaneModel_.worldTransform_.UpdateWorldMatrix(
-		Math::MakeYAxisBillboardMatrix(basePlaneModel_.worldTransform_.transform_.scale, basePlaneModel_.worldTransform_.transform_.translate, cameraMatrix));
-
+	outPlaneModel_.Update();
+	basePlaneModel_.Update();
 	beamModel_.Update();
 	waveModel_.Update();
+	mainPlaneModel_.Update();
 	// uvの更新
 	outPlaneModel_.materialData_->uvTransform = Math::MakeWorldMatrixFromEulerRotation(outUvtransform_.translate, outUvtransform_.rotate, outUvtransform_.scale);
 	waveModel_.materialData_->uvTransform = Math::MakeWorldMatrixFromEulerRotation(waveUvtransform_.translate, waveUvtransform_.rotate, waveUvtransform_.scale);
+	mainPlaneModel_.materialData_->uvTransform = Math::MakeWorldMatrixFromEulerRotation(mainUvtransform_.translate, mainUvtransform_.rotate, mainUvtransform_.scale);
 }
 
 void EnemySpawnEffect::Draw() {
 	beamModel_.DrawRaytracing(renderQueue_);
 	basePlaneModel_.Draw(renderQueue_,Draw3dType::Default, "WBOITAccumulatePass");
 	outPlaneModel_.Draw(renderQueue_, Draw3dType::DefaultAdd, "WBOITAccumulatePass");
+	mainPlaneModel_.Draw(renderQueue_, Draw3dType::DefaultAdd, "WBOITAccumulatePass");
 
 	if (phase_ == Phase::kEnd) {
 		waveModel_.Draw(renderQueue_);
@@ -127,5 +136,11 @@ void EnemySpawnEffect::Register() {
 	debugParame_->Register("uvrotate", waveUvtransform_.rotate, 0, subGroup);
 	debugParame_->Register("uvPos", waveUvtransform_.translate, 0, subGroup);
 	debugParame_->Register("Color", waveModel_.materialData_->color, 0, subGroup);
+	subGroup = "mainPlane";
+	debugParame_->RegisterWorld("", mainPlaneModel_.worldTransform_, subGroup);
+	debugParame_->Register("uvScale", mainUvtransform_.scale, 0, subGroup);
+	debugParame_->Register("uvPos", mainUvtransform_.translate, 0, subGroup);
+	debugParame_->Register("Color", mainPlaneModel_.materialData_->color, 0, subGroup);
+	debugParame_->Register("ScrollSpeed", scrollSpeed_, 1, subGroup);
 	debugParame_->Apply();
 }
