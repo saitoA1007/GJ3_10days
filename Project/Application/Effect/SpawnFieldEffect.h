@@ -20,6 +20,9 @@ private:
 	std::vector<std::unique_ptr<GameEngine::ModelComponent>> ringModels_;
 	std::vector<GameEngine::BlackHoleRingMaterial> materials_;
 	std::vector<Vector4> glowColors_;
+
+	std::vector<std::unique_ptr<GameEngine::ModelComponent>> underRingModels_;
+
 private:
 
 	// 登録する

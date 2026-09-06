@@ -10,20 +10,28 @@ SpawnFieldEffect::SpawnFieldEffect(GameEngine::Model* ring1Model, GameEngine::Mo
 	ringModels_.reserve(3);
 	for (uint32_t i = 0; i < 3; ++i) {
 		std::unique_ptr<ModelComponent> model;
+		std::unique_ptr<ModelComponent> underModel;
 
 		if (i == 0) {
 			model = std::make_unique<ModelComponent>(ring1Model);
+			underModel = std::make_unique<ModelComponent>(ring1Model);
 		} else if (i == 1) {
 			model = std::make_unique<ModelComponent>(ring2Model);
+			underModel = std::make_unique<ModelComponent>(ring2Model);
 		} else {
 			model = std::make_unique<ModelComponent>(ring3Model);
+			underModel = std::make_unique<ModelComponent>(ring3Model);
 		}
 		model->worldTransform_.transform_.translate = {};
-		
 
+		underModel->worldTransform_.transform_.translate.y = -0.1f;
+		underModel->materialData_->color = { 0.0f,0.0f,0.0f,1.0f };
+		underModel->materialData_->enableLighting = false;
+		
 		model->SetHitGroup(4);
 		model->SetBufferMaterial(0, materials_[i].GetMaterialSrvIndex());
 		ringModels_.push_back(std::move(model));
+		underRingModels_.push_back(std::move(underModel));
 	}
 
 	// 登録
@@ -52,13 +60,15 @@ void SpawnFieldEffect::Update() {
 
 	for (uint32_t i = 0; i < 3; ++i) {
 		ringModels_[i]->Update();
+		underRingModels_[i]->Update();
 	}
 }
 
 void SpawnFieldEffect::Draw() {
-	
-	for (auto& model : ringModels_) {
-		model->DrawCustomRaytracing(renderQueue_);
+
+	for (uint32_t i = 0; i < 3; ++i) {
+		ringModels_[i]->DrawCustomRaytracing(renderQueue_);
+		underRingModels_[i]->DrawRaytracing(renderQueue_);
 	}
 }
 
