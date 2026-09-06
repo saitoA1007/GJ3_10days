@@ -170,6 +170,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
     <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
+    <ClCompile Include="Application\GameCamera\ResultMoveCamera.cpp" />
     <ClCompile Include="Application\GameFlow\GameFlow.cpp" />
     <ClCompile Include="Application\GameFlow\LaunchPhase.cpp" />
     <ClCompile Include="Application\GameFlow\OpeningPhase.cpp" />
@@ -473,6 +474,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\GameCamera\GameCamera.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
+    <ClInclude Include="Application\GameCamera\ResultMoveCamera.h" />
     <ClInclude Include="Application\GameFlow\GameFlow.h" />
     <ClInclude Include="Application\GameFlow\IGamePhase.h" />
     <ClInclude Include="Application\GameFlow\LaunchPhase.h" />

@@ -23,6 +23,7 @@ using namespace GameEngine;
 #include "Application/Effect/SpawnFieldEffect.h"
 #include "Application/Effect/MoonObject.h"
 #include <Application/result/ShuffleNumber.h>
+#include "Application/GameCamera/ResultMoveCamera.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -49,6 +50,7 @@ GameScene::GameScene() {
 		1280,
 		720);
 
+	dir_.Normalize();
 
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("rogland_clear_night_1k.dds");
@@ -164,6 +166,9 @@ GameScene::GameScene() {
 	uint32_t moonGH = textureManager_->GetHandleByName("moon_meteor_01_diff_1k.jpg");
 	uint32_t moonNorGH = textureManager_->GetHandleByName("moon_meteor_01_nor_gl_1k.png");
 	gameObjectManager_->AddObject<MoonObject>(sphereModel, fructureModel, moonGH, moonNorGH);
+
+	// リザルトのムービーカメラ
+	//gameObjectManager_->AddObject<ResultMoveCamera>(mainCamera_.get());
 
 	// エフェクト用モデル
 	auto* effectModel = modelManager_->GetNameByModel("plane.obj");
