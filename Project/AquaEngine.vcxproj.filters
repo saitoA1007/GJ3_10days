@@ -579,7 +579,7 @@
     <ClCompile Include="Application\Prototype\Rocket\PrototypeRocket.cpp">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Prototype\Rocket\RocketEnergy.cpp">
+    <ClCompile Include="Application\Prototype\Rocket\PrototypeRocketEnergy.cpp">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClCompile>
     <ClCompile Include="Application\Prototype\Unit\PrototypeUnit.cpp">
@@ -589,6 +589,7 @@
       <Filter>Application\Prototype\Unit</Filter>
     </ClCompile>
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
+    <ClCompile Include="Application\Utils\GamingColor.cpp" />
     <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
     <ClCompile Include="EngineSource\Core\StaticGameObject.cpp" />
@@ -615,7 +616,7 @@
     <ClCompile Include="Application\Player\Player.cpp" />
     <ClCompile Include="Application\Player\PlayerStateMove.cpp" />
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
-    <ClCompile Include="Application\Pikumi\Pikumi.cpp" />
+    <ClCompile Include="Application\Unit\Pikumi.cpp" />
     <ClCompile Include="Application\Field\Field.cpp" />
     <ClCompile Include="Application\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Application\Score\Score.cpp">
@@ -632,7 +633,6 @@
       <Filter>Application\TitleLogo</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
-    <ClCompile Include="Application\Tower\Tower.cpp" />
     <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
@@ -642,8 +642,18 @@
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\HyperspaceMaterial.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
+    <ClCompile Include="Application\Unit\Unit.cpp" />
+    <ClCompile Include="Application\Unit\UnitManager.cpp" />
+    <ClCompile Include="Application\Rocket\Rocket.cpp" />
+    <ClCompile Include="Application\Rocket\RocketEnergy.cpp" />
+    <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
+    <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
+    <ClCompile Include="Application\LockOn\LockOnController.cpp" />
+    <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
+    <ClCompile Include="Application\GameFlow\GameFlow.cpp" />
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
+    <ClCompile Include="Application\Result\ResultMessage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1160,7 +1170,7 @@
     <ClInclude Include="Application\Prototype\Rocket\PrototypeRocket.h">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Prototype\Rocket\RocketEnergy.h">
+    <ClInclude Include="Application\Prototype\Rocket\PrototypeRocketEnergy.h">
       <Filter>Application\Prototype\Rocket</Filter>
     </ClInclude>
     <ClInclude Include="Application\Prototype\Unit\PrototypeUnit.h">
@@ -1170,6 +1180,7 @@
       <Filter>Application\Prototype\Unit</Filter>
     </ClInclude>
     <ClInclude Include="Application\Utils\GameTimer.h" />
+    <ClInclude Include="Application\Utils\GamingColor.h" />
     <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
     <ClInclude Include="EngineSource\Core\StaticGameObject.h" />
@@ -1205,7 +1216,7 @@
     <ClInclude Include="Application\Player\IPlayerState.h" />
     <ClInclude Include="Application\Player\PlayerStateMove.h" />
     <ClInclude Include="Application\Player\PlayerStateIdle.h" />
-    <ClInclude Include="Application\Pikumi\Pikumi.h" />
+    <ClInclude Include="Application\Unit\Pikumi.h" />
     <ClInclude Include="Application\Field\Field.h" />
     <ClInclude Include="Application\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\Score\Score.h">
@@ -1222,7 +1233,6 @@
       <Filter>Application\TitleLogo</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\StageSelectScene.h" />
-    <ClInclude Include="Application\Tower\Tower.h" />
     <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
     <ClInclude Include="Application\Utils\Binary\BinaryManager.h" />
@@ -1233,8 +1243,18 @@
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\HyperspaceMaterial.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
+    <ClInclude Include="Application\Unit\Unit.h" />
+    <ClInclude Include="Application\Unit\UnitManager.h" />
+    <ClInclude Include="Application\Rocket\Rocket.h" />
+    <ClInclude Include="Application\Rocket\RocketEnergy.h" />
+    <ClInclude Include="Application\Energy\EnergyPickup.h" />
+    <ClInclude Include="Application\Energy\EnergySpawner.h" />
+    <ClInclude Include="Application\LockOn\LockOnController.h" />
+    <ClInclude Include="Application\EnergyView\EnergyView.h" />
+    <ClInclude Include="Application\GameFlow\GameFlow.h" />
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
+    <ClInclude Include="Application\Result\ResultMessage.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

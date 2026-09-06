@@ -42,6 +42,19 @@ void ModelComponent::SetAlpha(float alpha) {
 	}
 }
 
+void ModelComponent::SetColor(const Vector3& color) {
+	for (auto& material : defaultMaterials_) {
+		const float alpha = material.GetMaterialData()->color.w;
+		material.SetColor({ color.x, color.y, color.z, alpha });
+	}
+}
+
+void ModelComponent::SetEnableLighting(bool enabled) {
+	for (auto& material : defaultMaterials_) {
+		material.SetEnableLighting(enabled);
+	}
+}
+
 void ModelComponent::Draw(RenderQueue* renderQueue, const Draw3dType& drawType, const std::string& passName) {
 
 	switch (drawType)

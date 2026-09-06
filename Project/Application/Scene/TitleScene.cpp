@@ -9,6 +9,10 @@
 #include "AudioManager.h"
 using namespace GameEngine;
 
+namespace {
+	constexpr Vector3 kCameraPosition = { 0.0f, 1.0f, -15.0f };
+}
+
 TitleScene::~TitleScene() {}
 
 TitleScene::TitleScene() {
@@ -26,7 +30,7 @@ TitleScene::TitleScene() {
 
 	// メインカメラの初期化
 	mainCamera_ = std::make_unique<Camera>();
-	mainCamera_->Initialize({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,1.0f,-15.0f} }, 1280, 720);
+	mainCamera_->Initialize({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},kCameraPosition }, 1280, 720);
 	mainCamera_->Update();
 	// 描画に使用するカメラを設定
 	renderQueue_->SetCamera(mainCamera_.get());
@@ -47,31 +51,62 @@ void TitleScene::Initialize() {
 	isFinished_ = false;
 	titleLogo_->ResetAnimation();
 	hyperspaceEffect_->ResetAnimation();
+	mainCamera_->transform_.translate = kCameraPosition;
+	mainCamera_->Update();
 }
 
 void TitleScene::Update() {
-
-	// カメラの更新処理
-	mainCamera_->Update();
-
 	// Decision入力を受けたらタイトル終了演出を開始する。
 	if (inputCommand_->IsCommandActive("Decision")) {
 		if (titleLogo_->GetAnimationState() == AnimationState::Idle) {
 			auto& audioManager = AudioManager::GetInstance();
-			const uint32_t titleDecisionHandle = audioManager.GetHandleByName("hyperSpace.mp3");
-			audioManager.Play(titleDecisionHandle, 0.8f, false);
+			const uint32_t titleDecisionHandle = audioManager.GetHandleByName("titleDecision.mp3");
+			audioManager.Play(titleDecisionHandle, 1.0f, false);
 
 			titleLogo_->AnimationStart();
 			hyperspaceEffect_->StartAnimation();
+			if (!hyperspaceAudioTimer_.IsActive()) {
+				hyperspaceAudioTimer_.Start(0.25f);
+			}
+
+			if (!bgmAudioTimer_.IsActive()) {
+				bgmAudioTimer_.Start(1.0f);
+			}
 		}
 	}
 
 	// タイトルロゴの更新処理
 	titleLogo_->Update();
 
+	// タイトル終了演出中は、ロゴのシェイクと同期してカメラも揺らす。
+	// 毎フレーム基準位置からオフセットすることで、位置のずれが累積しないようにする。
+	mainCamera_->transform_.translate = kCameraPosition + titleLogo_->GetCameraShakeOffset();
+	mainCamera_->Update();
+
+	hyperspaceAudioTimer_.Update();
+	bgmAudioTimer_.Update();
+
+	{
+		if(bgmAudioTimer_.IsActive()) {
+			auto& audioManager = AudioManager::GetInstance();
+			const uint32_t titleBGM = audioManager.GetHandleByName("titleBGM.mp3");
+			audioManager.SetVolume(titleBGM, 1.0f - bgmAudioTimer_.GetProgress());
+		}
+	}
+
+	if (hyperspaceAudioTimer_.IsFinished() && !isHyperspaceAudioPlayed_) {
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t titleDecisionHandle = audioManager.GetHandleByName("titleHyperSpace.mp3");
+		audioManager.Play(titleDecisionHandle, 1.0f, false);
+		isHyperspaceAudioPlayed_ = true;
+	}
+
 	// ロゴが画面奥まで移動し終えたらシーン遷移を許可する。
 	if (titleLogo_->IsAnimationFinished()) {
 		isFinished_ = true;
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t titleBGM = audioManager.GetHandleByName("titleBGM.mp3");
+		audioManager.Stop(titleBGM);
 	}
 }
 

@@ -1,4 +1,5 @@
 #include "AudioManager.h"
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
 #include "ConvertString.h"
@@ -264,6 +265,15 @@ void AudioManager::Play(uint32_t soundHandle, float volume, bool isloop) {
 	} else {
 		SoundPlayWave(soundHandle, isloop);
 	}
+}
+
+void AudioManager::SetVolume(uint32_t soundHandle, float volume) {
+	auto it = activeVoices_.find(soundHandle);
+	if (it == activeVoices_.end() || it->second == nullptr) {
+		return;
+	}
+
+	it->second->SetVolume(std::clamp(volume, 0.0f, 1.0f));
 }
 
 void AudioManager::Stop(const uint32_t& soundHandle) {

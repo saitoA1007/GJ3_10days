@@ -28,7 +28,20 @@ EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model)
 	LoadPreset();
 }
 
+void EnemyManager::SetContext(Field* field, Rocket* rocket, EnergySpawner* energySpawner, UnitManager* unitManager) {
+	context_.field = field;
+	context_.rocket = rocket;
+	context_.energySpawner = energySpawner;
+	context_.unitManager = unitManager;
+
+	// 全個体へコンテキストを伝達
+	for (auto& enemy : enemies_) {
+		enemy->SetContext(context_);
+	}
+}
+
 void EnemyManager::Initialize() {
+	gameplayEnabled_ = true;
 	freeEnemyIndices_.clear();
 	activeEnemies_.clear();
 	deadEnemies_.clear();
@@ -38,6 +51,8 @@ void EnemyManager::Initialize() {
 
 	for (uint32_t i = 0; i < maxEnemyNum_; ++i) {
 		enemies_[i]->Initialize();
+		// 初期化時にも一度コンテキストを設定
+		enemies_[i]->SetContext(context_);
 		freeEnemyIndices_.push_back(i);
 	}
 
@@ -74,6 +89,11 @@ void EnemyManager::Update() {
 	debugParam_.ApplyIfDirty();
 	Enemy::SetCollisionRadius(collisionRadius_);
 
+	// ゲームプレイが無効なら更新をスキップ
+	if (!gameplayEnabled_) {
+		return;
+	}
+
 	auto getRandomPos = [](float fieldSize)->Vector2 {
 		float range = RandomGenerator::Get(fieldSize / 2.f, fieldSize);
 		float theta = RandomGenerator::Get(0.f, 2.f * std::numbers::pi_v<float>);
@@ -91,28 +111,35 @@ void EnemyManager::Update() {
 
 #endif
 
-	//出現処理
-	if (stageTimer_ == 0.0f && GameEngine::FpsCounter::deltaTime > 0.0f) {
-		auto& fase = stageDataMap_[currentStageName_].fases[currentFaseIndex_];
-		for (int i = 0; i < (int)presetDataMap_[fase.name].enemyPositions.size(); ++i) {
-			EnemyType type = static_cast<EnemyType>(i);
-			for (const auto& transform : presetDataMap_[fase.name].enemyPositions[i]) {
-				Vector2 pos = { transform.translate.x, transform.translate.z };
-				Pop(1, pos, type);
+	// 出現処理（ステージ名が設定されていてデータが存在する場合のみ実行）
+	if (!currentStageName_.empty() && stageDataMap_.contains(currentStageName_)) {
+		auto& stage = stageDataMap_[currentStageName_];
+		if (!stage.fases.empty() && currentFaseIndex_ < stage.fases.size()) {
+			if (stageTimer_ == 0.0f && GameEngine::FpsCounter::deltaTime > 0.0f) {
+				auto& fase = stage.fases[currentFaseIndex_];
+				if (presetDataMap_.contains(fase.name)) {
+					for (int i = 0; i < (int)presetDataMap_[fase.name].enemyPositions.size(); ++i) {
+						EnemyType type = static_cast<EnemyType>(i);
+						for (const auto& transform : presetDataMap_[fase.name].enemyPositions[i]) {
+							Vector2 pos = { transform.translate.x, transform.translate.z };
+							Pop(1, pos, type);
+						}
+					}
+				}
+			}
+
+			stageTimer_ += GameEngine::FpsCounter::deltaTime;
+			if (stage.fases[currentFaseIndex_].time <= stageTimer_) {
+				currentFaseIndex_++;
+				if (currentFaseIndex_ >= stage.fases.size()) {
+					currentFaseIndex_ = 0;
+				}
+				stageTimer_ = 0.0f;
 			}
 		}
 	}
 
-	stageTimer_ += GameEngine::FpsCounter::deltaTime;
-	if (stageDataMap_[currentStageName_].fases[currentFaseIndex_].time <= stageTimer_) {
-		currentFaseIndex_++;
-		if (currentFaseIndex_ >= stageDataMap_[currentStageName_].fases.size()) {
-			currentFaseIndex_ = 0;
-		}
-		stageTimer_ = 0.0f;
-	}
-
-	//更新処理
+	// 死亡後アクション更新
 	for (auto it = deadEnemies_.begin(); it != deadEnemies_.end();) {
 		const auto [index, enemy] = *it;
 		enemy->DeadUpdate();
@@ -120,11 +147,13 @@ void EnemyManager::Update() {
 		if (!enemy->IsActive()) {
 			it = deadEnemies_.erase(it);
 			freeEnemyIndices_.push_back(index);
-		} else {
+		}
+		else {
 			++it;
 		}
 	}
 
+	// アクティブ敵の更新処理
 	for (auto it = activeEnemies_.begin(); it != activeEnemies_.end();) {
 		const auto [index, enemy] = *it;
 		if (!enemy->IsDead()) {
@@ -132,13 +161,13 @@ void EnemyManager::Update() {
 		}
 
 		if (enemy->IsDead()) {
-			// 死亡処理用のリストへ移し、攻撃による撃破だけを一度通知する。
 			deadEnemies_[index] = enemy;
 			it = activeEnemies_.erase(it);
 			if (enemy->WasDefeated() && onEnemyDefeated_) {
 				onEnemyDefeated_();
 			}
-		} else {
+		}
+		else {
 			++it;
 		}
 	}
@@ -194,10 +223,6 @@ void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 			enemies_[index]->SetRound(roundSpeed_);
 		}
 	}
-}
-
-int EnemyManager::GetCurrentNum() {
-	return 0;
 }
 
 void EnemyManager::LoadPreset() {
@@ -263,4 +288,37 @@ void EnemyManager::LoadPreset() {
 
 		stageDataMap_[path.stem().string()] = stageData;
 	}
+}
+
+
+Enemy* EnemyManager::FindNearestTargetable(const Vector3& position, float maxDistance) const {
+	Enemy* nearest = nullptr;
+	const float safeMaxDistance = (std::max)(maxDistance, 0.0f);
+	float nearestDistanceSquared = safeMaxDistance * safeMaxDistance;
+
+	for (const auto& [index, enemy] : activeEnemies_) {
+		if (!enemy || !enemy->IsTargetable()) {
+			continue;
+		}
+
+		const Vector3 offset = enemy->GetPosition() - position;
+		const float distanceSquared = offset.x * offset.x + offset.z * offset.z;
+
+		if (distanceSquared <= nearestDistanceSquared) {
+			nearest = enemy;
+			nearestDistanceSquared = distanceSquared;
+		}
+	}
+
+	return nearest;
+}
+
+size_t EnemyManager::GetCarrierTargetCount() const {
+	size_t count = 0;
+	for (const auto& [index, enemy] : activeEnemies_) {
+		if (enemy && enemy->IsTargetingCarrier()) {
+			count++;
+		}
+	}
+	return count;
 }
