@@ -41,6 +41,9 @@ namespace GameEngine {
 
 	public:
 
+		// 全チャンクのアンカーを無視して、固定されていない状態として扱う
+		bool kIgnoreAnchors_ = true;
+
 		float kBreakThreshold_ = 3.0f;
 		// チャンクが完全破壊された時、命中点から半径このくらいの範囲にある隣接チャンクも巻き込んで切り離す
 		float kBreakDetachRadius_ = 3.0f;
@@ -158,5 +161,10 @@ namespace GameEngine {
 
 		// instance内の全チャンクの位置、回転を原点へバネで収束させる。全チャンクが収束済みならtrueを返す
 		bool SimulateReassemblySpring(FractureInstance& instance, float deltaTime);
+
+		// アンカー判定
+		bool IsAnchored(const FractureChunkInfo& info) const {
+			return !kIgnoreAnchors_ && info.isAnchored;
+		}
 	};
 }

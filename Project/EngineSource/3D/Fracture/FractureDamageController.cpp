@@ -352,7 +352,7 @@ void FractureDamageController::CollapseUnsupportedChunks() {
 
 	for (const auto& [id, entry] : chunksById_) {
 		if (destroyedChunkIds_.count(id)) { continue; }
-		if (!entry->info.isAnchored) { continue; }
+		if (!IsAnchored(entry->info)) { continue; }
 		hasAnyAnchor = true;
 		if (reachable.insert(id).second) {
 			queue.push(id);
@@ -430,7 +430,7 @@ std::vector<uint32_t> FractureDamageController::SelectDetachedChunks(uint32_t se
 		const FractureChunkInfo& info = it->second->info;
 
 		// アンカーチャンクは境界として残し、切り離さない
-		if (info.isAnchored) {
+		if (IsAnchored(info)) {
 			continue;
 		}
 

@@ -120,6 +120,45 @@ void DestructibleObject::Draw() {
 	}
 }
 
+void DestructibleObject::NewDraw(Material* material) {
+
+	FractureBreakState& breakState = damageController_.GetBreakState();
+
+	// 事前分割された静的な破片はレイトレで描画
+	if (breakState.HasIntact()) {
+		renderQueue_->SubmitRaytracingFracture(model_, breakState.Intact(), worldTransform_);
+		//renderQueue_->SubmitFracture(model_, breakState.Intact());
+	}
+	// マクロ破片は破壊イベントごとに積み上がったバッチ全てを描画する
+	for (auto& batch : breakState.MacroDebrisBatches()) {
+		renderQueue_->SubmitRaytracingFracture(model_, *batch, worldTransform_);
+		//renderQueue_->SubmitFracture(model_, *batch);
+	}
+
+	// ランタイムでカットされた破片はラスタライズで描画
+	if (breakState.HasMicroDebris() || breakState.HasDentedChunks()) {
+		const auto& fractureChunks = model_->GetFractureChunks();
+		if (!fractureChunks.empty()) {
+			const auto& chunks = fractureChunks.begin()->second;
+			Material* drawMaterial = model_->GetMaterial(chunks.front().materialName);
+
+			// 積み上がったマイクロ破片バッチ全てを描画する
+			for (auto& batch : breakState.MicroDebrisBatches()) {
+				//renderQueue_->SubmitRuntimeCutFragments(*batch, &drawMaterial->GetMaterialBuffer());
+				//renderQueue_->SubmitRuntimeCutIceFragments(*batch, &material->GetMaterialBuffer());
+				renderQueue_->SubmitRuntimeCutFragments(*batch, &material->GetMaterialBuffer());
+			}
+
+			// 付着したまま動的に凹んでいるチャンクを描画する
+			for (auto& [chunkId, instance] : breakState.DentedChunks()) {
+				//renderQueue_->SubmitRuntimeCutFragments(*instance, &drawMaterial->GetMaterialBuffer());
+				//renderQueue_->SubmitRuntimeCutIceFragments(*instance, &material->GetMaterialBuffer());
+				renderQueue_->SubmitRuntimeCutFragments(*instance, &material->GetMaterialBuffer());
+			}
+		}
+	}
+}
+
 void DestructibleObject::OnCollisionEnter(const GameEngine::CollisionResult& result) {
 	// ワールド座標で渡ってくる衝突情報をローカル座標へ変換してから渡す
 	Matrix4x4 inverseWorld = Math::InverseMatrix(worldTransform_.GetWorldMatrix());

@@ -163,6 +163,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
+    <ClCompile Include="Application\Effect\MoonObject.cpp" />
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
     <ClCompile Include="Application\Enemy\EnemyEffectManager.cpp" />
     <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
@@ -462,6 +463,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
+    <ClInclude Include="Application\Effect\MoonObject.h" />
     <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
     <ClInclude Include="Application\Enemy\EnemyEffectManager.h" />
     <ClInclude Include="Application\EnergyView\EnergyView.h" />
