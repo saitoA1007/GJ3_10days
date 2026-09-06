@@ -54,6 +54,8 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, size_t capacity)
 		debugParameter_->Register("Scale", typeSettings_[i].scale, 0, group);
 		debugParameter_->Register("Value", typeSettings_[i].value, 1, group);
 		debugParameter_->Register("Color", typeSettings_[i].color, 2, group);
+		debugParameter_->Register("rimColor", typeSettings_[i].rimColor, 2, group);
+		debugParameter_->Register("dissolveEdgeColor", typeSettings_[i].dissolveEdgeColor, 2, group);
 	}
 
 	debugParameter_->Apply();

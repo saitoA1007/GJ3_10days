@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "RayLibShaderCompiler.h"
 #include "StateObjectBuilder.h"
 #include "ShaderTableBuilder.h"
@@ -13,6 +13,7 @@ namespace GameEngine {
 		static const std::wstring BlackHoleModel = L"BlackHoleModel";
 		static const std::wstring BlackHoleRingModel = L"BlackHoleRingModel";
 		static const std::wstring HyperspaceModel = L"HyperspaceModel";
+		static const std::wstring CrystalModel = L"CrystalModel";
 	}
 
 	class RaytracingPipeline {

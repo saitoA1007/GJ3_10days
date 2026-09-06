@@ -1,4 +1,4 @@
-#include "RaytracingPipeline.h"
+﻿#include "RaytracingPipeline.h"
 #include "EngineSource/Graphics/PSO/Core/RootSignatureBuilder.h"
 using namespace GameEngine;
 
@@ -50,6 +50,7 @@ void RaytracingPipeline::CreateStateObject() {
 	LibraryResult BlackHoleResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsBlackHole.hlsl");
 	LibraryResult BlackHoleRingResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsBlackHoleRing.hlsl");
 	LibraryResult HyperspaceResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsHyperspace.hlsl");
+	LibraryResult CrystalResult = rayLibShaderCompiler_.CompileShader(L"Resources/Shaders/Raytracing/chsCrystal.hlsl");
 
 	// 初期化処理
 	stateObjectBuilder_.Initialize();
@@ -63,6 +64,7 @@ void RaytracingPipeline::CreateStateObject() {
 	stateObjectBuilder_.AddDXILLibrary(BlackHoleResult.blob.Get(), BlackHoleResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(BlackHoleRingResult.blob.Get(), BlackHoleRingResult.exportNames);
 	stateObjectBuilder_.AddDXILLibrary(HyperspaceResult.blob.Get(), HyperspaceResult.exportNames);
+	stateObjectBuilder_.AddDXILLibrary(CrystalResult.blob.Get(), CrystalResult.exportNames);
 
 	// ヒットグループを設定
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::DefaultModel, L"MainObjectCHS");
@@ -71,6 +73,7 @@ void RaytracingPipeline::CreateStateObject() {
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::BlackHoleModel, L"MainBlackHoleLensCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::BlackHoleRingModel, L"MainBlackHoleRingCHS");
 	stateObjectBuilder_.AddHitGroup(AppHitGroups::HyperspaceModel, L"MainHyperspaceCHS");
+	stateObjectBuilder_.AddHitGroup(AppHitGroups::CrystalModel, L"MainCrystalCHS");
 
 	// シェーダー設定
 	const uint32_t MaxPayloadSize = sizeof(float) * 3 + sizeof(uint32_t) + sizeof(float);
@@ -177,6 +180,15 @@ void RaytracingPipeline::CreateShaderTable() {
 		ShaderRecord hyperspaceRecord;
 		auto& hyperspaceTable = hyperspaceRecord.SetIdentifier(hyperspaceId);
 		shaderTableBuilder_.HitGroup().AddRecord(std::move(hyperspaceRecord));
+
+		// クリスタル
+		auto crystalId = rtsoProps->GetShaderIdentifier(AppHitGroups::CrystalModel.c_str());
+		if (crystalId == nullptr) {
+			assert(false && "Not found ShaderIdentifier");
+		}
+		ShaderRecord crystalRecord;
+		auto& crystalTable = crystalRecord.SetIdentifier(crystalId);
+		shaderTableBuilder_.HitGroup().AddRecord(std::move(crystalRecord));
 	}
 
 	// テーブルを設定する

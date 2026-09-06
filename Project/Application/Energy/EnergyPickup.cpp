@@ -12,7 +12,10 @@ EnergyPickup::EnergyPickup(Model* model)
 {
 	assert(model != nullptr && "energy requires energy.obj");
 	modelComponent_ = std::make_unique<ModelComponent>(model);
-	modelComponent_->materialData_->enableLighting = true;
+	//modelComponent_->materialData_->enableLighting = true;
+
+	modelComponent_->SetHitGroup(6);
+	modelComponent_->SetBufferMaterial(0, material_.GetMaterialSrvIndex());
 }
 
 void EnergyPickup::Spawn(
@@ -80,7 +83,8 @@ void EnergyPickup::Update(float deltaTime)
 void EnergyPickup::Draw(RenderQueue* renderQueue)
 {
 	if (IsActive()) {
-		modelComponent_->DrawRaytracing(renderQueue);
+		//modelComponent_->DrawRaytracing(renderQueue);
+		modelComponent_->DrawCustomRaytracing(renderQueue);
 	}
 }
 
@@ -183,6 +187,11 @@ void EnergyPickup::SyncModel()
 		color.z = color.z + (1.0f - color.z) * 0.65f;
 	}
 	modelComponent_->materialData_->color = color;
+
+	material_.materialData_->baseColor = color;
+	material_.materialData_->rimColor = typeSettings_.rimColor;
+	material_.materialData_->dissolveEdgeColor = typeSettings_.dissolveEdgeColor;
+
 	modelComponent_->Update();
 }
 

@@ -11,11 +11,12 @@ class Field;
 class Rocket;
 class EnergySpawner;
 class UnitManager;
+class EnemyEffectManager;
 
 class EnemyManager : public GameEngine::IGameObject {
 public:
 
-	EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model);
+	EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model, EnemyEffectManager* effectManager);
 
 	void Initialize() override;
 	void Update() override;
@@ -72,6 +73,8 @@ private:
 	bool gameplayEnabled_ = true;
 
 private:
+	// 演出管理
+	EnemyEffectManager* effectManager_ = nullptr;
 
 	GameEngine::DebugParameter debugParam_{ "EnemyManager" };
 

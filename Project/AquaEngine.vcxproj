@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -164,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
+    <ClCompile Include="Application\Enemy\EnemyEffectManager.cpp" />
     <ClCompile Include="Application\EnergyView\EnergyView.cpp" />
     <ClCompile Include="Application\Energy\EnergyPickup.cpp" />
     <ClCompile Include="Application\Energy\EnergySpawner.cpp" />
@@ -228,6 +229,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="EngineSource\3D\Animation\Animator.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Material\BlackHoleRingMaterial.cpp" />
+    <ClCompile Include="EngineSource\3D\Material\CrystalMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Material\HyperspaceMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Material\IceMaterial.cpp" />
     <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
@@ -460,6 +462,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
     <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
+    <ClInclude Include="Application\Enemy\EnemyEffectManager.h" />
     <ClInclude Include="Application\EnergyView\EnergyView.h" />
     <ClInclude Include="Application\Energy\EnergyPickup.h" />
     <ClInclude Include="Application\Energy\EnergySpawner.h" />
@@ -533,6 +536,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="EngineSource\3D\Animation\Animator.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleMaterial.h" />
     <ClInclude Include="EngineSource\3D\Material\BlackHoleRingMaterial.h" />
+    <ClInclude Include="EngineSource\3D\Material\CrystalMaterial.h" />
     <ClInclude Include="EngineSource\3D\Material\HyperspaceMaterial.h" />
     <ClInclude Include="EngineSource\3D\Material\IceMaterial.h" />
     <ClInclude Include="EngineSource\3D\Fracture\FractureData.h" />
