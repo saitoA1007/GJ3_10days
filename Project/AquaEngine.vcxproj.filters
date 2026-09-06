@@ -655,6 +655,12 @@
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
+    <ClCompile Include="Application\GameFlow\PlayingPhase.cpp" />
+    <ClCompile Include="Application\GameFlow\TutorialPhase.cpp" />
+    <ClCompile Include="Application\GameFlow\OpeningPhase.cpp" />
+    <ClCompile Include="Application\GameFlow\LaunchPhase.cpp" />
+    <ClCompile Include="Application\GameFlow\ResultPhase.cpp" />
+    <ClCompile Include="Application\Result\ShuffleNumber.cpp" />
     <ClCompile Include="Application\Enemy\EnemyEffectManager.cpp" />
     <ClCompile Include="Application\Effect\MoonObject.cpp" />
   </ItemGroup>
@@ -1259,6 +1265,13 @@
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\SpawnFieldEffect.h" />
     <ClInclude Include="Application\Result\ResultMessage.h" />
+    <ClInclude Include="Application\GameFlow\IGamePhase.h" />
+    <ClInclude Include="Application\GameFlow\OpeningPhase.h" />
+    <ClInclude Include="Application\GameFlow\TutorialPhase.h" />
+    <ClInclude Include="Application\GameFlow\PlayingPhase.h" />
+    <ClInclude Include="Application\GameFlow\LaunchPhase.h" />
+    <ClInclude Include="Application\GameFlow\ResultPhase.h" />
+    <ClInclude Include="Application\Result\ShuffleNumber.h" />
     <ClInclude Include="Application\Enemy\EnemyEffectManager.h" />
     <ClInclude Include="Application\Effect\MoonObject.h" />
   </ItemGroup>
