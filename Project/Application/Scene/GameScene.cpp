@@ -4,6 +4,7 @@ using namespace GameEngine;
 #include "ParticleBehavior.h"
 #include "PostProcess/PostEffectData.h"
 #include <Application/Enemy/EnemyManager.h>
+#include "Application/Enemy/EnemyEffectManager.h"
 #include "Application/Player/Player.h"
 #include "Application/GameCamera/GameCamera.h"
 #include "Application/Field/Field.h"
@@ -61,9 +62,11 @@ GameScene::GameScene() {
 	fieldModel->SetDefaultIsEnableLight(true);
 	field_ = gameObjectManager_->AddObject<Field>(fieldModel);
 
+	// 敵の演出管理機能
+	auto* enemyEffectManager = gameObjectManager_->AddObject<EnemyEffectManager>(modelManager_, textureManager_, gameObjectManager_);
 	//Enemy
 	auto enemyModel = modelManager_->GetNameByModel("Enemy.gltf");
-	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(128, enemyModel);
+	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(128, enemyModel, enemyEffectManager);
 	enemyManager_->SetOnEnemyDefeated([this]() {
 		score_.Add(kScorePerEnemy);
 		});
