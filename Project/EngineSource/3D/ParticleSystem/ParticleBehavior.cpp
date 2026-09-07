@@ -34,6 +34,7 @@ ParticleBehavior::ParticleBehavior(const std::string& name, uint32_t maxNum, Tex
     debugParame_->Register("SpawnCoolTime", main_.spawnCoolTime, index++, subGroup);
     debugParame_->Register("IsLoop", main_.isLoop, index++, subGroup);
     debugParame_->Register("IsBillBoard", main_.isBillBoard, index++, subGroup);
+    debugParame_->Register("IsActiveBlendAdd", main_.isActiveBlendAdd_, index++, subGroup);
     subGroup += "/Defalut";
     debugParame_->Register("LifeTime", main_.lifeTime, index++, subGroup);
     debugParame_->Register("EmittePos", main_.emitterPos, index++, subGroup);
@@ -89,7 +90,12 @@ void ParticleBehavior::Update() {
 }
 
 void ParticleBehavior::Draw() {
-    renderQueue_->SubmitInstancing(model_, currentNumInstance_, *worldTransforms_, 0.0f, BlendMode::kBlendModeAdd,nullptr,"WBOITAccumulatePass");
+
+    if (main_.isActiveBlendAdd_) {
+        renderQueue_->SubmitInstancing(model_, currentNumInstance_, *worldTransforms_, 0.0f, BlendMode::kBlendModeAdd, nullptr, "WBOITAccumulatePass");
+    } else {
+        renderQueue_->SubmitInstancing(model_, currentNumInstance_, *worldTransforms_, 0.0f, BlendMode::kBlendModeNormal, nullptr, "WBOITAccumulatePass");
+    }
 }
 
 void ParticleBehavior::Emit(const Vector3& pos) {
