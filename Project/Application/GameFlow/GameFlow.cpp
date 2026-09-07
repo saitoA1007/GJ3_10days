@@ -14,6 +14,7 @@
 
 #include "OpeningPhase.h"
 #include "PlayingPhase.h"
+#include "StartPlayingPhase.h"
 #include "TutorialPhase.h"
 #include "LaunchPhase.h"
 #include "ResultPhase.h"
@@ -28,8 +29,9 @@ GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& setti
 	// DebugParameterの登録
 	debugParameter_ = std::make_unique<GameEngine::DebugParameter>("GameFlow");
 	debugParameter_->Register("OpeningDuration", settings_.openingDuration, 0, "Time");
-	debugParameter_->Register("GameDuration", settings_.gameDuration, 1, "Time");
-	debugParameter_->Register("LaunchDuration", settings_.launchDuration, 2, "Time");
+	debugParameter_->Register("StartPlayingDuration", settings_.startPlayingDuration, 1, "Time");
+	debugParameter_->Register("GameDuration", settings_.gameDuration, 2, "Time");
+	debugParameter_->Register("LaunchDuration", settings_.launchDuration, 3, "Time");
 	debugParameter_->Register("EnergyPositionXZ", settings_.tutorialEnergyPositionXZ, 0, "Tutorial");
 	debugParameter_->Register("MediumEnergyPositionXZ", settings_.tutorialMediumEnergyPositionXZ, 1, "Tutorial");
 	debugParameter_->Register("RequiredHoldDuration", settings_.tutorialRequiredHoldDuration, 2, "Tutorial");
@@ -68,6 +70,9 @@ void GameFlow::BuildPhases()
 	// チュートリアルフェーズ
 	phases_.push_back(std::make_unique<TutorialPhase>());
 
+	// プレイ開始演出フェーズ
+	phases_.push_back(std::make_unique<StartPlayingPhase>());
+
 	// プレイフェーズ 
 	phases_.push_back(std::make_unique<PlayingPhase>());
 
@@ -101,6 +106,7 @@ void GameFlow::ApplyDebugParameters()
 		debugParameter_->ApplyIfDirty();
 	}
 	settings_.openingDuration = (std::max)(settings_.openingDuration, 0.0f);
+	settings_.startPlayingDuration = (std::max)(settings_.startPlayingDuration, 0.0f);
 	settings_.gameDuration = (std::max)(settings_.gameDuration, 0.1f);
 	settings_.launchDuration = (std::max)(settings_.launchDuration, 0.0f);
 	settings_.tutorialRequiredHoldDuration =

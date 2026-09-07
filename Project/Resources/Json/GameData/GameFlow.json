@@ -4,7 +4,8 @@
         "Time": {
             "GameDuration": 60.0,
             "LaunchDuration": 3.0,
-            "OpeningDuration": 3.0
+            "OpeningDuration": 3.0,
+            "StartPlayingDuration": 3.0
         },
         "Tutorial": {
             "EnemyHoldPositionXZ": [

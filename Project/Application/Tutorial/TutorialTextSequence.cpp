@@ -37,6 +37,7 @@ struct TutorialTextSequence::StepEntry
 	bool showSuccessColor = true;
 	bool activated = false;
 	std::function<void()> onActivated;
+	std::function<void()> onCompleted;
 };
 
 TutorialTextSequence::TutorialTextSequence(
@@ -74,6 +75,7 @@ TutorialTextSequence::TutorialTextSequence(
 		entry->errorElapsed = entry->errorDuration;
 		entry->showSuccessColor = definition.showSuccessColor;
 		entry->onActivated = std::move(definition.onActivated);
+		entry->onCompleted = std::move(definition.onCompleted);
 		steps_.push_back(std::move(entry));
 	}
 	Reset();
@@ -169,6 +171,10 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 	if (entry.successStarted && entry.view->IsSuccessAnimationComplete())
 	{
 		++currentStepIndex_;
+		if (entry.onCompleted)
+		{
+			entry.onCompleted();
+		}
 	}
 }
 

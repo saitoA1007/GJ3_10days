@@ -179,6 +179,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\GameFlow\OpeningPhase.cpp" />
     <ClCompile Include="Application\GameFlow\PlayingPhase.cpp" />
     <ClCompile Include="Application\GameFlow\ResultPhase.cpp" />
+    <ClCompile Include="Application\GameFlow\StartPlayingPhase.cpp" />
+    <ClCompile Include="Application\StartPlaying\StartPlayingView.cpp" />
     <ClCompile Include="Application\GameFlow\TutorialPhase.cpp" />
     <ClCompile Include="Application\Tutorial\TutorialCameraModelView.cpp" />
     <ClCompile Include="Application\Tutorial\TutorialTextSequence.cpp" />
@@ -493,6 +495,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\GameFlow\OpeningPhase.h" />
     <ClInclude Include="Application\GameFlow\PlayingPhase.h" />
     <ClInclude Include="Application\GameFlow\ResultPhase.h" />
+    <ClInclude Include="Application\GameFlow\StartPlayingPhase.h" />
+    <ClInclude Include="Application\StartPlaying\StartPlayingView.h" />
     <ClInclude Include="Application\GameFlow\TutorialPhase.h" />
     <ClInclude Include="Application\Tutorial\TutorialCameraModelView.h" />
     <ClInclude Include="Application\Tutorial\TutorialTextSequence.h" />
