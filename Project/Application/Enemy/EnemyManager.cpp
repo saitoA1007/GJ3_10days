@@ -46,6 +46,7 @@ void EnemyManager::SetContext(Field* field, Rocket* rocket, EnergySpawner* energ
 
 void EnemyManager::Initialize() {
 	gameplayEnabled_ = true;
+	autoSpawnEnabled_ = false;
 	freeEnemyIndices_.clear();
 	activeEnemies_.clear();
 	deadEnemies_.clear();
@@ -116,7 +117,7 @@ void EnemyManager::Update() {
 #endif
 
 	// 出現処理（ステージ名が設定されていてデータが存在する場合のみ実行）
-	if (!currentStageName_.empty() && stageDataMap_.contains(currentStageName_)) {
+	if (autoSpawnEnabled_ && !currentStageName_.empty() && stageDataMap_.contains(currentStageName_)) {
 		auto& stage = stageDataMap_[currentStageName_];
 
 		if (currentFaseIndex_ < stage.fases.size()) {

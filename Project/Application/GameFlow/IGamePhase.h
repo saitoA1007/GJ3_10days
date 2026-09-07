@@ -2,6 +2,8 @@
 #include <string>
 #include <memory>
 
+#include "Vector2.h"
+
 class Rocket;
 class EnergySpawner;
 class EnemyManager;
@@ -14,6 +16,7 @@ struct GameFlowSettings
 	float openingDuration = 3.0f; // OP時間
 	float gameDuration = 60.0f;   // 制限時間
 	float launchDuration = 3.0f;   // 打ち上げ時間
+	Vector2 tutorialEnergyPositionXZ = { 0.0f, -6.0f }; // チュートリアル用EnergyのX・Z座標
 };
 
 // 各システムへの参照を一括保持するコンテキスト
@@ -51,6 +54,9 @@ public:
 
 	// このフェーズ中にプレイヤーのゲーム操作を許可するか
 	virtual bool IsGameplayEnabled() const { return false; }
+
+	// このフェーズ中に敵とEnergyの自動生成を許可するか
+	virtual bool IsAutoSpawnEnabled() const { return false; }
 
 	// このフェーズ中にGameSceneのメインカメラを使用するか
 	virtual bool UsesGameSceneCamera() const { return true; }

@@ -657,6 +657,8 @@
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
     <ClCompile Include="Application\GameFlow\PlayingPhase.cpp" />
     <ClCompile Include="Application\GameFlow\TutorialPhase.cpp" />
+    <ClCompile Include="Application\Tutorial\TutorialCameraModelView.cpp" />
+    <ClCompile Include="Application\Tutorial\TutorialTextSequence.cpp" />
     <ClCompile Include="Application\GameFlow\OpeningPhase.cpp" />
     <ClCompile Include="Application\GameFlow\LaunchPhase.cpp" />
     <ClCompile Include="Application\GameFlow\ResultPhase.cpp" />
@@ -1276,6 +1278,8 @@
     <ClInclude Include="Application\GameFlow\IGamePhase.h" />
     <ClInclude Include="Application\GameFlow\OpeningPhase.h" />
     <ClInclude Include="Application\GameFlow\TutorialPhase.h" />
+    <ClInclude Include="Application\Tutorial\TutorialCameraModelView.h" />
+    <ClInclude Include="Application\Tutorial\TutorialTextSequence.h" />
     <ClInclude Include="Application\GameFlow\PlayingPhase.h" />
     <ClInclude Include="Application\GameFlow\LaunchPhase.h" />
     <ClInclude Include="Application\GameFlow\ResultPhase.h" />

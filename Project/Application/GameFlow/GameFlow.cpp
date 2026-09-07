@@ -30,6 +30,7 @@ GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& setti
 	debugParameter_->Register("OpeningDuration", settings_.openingDuration, 0, "Time");
 	debugParameter_->Register("GameDuration", settings_.gameDuration, 1, "Time");
 	debugParameter_->Register("LaunchDuration", settings_.launchDuration, 2, "Time");
+	debugParameter_->Register("EnergyPositionXZ", settings_.tutorialEnergyPositionXZ, 0, "Tutorial");
 	debugParameter_->Apply();
 
 	SetUpdateOrder(0);
@@ -130,9 +131,18 @@ void GameFlow::ApplyGameplayState()
 {
 	IGamePhase* current = GetCurrentPhase();
 	const bool enabled = current ? (current->IsGameplayEnabled() && !debugPaused_) : false;
+	const bool autoSpawnEnabled = current ? (current->IsAutoSpawnEnabled() && !debugPaused_) : false;
 
-	if (context_.energySpawner)    context_.energySpawner->SetGameplayEnabled(enabled);
-	if (context_.enemyManager)     context_.enemyManager->SetGameplayEnabled(enabled);
+	if (context_.energySpawner)
+	{
+		context_.energySpawner->SetGameplayEnabled(enabled);
+		context_.energySpawner->SetAutoSpawnEnabled(autoSpawnEnabled);
+	}
+	if (context_.enemyManager)
+	{
+		context_.enemyManager->SetGameplayEnabled(enabled);
+		context_.enemyManager->SetAutoSpawnEnabled(autoSpawnEnabled);
+	}
 	if (context_.unitManager)      context_.unitManager->SetGameplayEnabled(enabled);
 	if (context_.lockOnController) context_.lockOnController->SetGameplayEnabled(enabled);
 }

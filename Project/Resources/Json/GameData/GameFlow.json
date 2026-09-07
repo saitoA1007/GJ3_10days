@@ -3,7 +3,14 @@
         "SceneName": "Game",
         "Time": {
             "GameDuration": 60.0,
+            "LaunchDuration": 3.0,
             "OpeningDuration": 3.0
+        },
+        "Tutorial": {
+            "EnergyPositionXZ": [
+                0.0,
+                -9.0
+            ]
         }
     }
 }

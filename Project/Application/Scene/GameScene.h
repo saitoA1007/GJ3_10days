@@ -17,6 +17,8 @@ class GameFlow;
 class LockOnController;
 class Rocket;
 class UnitManager;
+class TutorialCameraModelView;
+class TutorialTextSequence;
 
 namespace GameEngine
 {
@@ -72,6 +74,10 @@ private: // シーン機能
 
 	/// カメラ行列を更新してRenderQueueへ設定
 	void UpdateCamera();
+	/// チュートリアル表示の調整値と移動アニメーションを更新
+	void UpdateTutorialViews(bool advanceAnimation);
+	/// チュートリアル表示をカメラへ追従させて描画
+	void DrawTutorialViews();
 
 	std::unique_ptr<GameEngine::Camera> mainCamera_;                // 3D描画とマウスレイ投影に使うカメラ
 	std::unique_ptr<GameEngine::DebugParameter> mainCameraDebugParameter_; // Translate / Rotate の確認・調整用
@@ -90,6 +96,8 @@ private: // シーン機能
 	EnergyView* energyView_ = nullptr;
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;
+	std::unique_ptr<TutorialCameraModelView> tutorialLogoView_;
+	std::unique_ptr<TutorialTextSequence> tutorialTextSequence_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 	std::unique_ptr<GameEngine::Sprite> fadeSprite_;
 	float fadeElapsedTime_ = 0.0f;

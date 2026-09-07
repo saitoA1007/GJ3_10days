@@ -72,6 +72,7 @@ void EnergySpawner::Initialize()
 {
 	ApplyDebugParameters();
 	gameplayEnabled_ = true;
+	autoSpawnEnabled_ = false;
 	spawnTimer_ = 0.0f;
 	// シーン再初期化時に落下・予約・運搬状態を残さない。
 	for (auto& pickup : pickups_)
@@ -99,11 +100,14 @@ void EnergySpawner::Update()
 	// gameplayEnabled_がfalseの間は落下も生成タイマーも完全に停止する。
 	UpdatePickups(FpsCounter::gameDeltaTime);
 
-	spawnTimer_ += FpsCounter::gameDeltaTime;
-	if (spawnTimer_ >= settings_.spawnInterval)
+	if (autoSpawnEnabled_)
 	{
-		spawnTimer_ = 0.0f;
-		SpawnRandom();
+		spawnTimer_ += FpsCounter::gameDeltaTime;
+		if (spawnTimer_ >= settings_.spawnInterval)
+		{
+			spawnTimer_ = 0.0f;
+			SpawnRandom();
+		}
 	}
 }
 

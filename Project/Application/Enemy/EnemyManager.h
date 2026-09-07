@@ -39,6 +39,8 @@ public:
 	// ゲームプレイの更新有効フラグ切替
 	void SetGameplayEnabled(bool enabled) { gameplayEnabled_ = enabled; }
 	bool IsGameplayEnabled() const { return gameplayEnabled_; }
+	void SetAutoSpawnEnabled(bool enabled) { autoSpawnEnabled_ = enabled; }
+	bool IsAutoSpawnEnabled() const { return autoSpawnEnabled_; }
 
 	// 現在アクティブな敵の数を取得
 	size_t GetActiveCount() const { return activeEnemies_.size(); }
@@ -71,6 +73,7 @@ private:
 
 	float popTimer_ = 0.0f;
 	bool gameplayEnabled_ = true;
+	bool autoSpawnEnabled_ = false;
 
 private:
 	// 演出管理

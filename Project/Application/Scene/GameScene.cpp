@@ -17,6 +17,8 @@ using namespace GameEngine;
 #include "Application/Field/FieldEffect.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Score/ScoreView.h"
+#include "Application/Tutorial/TutorialCameraModelView.h"
+#include "Application/Tutorial/TutorialTextSequence.h"
 #include "ControllerVibration.h"
 #include "DebugParameter.h"
 #include "FPSCounter.h"
@@ -28,6 +30,9 @@ using namespace GameEngine;
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <algorithm>
+#include <string>
+#include <string_view>
+#include "MyMath.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -120,6 +125,14 @@ GameScene::GameScene() {
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
 
+	// Scoreと同様にカメラへ追従するチュートリアル表示
+	auto* tutorialLogoModel = modelManager_->GetNameByModel("tutorialLogo.obj");
+	tutorialLogoView_ = std::make_unique<TutorialCameraModelView>(
+		tutorialLogoModel,
+		gameCamera->GetCamera(),
+		"TutorialLogo",
+		TutorialCameraModelView::Settings{});
+
 	// クリアのムービー
 	// 月のオブジェクト
 	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
@@ -158,6 +171,71 @@ GameScene::GameScene() {
 	flowContext.resultMovieManager_ = resultMoiveManager;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
+
+	// TutorialPhaseの工程に対応するTextを、登録順に表示する。
+	TutorialTextSequence::StepDefinition text0Definition{};
+	text0Definition.phaseStep = TutorialPhase::Step::SelectEnergy;
+	text0Definition.model = modelManager_->GetNameByModel("tutorialText0.obj");
+	text0Definition.parameterGroupName = "TutorialText0";
+	text0Definition.viewSettings.startPosition = { 16.0f, -29.0f, -26.0f };
+	text0Definition.viewSettings.endPosition = { 5.5f, -29.0f, -26.0f };
+	text0Definition.viewSettings.rotation = { 2.01099992f, 3.14159274f, 0.0f };
+	text0Definition.viewSettings.scale = 0.5f;
+	text0Definition.viewSettings.moveDuration = 0.5f;
+	text0Definition.viewSettings.easeType = EaseType::kEaseOutElastic;
+
+	TutorialTextSequence::StepDefinition text1Definition{};
+	text1Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text1Definition.model = modelManager_->GetNameByModel("tutorialText1.obj");
+	text1Definition.parameterGroupName = "TutorialText1";
+	text1Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text1Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text1Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text1Definition.viewSettings.scale = 1.0f;
+	text1Definition.viewSettings.startDelay = 0.5f;
+	text1Definition.viewSettings.moveDuration = 0.5f;
+	text1Definition.viewSettings.holdDuration = 2.5f;
+	text1Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text1Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text2Definition{};
+	text2Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text2Definition.model = modelManager_->GetNameByModel("tutorialText2.obj");
+	text2Definition.parameterGroupName = "TutorialText2";
+	text2Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text2Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text2Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text2Definition.viewSettings.scale = 1.0f;
+	text2Definition.viewSettings.startDelay = 0.5f;
+	text2Definition.viewSettings.moveDuration = 0.5f;
+	text2Definition.viewSettings.holdDuration = 3.5f;
+	text2Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text2Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text3Definition{};
+	text3Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text3Definition.model = modelManager_->GetNameByModel("tutorialText3.obj");
+	text3Definition.parameterGroupName = "TutorialText3";
+	text3Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text3Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text3Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text3Definition.viewSettings.scale = 1.0f;
+	text3Definition.viewSettings.startDelay = 0.5f;
+	text3Definition.viewSettings.moveDuration = 0.5f;
+	text3Definition.viewSettings.holdDuration = 3.5f;
+	text3Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text3Definition.showSuccessColor = false;
+
+	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
+		gameCamera->GetCamera(),
+		gameFlow_,
+		lockOnController_,
+		inputCommand_,
+		std::vector<TutorialTextSequence::StepDefinition>{
+			text0Definition,
+			text1Definition,
+			text2Definition,
+			text3Definition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,
@@ -219,6 +297,8 @@ void GameScene::Initialize() {
 	fadeSprite_->scale_ = kFadeScale;
 	fadeSprite_->Update();
 	fadeElapsedTime_ = 0.0f;
+	if (tutorialLogoView_) tutorialLogoView_->Reset();
+	if (tutorialTextSequence_) tutorialTextSequence_->Reset();
 }
 
 void GameScene::Update() {
@@ -232,6 +312,7 @@ void GameScene::Update() {
 	score_.Update(FpsCounter::deltaTime);
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
+	UpdateTutorialViews(true);
 	UpdateCamera();
 	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
@@ -265,6 +346,7 @@ void GameScene::DebugUpdate()
 {
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
+	UpdateTutorialViews(false);
 	UpdateCamera();
 	
 	// ゲーム更新を停止している間に振動が残らないようにする。
@@ -275,10 +357,26 @@ void GameScene::DebugUpdate()
 }
 
 void GameScene::Draw() {
+	DrawTutorialViews();
 	scoreView_->Draw(renderQueue_);
 	if (fadeSprite_) {
 		renderQueue_->SubmitSprite(fadeSprite_.get());
 	}
+}
+
+void GameScene::UpdateTutorialViews(bool advanceAnimation)
+{
+	const IGamePhase* currentPhase = gameFlow_ ? gameFlow_->GetCurrentPhase() : nullptr;
+	const bool isTutorial = currentPhase && std::string_view(currentPhase->GetName()) == "Tutorial";
+	const float deltaTime = FpsCounter::deltaTime;
+	if (tutorialLogoView_) tutorialLogoView_->Update(isTutorial, advanceAnimation, deltaTime);
+	if (tutorialTextSequence_) tutorialTextSequence_->Update(advanceAnimation, deltaTime);
+}
+
+void GameScene::DrawTutorialViews()
+{
+	if (tutorialLogoView_) tutorialLogoView_->Draw(renderQueue_);
+	if (tutorialTextSequence_) tutorialTextSequence_->Draw(renderQueue_);
 }
 
 void GameScene::InputRegisterCommand() {
