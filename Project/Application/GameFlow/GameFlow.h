@@ -27,6 +27,11 @@ public:
 	}
 
 	const GameFlowContext& GetContext() const { return context_; }
+	bool UsesGameSceneCamera() const
+	{
+		const IGamePhase* current = GetCurrentPhase();
+		return current ? current->UsesGameSceneCamera() : true;
+	}
 
 private:
 	void ApplyGameplayState();
