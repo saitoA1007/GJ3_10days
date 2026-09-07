@@ -8,6 +8,7 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "IGameObject.h"
+#include "Application/Effect/RopeEffect.h"
 
 namespace GameEngine 
 {
@@ -54,8 +55,8 @@ public:
 	// ライフサイクル・基本更新
 	// ==========================================
 
-	// 描画モデルと、エネルギー消費元となるロケットを受け取る
-	Unit(GameEngine::Model* model, Rocket* rocket, const UnitSettings* settings);
+	// 描画モデルと、エネルギー消費元となるロケットを受け取る。
+	Unit(GameEngine::Model* model, Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH);
 
 	// 待機状態と初期位置へ戻す
 	void Initialize() override;
@@ -161,5 +162,8 @@ private:
 	// パラメータ
 	Vector3 position_ = {};                              
 	float stamina_ = 0.0f;                                
+
+	// 繋がっている演出
+	RopeEffect RopeEffect_;
 };
 

@@ -12,7 +12,8 @@
 
 using namespace GameEngine;
 
-UnitManager::UnitManager(Model* unitModel, Rocket* rocket, size_t capacity)
+UnitManager::UnitManager(Model* unitModel, Rocket* rocket, GameEngine::Model* baemModel,
+	uint32_t beamGH, size_t capacity)
 	: rocket_(rocket)
 {
 	assert(unitModel != nullptr && "unit manager requires unit.obj");
@@ -23,7 +24,7 @@ UnitManager::UnitManager(Model* unitModel, Rocket* rocket, size_t capacity)
 	units_.reserve(safeCapacity);
 	for (size_t i = 0; i < safeCapacity; ++i)
 	{
-		units_.push_back(std::make_unique<Unit>(unitModel, rocket_, &settings_.unit));
+		units_.push_back(std::make_unique<Unit>(unitModel, rocket_, &settings_.unit, baemModel, beamGH));
 	}
 
 	debugParameter_ = std::make_unique<DebugParameter>("Unit");

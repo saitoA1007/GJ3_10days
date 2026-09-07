@@ -11,11 +11,10 @@
 #include "Application/Enemy/Enemy.h"
 #include "Application/CollisionConfig.h"
 #include "FPSCounter.h"
-
 using namespace GameEngine;
 
-Unit::Unit(Model* model, Rocket* rocket, const UnitSettings* settings)
-	: rocket_(rocket), settings_(settings) 
+Unit::Unit(Model* model, Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH)
+	: rocket_(rocket), settings_(settings), RopeEffect_(bameModel, beamGH)
 {
 	assert(model != nullptr && "unit requires unit.obj");
 	assert(rocket_ != nullptr && "unit requires a rocket");
@@ -74,6 +73,9 @@ void Unit::Update()
 		break;
 	}
 
+	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, {0.0f,5.0f,0.0f});
+	RopeEffect_.Update();
+
 	SyncModel();
 }
 
@@ -82,6 +84,9 @@ void Unit::Draw()
 	if (IsDeployed())
 	{
 		modelComponent_->DrawRaytracing(renderQueue_);
+
+		// 演出を描画
+		RopeEffect_.Draw();
 	}
 }
 
