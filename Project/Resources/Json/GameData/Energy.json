@@ -7,12 +7,14 @@
         },
         "SceneName": "Game",
         "Spawn": {
+            "AngleCenterDegrees": 270.0,
+            "AngleRangeDegrees": 180.0,
             "FallHeight": 10.0,
             "FallSpeed": 5.0,
             "GroundHeight": 1.5,
             "InitialCountPerZone": 1,
-            "MaxActiveCount": 30,
-            "SpawnInterval": 2.5
+            "MaxActiveCount": 64,
+            "SpawnInterval": 2.0
         },
         "Type": {
             "Large": {
