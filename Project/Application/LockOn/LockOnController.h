@@ -93,6 +93,12 @@ public:
 	/// @return 有効ならtrue。
 	bool IsGameplayEnabled() const { return gameplayEnabled_; }
 
+	/// @brief 離した際に派遣を成立させる最低ホールド秒数を設定する。
+	void SetMinimumDispatchHoldSeconds(float seconds);
+
+	/// @brief Enemyをロックオン候補に含めるか切り替える。
+	void SetEnemySelectionEnabled(bool enabled);
+
 	/// @brief 現在のカーソル座標を取得する。
 	/// @return カーソル座標への参照。
 	const Vector3& GetCursorPosition() const { return cursorPosition_; }
@@ -192,8 +198,10 @@ private:
 	EnergyPickup* selectedEnergy_ = nullptr;                    
 	Enemy* selectedEnemy_ = nullptr;                            
 	float lockOnSeconds_ = 0.0f;                                
+	float minimumDispatchHoldSeconds_ = 0.0f;
 	bool isCharging_ = false;                                   
 	bool gameplayEnabled_ = true;  
+	bool enemySelectionEnabled_ = true;
 	int32_t chargedEnergy_ = 0;
 };
 

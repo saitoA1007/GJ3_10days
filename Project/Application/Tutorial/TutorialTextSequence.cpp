@@ -14,6 +14,7 @@ namespace
 {
 	constexpr float kTwoPi = 6.28318531f;
 	constexpr const char* kLockOnTriggerCommand = "LockOnTrigger";
+	constexpr const char* kLockOnReleaseCommand = "LockOnRelease";
 	constexpr Vector3 kNormalColor = { 1.0f, 1.0f, 1.0f };
 	constexpr Vector3 kSuccessColor = { 0.0f, 1.0f, 0.0f };
 	constexpr Vector3 kErrorColor = { 1.0f, 0.0f, 0.0f };
@@ -34,6 +35,8 @@ struct TutorialTextSequence::StepEntry
 	float holdElapsed = 0.0f;
 	bool successStarted = false;
 	bool showSuccessColor = true;
+	bool activated = false;
+	std::function<void()> onActivated;
 };
 
 TutorialTextSequence::TutorialTextSequence(
@@ -70,6 +73,7 @@ TutorialTextSequence::TutorialTextSequence(
 		entry->shakeCycles = (std::max)(definition.shakeCycles, 0.0f);
 		entry->errorElapsed = entry->errorDuration;
 		entry->showSuccessColor = definition.showSuccessColor;
+		entry->onActivated = std::move(definition.onActivated);
 		steps_.push_back(std::move(entry));
 	}
 	Reset();
@@ -101,6 +105,15 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 	}
 
 	StepEntry& entry = *steps_[currentStepIndex_];
+	if (!entry.activated)
+	{
+		entry.activated = true;
+		if (entry.onActivated)
+		{
+			entry.onActivated();
+		}
+	}
+
 	if (!entry.successStarted && entry.progressMode == ProgressMode::PhaseStep &&
 		HasPhaseStepCompleted(entry, *tutorialPhase))
 	{
@@ -190,7 +203,7 @@ bool TutorialTextSequence::IsMistakeInput(const StepEntry& entry) const
 	{
 		return false;
 	}
-	if (!inputCommand_ || !inputCommand_->IsCommandActive(kLockOnTriggerCommand))
+	if (!inputCommand_)
 	{
 		return false;
 	}
@@ -198,8 +211,19 @@ bool TutorialTextSequence::IsMistakeInput(const StepEntry& entry) const
 	switch (entry.phaseStep)
 	{
 	case TutorialPhase::Step::SelectEnergy:
-		return !lockOnController_ || !lockOnController_->GetSelectedEnergy();
+		return inputCommand_->IsCommandActive(kLockOnTriggerCommand) &&
+			(!lockOnController_ || !lockOnController_->GetSelectedEnergy());
 	case TutorialPhase::Step::DispatchUnit:
+	case TutorialPhase::Step::WaitForChargeInstruction:
+	case TutorialPhase::Step::WaitForEnemyCollisionInstruction:
+	case TutorialPhase::Step::EnemyCollision:
+	case TutorialPhase::Step::WaitForEnemyLockOnInstruction:
+	case TutorialPhase::Step::EnemyLockOnOrCollision:
+	case TutorialPhase::Step::WaitForEnemyHoldInstruction:
+		return false;
+	case TutorialPhase::Step::ChargeEnergy:
+	case TutorialPhase::Step::EnemyHoldOrCollision:
+		return inputCommand_->IsCommandActive(kLockOnReleaseCommand);
 	case TutorialPhase::Step::Complete:
 		return false;
 	}
@@ -216,5 +240,6 @@ void TutorialTextSequence::ResetSteps()
 		entry->errorElapsed = entry->errorDuration;
 		entry->holdElapsed = 0.0f;
 		entry->successStarted = false;
+		entry->activated = false;
 	}
 }

@@ -217,12 +217,13 @@ void EnemyManager::SetStage(const std::string& stageName) {
 	currentFaseIndex_ = 0;
 }
 
-void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
+Enemy* EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
+	Enemy* firstSpawnedEnemy = nullptr;
 	for (int i = 0; i < num; ++i) {
 		if (freeEnemyIndices_.empty()) {
 			// 敵のプールが空の場合は何もしない
 			SF::error("[Manager::Pop()]: No free index in pool.", "Enemy");
-			return;
+			return firstSpawnedEnemy;
 		}
 		// プールから敵を取得
 		int index = freeEnemyIndices_.back();
@@ -231,6 +232,9 @@ void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 		activeEnemies_[index] = enemies_[index].get();
 		enemies_[index]->SetActive(true);
 		enemies_[index]->SetUp(position, configList_[static_cast<int>(type)], type);
+		if (!firstSpawnedEnemy) {
+			firstSpawnedEnemy = enemies_[index].get();
+		}
 		// 敵の登場演出
 		effectManager_->StartSpawnEffect(Vector3(position.x,0.0f, position.y));
 
@@ -240,6 +244,7 @@ void EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 			enemies_[index]->SetRound(roundSpeed_);
 		}
 	}
+	return firstSpawnedEnemy;
 }
 
 void EnemyManager::LoadPreset() {

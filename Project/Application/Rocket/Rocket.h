@@ -81,6 +81,9 @@ public:
 	/// @return 減少前後と実際の差分。
 	EnergyChange ReceiveEnemyHit();
 
+	/// @brief シーン初期化後に敵がロケットへ到達した回数を取得する。
+	uint64_t GetEnemyHitCount() const { return enemyHitCount_; }
+
 	/// @brief エネルギーをInitialEnergyへ戻す。
 	void ResetEnergy();
 
@@ -144,5 +147,6 @@ private:
 	GameEngine::SphereCollider collider_;                       // 敵の到達検出に使う球Collider
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;// 設定とParameter Inspectorの接続
 	EnergyChangedCallback onEnergyChanged_;                     // UIや演出向けの任意通知先
+	uint64_t enemyHitCount_ = 0;                                // Enemy到達通知の累計
 };
 

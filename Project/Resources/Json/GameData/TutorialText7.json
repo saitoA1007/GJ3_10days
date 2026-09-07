@@ -1,0 +1,27 @@
+{
+    "TutorialText7": {
+        "EaseType": {
+            "_EaseType": "EaseOutExpo"
+        },
+        "EndPosition": [
+            0.0,
+            -34.5,
+            -25.0
+        ],
+        "HoldDuration": 3.5,
+        "MoveDuration": 0.5,
+        "Rotation": [
+            1.7209999561309814,
+            3.1415927410125732,
+            0.0
+        ],
+        "Scale": 1.0,
+        "SceneName": "Game",
+        "StartDelay": 0.5,
+        "StartPosition": [
+            0.0,
+            -40.0,
+            -25.0
+        ]
+    }
+}

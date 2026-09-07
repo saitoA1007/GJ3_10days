@@ -20,6 +20,10 @@ public:
 
 	void AdvanceToNextPhase();
 	void ChangePhase(size_t index);
+	void BeginTutorialChargeEnergyStep();
+	void BeginTutorialEnemyCollisionStep();
+	void BeginTutorialEnemyLockOnStep();
+	void BeginTutorialEnemyHoldStep();
 
 	IGamePhase* GetCurrentPhase() const
 	{

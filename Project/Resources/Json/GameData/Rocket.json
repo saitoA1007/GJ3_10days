@@ -1,15 +1,15 @@
 {
     "Rocket": {
         "Collider": {
-            "OffsetY": 1.75,
-            "Radius": 1.5
+            "OffsetY": -5.0,
+            "Radius": 4.0
         },
         "Debug": {
             "ChangeAmount": 10
         },
         "Energy": {
             "EnemyHitLoss": 10,
-            "InitialEnergy": 0
+            "InitialEnergy": 100
         },
         "Entrance": {
             "Duration": 3.0,
