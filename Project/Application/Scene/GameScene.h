@@ -91,6 +91,8 @@ private: // シーン機能
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
+	std::unique_ptr<GameEngine::Sprite> fadeSprite_;
+	float fadeElapsedTime_ = 0.0f;
 
 	// シーンライト
 	float intensity_ = 1.0f;

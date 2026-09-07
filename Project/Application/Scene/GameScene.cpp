@@ -27,6 +27,7 @@ using namespace GameEngine;
 #include <Application/result/ShuffleNumber.h>
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
+#include <algorithm>
 
 // 後で別クラスに纏めて消す
 namespace
@@ -37,6 +38,9 @@ namespace
 	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
 	constexpr Vector3 kCameraPosition = { 0.0f, 60.0f, -60.0f };
 	constexpr Vector3 kCameraTarget = { 0.0f, 0.0f, 0.0f };
+	constexpr float kFadeDuration = 1.0f;
+	constexpr Vector2 kFadeTextureSize = { 128.0f, 72.0f };
+	constexpr Vector2 kFadeScale = { 10.0f, 10.0f };
 }
 
 GameScene::~GameScene() {
@@ -198,9 +202,30 @@ void GameScene::Initialize() {
 
 	score_.Reset();
 	scoreView_->SetValue(score_.GetDisplayedValue());
+
+	// 128x72のFade.pngを10倍にして画面全体を覆い、開始時は不透明にする。
+	fadeSprite_ = std::make_unique<Sprite>(
+		Vector2{ 0.0f, 0.0f },
+		kFadeTextureSize,
+		Vector2{ 0.0f, 0.0f },
+		Vector4{ 1.0f, 1.0f, 1.0f, 1.0f },
+		Vector2{ 0.0f, 0.0f },
+		kFadeTextureSize,
+		kFadeTextureSize);
+	fadeSprite_->textureHandle_ = textureManager_->GetHandleByName("Fade.png");
+	fadeSprite_->scale_ = kFadeScale;
+	fadeSprite_->Update();
+	fadeElapsedTime_ = 0.0f;
 }
 
 void GameScene::Update() {
+	if (fadeSprite_ && fadeElapsedTime_ < kFadeDuration) {
+		fadeElapsedTime_ = std::min(fadeElapsedTime_ + FpsCounter::deltaTime, kFadeDuration);
+		const float progress = fadeElapsedTime_ / kFadeDuration;
+		fadeSprite_->color_.w = 1.0f - progress;
+		fadeSprite_->Update();
+	}
+
 	score_.Update(FpsCounter::deltaTime);
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
@@ -248,6 +273,9 @@ void GameScene::DebugUpdate()
 
 void GameScene::Draw() {
 	scoreView_->Draw(renderQueue_);
+	if (fadeSprite_) {
+		renderQueue_->SubmitSprite(fadeSprite_.get());
+	}
 }
 
 void GameScene::InputRegisterCommand() {
