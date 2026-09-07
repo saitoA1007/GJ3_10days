@@ -81,13 +81,28 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 	case Step::EnemyCollision:
 		if (context.rocket && context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_)
 		{
-			step_ = Step::Complete;
+			step_ = Step::WaitForEnemyLockOnInstruction;
 			if (context.lockOnController)
 			{
 				context.lockOnController->SetEnemySelectionEnabled(true);
 			}
 		}
 		break;
+	case Step::WaitForEnemyLockOnInstruction:
+		break;
+	case Step::EnemyLockOnOrCollision:
+	{
+		const bool enemyLockOnStarted = context.lockOnController &&
+			context.lockOnController->GetSelectedEnemy() != nullptr &&
+			context.lockOnController->IsCharging();
+		const bool enemyReachedRocket = context.rocket &&
+			context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_;
+		if (enemyLockOnStarted || enemyReachedRocket)
+		{
+			step_ = Step::Complete;
+		}
+		break;
+	}
 	case Step::Complete:
 		// TODO: チュートリアル完成後にPlayingへの遷移を再度有効化する。
 		return false;
@@ -139,4 +154,20 @@ void TutorialPhase::BeginEnemyCollisionStep(GameFlowContext& context)
 	const Vector2& positionXZ = context.settings->tutorialEnemyPositionXZ;
 	context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
 	step_ = Step::EnemyCollision;
+}
+
+void TutorialPhase::BeginEnemyLockOnStep(GameFlowContext& context)
+{
+	if (step_ != Step::WaitForEnemyLockOnInstruction ||
+		!context.enemyManager || !context.rocket || !context.settings ||
+		!context.lockOnController)
+	{
+		return;
+	}
+
+	enemyHitCountAtSpawn_ = context.rocket->GetEnemyHitCount();
+	context.lockOnController->SetEnemySelectionEnabled(true);
+	const Vector2& positionXZ = context.settings->tutorialLockOnEnemyPositionXZ;
+	context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
+	step_ = Step::EnemyLockOnOrCollision;
 }

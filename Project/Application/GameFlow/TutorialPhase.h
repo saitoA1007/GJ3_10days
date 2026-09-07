@@ -16,6 +16,8 @@ public:
 		ChargeEnergy,
 		WaitForEnemyCollisionInstruction,
 		EnemyCollision,
+		WaitForEnemyLockOnInstruction,
+		EnemyLockOnOrCollision,
 		Complete,
 	};
 
@@ -26,6 +28,7 @@ public:
 
 	void BeginChargeEnergyStep(GameFlowContext& context);
 	void BeginEnemyCollisionStep(GameFlowContext& context);
+	void BeginEnemyLockOnStep(GameFlowContext& context);
 
 	const char* GetName() const override { return "Tutorial"; }
 	// 操作を許可

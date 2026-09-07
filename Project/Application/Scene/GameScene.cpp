@@ -308,6 +308,53 @@ GameScene::GameScene() {
 		}
 	};
 
+	TutorialTextSequence::StepDefinition text9Definition{};
+	text9Definition.phaseStep = TutorialPhase::Step::EnemyLockOnOrCollision;
+	text9Definition.model = modelManager_->GetNameByModel("tutorialText9.obj");
+	text9Definition.parameterGroupName = "TutorialText9";
+	text9Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text9Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text9Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text9Definition.viewSettings.scale = 1.0f;
+	text9Definition.viewSettings.startDelay = 0.5f;
+	text9Definition.viewSettings.moveDuration = 0.5f;
+	text9Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text9Definition.onActivated = [this]()
+	{
+		if (gameFlow_)
+		{
+			gameFlow_->BeginTutorialEnemyLockOnStep();
+		}
+	};
+
+	TutorialTextSequence::StepDefinition text10Definition{};
+	text10Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text10Definition.model = modelManager_->GetNameByModel("tutorialText10.obj");
+	text10Definition.parameterGroupName = "TutorialText10";
+	text10Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text10Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text10Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text10Definition.viewSettings.scale = 1.0f;
+	text10Definition.viewSettings.startDelay = 0.5f;
+	text10Definition.viewSettings.moveDuration = 0.5f;
+	text10Definition.viewSettings.holdDuration = 3.5f;
+	text10Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text10Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text11Definition{};
+	text11Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text11Definition.model = modelManager_->GetNameByModel("tutorialText11.obj");
+	text11Definition.parameterGroupName = "TutorialText11";
+	text11Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text11Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text11Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text11Definition.viewSettings.scale = 1.0f;
+	text11Definition.viewSettings.startDelay = 0.5f;
+	text11Definition.viewSettings.moveDuration = 0.5f;
+	text11Definition.viewSettings.holdDuration = 3.5f;
+	text11Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text11Definition.showSuccessColor = false;
+
 	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
 		gameCamera->GetCamera(),
 		gameFlow_,
@@ -322,7 +369,10 @@ GameScene::GameScene() {
 			text5Definition,
 			text6Definition,
 			text7Definition,
-			text8Definition });
+			text8Definition,
+			text9Definition,
+			text10Definition,
+			text11Definition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,

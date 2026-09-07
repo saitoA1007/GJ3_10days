@@ -34,6 +34,7 @@ GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& setti
 	debugParameter_->Register("MediumEnergyPositionXZ", settings_.tutorialMediumEnergyPositionXZ, 1, "Tutorial");
 	debugParameter_->Register("RequiredHoldDuration", settings_.tutorialRequiredHoldDuration, 2, "Tutorial");
 	debugParameter_->Register("EnemyPositionXZ", settings_.tutorialEnemyPositionXZ, 3, "Tutorial");
+	debugParameter_->Register("LockOnEnemyPositionXZ", settings_.tutorialLockOnEnemyPositionXZ, 4, "Tutorial");
 	debugParameter_->Apply();
 
 	SetUpdateOrder(0);
@@ -119,6 +120,15 @@ void GameFlow::BeginTutorialEnemyCollisionStep()
 	if (tutorialPhase)
 	{
 		tutorialPhase->BeginEnemyCollisionStep(context_);
+	}
+}
+
+void GameFlow::BeginTutorialEnemyLockOnStep()
+{
+	auto* tutorialPhase = dynamic_cast<TutorialPhase*>(GetCurrentPhase());
+	if (tutorialPhase)
+	{
+		tutorialPhase->BeginEnemyLockOnStep(context_);
 	}
 }
 

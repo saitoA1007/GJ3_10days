@@ -24,6 +24,7 @@ struct GameFlowSettings
 	Vector2 tutorialEnergyPositionXZ = { 0.0f, -6.0f }; // チュートリアル用EnergyのX・Z座標
 	Vector2 tutorialMediumEnergyPositionXZ = { 0.0f, -6.0f }; // 長押し工程用Medium EnergyのX・Z座標
 	Vector2 tutorialEnemyPositionXZ = { 0.0f, -18.0f }; // ロケット衝突工程用EnemyのX・Z座標
+	Vector2 tutorialLockOnEnemyPositionXZ = { 0.0f, -12.0f }; // ロックオン工程用EnemyのX・Z座標
 	float tutorialRequiredHoldDuration = 1.0f; // Medium Energyを長押しする必要時間
 };
 

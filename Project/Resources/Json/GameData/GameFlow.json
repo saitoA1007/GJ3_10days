@@ -15,6 +15,10 @@
                 0.0,
                 -9.0
             ],
+            "LockOnEnemyPositionXZ": [
+                0.0,
+                -20.0
+            ],
             "MediumEnergyPositionXZ": [
                 0.0,
                 -18.0
