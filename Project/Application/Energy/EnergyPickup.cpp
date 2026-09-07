@@ -84,6 +84,7 @@ void EnergyPickup::Update(
 	}
 
 	// パーティクルの更新
+	particle_.SetEmitterPos(modelComponent_->worldTransform_.transform_.translate);
 	particle_.Update();
 
 	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
@@ -245,9 +246,7 @@ void EnergyPickup::SyncModel()
 	particle_.SetScale({ eScale, eScale, eScale });
 
 	// 出現位置を設定
-	Vector3 emitPos = modelComponent_->worldTransform_.transform_.translate;
-	emitPos.y = groundY_;
-	particle_.SetEmitterPos(emitPos);
+	particle_.SetEmitterPos(modelComponent_->worldTransform_.transform_.translate);
 
 	modelComponent_->Update();
 }
