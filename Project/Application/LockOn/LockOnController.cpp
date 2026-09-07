@@ -64,6 +64,9 @@ LockOnController::LockOnController(
 	cursorModel_ = std::make_unique<ModelComponent>(cursorModel);
 	cursorModel_->materialData_->enableLighting = false;
 
+	chargeModel_ = std::make_unique<ModelComponent>(cursorModel);
+	chargeModel_->materialData_->enableLighting = false;
+
 	debugParameter_ = std::make_unique<DebugParameter>("LockOn");
 	debugParameter_->Register("CursorSpeed", settings_.cursorSpeed, 0, "Cursor");
 	debugParameter_->Register("SelectionRadius", settings_.selectionRadius, 1, "Cursor");
@@ -101,6 +104,7 @@ void LockOnController::Update()
 	if (!gameplayEnabled_)
 	{
 		SyncCursorModel();
+		SyncChargeModel();
 		return;
 	}
 
@@ -119,12 +123,14 @@ void LockOnController::Update()
 		}
 	}
 	SyncCursorModel();
+	SyncChargeModel();
 }
 
 void LockOnController::DebugUpdate() 
 {
 	ApplyDebugParameters();
 	SyncCursorModel();
+	SyncChargeModel();
 	if (gameplayEnabled_)
 	{
 		DrawLockOnGuide();
@@ -137,6 +143,11 @@ void LockOnController::Draw()
 	if (gameplayEnabled_) 
 	{
 		cursorModel_->DrawRaytracing(renderQueue_);
+
+		if (isCharging_ && (selectedEnergy_ || selectedEnemy_))
+		{
+			chargeModel_->DrawRaytracing(renderQueue_);
+		}
 	}
 }
 
@@ -285,6 +296,42 @@ void LockOnController::SyncCursorModel()
 	};
 	cursorModel_->materialData_->color = settings_.cursorColor;
 	cursorModel_->Update();
+}
+
+void LockOnController::SyncChargeModel()
+{
+	if (!isCharging_ || (!selectedEnergy_ && !selectedEnemy_))
+	{
+		return;
+	}
+
+	Vector3 targetPosition = selectedEnemy_
+		? selectedEnemy_->GetPosition()
+		: selectedEnergy_->GetPosition();
+
+	const float targetRadius = selectedEnemy_
+		? selectedEnemy_->GetDisplayScale() + 0.25f
+		: selectedEnergy_->GetScale() + 0.25f;
+
+	const float ratio = CalculateChargeRatio();
+	const float currentRadius = targetRadius + ratio * settings_.selectionRadius;
+
+	chargeModel_->worldTransform_.transform_.scale =
+	{
+		settings_.cursorModelScale.x * currentRadius,
+		settings_.cursorModelScale.y * currentRadius,
+		settings_.cursorModelScale.z * currentRadius,
+	};
+
+	chargeModel_->worldTransform_.transform_.translate =
+	{
+		targetPosition.x,
+		settings_.groundHeight + settings_.cursorModelHeightOffset + 0.01f,
+		targetPosition.z,
+	};
+
+	chargeModel_->materialData_->color = settings_.chargeColor;
+	chargeModel_->Update();
 }
 
 void LockOnController::UpdateSelection()
