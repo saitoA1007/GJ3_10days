@@ -98,8 +98,11 @@ GameScene::GameScene() {
 	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
 	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_,textureManager_, planeModel);
 
+	auto* crossBeamModel = modelManager_->GetNameByModel("crossBeam.gltf");
+	crossBeamModel->SetDefaultIsEnableLight(false);
+	uint32_t beamNoiseGH = textureManager_->GetHandleByName("beamNoise.png");
 	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
-	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, rocket_);
+	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, rocket_, crossBeamModel, beamNoiseGH);
 
 	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");
 	lockOnController_ = gameObjectManager_->AddObject<LockOnController>(

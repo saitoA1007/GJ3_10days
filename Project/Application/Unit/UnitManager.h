@@ -32,6 +32,8 @@ public:
 	UnitManager(
 		GameEngine::Model* unitModel,
 		Rocket* rocket,
+		GameEngine::Model* baemModel,
+		uint32_t beamGH,
 		size_t capacity = 16);
 	~UnitManager() override = default;
 
