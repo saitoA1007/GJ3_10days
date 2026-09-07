@@ -162,6 +162,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Application\Effect\BlackHoleEffect.cpp" />
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
+    <ClCompile Include="Application\Effect\ExplosionEffect.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
     <ClCompile Include="Application\Effect\MoonObject.cpp" />
     <ClCompile Include="Application\Effect\RocketEffect.cpp" />
@@ -469,6 +470,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
+    <ClInclude Include="Application\Effect\ExplosionEffect.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
     <ClInclude Include="Application\Effect\MoonObject.h" />
     <ClInclude Include="Application\Effect\RocketEffect.h" />
