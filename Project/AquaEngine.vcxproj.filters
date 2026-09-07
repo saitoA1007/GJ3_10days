@@ -665,6 +665,7 @@
     <ClCompile Include="Application\Effect\MoonObject.cpp" />
     <ClCompile Include="Application\GameCamera\ResultMoveCamera.cpp" />
     <ClCompile Include="Application\Effect\RocketEffect.cpp" />
+    <ClCompile Include="Application\Result\ResultMovieManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1278,6 +1279,7 @@
     <ClInclude Include="Application\Effect\MoonObject.h" />
     <ClInclude Include="Application\GameCamera\ResultMoveCamera.h" />
     <ClInclude Include="Application\Effect\RocketEffect.h" />
+    <ClInclude Include="Application\Result\ResultMovieManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

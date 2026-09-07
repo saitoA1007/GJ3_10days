@@ -13,7 +13,7 @@ public:
 	};
 
 public:
-	ResultMoveCamera(GameEngine::Camera* mainCamera);
+	ResultMoveCamera();
 
 	void Initialize() override;
 	void Update() override;
@@ -24,6 +24,16 @@ public:
 		isFinished_ = false;
 		phase_ = Phase::kWait;
 		timer_ = 0.0f;
+		// メインカメラに映す
+		//mainCamera_->SetCamera(camera_);
+		renderQueue_->SetCamera(&camera_);
+	}
+
+	// 現在のフェーズを取得
+	Phase GetCurrentPhase() const { return phase_; }
+
+	bool IsFinished() const {
+		return isFinished_;
 	}
 
 private:
@@ -47,9 +57,6 @@ private:
 
 private:
 	GameEngine::DebugParameter debugParam_{ "ResultMoveCamera" };
-
-	// メインカメラ
-	GameEngine::Camera* mainCamera_ = nullptr;
 
 	GameEngine::Camera camera_;
 
