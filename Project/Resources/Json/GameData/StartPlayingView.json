@@ -1,5 +1,12 @@
 {
     "StartPlayingView": {
+        "BurstFall": {
+            "Gravity": 9.800000190734863,
+            "HorizontalVelocity": 2.0,
+            "RotationSpeed": 2.0,
+            "UpwardVelocity": 4.0,
+            "VelocityVariation": 2.0
+        },
         "PlayStartLogo0": {
             "Rotate": [
                 2.010999917984009,
@@ -221,6 +228,11 @@
                 -42.86000061035156
             ]
         },
-        "SceneName": "Game"
+        "SceneName": "Game",
+        "Shake": {
+            "Amplitude": 0.05000000074505806,
+            "Duration": 2.0,
+            "Frequency": 50.0
+        }
     }
 }
