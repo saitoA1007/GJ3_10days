@@ -56,6 +56,11 @@ void DirectionEmitModule::Create(ParticleData& particleData) {
 		baseDir = Math::RotateVector(baseDir, tilt);
 	}
 
+	// レンジ対策
+	if (maxSpeed_ < minSpeed_) {
+		std::swap(minSpeed_, maxSpeed_);
+	}
+
 	float speed = RandomGenerator::Get(minSpeed_, maxSpeed_);
 	particleData.velocity = baseDir * speed;
 }

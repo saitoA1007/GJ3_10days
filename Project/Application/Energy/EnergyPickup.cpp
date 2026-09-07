@@ -240,9 +240,9 @@ void EnergyPickup::SyncModel()
 	material_.materialData_->dissolveEdgeColor = typeSettings_.dissolveEdgeColor;
 
 	// 色を設定
-	particle_.SetColor(color);
+	particle_.SetColor(typeSettings_.color);
 	// サイズを設定
-	float eScale = scale * 1.5f;
+	float eScale = scale * 1.2f;
 	particle_.SetScale({ eScale, eScale, eScale });
 
 	// 出現位置を設定

@@ -62,7 +62,7 @@
                 "Enable": false
             },
             "SpawnCoolTime": 0.10000000149011612,
-            "SpawnMaxCount": 1,
+            "SpawnMaxCount": 2,
             "TextureEmit": {
                 "Enable": true,
                 "Texture": {
@@ -79,7 +79,7 @@
                     "_EaseType": "EaseOutSine"
                 },
                 "Enable": true,
-                "EndAlpha": 0.0
+                "EndAlpha": 0.5
             },
             "Attraction": {
                 "Enable": false
@@ -110,6 +110,6 @@
                 "Enable": false
             }
         },
-        "SceneName": "Test"
+        "SceneName": "Game"
     }
 }
