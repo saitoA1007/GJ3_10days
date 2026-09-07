@@ -28,7 +28,8 @@ namespace
 	};
 }
 
-EnergySpawner::EnergySpawner(Model* energyModel, Field* field, size_t capacity)
+EnergySpawner::EnergySpawner(Model* energyModel, Field* field, GameEngine::TextureManager* textureManager,
+	GameEngine::Model* planeModel, size_t capacity)
 	: field_(field)
 {
 	assert(energyModel != nullptr && "energy spawner requires energy.obj");
@@ -38,16 +39,20 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, size_t capacity)
 	const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 	pickups_.reserve(safeCapacity);
 	for (size_t i = 0; i < safeCapacity; ++i) {
-		pickups_.push_back(std::make_unique<EnergyPickup>(energyModel));
+		pickups_.push_back(std::make_unique<EnergyPickup>(energyModel, planeModel, textureManager));
 	}
 
 	debugParameter_ = std::make_unique<DebugParameter>("Energy");
 	debugParameter_->Register("SpawnInterval", settings_.spawnInterval, 0, "Spawn");
-	debugParameter_->Register("FallHeight", settings_.fallHeight, 1, "Spawn");
-	debugParameter_->Register("FallSpeed", settings_.fallSpeed, 2, "Spawn");
+	debugParameter_->Register("AppearDuration", settings_.appearDuration, 1, "Spawn");
 	debugParameter_->Register("GroundHeight", settings_.groundHeight, 3, "Spawn");
 	debugParameter_->Register("MaxActiveCount", settings_.maxActiveCount, 4, "Spawn");
 	debugParameter_->Register("InitialCountPerZone", settings_.initialCountPerZone, 5, "Spawn");
+	debugParameter_->Register("AngleCenterDegrees", settings_.spawnAngleCenterDegrees, 6, "Spawn");
+	debugParameter_->Register("AngleRangeDegrees", settings_.spawnAngleRangeDegrees, 7, "Spawn");
+	debugParameter_->Register("FloatingAmplitude", settings_.floatingAmplitude, 0, "Animation");
+	debugParameter_->Register("FloatingSpeed", settings_.floatingSpeed, 1, "Animation");
+	debugParameter_->Register("RotationSpeed", settings_.rotationSpeed, 2, "Animation");
 
 	for (size_t i = 0; i < typeSettings_.size(); ++i) {
 		const std::string group = std::string("Type/") + kEnergySizeNames[i];
@@ -147,9 +152,9 @@ bool EnergySpawner::SpawnInZone(FieldZone zone)
 	(*available)->Spawn(
 		size,
 		MakeSpawnPosition(zone),
-		settings_.fallHeight,
-		settings_.fallSpeed,
-		typeSettings_[static_cast<size_t>(size)]);
+		settings_.appearDuration, 
+		typeSettings_[static_cast<size_t>(size)]
+	);
 	return true;
 }
 
@@ -183,7 +188,7 @@ EnergyPickup* EnergySpawner::FindNearestAvailable(const Vector3& position, float
 	const float safeMaxDistance = (std::max)(maxDistance, 0.0f);
 	float nearestDistanceSquared = safeMaxDistance * safeMaxDistance;
 
-	// Falling・Reserved・Carriedはロックオン候補に含めない。
+	// Appearing・Reserved・Carriedはロックオン候補に含めない。
 	for (auto& pickup : pickups_) 
 	{
 		if (!pickup->IsTargetable()) 
@@ -220,8 +225,10 @@ void EnergySpawner::ApplyDebugParameters()
 void EnergySpawner::SanitizeSettings() 
 {
 	settings_.spawnInterval = (std::max)(settings_.spawnInterval, 0.1f);
-	settings_.fallHeight = (std::max)(settings_.fallHeight, 0.0f);
-	settings_.fallSpeed = (std::max)(settings_.fallSpeed, 0.01f);
+	settings_.appearDuration = (std::max)(settings_.appearDuration, 0.01f);
+	settings_.spawnAngleRangeDegrees = (std::clamp)(settings_.spawnAngleRangeDegrees, 0.0f, 360.0f);
+	settings_.floatingAmplitude = (std::max)(settings_.floatingAmplitude, 0.0f);
+	settings_.floatingSpeed = (std::max)(settings_.floatingSpeed, 0.0f);
 	settings_.maxActiveCount = (std::clamp)(
 		settings_.maxActiveCount,
 		1,
@@ -249,7 +256,11 @@ void EnergySpawner::UpdatePickups(float deltaTime)
 
 		// Register変更を既に存在する個体にも即時反映する。
 		pickup->ApplyTypeSettings(typeSettings_[static_cast<size_t>(pickup->GetSize())]);
-		pickup->Update(deltaTime);
+		pickup->Update(
+			deltaTime,
+			settings_.floatingAmplitude,
+			settings_.floatingSpeed,
+			settings_.rotationSpeed);
 	}
 }
 
@@ -285,7 +296,13 @@ Vector3 EnergySpawner::MakeSpawnPosition(FieldZone zone) const
 		minRadius * minRadius,
 		maxRadius * maxRadius);
 	const float radius = std::sqrt(radiusSquared);
-	const float angle = RandomGenerator::Get<float>(0.0f, TWO_PI);
+	// 0度を+X方向とし、中心角を基準に指定幅の扇形から抽選する。
+	// 360度なら従来どおり円環全周、180度なら中心角の左右90度が生成範囲になる。
+	const float halfAngleRangeDegrees = settings_.spawnAngleRangeDegrees * 0.5f;
+	const float angleDegrees = RandomGenerator::Get<float>(
+		settings_.spawnAngleCenterDegrees - halfAngleRangeDegrees,
+		settings_.spawnAngleCenterDegrees + halfAngleRangeDegrees);
+	const float angle = angleDegrees * (PI / 180.0f);
 	const Vector3 center = field_->GetSettings().center;
 
 	return 

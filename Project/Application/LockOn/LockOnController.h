@@ -134,6 +134,8 @@ private:
 	/// @brief 論理位置、選択半径に連動するスケール、色をcursor.objへ反映する。
 	void SyncCursorModel();
 
+	void SyncChargeModel();
+
 	/// @brief 範囲内で最も近いEnergyまたはEnemyを選ぶ。
 	void UpdateSelection();
 
@@ -173,23 +175,25 @@ private:
 	/// @brief 選択・チャージ状態をImGuiへ表示する。
 	void DrawDebugWindow();
 
-	GameEngine::Input* input_ = nullptr;                           // マウス座標と移動量の取得元
-	GameEngine::InputCommand* inputCommand_ = nullptr;             // デバイス共通コマンドの取得元
-	GameEngine::Camera* camera_ = nullptr;                         // マウスレイの逆変換に使うカメラ
-	std::unique_ptr<GameEngine::ModelComponent> cursorModel_;      // cursor.objの描画情報
-	GameEngine::DebugRenderer* debugRenderer_ = nullptr;           // ロックオン範囲のデバッグ描画先
-	Field* field_ = nullptr;                                       // カーソル移動範囲の参照先
-	Rocket* rocket_ = nullptr;                                     // 派遣線の始点と消費元
-	EnergySpawner* energySpawner_ = nullptr;                       // 選択可能なEnergyの検索先
-	EnemyManager* enemyManager_ = nullptr;                         // 選択可能なEnemyの検索先
-	UnitManager* unitManager_ = nullptr;                           // 派遣処理の依頼先
-	LockOnSettings settings_;                                      // Registerから編集される設定
-	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;   // 設定とParameter Inspectorの接続
-	Vector3 cursorPosition_ = {};                                  // フィールドXZ平面上のカーソル座標
-	EnergyPickup* selectedEnergy_ = nullptr;                       // 現在選択中のEnergy
-	Enemy* selectedEnemy_ = nullptr;                               // 現在選択中のEnemy
-	float lockOnSeconds_ = 0.0f;                                  // 今回の入力を保持した秒数
-	bool isCharging_ = false;                                      // ロックオン入力を保持中か
-	bool gameplayEnabled_ = true;                                 // Ready・TimeUp・Pause中はfalse
+	GameEngine::Input* input_ = nullptr;                        
+	GameEngine::InputCommand* inputCommand_ = nullptr;          
+	GameEngine::Camera* camera_ = nullptr;                      
+	std::unique_ptr<GameEngine::ModelComponent> cursorModel_;   
+	std::unique_ptr<GameEngine::ModelComponent> chargeModel_;
+	GameEngine::DebugRenderer* debugRenderer_ = nullptr;        
+	Field* field_ = nullptr;                                    
+	Rocket* rocket_ = nullptr;                                  
+	EnergySpawner* energySpawner_ = nullptr;                    
+	EnemyManager* enemyManager_ = nullptr;                      
+	UnitManager* unitManager_ = nullptr;                        
+	LockOnSettings settings_;                                   
+	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;
+	Vector3 cursorPosition_ = {};                               
+	EnergyPickup* selectedEnergy_ = nullptr;                    
+	Enemy* selectedEnemy_ = nullptr;                            
+	float lockOnSeconds_ = 0.0f;                                
+	bool isCharging_ = false;                                   
+	bool gameplayEnabled_ = true;  
+	int32_t chargedEnergy_ = 0;
 };
 

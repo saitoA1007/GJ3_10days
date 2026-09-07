@@ -7,6 +7,7 @@ class EnergySpawner;
 class EnemyManager;
 class UnitManager;
 class LockOnController;
+class ResultMovieManager; // リザルトのムービー管理
 
 struct GameFlowSettings
 {
@@ -24,6 +25,7 @@ struct GameFlowContext
 	UnitManager* unitManager = nullptr;
 	LockOnController* lockOnController = nullptr;
 	GameFlowSettings* settings = nullptr;
+	ResultMovieManager* resultMovieManager_ = nullptr;
 
 	int32_t finalEnergy = 0; // スコア用
 };
@@ -49,4 +51,7 @@ public:
 
 	// このフェーズ中にプレイヤーのゲーム操作を許可するか
 	virtual bool IsGameplayEnabled() const { return false; }
+
+	// このフェーズ中にGameSceneのメインカメラを使用するか
+	virtual bool UsesGameSceneCamera() const { return true; }
 };

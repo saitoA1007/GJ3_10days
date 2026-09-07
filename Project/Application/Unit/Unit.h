@@ -31,19 +31,19 @@ enum class UnitState : uint8_t
 /// 全ユニットで共有する移動・スタミナ・見た目の設定
 struct UnitSettings
 {
-	Vector3 launchOffset = { 0.0f, 0.0f, 0.0f };         // ロケット位置から出撃位置までの差
-	Vector3 scale = { 0.7f, 0.7f, 0.7f };                // unit.objの表示倍率
-	Vector3 carryOffset = { 0.0f, 1.45f, 0.0f };         // ユニット位置から頭上Energyまでの差
-	float normalSpeed = 1.5f;                            // スタミナ切れ時の秒速
-	float boostedSpeed = 5.0f;                           // スタミナがある間の秒速
-	float pickupRadius = 0.45f;                          // Energy回収が成立する距離
-	float deliveryRadius = 1.6f;                         // ロケットへ納品が成立する距離
-	float collisionRadius = 0.6f;                        // EnemyとのXZ平面上の当たり判定半径
-	float staminaDrainPerSecond = 2.0f;                  // 基本スタミナ消費量/秒
-	float distanceDrainRate = 0.08f;                     // ロケットからの距離による消費倍率
-	Vector4 normalColor = { 1.0f, 1.0f, 1.0f, 1.0f };    // スタミナ切れ時の色
-	Vector4 staminaColor = { 0.25f, 0.85f, 1.0f, 1.0f }; // スタミナがある間の水色
-	float groundY = 0.0f;                                // 地面のY座標
+	Vector3 launchOffset = { 0.0f, 0.0f, 0.0f };        
+	Vector3 scale = { 0.7f, 0.7f, 0.7f };               
+	Vector3 carryOffset = { 0.0f, 1.45f, 0.0f };        
+	float normalSpeed = 1.5f;                           
+	float boostedSpeed = 5.0f;                          
+	float pickupRadius = 0.45f;                         
+	float deliveryRadius = 1.6f;                        
+	float collisionRadius = 0.6f;                       
+	float staminaDrainPerSecond = 2.0f;                 
+	float distanceDrainRate = 0.08f;                    
+	Vector4 normalColor = { 1.0f, 1.0f, 1.0f, 1.0f };   
+	Vector4 staminaColor = { 0.25f, 0.85f, 1.0f, 1.0f };
+	float groundY = 0.0f;                               
 };
 
 /// @brief エネルギー回収または敵攻撃へ派遣されるユニット。

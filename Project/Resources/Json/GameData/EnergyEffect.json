@@ -1,14 +1,14 @@
 {
-    "RocketFireEffect": {
+    "EnergyEffect": {
         "Emitter": {
             "ColorEmit": {
                 "Enable": false
             },
             "Defalut": {
                 "Color": [
-                    0.0,
-                    0.15444016456604004,
                     1.0,
+                    0.023166000843048096,
+                    0.0,
                     1.0
                 ],
                 "EmittePos": [
@@ -16,28 +16,20 @@
                     0.0,
                     0.0
                 ],
-                "LifeTime": 0.5,
+                "LifeTime": 1.0,
                 "Rotate": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "Scale": [
-                    2.0,
-                    2.0,
+                    1.0,
+                    1.0,
                     1.0
                 ]
             },
             "DirectionEmit": {
-                "Direction": [
-                    0.0,
-                    1.0,
-                    0.0
-                ],
-                "Enable": true,
-                "MaxSpeed": 0.1899999976158142,
-                "MinSpeed": 0.10000000149011612,
-                "SpreadAngle": 10.0
+                "Enable": false
             },
             "IsActiveBlendAdd": true,
             "IsBillBoard": true,
@@ -51,7 +43,7 @@
                     "_Max": [
                         0.0,
                         0.0,
-                        7.989999771118164
+                        7.0
                     ],
                     "_Min": [
                         0.0,
@@ -69,7 +61,7 @@
             "ShapeEmit": {
                 "Enable": false
             },
-            "SpawnCoolTime": 0.0,
+            "SpawnCoolTime": 0.10000000149011612,
             "SpawnMaxCount": 2,
             "TextureEmit": {
                 "Enable": true,
@@ -84,35 +76,26 @@
         "Particle": {
             "AlphaOverLifeTime": {
                 "EaseType": {
-                    "_EaseType": "EaseInQuad"
+                    "_EaseType": "EaseOutSine"
                 },
                 "Enable": true,
-                "EndAlpha": 0.0
+                "EndAlpha": 0.5
             },
             "Attraction": {
                 "Enable": false
             },
             "ColorOverLifeTime": {
-                "EaseType": {
-                    "_EaseType": "EaseInOutBounce"
-                },
-                "Enable": true,
-                "EndColor": [
-                    1.0,
-                    0.0,
-                    0.0,
-                    1.0
-                ]
+                "Enable": false
             },
             "RotationByVelocity": {
                 "Enable": false
             },
             "SizeOverLifeTime": {
                 "EaseType": {
-                    "_EaseType": "EaseInOutQuad"
+                    "_EaseType": "EaseInOutBounce"
                 },
                 "Enable": true,
-                "EndSize": 0.6200000047683716,
+                "EndSize": 0.0,
                 "SeparateAxes": false,
                 "SeparateAxesEndSize": [
                     0.0,

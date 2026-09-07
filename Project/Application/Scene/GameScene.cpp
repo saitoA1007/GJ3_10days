@@ -23,7 +23,11 @@ using namespace GameEngine;
 #include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
 #include "Application/Effect/MoonObject.h"
+#include "Application/Effect/RocketEffect.h"
+#include <Application/result/ShuffleNumber.h>
+#include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
+#include <algorithm>
 
 // 後で別クラスに纏めて消す
 namespace
@@ -34,6 +38,9 @@ namespace
 	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
 	constexpr Vector3 kCameraPosition = { 0.0f, 60.0f, -60.0f };
 	constexpr Vector3 kCameraTarget = { 0.0f, 0.0f, 0.0f };
+	constexpr float kFadeDuration = 1.0f;
+	constexpr Vector2 kFadeTextureSize = { 128.0f, 72.0f };
+	constexpr Vector2 kFadeScale = { 10.0f, 10.0f };
 }
 
 GameScene::~GameScene() {
@@ -89,7 +96,7 @@ GameScene::GameScene() {
 	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
 
 	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
-	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_);
+	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_,textureManager_, planeModel);
 
 	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
 	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, rocket_);
@@ -109,6 +116,19 @@ GameScene::GameScene() {
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
+
+	// クリアのムービー
+	// 月のオブジェクト
+	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
+	auto* fructureModel = modelManager_->GetNameByModel("fractureMoon.gltf");
+	uint32_t moonGH = textureManager_->GetHandleByName("moon_meteor_01_diff_1k.jpg");
+	uint32_t moonNorGH = textureManager_->GetHandleByName("moon_meteor_01_nor_gl_1k.png");
+	auto* moonObject = gameObjectManager_->AddObject<MoonObject>(sphereModel, fructureModel, moonGH, moonNorGH);
+	// リザルトのムービーカメラ
+	auto* reCamera =  gameObjectManager_->AddObject<ResultMoveCamera>();
+	// ロケット演出
+	auto* rocketEffect =  gameObjectManager_->AddObject<RocketEffect>(modelManager_, textureManager_,gameObjectManager_);
+	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect);
 
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
@@ -132,6 +152,7 @@ GameScene::GameScene() {
 	flowContext.enemyManager = enemyManager_;
 	flowContext.unitManager = unitManager_;
 	flowContext.lockOnController = lockOnController_;
+	flowContext.resultMovieManager_ = resultMoiveManager;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
@@ -165,16 +186,6 @@ GameScene::GameScene() {
 	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
 	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model, halfDomeModel, circleModel);
 
-	// 月のオブジェクト
-	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
-	auto* fructureModel = modelManager_->GetNameByModel("fractureMoon.gltf");
-	uint32_t moonGH = textureManager_->GetHandleByName("moon_meteor_01_diff_1k.jpg");
-	uint32_t moonNorGH = textureManager_->GetHandleByName("moon_meteor_01_nor_gl_1k.png");
-	gameObjectManager_->AddObject<MoonObject>(sphereModel, fructureModel, moonGH, moonNorGH);
-
-	// リザルトのムービーカメラ
-	//gameObjectManager_->AddObject<ResultMoveCamera>(mainCamera_.get());
-
 	// エフェクト用モデル
 	auto* effectModel = modelManager_->GetNameByModel("plane.obj");
 	effectModel->SetDefaultIsEnableLight(false);
@@ -191,9 +202,30 @@ void GameScene::Initialize() {
 
 	score_.Reset();
 	scoreView_->SetValue(score_.GetDisplayedValue());
+
+	// 128x72のFade.pngを10倍にして画面全体を覆い、開始時は不透明にする。
+	fadeSprite_ = std::make_unique<Sprite>(
+		Vector2{ 0.0f, 0.0f },
+		kFadeTextureSize,
+		Vector2{ 0.0f, 0.0f },
+		Vector4{ 1.0f, 1.0f, 1.0f, 1.0f },
+		Vector2{ 0.0f, 0.0f },
+		kFadeTextureSize,
+		kFadeTextureSize);
+	fadeSprite_->textureHandle_ = textureManager_->GetHandleByName("Fade.png");
+	fadeSprite_->scale_ = kFadeScale;
+	fadeSprite_->Update();
+	fadeElapsedTime_ = 0.0f;
 }
 
 void GameScene::Update() {
+	if (fadeSprite_ && fadeElapsedTime_ < kFadeDuration) {
+		fadeElapsedTime_ = std::min(fadeElapsedTime_ + FpsCounter::deltaTime, kFadeDuration);
+		const float progress = fadeElapsedTime_ / kFadeDuration;
+		fadeSprite_->color_.w = 1.0f - progress;
+		fadeSprite_->Update();
+	}
+
 	score_.Update(FpsCounter::deltaTime);
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
@@ -241,6 +273,9 @@ void GameScene::DebugUpdate()
 
 void GameScene::Draw() {
 	scoreView_->Draw(renderQueue_);
+	if (fadeSprite_) {
+		renderQueue_->SubmitSprite(fadeSprite_.get());
+	}
 }
 
 void GameScene::InputRegisterCommand() {
@@ -301,5 +336,10 @@ void GameScene::UpdateCamera()
 			rocket_->GetEntranceProgress());
 	}
 	mainCamera_->Update();
-	renderQueue_->SetCamera(mainCamera_.get());
+
+	// 打ち上げ演出以降はResultMoveCameraがRenderQueueのカメラを管理する。
+	if (!gameFlow_ || gameFlow_->UsesGameSceneCamera())
+	{
+		renderQueue_->SetCamera(mainCamera_.get());
+	}
 }

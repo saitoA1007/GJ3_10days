@@ -18,6 +18,12 @@ public:
 	// 月を破壊する
 	void Break() {
 		pPos_.x = 65.0f;
+		isFractureActive_ = true;
+	}
+
+	void Reset() {
+		pPos_.x = 60.0f;
+		isFractureActive_ = false;
 	}
 
 public:

@@ -217,6 +217,11 @@ void Enemy::TrackingMovement(float deltaTime) {
 		// 距離をロケット中心からの距離へ再計算
 		Vector2 pos2D = { data_->transform.translate.x, data_->transform.translate.z };
 		distance_ = pos2D.Length();
+
+		// 現在地からロケットへの方向を再計算し、direction_ を上書き
+		if (distance_ > 0.0001f) {
+			direction_ = pos2D / distance_;
+		}
 	}
 }
 

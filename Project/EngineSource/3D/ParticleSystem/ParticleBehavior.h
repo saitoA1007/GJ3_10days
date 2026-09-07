@@ -90,6 +90,16 @@ namespace GameEngine{
 
 		bool IsLoop() const { return main_.isLoop; }
 
+		// 色を設定
+		void SetColor(Vector4 color) {
+			main_.color = color;
+		}
+
+		// サイズを設定
+		void SetScale(Vector3 scale) {
+			main_.scale = scale;
+		}
+
 	private:
 		// パラメータ機能
 		std::unique_ptr<DebugParameter> debugParame_;

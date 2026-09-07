@@ -31,6 +31,7 @@
             "DirectionEmit": {
                 "Enable": false
             },
+            "IsActiveBlendAdd": true,
             "IsBillBoard": true,
             "IsLoop": true,
             "LifeTimeEmit": {
@@ -103,8 +104,20 @@
                     0.0
                 ]
             },
+            "ColorOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInQuad"
+                },
+                "Enable": true,
+                "EndColor": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
+            },
             "RotationByVelocity": {
-                "Enable": true
+                "Enable": false
             },
             "SizeOverLifeTime": {
                 "EaseType": {

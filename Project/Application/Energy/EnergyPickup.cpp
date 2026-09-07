@@ -2,13 +2,15 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "Model.h"
+#include "MyMath.h"
 #include "RenderQueue.h"
 
 using namespace GameEngine;
 
-EnergyPickup::EnergyPickup(Model* model)
+EnergyPickup::EnergyPickup(Model* model, GameEngine::Model* planeModel, GameEngine::TextureManager* textureManager) : particle_("EnergyEffect",16, textureManager, planeModel)
 {
 	assert(model != nullptr && "energy requires energy.obj");
 	modelComponent_ = std::make_unique<ModelComponent>(model);
@@ -21,18 +23,26 @@ EnergyPickup::EnergyPickup(Model* model)
 void EnergyPickup::Spawn(
 	EnergySize size,
 	const Vector3& groundPosition,
-	float fallHeight,
-	float fallSpeed,
+	float appearDuration,
 	const EnergyTypeSettings& typeSettings)
 {
 	// 着地点を保持したまま開始位置だけ上へずらし、Falling状態から始める。
 	size_ = size;
-	state_ = EnergyState::Falling;
+	state_ = EnergyState::Appearing;
 	typeSettings_ = typeSettings;
 	groundY_ = groundPosition.y;
-	fallSpeed_ = (std::max)(fallSpeed, 0.0f);
-	position_ = groundPosition;
-	position_.y += (std::max)(fallHeight, 0.0f);
+	position_ = groundPosition; 
+
+	animationTime_ = 0.0f;
+	rotationY_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
+	isHighlighted_ = false;
+
+	// ディゾルブの初期設定
+	appearTime_ = 0.0f;
+	appearDuration_ = appearDuration;
+	material_.materialData_->dissolveThreshold = 1.0f;
+
 	SyncModel();
 }
 
@@ -48,7 +58,11 @@ void EnergyPickup::SpawnOnGround(
 	groundY_ = groundPosition.y;
 	fallSpeed_ = 0.0f;
 	position_ = groundPosition;
+	animationTime_ = 0.0f;
+	rotationY_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+	material_.materialData_->dissolveThreshold = 0.0f;
 	SyncModel();
 }
 
@@ -58,24 +72,60 @@ void EnergyPickup::Reset()
 	position_ = {};
 	groundY_ = 0.0f;
 	fallSpeed_ = 0.0f;
+	animationTime_ = 0.0f;
+	rotationY_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+	material_.materialData_->dissolveThreshold = 0.0f;
 }
 
-void EnergyPickup::Update(float deltaTime)
+void EnergyPickup::Update(
+	float deltaTime,
+	float floatingAmplitude,
+	float floatingSpeed,
+	float rotationSpeed)
 {
 	if (!IsActive()) {
 		return;
 	}
 
-	if (state_ == EnergyState::Falling) 
+	// パーティクルの更新
+	particle_.SetEmitterPos(modelComponent_->worldTransform_.transform_.translate);
+	particle_.Update();
+
+	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
+
+	// ディゾルブ出現中の処理
+	if (state_ == EnergyState::Appearing)
 	{
-		// 地面を通り抜けないよう、到達したフレームで位置をgroundY_へ固定する。
-		position_.y -= fallSpeed_ * (std::max)(deltaTime, 0.0f);
-		if (position_.y <= groundY_) {
-			position_.y = groundY_;
-			state_ = EnergyState::OnGround;
+		appearTime_ += safeDeltaTime;
+
+		float threshold = 1.0f - (appearTime_ / appearDuration_);
+
+		if (appearTime_ >= appearDuration_)
+		{
+			threshold = 0.0f;
+			state_ = EnergyState::OnGround; 
+			animationTime_ = 0.0f;
 		}
+
+		material_.materialData_->dissolveThreshold = threshold;
 	}
+
+	if (state_ == EnergyState::OnGround || state_ == EnergyState::Reserved)
+	{
+		floatingAmplitude_ = (std::max)(floatingAmplitude, 0.0f);
+		animationTime_ += safeDeltaTime * (std::max)(floatingSpeed, 0.0f);
+		rotationY_ += safeDeltaTime * rotationSpeed;
+		animationTime_ = std::fmod(animationTime_, TWO_PI);
+		rotationY_ = std::fmod(rotationY_, TWO_PI);
+	}
+	else
+	{
+		floatingAmplitude_ = 0.0f;
+	}
+
+	material_.materialData_->time += safeDeltaTime;
 
 	SyncModel();
 }
@@ -85,6 +135,9 @@ void EnergyPickup::Draw(RenderQueue* renderQueue)
 	if (IsActive()) {
 		//modelComponent_->DrawRaytracing(renderQueue);
 		modelComponent_->DrawCustomRaytracing(renderQueue);
+
+		// パーティクルの描画
+		particle_.Draw();
 	}
 }
 
@@ -133,6 +186,8 @@ void EnergyPickup::DropOnGround(const Vector3& position)
 	position_ = position;
 	position_.y = groundY_;
 	state_ = EnergyState::OnGround;
+	animationTime_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
 	SyncModel();
 }
 
@@ -177,7 +232,13 @@ void EnergyPickup::SyncModel()
 {
 	const float scale = typeSettings_.scale;
 	modelComponent_->worldTransform_.transform_.scale = { scale, scale, scale };
-	modelComponent_->worldTransform_.transform_.translate = position_;
+	Vector3 displayPosition = position_;
+	if (state_ == EnergyState::OnGround || state_ == EnergyState::Reserved)
+	{
+		displayPosition.y += std::sin(animationTime_) * floatingAmplitude_;
+	}
+	modelComponent_->worldTransform_.transform_.translate = displayPosition;
+	modelComponent_->worldTransform_.transform_.rotate.y = rotationY_;
 	Vector4 color = typeSettings_.color;
 	if (isHighlighted_) 
 	{
@@ -191,6 +252,15 @@ void EnergyPickup::SyncModel()
 	material_.materialData_->baseColor = color;
 	material_.materialData_->rimColor = typeSettings_.rimColor;
 	material_.materialData_->dissolveEdgeColor = typeSettings_.dissolveEdgeColor;
+
+	// 色を設定
+	particle_.SetColor(typeSettings_.color);
+	// サイズを設定
+	float eScale = scale * 1.2f;
+	particle_.SetScale({ eScale, eScale, eScale });
+
+	// 出現位置を設定
+	particle_.SetEmitterPos(modelComponent_->worldTransform_.transform_.translate);
 
 	modelComponent_->Update();
 }

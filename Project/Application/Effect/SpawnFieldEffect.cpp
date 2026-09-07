@@ -1,4 +1,5 @@
 #include "SpawnFieldEffect.h"
+#include <algorithm>
 #include "FPSCounter.h"
 using namespace GameEngine;
 
@@ -54,6 +55,7 @@ SpawnFieldEffect::SpawnFieldEffect(GameEngine::Model* ring1Model, GameEngine::Mo
 
 	// 登録
 	Register();
+	ApplyRingModelScales();
 
 	for (uint32_t i = 0; i < 3; ++i) {
 		materials_[i].materialData_->emissionColor = Vector3(glowColors_[i].x, glowColors_[i].y, glowColors_[i].z);
@@ -65,11 +67,7 @@ void SpawnFieldEffect::Initialize() {
 }
 
 void SpawnFieldEffect::Update() {
-	if (debugParame_->ApplyIfDirty()) {
-		for (uint32_t i = 0; i < 3; ++i) {
-			materials_[i].materialData_->emissionColor = Vector3(glowColors_[i].x, glowColors_[i].y, glowColors_[i].z);
-		}
-	}
+	ApplyDebugParameters();
 
 	// 時間を更新
 	universeMaterial_.materialData_->time += FpsCounter::gameDeltaTime;
@@ -93,6 +91,10 @@ void SpawnFieldEffect::Update() {
 	universeModel_.Update();
 }
 
+void SpawnFieldEffect::DebugUpdate() {
+	ApplyDebugParameters();
+}
+
 void SpawnFieldEffect::Draw() {
 
 	universeModel_.DrawCustomRaytracing(renderQueue_);
@@ -113,17 +115,18 @@ void SpawnFieldEffect::Register() {
 	// エネルギーのスポーン演出
 	for (uint32_t i = 0; i < 3; ++i) {
 		std::string subGroup = "Ring" + std::to_string(i);
-		debugParame_->Register("InnerRadius", materials_[i].materialData_->innerRadius, 0, subGroup);
-		debugParame_->Register("OuterRadius", materials_[i].materialData_->outerRadius, 1, subGroup);
-		debugParame_->Register("ScrollSpeed", materials_[i].materialData_->scrollSpeed, 2, subGroup);
-		debugParame_->Register("noiseScale", materials_[i].materialData_->noiseScale, 3, subGroup);
-		debugParame_->Register("noiseJitter", materials_[i].materialData_->noiseJitter, 4, subGroup);
-		debugParame_->Register("driftSpeed", materials_[i].materialData_->driftSpeed, 5, subGroup);
-		debugParame_->Register("dissolveThreshold", materials_[i].materialData_->dissolveThreshold, 6, subGroup);
-		debugParame_->Register("dissolveEdge", materials_[i].materialData_->dissolveEdge, 7, subGroup);
-		debugParame_->Register("densityPower", materials_[i].materialData_->densityPower, 8, subGroup);
-		debugParame_->Register("emissionIntensity", materials_[i].materialData_->emissionIntensity, 9, subGroup);
-		debugParame_->Register("glowColor", glowColors_[i], 10, subGroup);
+		debugParame_->Register("ModelScale", ringModelScales_[i], 0, subGroup);
+		debugParame_->Register("InnerRadius", materials_[i].materialData_->innerRadius, 1, subGroup);
+		debugParame_->Register("OuterRadius", materials_[i].materialData_->outerRadius, 2, subGroup);
+		debugParame_->Register("ScrollSpeed", materials_[i].materialData_->scrollSpeed, 3, subGroup);
+		debugParame_->Register("noiseScale", materials_[i].materialData_->noiseScale, 4, subGroup);
+		debugParame_->Register("noiseJitter", materials_[i].materialData_->noiseJitter, 5, subGroup);
+		debugParame_->Register("driftSpeed", materials_[i].materialData_->driftSpeed, 6, subGroup);
+		debugParame_->Register("dissolveThreshold", materials_[i].materialData_->dissolveThreshold, 7, subGroup);
+		debugParame_->Register("dissolveEdge", materials_[i].materialData_->dissolveEdge, 8, subGroup);
+		debugParame_->Register("densityPower", materials_[i].materialData_->densityPower, 9, subGroup);
+		debugParame_->Register("emissionIntensity", materials_[i].materialData_->emissionIntensity, 10, subGroup);
+		debugParame_->Register("glowColor", glowColors_[i], 11, subGroup);
 	}
 	// 宇宙
 	debugParame_->Register("radius", universeMaterial_.materialData_->radius, 1, "UniverseMaterial");
@@ -137,4 +140,27 @@ void SpawnFieldEffect::Register() {
 	debugParame_->Register("Cycle", colorCycle_, 1, "Color");
 	debugParame_->Register("Offset", colorOffset_, 1, "Color");
 	debugParame_->Apply();
+}
+
+void SpawnFieldEffect::ApplyDebugParameters() {
+	if (!debugParame_->ApplyIfDirty()) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < 3; ++i) {
+		materials_[i].materialData_->emissionColor = Vector3(glowColors_[i].x, glowColors_[i].y, glowColors_[i].z);
+	}
+	ApplyRingModelScales();
+}
+
+void SpawnFieldEffect::ApplyRingModelScales() {
+	for (size_t i = 0; i < ringModelScales_.size(); ++i) {
+		ringModelScales_[i] = (std::max)(ringModelScales_[i], 0.0f);
+		const Vector3 scale = { ringModelScales_[i], 1.0f, ringModelScales_[i] };
+
+		ringModels_[i]->worldTransform_.transform_.scale = scale;
+		underRingModels_[i]->worldTransform_.transform_.scale = scale;
+		ringModels_[i]->Update();
+		underRingModels_[i]->Update();
+	}
 }

@@ -6,6 +6,7 @@
         },
         "Ring0": {
             "InnerRadius": 8.600000381469727,
+            "ModelScale": 1.2000000476837158,
             "OuterRadius": 11.4399995803833,
             "ScrollSpeed": 0.10000000149011612,
             "densityPower": 1.1200000047683716,
@@ -23,8 +24,9 @@
             "noiseScale": 30.0
         },
         "Ring1": {
-            "InnerRadius": 19.450000762939453,
-            "OuterRadius": 24.889999389648438,
+            "InnerRadius": 19.860000610351563,
+            "ModelScale": 1.100000023841858,
+            "OuterRadius": 24.989999771118164,
             "ScrollSpeed": 0.10000000149011612,
             "densityPower": 1.9199999570846558,
             "dissolveEdge": 0.7200000286102295,
@@ -42,6 +44,7 @@
         },
         "Ring2": {
             "InnerRadius": 29.360000610351563,
+            "ModelScale": 1.100000023841858,
             "OuterRadius": 34.09000015258789,
             "ScrollSpeed": 0.10000000149011612,
             "densityPower": 1.7000000476837158,

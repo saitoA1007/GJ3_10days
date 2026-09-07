@@ -59,20 +59,13 @@ LockOnController::LockOnController(
 	enemyManager_(enemyManager),
 	unitManager_(unitManager),
 	settings_(settings) {
-	assert(input_ != nullptr && "lock-on requires input");
-	assert(inputCommand_ != nullptr && "lock-on requires input commands");
-	assert(camera_ != nullptr && "lock-on requires a camera");
-	assert(cursorModel != nullptr && "lock-on requires cursor.obj");
-	assert(debugRenderer_ != nullptr && "lock-on requires a debug renderer");
-	assert(field_ != nullptr && "lock-on requires a field");
-	assert(rocket_ != nullptr && "lock-on requires a rocket");
-	assert(energySpawner_ != nullptr && "lock-on requires an energy spawner");
-	assert(enemyManager_ != nullptr && "lock-on requires an enemy manager");
-	assert(unitManager_ != nullptr && "lock-on requires a unit manager");
 
 	// カーソルは画面上で色を判別しやすいよう、ライティングの影響を受けない。
 	cursorModel_ = std::make_unique<ModelComponent>(cursorModel);
 	cursorModel_->materialData_->enableLighting = false;
+
+	chargeModel_ = std::make_unique<ModelComponent>(cursorModel);
+	chargeModel_->materialData_->enableLighting = false;
 
 	debugParameter_ = std::make_unique<DebugParameter>("LockOn");
 	debugParameter_->Register("CursorSpeed", settings_.cursorSpeed, 0, "Cursor");
@@ -111,6 +104,7 @@ void LockOnController::Update()
 	if (!gameplayEnabled_)
 	{
 		SyncCursorModel();
+		SyncChargeModel();
 		return;
 	}
 
@@ -129,12 +123,14 @@ void LockOnController::Update()
 		}
 	}
 	SyncCursorModel();
+	SyncChargeModel();
 }
 
 void LockOnController::DebugUpdate() 
 {
 	ApplyDebugParameters();
 	SyncCursorModel();
+	SyncChargeModel();
 	if (gameplayEnabled_)
 	{
 		DrawLockOnGuide();
@@ -147,6 +143,11 @@ void LockOnController::Draw()
 	if (gameplayEnabled_) 
 	{
 		cursorModel_->DrawRaytracing(renderQueue_);
+
+		if (isCharging_ && (selectedEnergy_ || selectedEnemy_))
+		{
+			chargeModel_->DrawRaytracing(renderQueue_);
+		}
 	}
 }
 
@@ -297,6 +298,42 @@ void LockOnController::SyncCursorModel()
 	cursorModel_->Update();
 }
 
+void LockOnController::SyncChargeModel()
+{
+	if (!isCharging_ || (!selectedEnergy_ && !selectedEnemy_))
+	{
+		return;
+	}
+
+	Vector3 targetPosition = selectedEnemy_
+		? selectedEnemy_->GetPosition()
+		: selectedEnergy_->GetPosition();
+
+	const float targetRadius = selectedEnemy_
+		? selectedEnemy_->GetDisplayScale() + 0.25f
+		: selectedEnergy_->GetScale() + 0.25f;
+
+	const float ratio = CalculateChargeRatio();
+	const float currentRadius = targetRadius + ratio * settings_.selectionRadius;
+
+	chargeModel_->worldTransform_.transform_.scale =
+	{
+		settings_.cursorModelScale.x * currentRadius,
+		targetPosition.y + settings_.cursorModelHeightOffset + 0.01f,
+		settings_.cursorModelScale.z * currentRadius,
+	};
+
+	chargeModel_->worldTransform_.transform_.translate =
+	{
+		targetPosition.x,
+		settings_.groundHeight + settings_.cursorModelHeightOffset + 0.01f,
+		targetPosition.z,
+	};
+
+	chargeModel_->materialData_->color = settings_.chargeColor;
+	chargeModel_->Update();
+}
+
 void LockOnController::UpdateSelection()
 {
 	EnergyPickup* energy = energySpawner_->FindNearestAvailable(cursorPosition_, settings_.selectionRadius);
@@ -330,11 +367,12 @@ void LockOnController::StartLockOn()
 
 	isCharging_ = true;
 	lockOnSeconds_ = 0.0f;
+	chargedEnergy_ = 0;
 }
 
 void LockOnController::UpdateLockOn(float deltaTime)
 {
-	// 対象が他処理で消えた場合はEnergyを消費せずキャンセルする。
+	// 対象が他処理で消えた場合はEnergyを消費せずキャンセル
 	if (!HasValidSelection()) {
 		CancelLockOn();
 		return;
@@ -342,14 +380,40 @@ void LockOnController::UpdateLockOn(float deltaTime)
 
 	if (inputCommand_->IsCommandActive(kLockOnPushCommand))
 	{
-		// 最大値で止め、長時間保持しても要求Energyが上限を越えないようにする。
+		// 無条件でチャージ時間を進める
 		lockOnSeconds_ = (std::min)(
 			lockOnSeconds_ + (std::max)(deltaTime, 0.0f),
 			settings_.maxLockOnSeconds);
+
+		// 加算後の時間に応じた目標エネルギーと不足分を計算
+		const int32_t targetEnergy = CalculateRequestedEnergy();
+		const int32_t neededEnergy = targetEnergy - chargedEnergy_;
+
+		// 新たにエネルギーが必要になった場合のみ引き落とす
+		if (neededEnergy > 0)
+		{
+			const EnergyChange change = rocket_->AllocateEnergyToUnit(neededEnergy);
+
+			// 消費時は amount が負数になるため絶対値を取得
+			const int32_t actualAllocated = std::abs(change.amount);
+			chargedEnergy_ += actualAllocated;
+
+			// ロケットのエネルギー不足で要求量より引き落とせなかった場合
+			if (actualAllocated < neededEnergy)
+			{
+				// 実際に確保できた chargedEnergy_ の量に応じた時間へ逆算して固定
+				const float chargeDuration = settings_.maxLockOnSeconds - settings_.chargeStartSeconds;
+				if (settings_.maxChargeEnergyCost > 0 && chargeDuration > 0.0f)
+				{
+					const float ratio = static_cast<float>(chargedEnergy_) / static_cast<float>(settings_.maxChargeEnergyCost);
+					lockOnSeconds_ = settings_.chargeStartSeconds + ratio * chargeDuration;
+				}
+			}
+		}
 	}
 
 	// 離した瞬間に現在のチャージ量を確定し、1体だけ派遣する。
-	if (inputCommand_->IsCommandActive(kLockOnReleaseCommand)) 
+	if (inputCommand_->IsCommandActive(kLockOnReleaseCommand))
 	{
 		CompleteLockOn();
 	}
@@ -357,18 +421,24 @@ void LockOnController::UpdateLockOn(float deltaTime)
 
 void LockOnController::CompleteLockOn()
 {
-	const int32_t requestedEnergy = CalculateRequestedEnergy();
-
+	// リアルタイムで引き落とした chargedEnergy_ をそのまま Unit に渡す
 	bool dispatched = false;
 	if (selectedEnergy_)
 	{
-		dispatched = unitManager_->DispatchToEnergy(selectedEnergy_, requestedEnergy);
+		dispatched = unitManager_->DispatchToEnergy(selectedEnergy_, chargedEnergy_);
 	}
 	else if (selectedEnemy_)
 	{
-		dispatched = unitManager_->DispatchToEnemy(selectedEnemy_, requestedEnergy);
+		dispatched = unitManager_->DispatchToEnemy(selectedEnemy_, chargedEnergy_);
 	}
 
+	// 派遣に失敗した場合は引き落としたエネルギーをロケットに返却
+	if (!dispatched && chargedEnergy_ > 0)
+	{
+		rocket_->DepositEnergy(chargedEnergy_);
+	}
+
+	chargedEnergy_ = 0;
 	SetSelection(nullptr, nullptr);
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
@@ -381,6 +451,12 @@ void LockOnController::CompleteLockOn()
 
 void LockOnController::CancelLockOn()
 {
+	if (chargedEnergy_ > 0 && rocket_)
+	{
+		rocket_->DepositEnergy(chargedEnergy_);
+	}
+
+	chargedEnergy_ = 0;
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
 	SetSelection(nullptr, nullptr);

@@ -8,11 +8,13 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "CrystalMaterial.h"
+#include "ParticleBehavior.h"
 
 namespace GameEngine 
 {
 	class Model;
 	class RenderQueue;
+	class TextureManager;
 }
 
 /// @brief エネルギーの大きさ。Scaleと獲得量は設定側で決まる。
@@ -30,7 +32,7 @@ inline constexpr size_t kEnergySizeCount = static_cast<size_t>(EnergySize::Count
 enum class EnergyState : uint8_t 
 {
 	Inactive, // プール内で未使用
-	Falling,  // 空中から落下中
+	Appearing,// ディゾルブで出現中
 	OnGround, // 地面にあり、選択可能
 	Reserved, // 派遣ユニットが確保済み
 	Carried,  // ユニットが運搬中
@@ -52,7 +54,7 @@ class EnergyPickup final
 public:
 	/// @brief プールで再利用するエネルギーモデルを準備する。
 	/// @param[in] model エネルギーの描画モデル。
-	explicit EnergyPickup(GameEngine::Model* model);
+	explicit EnergyPickup(GameEngine::Model* model, GameEngine::Model* planeModel, GameEngine::TextureManager* textureManager);
 
 	/// @brief 空中から落下するエネルギーとして生成する。
 	/// @param[in] size 生成するエネルギーサイズ。
@@ -63,8 +65,7 @@ public:
 	void Spawn(
 		EnergySize size,
 		const Vector3& groundPosition,
-		float fallHeight,
-		float fallSpeed,
+		float appearDuration,
 		const EnergyTypeSettings& typeSettings);
 	/// @brief 敵のドロップなど、落下演出なしで地面へ直接生成する。
 	/// @param[in] size 生成するエネルギーサイズ。
@@ -77,9 +78,16 @@ public:
 	/// @brief 非アクティブ状態へ戻して再利用可能にする。
 	void Reset();
 
-	/// @brief 落下中の位置とモデルを更新する。
+	/// @brief 落下処理と、着地後の浮遊・回転アニメーションを更新する。
 	/// @param[in] deltaTime 前フレームからの経過秒数。
-	void Update(float deltaTime);
+	/// @param[in] floatingAmplitude 上下に浮遊する振幅。
+	/// @param[in] floatingSpeed 浮遊アニメーションの角速度（rad/s）。
+	/// @param[in] rotationSpeed Y軸回転の角速度（rad/s）。
+	void Update(
+		float deltaTime,
+		float floatingAmplitude,
+		float floatingSpeed,
+		float rotationSpeed);
 
 	/// @brief アクティブな場合だけ描画する。
 	/// @param[in] renderQueue 描画命令の登録先。
@@ -152,9 +160,18 @@ private:
 	Vector3 position_ = {};                                      // 現在のワールド座標
 	float groundY_ = 0.0f;                                      // 落下終了・再配置に使う地面の高さ
 	float fallSpeed_ = 0.0f;                                    // 1秒あたりの落下距離
+	float animationTime_ = 0.0f;                                // 着地後アニメーションの経過秒数
+	float rotationY_ = 0.0f;                                    // モデル表示へ適用するY軸回転角
+	float floatingAmplitude_ = 0.0f;                             // 上下に浮遊する振幅
 	bool isHighlighted_ = false;                                 // カーソル選択中か
+
+	float appearTime_ = 0.0f;       
+	float appearDuration_ = 1.0f;
 
 	// マテリアル
 	GameEngine::CrystalMaterial material_;
+
+	// オーラのパーティクル
+	GameEngine::ParticleBehavior particle_;
 };
 
