@@ -27,6 +27,7 @@ public:
 		float scale = 0.5f;
 		float startDelay = 0.0f;
 		float moveDuration = 1.0f;
+		float holdDuration = 1.0f;
 		EaseType easeType = EaseType::kEaseOutCubic;
 	};
 
@@ -43,7 +44,11 @@ public:
 		float targetRotationX,
 		float rotateDuration,
 		float returnDuration);
+	void StartReturnAnimation(float returnDuration);
 	bool IsSuccessAnimationComplete() const;
+	bool IsEntranceAnimationComplete() const;
+	float GetHoldDuration() const;
+	float GetMoveDuration() const;
 
 	void SetColor(const Vector3& color);
 	void SetDisplayOffset(const Vector3& offset);

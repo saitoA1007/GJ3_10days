@@ -22,6 +22,7 @@ namespace
 struct TutorialTextSequence::StepEntry
 {
 	std::unique_ptr<TutorialCameraModelView> view;
+	ProgressMode progressMode = ProgressMode::PhaseStep;
 	TutorialPhase::Step phaseStep = TutorialPhase::Step::SelectEnergy;
 	float successTargetRotationX = 8.021f;
 	float successRotateDuration = 0.5f;
@@ -30,7 +31,9 @@ struct TutorialTextSequence::StepEntry
 	float shakeAmplitude = 0.45f;
 	float shakeCycles = 4.0f;
 	float errorElapsed = 0.35f;
+	float holdElapsed = 0.0f;
 	bool successStarted = false;
+	bool showSuccessColor = true;
 };
 
 TutorialTextSequence::TutorialTextSequence(
@@ -57,6 +60,7 @@ TutorialTextSequence::TutorialTextSequence(
 			camera,
 			definition.parameterGroupName,
 			definition.viewSettings);
+		entry->progressMode = definition.progressMode;
 		entry->phaseStep = definition.phaseStep;
 		entry->successTargetRotationX = definition.successTargetRotationX;
 		entry->successRotateDuration = (std::max)(definition.successRotateDuration, 0.0f);
@@ -65,6 +69,7 @@ TutorialTextSequence::TutorialTextSequence(
 		entry->shakeAmplitude = (std::max)(definition.shakeAmplitude, 0.0f);
 		entry->shakeCycles = (std::max)(definition.shakeCycles, 0.0f);
 		entry->errorElapsed = entry->errorDuration;
+		entry->showSuccessColor = definition.showSuccessColor;
 		steps_.push_back(std::move(entry));
 	}
 	Reset();
@@ -96,7 +101,8 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 	}
 
 	StepEntry& entry = *steps_[currentStepIndex_];
-	if (!entry.successStarted && HasPhaseStepCompleted(entry, *tutorialPhase))
+	if (!entry.successStarted && entry.progressMode == ProgressMode::PhaseStep &&
+		HasPhaseStepCompleted(entry, *tutorialPhase))
 	{
 		entry.successStarted = true;
 		entry.errorElapsed = entry.errorDuration;
@@ -121,7 +127,7 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 	entry.view->SetColor(
 		isErrorFeedbackActive
 		? kErrorColor
-		: (entry.successStarted ? kSuccessColor : kNormalColor));
+		: (entry.successStarted && entry.showSuccessColor ? kSuccessColor : kNormalColor));
 
 	float shakeOffsetX = 0.0f;
 	if (isErrorFeedbackActive && entry.errorDuration > 0.0f)
@@ -132,6 +138,20 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 	}
 	entry.view->SetDisplayOffset({ shakeOffsetX, 0.0f, 0.0f });
 	entry.view->Update(true, advanceAnimation, deltaTime);
+
+	if (!entry.successStarted && entry.progressMode == ProgressMode::TimedHold &&
+		entry.view->IsEntranceAnimationComplete())
+	{
+		if (advanceAnimation)
+		{
+			entry.holdElapsed += (std::max)(deltaTime, 0.0f);
+		}
+		if (entry.holdElapsed >= entry.view->GetHoldDuration())
+		{
+			entry.successStarted = true;
+			entry.view->StartReturnAnimation(entry.view->GetMoveDuration());
+		}
+	}
 
 	if (entry.successStarted && entry.view->IsSuccessAnimationComplete())
 	{
@@ -166,6 +186,10 @@ bool TutorialTextSequence::HasPhaseStepCompleted(
 
 bool TutorialTextSequence::IsMistakeInput(const StepEntry& entry) const
 {
+	if (entry.progressMode != ProgressMode::PhaseStep)
+	{
+		return false;
+	}
 	if (!inputCommand_ || !inputCommand_->IsCommandActive(kLockOnTriggerCommand))
 	{
 		return false;
@@ -190,6 +214,7 @@ void TutorialTextSequence::ResetSteps()
 		entry->view->Reset();
 		entry->view->SetColor(kNormalColor);
 		entry->errorElapsed = entry->errorDuration;
+		entry->holdElapsed = 0.0f;
 		entry->successStarted = false;
 	}
 }

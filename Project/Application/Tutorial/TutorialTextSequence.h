@@ -22,8 +22,15 @@ namespace GameEngine
 class TutorialTextSequence final
 {
 public:
+	enum class ProgressMode
+	{
+		PhaseStep,
+		TimedHold,
+	};
+
 	struct StepDefinition
 	{
+		ProgressMode progressMode = ProgressMode::PhaseStep;
 		TutorialPhase::Step phaseStep = TutorialPhase::Step::SelectEnergy;
 		GameEngine::Model* model = nullptr;
 		std::string parameterGroupName;
@@ -34,6 +41,7 @@ public:
 		float errorDuration = 0.35f;
 		float shakeAmplitude = 0.45f;
 		float shakeCycles = 4.0f;
+		bool showSuccessColor = true;
 	};
 
 	TutorialTextSequence(
