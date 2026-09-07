@@ -34,7 +34,7 @@ void ResultMovieManager::Update() {
 	case ResultMoveCamera::Phase::kMove:
 
 		// ロケット演出
-		rocketEffect_->Start();
+		rocketEffect_->Start(1.0f);
 		break;
 
 	case ResultMoveCamera::Phase::kStop:
@@ -55,6 +55,7 @@ void ResultMovieManager::Start() {
 
 	// カメラ演出を開始
 	resultMoveCamera_->Start();
+	rocketEffect_->Reset();
 }
 
 bool ResultMovieManager::IsFin() const {
