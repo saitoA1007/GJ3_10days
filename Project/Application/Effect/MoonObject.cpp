@@ -69,11 +69,13 @@ void MoonObject::Update() {
 }
 
 void MoonObject::Draw() {
-	defaultModel_.DrawRaytracing(renderQueue_);
 
-	if (!isFractureActive_) { return; }
-	// 破片を描画
-	destructObject_.NewDraw(&defaultModel_.GetMaterial());
+	if (isFractureActive_) {
+		// 破片を描画
+		destructObject_.NewDraw(&defaultModel_.GetMaterial());
+	} else {
+		defaultModel_.DrawRaytracing(renderQueue_);
+	}
 }
 
 void MoonObject::OnCollisionEnter([[maybe_unused]] const GameEngine::CollisionResult& result) {

@@ -34,6 +34,8 @@ public:
 		isRocketStarted_ = false;
 	}
 
+	float GetEnergy() const { return energy_; }
+
 public:
 
 	//ロケット

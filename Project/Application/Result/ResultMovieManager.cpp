@@ -34,11 +34,14 @@ void ResultMovieManager::Update() {
 	case ResultMoveCamera::Phase::kMove:
 
 		// ロケット演出
-		rocketEffect_->Start(1.0f);
+		rocketEffect_->Start(1.1f);
 		break;
 
 	case ResultMoveCamera::Phase::kStop:
 
+		if (rocketEffect_->GetEnergy() > 1.0f) {
+			moonObject_->Break();
+		}
 		break;
 	}
 }

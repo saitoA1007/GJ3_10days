@@ -50,8 +50,7 @@ void RocketEffect::Start(float energy) {
 	tr.translate = startPos_;
 	tr.rotate.z = 0.0f;
 
-	energy;
-	//energy_ = energy;
+	energy_ = energy;
 
 	timer_ = 0.0f;
 	velocity_ = { 0.0f,0.0f,0.0f };
@@ -101,7 +100,12 @@ void RocketEffect::UpdateBoost() {
 		// 到達成功
 		tr.translate = endPos_;
 		fireEffect_->SetActive(false);
-		phase_ = Phase::Overrun;
+
+		if (energy_ > 1.0f) {
+			phase_ = Phase::Overrun;
+		} else {
+			phase_ = Phase::Idle;
+		}
 		isActiveAnimation_ = false;
 		timer_ = 0.0f;
 	} else {
