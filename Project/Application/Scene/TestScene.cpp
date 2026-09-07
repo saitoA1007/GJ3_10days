@@ -61,7 +61,10 @@ TestScene::TestScene() {
 	gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_);
 
 
-	gameObjectManager_->AddObject<ParticleBehavior>("RocketFireEffect", 32, textureManager_, effectModel_);
+	gameObjectManager_->AddObject<ParticleBehavior>("EnergyEffect", 16, textureManager_, effectModel_);
+
+
+	//gameObjectManager_->AddObject<ParticleBehavior>("RocketFireEffect", 32, textureManager_, effectModel_);
 
 
 	auto* sModel = modelManager_->GetNameByModel("beam.gltf");
