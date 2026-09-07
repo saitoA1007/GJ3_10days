@@ -43,8 +43,7 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, size_t capacity)
 
 	debugParameter_ = std::make_unique<DebugParameter>("Energy");
 	debugParameter_->Register("SpawnInterval", settings_.spawnInterval, 0, "Spawn");
-	debugParameter_->Register("FallHeight", settings_.fallHeight, 1, "Spawn");
-	debugParameter_->Register("FallSpeed", settings_.fallSpeed, 2, "Spawn");
+	debugParameter_->Register("AppearDuration", settings_.appearDuration, 1, "Spawn");
 	debugParameter_->Register("GroundHeight", settings_.groundHeight, 3, "Spawn");
 	debugParameter_->Register("MaxActiveCount", settings_.maxActiveCount, 4, "Spawn");
 	debugParameter_->Register("InitialCountPerZone", settings_.initialCountPerZone, 5, "Spawn");
@@ -152,9 +151,9 @@ bool EnergySpawner::SpawnInZone(FieldZone zone)
 	(*available)->Spawn(
 		size,
 		MakeSpawnPosition(zone),
-		settings_.fallHeight,
-		settings_.fallSpeed,
-		typeSettings_[static_cast<size_t>(size)]);
+		settings_.appearDuration, 
+		typeSettings_[static_cast<size_t>(size)]
+	);
 	return true;
 }
 
@@ -188,7 +187,7 @@ EnergyPickup* EnergySpawner::FindNearestAvailable(const Vector3& position, float
 	const float safeMaxDistance = (std::max)(maxDistance, 0.0f);
 	float nearestDistanceSquared = safeMaxDistance * safeMaxDistance;
 
-	// Falling・Reserved・Carriedはロックオン候補に含めない。
+	// Appearing・Reserved・Carriedはロックオン候補に含めない。
 	for (auto& pickup : pickups_) 
 	{
 		if (!pickup->IsTargetable()) 
@@ -225,8 +224,7 @@ void EnergySpawner::ApplyDebugParameters()
 void EnergySpawner::SanitizeSettings() 
 {
 	settings_.spawnInterval = (std::max)(settings_.spawnInterval, 0.1f);
-	settings_.fallHeight = (std::max)(settings_.fallHeight, 0.0f);
-	settings_.fallSpeed = (std::max)(settings_.fallSpeed, 0.01f);
+	settings_.appearDuration = (std::max)(settings_.appearDuration, 0.01f);
 	settings_.spawnAngleRangeDegrees = (std::clamp)(settings_.spawnAngleRangeDegrees, 0.0f, 360.0f);
 	settings_.floatingAmplitude = (std::max)(settings_.floatingAmplitude, 0.0f);
 	settings_.floatingSpeed = (std::max)(settings_.floatingSpeed, 0.0f);

@@ -30,7 +30,7 @@ inline constexpr size_t kEnergySizeCount = static_cast<size_t>(EnergySize::Count
 enum class EnergyState : uint8_t 
 {
 	Inactive, // プール内で未使用
-	Falling,  // 空中から落下中
+	Appearing,// ディゾルブで出現中
 	OnGround, // 地面にあり、選択可能
 	Reserved, // 派遣ユニットが確保済み
 	Carried,  // ユニットが運搬中
@@ -63,8 +63,7 @@ public:
 	void Spawn(
 		EnergySize size,
 		const Vector3& groundPosition,
-		float fallHeight,
-		float fallSpeed,
+		float appearDuration,
 		const EnergyTypeSettings& typeSettings);
 	/// @brief 敵のドロップなど、落下演出なしで地面へ直接生成する。
 	/// @param[in] size 生成するエネルギーサイズ。
@@ -163,6 +162,9 @@ private:
 	float rotationY_ = 0.0f;                                    // モデル表示へ適用するY軸回転角
 	float floatingAmplitude_ = 0.0f;                             // 上下に浮遊する振幅
 	bool isHighlighted_ = false;                                 // カーソル選択中か
+
+	float appearTime_ = 0.0f;       
+	float appearDuration_ = 1.0f;
 
 	// マテリアル
 	GameEngine::CrystalMaterial material_;
