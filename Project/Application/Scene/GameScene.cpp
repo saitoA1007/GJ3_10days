@@ -23,7 +23,6 @@ using namespace GameEngine;
 #include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
 #include "Application/Effect/MoonObject.h"
-#include <Application/result/ShuffleNumber.h>
 #include "Application/GameCamera/ResultMoveCamera.h"
 
 // 後で別クラスに纏めて消す
@@ -125,7 +124,7 @@ GameScene::GameScene() {
 		energySpawner_,
 		unitManager_
 	);
-	enemyManager_->SetStage("Test");
+	enemyManager_->SetStage("Tutorial");
 
 	GameFlowContext flowContext{};
 	flowContext.rocket = rocket_;
@@ -182,8 +181,6 @@ GameScene::GameScene() {
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingOneEffect", 32, textureManager_, effectModel);
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingTwoEffect", 128, textureManager_, effectModel);
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingThreeEffect", 128, textureManager_, effectModel);
-
-	gameObjectManager_->AddObject<ShuffleNumber>(modelManager_);
 }
 
 void GameScene::Initialize() {

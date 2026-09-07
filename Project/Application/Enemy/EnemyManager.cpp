@@ -118,7 +118,14 @@ void EnemyManager::Update() {
 	// 出現処理（ステージ名が設定されていてデータが存在する場合のみ実行）
 	if (!currentStageName_.empty() && stageDataMap_.contains(currentStageName_)) {
 		auto& stage = stageDataMap_[currentStageName_];
-		if (!stage.fases.empty() && currentFaseIndex_ < stage.fases.size()) {
+
+		if (currentFaseIndex_ < stage.fases.size()) {
+			SF::warn("[EnemyManager::Update()]: FaseIndex go to Unknown Number", "Enemy");
+			currentFaseIndex_ = 0;
+		}
+
+		if (!stage.fases.empty()) {
+
 			if (stageTimer_ == 0.0f && GameEngine::FpsCounter::deltaTime > 0.0f) {
 				auto& fase = stage.fases[currentFaseIndex_];
 				if (presetDataMap_.contains(fase.name)) {
@@ -133,11 +140,14 @@ void EnemyManager::Update() {
 			}
 
 			stageTimer_ += GameEngine::FpsCounter::deltaTime;
-			if (stage.fases[currentFaseIndex_].time <= stageTimer_) {
+
+			//次のフェーズに進む条件をチェック
+			if (stage.fases[currentFaseIndex_].time <= stageTimer_ || (int)activeEnemies_.size() < stage.minEnemyCount) {
 				currentFaseIndex_++;
 				if (currentFaseIndex_ >= stage.fases.size()) {
 					currentFaseIndex_ = 0;
 				}
+
 				stageTimer_ = 0.0f;
 			}
 		}
