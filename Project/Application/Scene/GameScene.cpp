@@ -308,5 +308,5 @@ void GameScene::UpdateCamera()
 			rocket_->GetEntranceProgress());
 	}
 	mainCamera_->Update();
-	renderQueue_->SetCamera(mainCamera_.get());
+	//renderQueue_->SetCamera(mainCamera_.get());
 }

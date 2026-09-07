@@ -12,6 +12,14 @@ namespace GameEngine {
 
 class RocketEffect : public GameEngine::IGameObject {
 public:
+	enum class Phase {
+		Idle,   // 待機
+		Boost,  // 推進中
+		Overrun,
+		Fall,   // 落下中
+	};
+
+public:
 	RocketEffect(GameEngine::ModelManager* modelManager, GameEngine::TextureManager* textureManager, GameEngine::GameObjectManager* objectManager);
 
 	void Initialize() override;
@@ -20,7 +28,11 @@ public:
 
 public:
 
-	void Start();
+	void Start(float energy);
+
+	void Reset() {
+		isRocketStarted_ = false;
+	}
 
 public:
 
@@ -32,7 +44,7 @@ private:
 	float kMoveMaxTime_ = 2.0f;
 
 	Vector3 startPos_ = {0.0f,0.0f,0.0f};
-	Vector3 endPos_ = {100.0f,50.0f,0.0f};
+	Vector3 endPos_ = {80.0f,50.0f,0.0f};
 	
 private:
 	// パラメータ機能
@@ -48,6 +60,23 @@ private:
 	// 補正
 	float kRotateOffsetZ_ = 0.0f;
 
+	// エネルギー
+	float energy_ = 1.0f;
+
+	Phase phase_ = Phase::Idle;
+
+	// 落下用
+	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
+	float kGravity_ = -60.0f;   // 落下加速度
+	float kGroundY_ = 0.0f;     // 地面の高さ
+
+	// 通過後の追加移動
+	float kOverrunDistanceX_ = 20.0f;
+	float overrunTimer_ = 0.0f;
+	float overrunTime_ = 0.3f;
+
+	bool isRocketStarted_ = false;
+
 private:
 
 	// 登録する
@@ -55,5 +84,11 @@ private:
 
 	void UpdateMove();
 
+	void UpdateBoost();
+	void UpdateOverrun();
+	void UpdateFall();
+
 	Vector3 CalcPos(float t) const;
+
+	Vector3 CalcVelocity(float t) const;
 };
