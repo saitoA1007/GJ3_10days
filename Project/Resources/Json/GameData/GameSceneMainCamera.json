@@ -1,0 +1,18 @@
+{
+    "GameSceneMainCamera": {
+        "Entrance": {
+            "StartRotateX": 0.25
+        },
+        "Rotate": [
+            0.8299999833106995,
+            0.0,
+            0.0
+        ],
+        "SceneName": "Game",
+        "Translate": [
+            0.0,
+            58.0,
+            -63.0
+        ]
+    }
+}

@@ -11,6 +11,23 @@
             "EnemyHitLoss": 10,
             "InitialEnergy": 0
         },
+        "Entrance": {
+            "Duration": 3.0,
+            "EaseType": {
+                "_EaseType": "EaseOutQuint"
+            },
+            "Enabled": true,
+            "EndPosition": [
+                0.0,
+                5.5,
+                0.0
+            ],
+            "StartPosition": [
+                0.0,
+                50.0,
+                0.0
+            ]
+        },
         "SceneName": "Game",
         "Transform": {
             "Rotate": [
@@ -22,11 +39,6 @@
                 3.0,
                 3.0,
                 3.0
-            ],
-            "Translate": [
-                0.0,
-                5.5,
-                0.0
             ]
         }
     }

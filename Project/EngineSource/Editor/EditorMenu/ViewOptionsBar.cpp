@@ -32,6 +32,14 @@ void ViewOptionsBar::Run() {
 		if (ImGui::BeginMenu("View")) {
 			ImGui::Checkbox("isDebugView", &isDebugView_);
 			ImGui::Checkbox("isDebugDraw", &isDebugDraw_);
+
+			ImGui::SeparatorText("Debug Camera Transform");
+			Vector3 translate = debugCamera_->GetTranslate();
+			Vector3 rotate = debugCamera_->GetRotate();
+			ImGui::SetNextItemWidth(260.0f);
+			ImGui::InputFloat3("Translate", &translate.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+			ImGui::SetNextItemWidth(260.0f);
+			ImGui::InputFloat3("Rotate (rad)", &rotate.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();

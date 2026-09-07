@@ -30,7 +30,7 @@ enum class AnimationState {
 /// </summary>
 class TitleLogo final {
 public:
-	explicit TitleLogo(GameEngine::ModelManager* modelManager);
+	TitleLogo(GameEngine::ModelManager* modelManager, bool isPadConnected);
 	~TitleLogo();
 
 	void Update();

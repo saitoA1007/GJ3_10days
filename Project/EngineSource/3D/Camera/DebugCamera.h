@@ -40,6 +40,16 @@ namespace GameEngine {
 		Vector3 GetWorldPosition();
 
 		/// <summary>
+		/// DebugViewで使用中のカメラ座標を取得
+		/// </summary>
+		const Vector3& GetTranslate() const { return translate_; }
+
+		/// <summary>
+		/// DebugViewで使用中のカメラ回転（ラジアン）を取得
+		/// </summary>
+		const Vector3& GetRotate() const { return rotate_; }
+
+		/// <summary>
 		/// カメラの注視点の位置を取得
 		/// </summary>
 		/// <returns></returns>

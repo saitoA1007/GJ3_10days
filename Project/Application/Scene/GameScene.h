@@ -21,6 +21,7 @@ class UnitManager;
 namespace GameEngine
 {
 	class ControllerVibration;
+	class DebugParameter;
 }
 
 class GameScene : public GameEngine::IScene {
@@ -73,6 +74,9 @@ private: // シーン機能
 	void UpdateCamera();
 
 	std::unique_ptr<GameEngine::Camera> mainCamera_;                // 3D描画とマウスレイ投影に使うカメラ
+	std::unique_ptr<GameEngine::DebugParameter> mainCameraDebugParameter_; // Translate / Rotate の確認・調整用
+	Vector3 mainCameraEndRotation_ = {};                            // ロケット着地時のカメラ回転
+	float mainCameraEntranceStartRotateX_ = 0.5f;                   // ロケット降下開始時のX回転
 	// 終了フラグ
 	bool isFinished_ = false;
 	Player* player_ = nullptr;
