@@ -46,9 +46,11 @@ GameScene::GameScene() {
 		{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, kCameraPosition },
 		1280,
 		720);
+	mainCameraEndRotation_ = mainCamera_->transform_.rotate;
 	mainCameraDebugParameter_ = std::make_unique<DebugParameter>("GameSceneMainCamera");
 	mainCameraDebugParameter_->Register("Translate", mainCamera_->transform_.translate, 0);
-	mainCameraDebugParameter_->Register("Rotate", mainCamera_->transform_.rotate, 1);
+	mainCameraDebugParameter_->Register("Rotate", mainCameraEndRotation_, 1);
+	mainCameraDebugParameter_->Register("StartRotateX", mainCameraEntranceStartRotateX_, 0, "Entrance");
 
 
 	// 背景を設定
@@ -159,7 +161,7 @@ GameScene::GameScene() {
 
 void GameScene::Initialize() {
 	mainCamera_->transform_.translate = kCameraPosition;
-	mainCamera_->transform_.rotate = Math::DirectionToEuler(kCameraTarget - kCameraPosition);
+	mainCameraEndRotation_ = Math::DirectionToEuler(kCameraTarget - kCameraPosition);
 	mainCameraDebugParameter_->Apply();
 	UpdateCamera();
 
@@ -265,6 +267,15 @@ void GameScene::InputRegisterCommand() {
 void GameScene::UpdateCamera()
 {
 	mainCameraDebugParameter_->ApplyIfDirty();
+	mainCamera_->transform_.rotate = mainCameraEndRotation_;
+	if (rocket_)
+	{
+		// ロケットと同じイージング済み進行率で、X回転を開始角度から着地時の角度へ動かす。
+		mainCamera_->transform_.rotate.x = GameEngine::Lerp(
+			mainCameraEntranceStartRotateX_,
+			mainCameraEndRotation_.x,
+			rocket_->GetEntranceProgress());
+	}
 	mainCamera_->Update();
 	renderQueue_->SetCamera(mainCamera_.get());
 }

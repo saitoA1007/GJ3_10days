@@ -1,5 +1,8 @@
 {
     "GameSceneMainCamera": {
+        "Entrance": {
+            "StartRotateX": 0.25
+        },
         "Rotate": [
             0.8299999833106995,
             0.0,

@@ -102,6 +102,20 @@ void Rocket::StartEntrance()
 	isEntrancePlaying_ = false;
 }
 
+float Rocket::GetEntranceProgress() const
+{
+	if (!settings_.entranceEnabled || settings_.entranceDuration <= 0.0f || !isEntrancePlaying_)
+	{
+		return 1.0f;
+	}
+
+	const float progress = (std::clamp)(
+		entranceElapsedTime_ / settings_.entranceDuration,
+		0.0f,
+		1.0f);
+	return GameEngine::Apply(progress, settings_.entranceEaseType);
+}
+
 EnergyChange Rocket::DepositEnergy(int32_t amount) 
 {
 	// 増減理由を付けておくことで、将来UIや演出が変化元を判別できる。

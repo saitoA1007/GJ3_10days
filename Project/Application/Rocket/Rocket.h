@@ -63,6 +63,10 @@ public:
 	/// @return A座標からB座標へ移動中ならtrue。
 	bool IsEntrancePlaying() const { return isEntrancePlaying_; }
 
+	/// @brief イージングを反映した登場移動の進行率を取得する。
+	/// @return 開始時は0、完了時または演出無効時は1。
+	float GetEntranceProgress() const;
+
 	/// @brief ユニットが届けたエネルギーを加算する。
 	/// @param[in] amount 加算する量。
 	/// @return 加算前後と実際の差分。
