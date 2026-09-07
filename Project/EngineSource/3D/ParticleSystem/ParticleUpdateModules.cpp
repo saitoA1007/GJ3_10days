@@ -37,11 +37,15 @@ void AlphaOverLifeTimeModule::Update(ParticleData& particleData, [[maybe_unused]
 // 色変化モジュール
 //==================================================
 
+void ColorOverLifeTimeModule::Create(ParticleData& particleData) {
+	startHSV_ = Math::RGBtoHSV({ particleData.startColor.x,particleData.startColor.y,particleData.startColor.z });
+}
+
 void ColorOverLifeTimeModule::Update(ParticleData& particleData, [[maybe_unused]] float time) {
-	Vector3 startHsv = Math::RGBtoHSV({ particleData.startColor.x,particleData.startColor.y,particleData.startColor.z });
+	//Vector3 startHsv = Math::RGBtoHSV({ particleData.startColor.x,particleData.startColor.y,particleData.startColor.z });
 	Vector3 endHsv = Math::RGBtoHSV({ endRGB_.x,endRGB_.y,endRGB_.z });
 	
-	Vector3 hsv = Lerp(startHsv, endHsv, particleData.currentTime, easeType_);
+	Vector3 hsv = Lerp(startHSV_, endHsv, particleData.currentTime, easeType_);
 
 	// RGBに変換して反映する
 	Vector3 rgb = Math::HSVtoRGB(hsv.x, std::clamp(hsv.y, 0.0f, 1.0f), std::clamp(hsv.z, 0.0f, 1.0f));

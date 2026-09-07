@@ -60,6 +60,10 @@ TestScene::TestScene() {
 	effectModel_->SetDefaultIsEnableLight(false);
 	gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_);
 
+
+	gameObjectManager_->AddObject<ParticleBehavior>("RocketFireEffect", 32, textureManager_, effectModel_);
+
+
 	auto* sModel = modelManager_->GetNameByModel("beam.gltf");
 	sModel->SetDefaultIsEnableLight(false);
 	auto* rModel = modelManager_->GetNameByModel("RushPower.obj");

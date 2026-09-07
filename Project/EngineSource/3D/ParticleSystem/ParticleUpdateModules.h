@@ -104,6 +104,7 @@ namespace GameEngine {
 			param->RemoveItem("EaseType", subGroup);
 		}
 
+		void Create(ParticleData& particleData) override;
 		void Update(ParticleData& particleData, [[maybe_unused]] float time) override;
 
 		// 外部から色を設定する
@@ -113,6 +114,7 @@ namespace GameEngine {
 
 	private:
 		// 色相、彩度、明度
+		Vector3 startHSV_ = {};
 		Vector4 endRGB_ = { 1.0f, 1.0f, 1.0f,1.0f };
 		EaseType easeType_ = EaseType::kLinear;
 	};
