@@ -20,21 +20,20 @@ public:
 
 public:
 
-	void Start(Vector3 pos, Vector3 dir, bool isActive);
+	void Start();
 
 public:
 
-	// 基準位置
-	GameEngine::WorldTransform baseWorld_;
+	//ロケット
+	GameEngine::ModelComponent rocketModel_;
 
 private:
 
-	float kInMaxTime_ = 2.0f;
-	float kEndMaxTime_ = 2.0f;
+	float kMoveMaxTime_ = 2.0f;
 
-	float kInStartPos_ = 50.0f;
-	float kInEndScale_ = 1.0f;
-
+	Vector3 startPos_ = {0.0f,0.0f,0.0f};
+	Vector3 endPos_ = {100.0f,50.0f,0.0f};
+	
 private:
 	// パラメータ機能
 	GameEngine::DebugParameter debugParame_{"RocketEffect"};
@@ -42,14 +41,19 @@ private:
 	// 炎
 	GameEngine::ParticleBehavior* fireEffect_ = nullptr;
 
-	// ウェーブ
-	//GameEngine::ModelComponent waveModel_;
-	Transform waveUvtransform_ = { {1.0f,1.0f,1.0f},{},{} };
-
 	float timer_ = 0.0f;
+
+	bool isActiveAnimation_ = false;
+
+	// 補正
+	float kRotateOffsetZ_ = 0.0f;
 
 private:
 
 	// 登録する
 	void Register();
+
+	void UpdateMove();
+
+	Vector3 CalcPos(float t) const;
 };

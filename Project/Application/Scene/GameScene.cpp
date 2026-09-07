@@ -23,6 +23,9 @@ using namespace GameEngine;
 #include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
 #include "Application/Effect/MoonObject.h"
+#include "Application/Effect/RocketEffect.h"
+#include <Application/result/ShuffleNumber.h>
+#include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
 
 // 後で別クラスに纏めて消す
@@ -110,6 +113,19 @@ GameScene::GameScene() {
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
 
+	// クリアのムービー
+	// 月のオブジェクト
+	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
+	auto* fructureModel = modelManager_->GetNameByModel("fractureMoon.gltf");
+	uint32_t moonGH = textureManager_->GetHandleByName("moon_meteor_01_diff_1k.jpg");
+	uint32_t moonNorGH = textureManager_->GetHandleByName("moon_meteor_01_nor_gl_1k.png");
+	auto* moonObject = gameObjectManager_->AddObject<MoonObject>(sphereModel, fructureModel, moonGH, moonNorGH);
+	// リザルトのムービーカメラ
+	auto* reCamera =  gameObjectManager_->AddObject<ResultMoveCamera>();
+	// ロケット演出
+	auto* rocketEffect =  gameObjectManager_->AddObject<RocketEffect>(modelManager_, textureManager_,gameObjectManager_);
+	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect);
+
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
 		digitModels[digit] = modelManager_->GetNameByModel(std::to_string(digit) + ".obj");
@@ -132,6 +148,7 @@ GameScene::GameScene() {
 	flowContext.enemyManager = enemyManager_;
 	flowContext.unitManager = unitManager_;
 	flowContext.lockOnController = lockOnController_;
+	flowContext.resultMovieManager_ = resultMoiveManager;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
@@ -164,16 +181,6 @@ GameScene::GameScene() {
 	auto* ring2Model = modelManager_->GetNameByModel("fieldRingLv2.gltf");
 	auto* ring3Model = modelManager_->GetNameByModel("fieldRingLv3.gltf");
 	gameObjectManager_->AddObject<SpawnFieldEffect>(ring1Model, ring2Model, ring3Model, halfDomeModel, circleModel);
-
-	// 月のオブジェクト
-	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
-	auto* fructureModel = modelManager_->GetNameByModel("fractureMoon.gltf");
-	uint32_t moonGH = textureManager_->GetHandleByName("moon_meteor_01_diff_1k.jpg");
-	uint32_t moonNorGH = textureManager_->GetHandleByName("moon_meteor_01_nor_gl_1k.png");
-	gameObjectManager_->AddObject<MoonObject>(sphereModel, fructureModel, moonGH, moonNorGH);
-
-	// リザルトのムービーカメラ
-	//gameObjectManager_->AddObject<ResultMoveCamera>(mainCamera_.get());
 
 	// エフェクト用モデル
 	auto* effectModel = modelManager_->GetNameByModel("plane.obj");

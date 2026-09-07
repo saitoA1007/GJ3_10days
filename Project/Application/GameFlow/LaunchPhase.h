@@ -13,5 +13,5 @@ public:
 	bool IsGameplayEnabled() const override { return false; } // 敵の動きなどを止める
 
 private:
-	float timer_ = 0.0f;
+	bool isFinished_ = false;
 };

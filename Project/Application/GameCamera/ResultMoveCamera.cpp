@@ -3,9 +3,8 @@
 #include "EasingManager.h"
 using namespace GameEngine;
 
-ResultMoveCamera::ResultMoveCamera(GameEngine::Camera* mainCamera) {
-	mainCamera_ = mainCamera;
-
+ResultMoveCamera::ResultMoveCamera() {
+	
 	debugParam_.Register("WaitMaxTime", kWaitMaxTime_);
 	debugParam_.Register("MoveMaxTime", kMoveMaxTime_);
 	debugParam_.Register("StopMaxTime", kStopMaxTime_);
@@ -33,8 +32,6 @@ void ResultMoveCamera::Initialize() {
 	shakePhase_ = 0.0f;
 	shakePower_ = 0.0f;
 	basePos_ = startPos_;
-	// メインカメラに映す
-	mainCamera_->SetCamera(camera_);
 }
 
 void ResultMoveCamera::Update() {
