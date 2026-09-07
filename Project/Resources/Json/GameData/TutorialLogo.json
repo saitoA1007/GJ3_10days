@@ -1,13 +1,13 @@
 {
     "TutorialLogo": {
+        "EaseType": {
+            "_EaseType": "EaseOutElastic"
+        },
         "EndPosition": [
             5.5,
             -26.0,
             -26.0
         ],
-        "EaseType": {
-            "_EaseType": "EaseOutCubic"
-        },
         "MoveDuration": 0.5,
         "Rotation": [
             2.010999917984009,
