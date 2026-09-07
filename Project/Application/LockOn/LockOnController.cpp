@@ -94,6 +94,7 @@ void LockOnController::Initialize()
 	cursorPosition_ = rocket_->GetPosition();
 	cursorPosition_.y = settings_.groundHeight;
 	lockOnSeconds_ = 0.0f;
+	minimumDispatchHoldSeconds_ = 0.0f;
 	isCharging_ = false;
 	SyncCursorModel();
 }
@@ -164,6 +165,11 @@ void LockOnController::SetGameplayEnabled(bool enabled)
 	{
 		CancelLockOn();
 	}
+}
+
+void LockOnController::SetMinimumDispatchHoldSeconds(float seconds)
+{
+	minimumDispatchHoldSeconds_ = (std::max)(seconds, 0.0f);
 }
 
 void LockOnController::ApplyDebugParameters()
@@ -421,6 +427,13 @@ void LockOnController::UpdateLockOn(float deltaTime)
 
 void LockOnController::CompleteLockOn()
 {
+	if (lockOnSeconds_ < minimumDispatchHoldSeconds_)
+	{
+		CancelLockOn();
+		UpdateSelection();
+		return;
+	}
+
 	// リアルタイムで引き落とした chargedEnergy_ をそのまま Unit に渡す
 	bool dispatched = false;
 	if (selectedEnergy_)

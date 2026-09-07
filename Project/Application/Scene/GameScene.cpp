@@ -168,6 +168,7 @@ GameScene::GameScene() {
 	flowContext.enemyManager = enemyManager_;
 	flowContext.unitManager = unitManager_;
 	flowContext.lockOnController = lockOnController_;
+	flowContext.inputCommand = inputCommand_;
 	flowContext.resultMovieManager_ = resultMoiveManager;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
@@ -226,6 +227,25 @@ GameScene::GameScene() {
 	text3Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
 	text3Definition.showSuccessColor = false;
 
+	TutorialTextSequence::StepDefinition text4Definition{};
+	text4Definition.phaseStep = TutorialPhase::Step::ChargeEnergy;
+	text4Definition.model = modelManager_->GetNameByModel("tutorialText4.obj");
+	text4Definition.parameterGroupName = "TutorialText4";
+	text4Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text4Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text4Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text4Definition.viewSettings.scale = 1.0f;
+	text4Definition.viewSettings.startDelay = 0.5f;
+	text4Definition.viewSettings.moveDuration = 0.5f;
+	text4Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text4Definition.onActivated = [this]()
+	{
+		if (gameFlow_)
+		{
+			gameFlow_->BeginTutorialChargeEnergyStep();
+		}
+	};
+
 	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
 		gameCamera->GetCamera(),
 		gameFlow_,
@@ -235,7 +255,8 @@ GameScene::GameScene() {
 			text0Definition,
 			text1Definition,
 			text2Definition,
-			text3Definition });
+			text3Definition,
+			text4Definition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,

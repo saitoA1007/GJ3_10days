@@ -31,6 +31,8 @@ GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& setti
 	debugParameter_->Register("GameDuration", settings_.gameDuration, 1, "Time");
 	debugParameter_->Register("LaunchDuration", settings_.launchDuration, 2, "Time");
 	debugParameter_->Register("EnergyPositionXZ", settings_.tutorialEnergyPositionXZ, 0, "Tutorial");
+	debugParameter_->Register("MediumEnergyPositionXZ", settings_.tutorialMediumEnergyPositionXZ, 1, "Tutorial");
+	debugParameter_->Register("RequiredHoldDuration", settings_.tutorialRequiredHoldDuration, 2, "Tutorial");
 	debugParameter_->Apply();
 
 	SetUpdateOrder(0);
@@ -97,6 +99,17 @@ void GameFlow::ApplyDebugParameters()
 	settings_.openingDuration = (std::max)(settings_.openingDuration, 0.0f);
 	settings_.gameDuration = (std::max)(settings_.gameDuration, 0.1f);
 	settings_.launchDuration = (std::max)(settings_.launchDuration, 0.0f);
+	settings_.tutorialRequiredHoldDuration =
+		(std::max)(settings_.tutorialRequiredHoldDuration, 0.0f);
+}
+
+void GameFlow::BeginTutorialChargeEnergyStep()
+{
+	auto* tutorialPhase = dynamic_cast<TutorialPhase*>(GetCurrentPhase());
+	if (tutorialPhase)
+	{
+		tutorialPhase->BeginChargeEnergyStep(context_);
+	}
 }
 
 void GameFlow::AdvanceToNextPhase()

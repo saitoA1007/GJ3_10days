@@ -9,7 +9,7 @@
         },
         "Energy": {
             "EnemyHitLoss": 10,
-            "InitialEnergy": 0
+            "InitialEnergy": 100
         },
         "Entrance": {
             "Duration": 3.0,

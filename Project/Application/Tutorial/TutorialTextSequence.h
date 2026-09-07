@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -42,6 +43,7 @@ public:
 		float shakeAmplitude = 0.45f;
 		float shakeCycles = 4.0f;
 		bool showSuccessColor = true;
+		std::function<void()> onActivated;
 	};
 
 	TutorialTextSequence(

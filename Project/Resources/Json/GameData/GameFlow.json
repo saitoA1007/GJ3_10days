@@ -10,7 +10,12 @@
             "EnergyPositionXZ": [
                 0.0,
                 -9.0
-            ]
+            ],
+            "MediumEnergyPositionXZ": [
+                0.0,
+                -18.0
+            ],
+            "RequiredHoldDuration": 1.0
         }
     }
 }

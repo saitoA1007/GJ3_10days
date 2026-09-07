@@ -4,6 +4,11 @@
 
 #include "Vector2.h"
 
+namespace GameEngine
+{
+	class InputCommand;
+}
+
 class Rocket;
 class EnergySpawner;
 class EnemyManager;
@@ -17,6 +22,8 @@ struct GameFlowSettings
 	float gameDuration = 60.0f;   // 制限時間
 	float launchDuration = 3.0f;   // 打ち上げ時間
 	Vector2 tutorialEnergyPositionXZ = { 0.0f, -6.0f }; // チュートリアル用EnergyのX・Z座標
+	Vector2 tutorialMediumEnergyPositionXZ = { 0.0f, -6.0f }; // 長押し工程用Medium EnergyのX・Z座標
+	float tutorialRequiredHoldDuration = 1.0f; // Medium Energyを長押しする必要時間
 };
 
 // 各システムへの参照を一括保持するコンテキスト
@@ -27,6 +34,7 @@ struct GameFlowContext
 	EnemyManager* enemyManager = nullptr;
 	UnitManager* unitManager = nullptr;
 	LockOnController* lockOnController = nullptr;
+	GameEngine::InputCommand* inputCommand = nullptr;
 	GameFlowSettings* settings = nullptr;
 	ResultMovieManager* resultMovieManager_ = nullptr;
 
