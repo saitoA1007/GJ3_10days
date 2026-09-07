@@ -19,6 +19,9 @@ struct EnergySpawnSettings
 	float fallHeight = 10.0f;      // 地面からの生成高度
 	float fallSpeed = 5.0f;        // 1秒あたりの落下距離
 	float groundHeight = 0.25f;    // 着地時のY座標
+	float floatingAmplitude = 0.25f; // 着地後に上下する振幅
+	float floatingSpeed = 2.0f;    // 浮遊アニメーションの角速度（rad/s）
+	float rotationSpeed = 1.5f;    // 着地後のY軸回転速度（rad/s）
 	int32_t maxActiveCount = 30;   // 落下・地上・運搬を含む同時存在上限
 	int32_t initialCountPerZone = 1; // 開始時にNear/Middle/Farへ置く個数
 };

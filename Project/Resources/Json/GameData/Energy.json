@@ -1,10 +1,15 @@
 {
     "Energy": {
+        "Animation": {
+            "FloatingAmplitude": 0.25,
+            "FloatingSpeed": 2.0,
+            "RotationSpeed": 1.5
+        },
         "SceneName": "Game",
         "Spawn": {
             "FallHeight": 10.0,
             "FallSpeed": 5.0,
-            "GroundHeight": 0.25,
+            "GroundHeight": 1.5,
             "InitialCountPerZone": 1,
             "MaxActiveCount": 30,
             "SpawnInterval": 2.5
