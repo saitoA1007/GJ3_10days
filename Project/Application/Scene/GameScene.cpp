@@ -308,5 +308,10 @@ void GameScene::UpdateCamera()
 			rocket_->GetEntranceProgress());
 	}
 	mainCamera_->Update();
-	renderQueue_->SetCamera(mainCamera_.get());
+
+	// 打ち上げ演出以降はResultMoveCameraがRenderQueueのカメラを管理する。
+	if (!gameFlow_ || gameFlow_->UsesGameSceneCamera())
+	{
+		renderQueue_->SetCamera(mainCamera_.get());
+	}
 }

@@ -11,6 +11,7 @@ public:
 
 	const char* GetName() const override { return "Clear"; }
 	bool IsGameplayEnabled() const override { return false; } // 敵の動きなどを止める
+	bool UsesGameSceneCamera() const override { return false; } // 演出用カメラへ切り替える
 
 private:
 	bool isFinished_ = false;

@@ -11,4 +11,5 @@ public:
 
 	const char* GetName() const override { return "Result"; }
 	bool IsGameplayEnabled() const override { return false; }
+	bool UsesGameSceneCamera() const override { return false; }
 };
