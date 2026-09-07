@@ -20,6 +20,7 @@ void TutorialPhase::OnEnter(GameFlowContext& context)
 {
 	step_ = Step::SelectEnergy;
 	chargeEnergy_ = nullptr;
+	enemyHoldTarget_ = nullptr;
 	enemyHitCountAtSpawn_ = context.rocket ? context.rocket->GetEnemyHitCount() : 0;
 	if (context.lockOnController)
 	{
@@ -99,7 +100,33 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 			context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_;
 		if (enemyLockOnStarted || enemyReachedRocket)
 		{
+			step_ = Step::WaitForEnemyHoldInstruction;
+		}
+		break;
+	}
+	case Step::WaitForEnemyHoldInstruction:
+		break;
+	case Step::EnemyHoldOrCollision:
+	{
+		const float requiredHoldDuration = context.settings
+			? (std::max)(context.settings->tutorialEnemyRequiredHoldDuration, 0.0f)
+			: 0.0f;
+		context.lockOnController->SetMinimumDispatchHoldSeconds(requiredHoldDuration);
+		const bool released = context.inputCommand &&
+			context.inputCommand->IsCommandActive(kLockOnReleaseCommand);
+		const bool heldTargetEnemy =
+			context.lockOnController->GetSelectedEnemy() == enemyHoldTarget_ &&
+			context.lockOnController->IsCharging();
+		const bool enemyHoldCompleted = released && heldTargetEnemy &&
+			context.lockOnController->GetLockOnSeconds() >= requiredHoldDuration;
+		const bool enemyDefeated = enemyHoldTarget_ &&
+			enemyHoldTarget_->WasDefeated();
+		const bool enemyReachedRocket = context.rocket &&
+			context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_;
+		if (enemyHoldCompleted || enemyDefeated || enemyReachedRocket)
+		{
 			step_ = Step::Complete;
+			context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
 		}
 		break;
 	}
@@ -118,6 +145,7 @@ void TutorialPhase::OnExit(GameFlowContext& context)
 		context.lockOnController->SetEnemySelectionEnabled(true);
 	}
 	chargeEnergy_ = nullptr;
+	enemyHoldTarget_ = nullptr;
 }
 
 void TutorialPhase::BeginChargeEnergyStep(GameFlowContext& context)
@@ -170,4 +198,31 @@ void TutorialPhase::BeginEnemyLockOnStep(GameFlowContext& context)
 	const Vector2& positionXZ = context.settings->tutorialLockOnEnemyPositionXZ;
 	context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
 	step_ = Step::EnemyLockOnOrCollision;
+}
+
+void TutorialPhase::BeginEnemyHoldStep(GameFlowContext& context)
+{
+	if (step_ != Step::WaitForEnemyHoldInstruction ||
+		!context.enemyManager || !context.rocket || !context.settings ||
+		!context.lockOnController)
+	{
+		return;
+	}
+
+	// 前工程のロックオンを持ち越さず、text12で改めて長押ししてもらう。
+	context.lockOnController->SetEnemySelectionEnabled(false);
+	context.lockOnController->SetEnemySelectionEnabled(true);
+	context.lockOnController->SetMinimumDispatchHoldSeconds(
+		context.settings->tutorialEnemyRequiredHoldDuration);
+	enemyHitCountAtSpawn_ = context.rocket->GetEnemyHitCount();
+	const Vector2& positionXZ = context.settings->tutorialEnemyHoldPositionXZ;
+	enemyHoldTarget_ = context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
+	if (enemyHoldTarget_)
+	{
+		step_ = Step::EnemyHoldOrCollision;
+	}
+	else
+	{
+		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
+	}
 }

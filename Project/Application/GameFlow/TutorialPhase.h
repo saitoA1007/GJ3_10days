@@ -4,6 +4,7 @@
 #include "IGamePhase.h"
 
 class EnergyPickup;
+class Enemy;
 
 class TutorialPhase : public IGamePhase
 {
@@ -18,6 +19,8 @@ public:
 		EnemyCollision,
 		WaitForEnemyLockOnInstruction,
 		EnemyLockOnOrCollision,
+		WaitForEnemyHoldInstruction,
+		EnemyHoldOrCollision,
 		Complete,
 	};
 
@@ -29,6 +32,7 @@ public:
 	void BeginChargeEnergyStep(GameFlowContext& context);
 	void BeginEnemyCollisionStep(GameFlowContext& context);
 	void BeginEnemyLockOnStep(GameFlowContext& context);
+	void BeginEnemyHoldStep(GameFlowContext& context);
 
 	const char* GetName() const override { return "Tutorial"; }
 	// 操作を許可
@@ -39,5 +43,6 @@ public:
 private:
 	Step step_ = Step::SelectEnergy;
 	EnergyPickup* chargeEnergy_ = nullptr;
+	Enemy* enemyHoldTarget_ = nullptr;
 	uint64_t enemyHitCountAtSpawn_ = 0;
 };

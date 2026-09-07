@@ -355,6 +355,39 @@ GameScene::GameScene() {
 	text11Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
 	text11Definition.showSuccessColor = false;
 
+	TutorialTextSequence::StepDefinition text12Definition{};
+	text12Definition.phaseStep = TutorialPhase::Step::EnemyHoldOrCollision;
+	text12Definition.model = modelManager_->GetNameByModel("tutorialText12.obj");
+	text12Definition.parameterGroupName = "TutorialText12";
+	text12Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text12Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text12Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text12Definition.viewSettings.scale = 1.0f;
+	text12Definition.viewSettings.startDelay = 0.5f;
+	text12Definition.viewSettings.moveDuration = 0.5f;
+	text12Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text12Definition.onActivated = [this]()
+	{
+		if (gameFlow_)
+		{
+			gameFlow_->BeginTutorialEnemyHoldStep();
+		}
+	};
+
+	TutorialTextSequence::StepDefinition text13Definition{};
+	text13Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text13Definition.model = modelManager_->GetNameByModel("tutorialText13.obj");
+	text13Definition.parameterGroupName = "TutorialText13";
+	text13Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text13Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text13Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text13Definition.viewSettings.scale = 1.0f;
+	text13Definition.viewSettings.startDelay = 0.5f;
+	text13Definition.viewSettings.moveDuration = 0.5f;
+	text13Definition.viewSettings.holdDuration = 3.5f;
+	text13Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text13Definition.showSuccessColor = false;
+
 	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
 		gameCamera->GetCamera(),
 		gameFlow_,
@@ -372,7 +405,9 @@ GameScene::GameScene() {
 			text8Definition,
 			text9Definition,
 			text10Definition,
-			text11Definition });
+			text11Definition,
+			text12Definition,
+			text13Definition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,

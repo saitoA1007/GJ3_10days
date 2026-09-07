@@ -7,10 +7,15 @@
             "OpeningDuration": 3.0
         },
         "Tutorial": {
+            "EnemyHoldPositionXZ": [
+                0.0,
+                -12.0
+            ],
             "EnemyPositionXZ": [
                 0.0,
                 -12.0
             ],
+            "EnemyRequiredHoldDuration": 1.0,
             "EnergyPositionXZ": [
                 0.0,
                 -9.0

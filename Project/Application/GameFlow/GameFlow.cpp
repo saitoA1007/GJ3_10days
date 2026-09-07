@@ -35,6 +35,8 @@ GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& setti
 	debugParameter_->Register("RequiredHoldDuration", settings_.tutorialRequiredHoldDuration, 2, "Tutorial");
 	debugParameter_->Register("EnemyPositionXZ", settings_.tutorialEnemyPositionXZ, 3, "Tutorial");
 	debugParameter_->Register("LockOnEnemyPositionXZ", settings_.tutorialLockOnEnemyPositionXZ, 4, "Tutorial");
+	debugParameter_->Register("EnemyHoldPositionXZ", settings_.tutorialEnemyHoldPositionXZ, 5, "Tutorial");
+	debugParameter_->Register("EnemyRequiredHoldDuration", settings_.tutorialEnemyRequiredHoldDuration, 6, "Tutorial");
 	debugParameter_->Apply();
 
 	SetUpdateOrder(0);
@@ -103,6 +105,8 @@ void GameFlow::ApplyDebugParameters()
 	settings_.launchDuration = (std::max)(settings_.launchDuration, 0.0f);
 	settings_.tutorialRequiredHoldDuration =
 		(std::max)(settings_.tutorialRequiredHoldDuration, 0.0f);
+	settings_.tutorialEnemyRequiredHoldDuration =
+		(std::max)(settings_.tutorialEnemyRequiredHoldDuration, 0.0f);
 }
 
 void GameFlow::BeginTutorialChargeEnergyStep()
@@ -129,6 +133,15 @@ void GameFlow::BeginTutorialEnemyLockOnStep()
 	if (tutorialPhase)
 	{
 		tutorialPhase->BeginEnemyLockOnStep(context_);
+	}
+}
+
+void GameFlow::BeginTutorialEnemyHoldStep()
+{
+	auto* tutorialPhase = dynamic_cast<TutorialPhase*>(GetCurrentPhase());
+	if (tutorialPhase)
+	{
+		tutorialPhase->BeginEnemyHoldStep(context_);
 	}
 }
 

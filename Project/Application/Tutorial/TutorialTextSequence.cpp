@@ -219,8 +219,10 @@ bool TutorialTextSequence::IsMistakeInput(const StepEntry& entry) const
 	case TutorialPhase::Step::EnemyCollision:
 	case TutorialPhase::Step::WaitForEnemyLockOnInstruction:
 	case TutorialPhase::Step::EnemyLockOnOrCollision:
+	case TutorialPhase::Step::WaitForEnemyHoldInstruction:
 		return false;
 	case TutorialPhase::Step::ChargeEnergy:
+	case TutorialPhase::Step::EnemyHoldOrCollision:
 		return inputCommand_->IsCommandActive(kLockOnReleaseCommand);
 	case TutorialPhase::Step::Complete:
 		return false;

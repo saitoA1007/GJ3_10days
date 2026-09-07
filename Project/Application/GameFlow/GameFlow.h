@@ -23,6 +23,7 @@ public:
 	void BeginTutorialChargeEnergyStep();
 	void BeginTutorialEnemyCollisionStep();
 	void BeginTutorialEnemyLockOnStep();
+	void BeginTutorialEnemyHoldStep();
 
 	IGamePhase* GetCurrentPhase() const
 	{
