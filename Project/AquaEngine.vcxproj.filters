@@ -670,6 +670,7 @@
     <ClCompile Include="Application\Utils\CameraEditor\Data\CurveData.cpp" />
     <ClCompile Include="Application\Utils\CameraEditor\CameraEditor.cpp" />
     <ClCompile Include="Application\Effect\RopeEffect.cpp" />
+    <ClCompile Include="Application\Effect\ExplosionEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1288,6 +1289,7 @@
     <ClInclude Include="Application\Utils\CameraEditor\Data\CurveData.h" />
     <ClInclude Include="Application\Utils\CameraEditor\CameraEditor.h" />
     <ClInclude Include="Application\Effect\RopeEffect.h" />
+    <ClInclude Include="Application\Effect\ExplosionEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />
