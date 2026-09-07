@@ -19,6 +19,7 @@ using namespace GameEngine;
 #include "Application/Score/ScoreView.h"
 #include "ControllerVibration.h"
 #include "DebugParameter.h"
+#include "EasingManager.h"
 #include "FPSCounter.h"
 #include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
@@ -29,9 +30,152 @@ using namespace GameEngine;
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <string>
 #include <string_view>
 #include "ModelComponent.h"
 #include "MyMath.h"
+
+class TutorialCameraModelView final
+{
+public:
+	struct Settings
+	{
+		Vector3 startPosition = { 0.0f, 2.8f, 10.0f };
+		Vector3 endPosition = { 0.0f, 2.8f, 10.0f };
+		Vector3 rotation = { 1.57079637f, 3.14159274f, 0.0f };
+		float scale = 0.5f;
+		float startDelay = 0.0f;
+		float moveDuration = 1.0f;
+		EaseType easeType = EaseType::kEaseOutCubic;
+	};
+
+	TutorialCameraModelView(
+		GameEngine::Model* model,
+		const GameEngine::Camera* camera,
+		const std::string& parameterGroupName,
+		const Settings& defaults)
+		: camera_(camera), settings_(defaults), debugParameter_(parameterGroupName)
+	{
+		assert(model && "tutorial model must be loaded.");
+		assert(camera_ && "tutorial model requires a camera.");
+		if (model)
+		{
+			model_ = std::make_unique<GameEngine::ModelComponent>(model);
+			model_->SetEnableLighting(false);
+			model_->SetColor({ 1.0f, 1.0f, 1.0f });
+		}
+
+		debugParameter_.Register("StartPosition", settings_.startPosition, 0);
+		debugParameter_.Register("EndPosition", settings_.endPosition, 1);
+		debugParameter_.Register("StartDelay", settings_.startDelay, 2);
+		debugParameter_.Register("MoveDuration", settings_.moveDuration, 3);
+		debugParameter_.Register("EaseType", settings_.easeType, 4);
+		debugParameter_.Register("Rotation", settings_.rotation, 5);
+		debugParameter_.Register("Scale", settings_.scale, 6);
+		debugParameter_.Apply();
+		Reset();
+	}
+
+	void Reset()
+	{
+		currentPosition_ = settings_.startPosition;
+		animationElapsed_ = 0.0f;
+		wasInTutorial_ = false;
+		hasEnteredTutorial_ = false;
+		displayOffset_ = {};
+	}
+
+	void SetColor(const Vector3& color)
+	{
+		if (model_)
+		{
+			model_->SetColor(color);
+		}
+	}
+
+	void SetDisplayOffset(const Vector3& offset)
+	{
+		displayOffset_ = offset;
+	}
+
+	void Update(bool isTutorial, bool advanceAnimation, float deltaTime)
+	{
+		debugParameter_.ApplyIfDirty();
+
+		if (isTutorial && !wasInTutorial_)
+		{
+			animationElapsed_ = 0.0f;
+			hasEnteredTutorial_ = true;
+		}
+		else if (isTutorial && advanceAnimation)
+		{
+			animationElapsed_ += (std::max)(deltaTime, 0.0f);
+		}
+
+		if (isTutorial)
+		{
+			const float startDelay = (std::max)(settings_.startDelay, 0.0f);
+			const float moveDuration = (std::max)(settings_.moveDuration, 0.0f);
+			if (animationElapsed_ <= startDelay)
+			{
+				currentPosition_ = settings_.startPosition;
+			}
+			else if (moveDuration <= 0.0f)
+			{
+				currentPosition_ = settings_.endPosition;
+			}
+			else
+			{
+				const float progress = (std::clamp)(
+					(animationElapsed_ - startDelay) / moveDuration,
+					0.0f,
+					1.0f);
+				currentPosition_ = GameEngine::Lerp(
+					settings_.startPosition,
+					settings_.endPosition,
+					progress,
+					settings_.easeType);
+			}
+		}
+		else if (!hasEnteredTutorial_)
+		{
+			currentPosition_ = settings_.startPosition;
+		}
+
+		wasInTutorial_ = isTutorial;
+	}
+
+	void Draw(GameEngine::RenderQueue* renderQueue)
+	{
+		if (!model_ || !camera_ || !renderQueue)
+		{
+			return;
+		}
+
+		const Matrix4x4 cameraWorld = renderQueue->GetUseDebugCamera()
+			? renderQueue->GetDebugCameraWorldMatrix()
+			: camera_->GetWorldMatrix();
+		const float scale = (std::max)(settings_.scale, 0.0f);
+		model_->worldTransform_.UpdateWorldMatrix(
+			GameEngine::Math::MakeAffineMatrix(
+				{ scale, scale, scale },
+				settings_.rotation,
+				currentPosition_ + displayOffset_) * cameraWorld);
+		model_->Draw(renderQueue);
+	}
+
+private:
+	const GameEngine::Camera* camera_ = nullptr;
+	std::unique_ptr<GameEngine::ModelComponent> model_;
+	Settings settings_;
+	Vector3 currentPosition_ = {};
+	Vector3 displayOffset_ = {};
+	GameEngine::DebugParameter debugParameter_;
+	float animationElapsed_ = 0.0f;
+	bool wasInTutorial_ = false;
+	bool hasEnteredTutorial_ = false;
+};
 
 // 後で別クラスに纏めて消す
 namespace
@@ -45,6 +189,11 @@ namespace
 	constexpr float kFadeDuration = 1.0f;
 	constexpr Vector2 kFadeTextureSize = { 128.0f, 72.0f };
 	constexpr Vector2 kFadeScale = { 10.0f, 10.0f };
+	constexpr float kTutorialText0ErrorDuration = 0.35f;
+	constexpr float kTutorialText0ShakeAmplitude = 0.45f;
+	constexpr float kTutorialText0ShakeCycles = 4.0f;
+	constexpr float kTwoPi = 6.28318531f;
+	constexpr const char* kLockOnTriggerCommand = "LockOnTrigger";
 }
 
 GameScene::~GameScene() {
@@ -121,26 +270,26 @@ GameScene::GameScene() {
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
 
-	// Scoreと同様にカメラへ追従するチュートリアルロゴ
-	tutorialLogoCamera_ = gameCamera->GetCamera();
+	// Scoreと同様にカメラへ追従するチュートリアル表示
 	auto* tutorialLogoModel = modelManager_->GetNameByModel("tutorialLogo.obj");
-	assert(tutorialLogoModel && "tutorialLogo.obj must be loaded.");
-	if (tutorialLogoModel)
-	{
-		tutorialLogo_ = std::make_unique<ModelComponent>(tutorialLogoModel);
-		tutorialLogo_->SetEnableLighting(false);
-		tutorialLogo_->SetColor({ 1.0f, 1.0f, 1.0f });
-	}
-	tutorialLogoDebugParameter_ = std::make_unique<DebugParameter>("TutorialLogo");
-	tutorialLogoDebugParameter_->Register("StartPosition", tutorialLogoStartPosition_, 0);
-	tutorialLogoDebugParameter_->Register("EndPosition", tutorialLogoEndPosition_, 1);
-	tutorialLogoDebugParameter_->Register("StartDelay", tutorialLogoStartDelay_, 2);
-	tutorialLogoDebugParameter_->Register("MoveDuration", tutorialLogoMoveDuration_, 3);
-	tutorialLogoDebugParameter_->Register("EaseType", tutorialLogoEaseType_, 4);
-	tutorialLogoDebugParameter_->Register("Rotation", tutorialLogoRotation_, 5);
-	tutorialLogoDebugParameter_->Register("Scale", tutorialLogoScale_, 6);
-	tutorialLogoDebugParameter_->Apply();
-	tutorialLogoPosition_ = tutorialLogoStartPosition_;
+	tutorialLogoView_ = std::make_unique<TutorialCameraModelView>(
+		tutorialLogoModel,
+		gameCamera->GetCamera(),
+		"TutorialLogo",
+		TutorialCameraModelView::Settings{});
+
+	TutorialCameraModelView::Settings text0Defaults{};
+	text0Defaults.startPosition = { 16.0f, -29.0f, -26.0f };
+	text0Defaults.endPosition = { 5.5f, -29.0f, -26.0f };
+	text0Defaults.rotation = { 2.01099992f, 3.14159274f, 0.0f };
+	text0Defaults.scale = 0.5f;
+	text0Defaults.moveDuration = 0.5f;
+	text0Defaults.easeType = EaseType::kEaseOutElastic;
+	tutorialText0View_ = std::make_unique<TutorialCameraModelView>(
+		modelManager_->GetNameByModel("tutorialText0.obj"),
+		gameCamera->GetCamera(),
+		"TutorialText0",
+		text0Defaults);
 
 	// クリアのムービー
 	// 月のオブジェクト
@@ -241,10 +390,11 @@ void GameScene::Initialize() {
 	fadeSprite_->scale_ = kFadeScale;
 	fadeSprite_->Update();
 	fadeElapsedTime_ = 0.0f;
-	tutorialLogoAnimationElapsed_ = 0.0f;
-	tutorialLogoWasInTutorial_ = false;
-	tutorialLogoHasEnteredTutorial_ = false;
-	tutorialLogoPosition_ = tutorialLogoStartPosition_;
+	if (tutorialLogoView_) tutorialLogoView_->Reset();
+	if (tutorialText0View_) tutorialText0View_->Reset();
+	tutorialEnergyClicked_ = false;
+	tutorialWasInTutorial_ = false;
+	tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
 }
 
 void GameScene::Update() {
@@ -258,7 +408,7 @@ void GameScene::Update() {
 	score_.Update(FpsCounter::deltaTime);
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
-	UpdateTutorialLogo(true);
+	UpdateTutorialViews(true);
 	UpdateCamera();
 	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
@@ -292,7 +442,7 @@ void GameScene::DebugUpdate()
 {
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
-	UpdateTutorialLogo(false);
+	UpdateTutorialViews(false);
 	UpdateCamera();
 	
 	// ゲーム更新を停止している間に振動が残らないようにする。
@@ -303,84 +453,72 @@ void GameScene::DebugUpdate()
 }
 
 void GameScene::Draw() {
-	DrawTutorialLogo();
+	DrawTutorialViews();
 	scoreView_->Draw(renderQueue_);
 	if (fadeSprite_) {
 		renderQueue_->SubmitSprite(fadeSprite_.get());
 	}
 }
 
-void GameScene::UpdateTutorialLogo(bool advanceAnimation)
+void GameScene::UpdateTutorialViews(bool advanceAnimation)
 {
-	if (tutorialLogoDebugParameter_)
-	{
-		tutorialLogoDebugParameter_->ApplyIfDirty();
-	}
-
 	const IGamePhase* currentPhase = gameFlow_ ? gameFlow_->GetCurrentPhase() : nullptr;
 	const bool isTutorial = currentPhase && std::string_view(currentPhase->GetName()) == "Tutorial";
-
-	if (isTutorial && !tutorialLogoWasInTutorial_)
+	if (isTutorial && !tutorialWasInTutorial_)
 	{
-		tutorialLogoAnimationElapsed_ = 0.0f;
-		tutorialLogoHasEnteredTutorial_ = true;
+		tutorialEnergyClicked_ = false;
+		tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
 	}
-	else if (isTutorial && advanceAnimation)
+	if (isTutorial && lockOnController_ &&
+		lockOnController_->GetSelectedEnergy() && lockOnController_->IsCharging())
 	{
-		tutorialLogoAnimationElapsed_ += (std::max)(FpsCounter::deltaTime, 0.0f);
+		tutorialEnergyClicked_ = true;
+		tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
 	}
-
-	if (isTutorial)
+	else if (advanceAnimation && isTutorial && !tutorialEnergyClicked_ && inputCommand_ &&
+		inputCommand_->IsCommandActive(kLockOnTriggerCommand) &&
+		(!lockOnController_ || !lockOnController_->GetSelectedEnergy()))
 	{
-		const float startDelay = (std::max)(tutorialLogoStartDelay_, 0.0f);
-		const float moveDuration = (std::max)(tutorialLogoMoveDuration_, 0.0f);
-		if (tutorialLogoAnimationElapsed_ <= startDelay)
-		{
-			tutorialLogoPosition_ = tutorialLogoStartPosition_;
-		}
-		else if (moveDuration <= 0.0f)
-		{
-			tutorialLogoPosition_ = tutorialLogoEndPosition_;
-		}
-		else
-		{
-			const float progress = (std::clamp)(
-				(tutorialLogoAnimationElapsed_ - startDelay) / moveDuration,
-				0.0f,
-				1.0f);
-			tutorialLogoPosition_ = Lerp(
-				tutorialLogoStartPosition_,
-				tutorialLogoEndPosition_,
-				progress,
-				tutorialLogoEaseType_);
-		}
-	}
-	else if (!tutorialLogoHasEnteredTutorial_)
-	{
-		tutorialLogoPosition_ = tutorialLogoStartPosition_;
+		tutorialText0ErrorElapsed_ = 0.0f;
 	}
 
-	tutorialLogoWasInTutorial_ = isTutorial;
+	if (advanceAnimation && tutorialText0ErrorElapsed_ < kTutorialText0ErrorDuration)
+	{
+		tutorialText0ErrorElapsed_ = (std::min)(
+			tutorialText0ErrorElapsed_ + (std::max)(FpsCounter::deltaTime, 0.0f),
+			kTutorialText0ErrorDuration);
+	}
+
+	const float deltaTime = FpsCounter::deltaTime;
+	if (tutorialLogoView_) tutorialLogoView_->Update(isTutorial, advanceAnimation, deltaTime);
+	if (tutorialText0View_)
+	{
+		const bool isErrorFeedbackActive =
+			isTutorial && tutorialText0ErrorElapsed_ < kTutorialText0ErrorDuration;
+		tutorialText0View_->SetColor(
+			isErrorFeedbackActive
+			? Vector3{ 1.0f, 0.0f, 0.0f }
+			: (isTutorial && tutorialEnergyClicked_
+				? Vector3{ 0.0f, 1.0f, 0.0f }
+				: Vector3{ 1.0f, 1.0f, 1.0f }));
+
+		float shakeOffsetX = 0.0f;
+		if (isErrorFeedbackActive)
+		{
+			const float progress = tutorialText0ErrorElapsed_ / kTutorialText0ErrorDuration;
+			shakeOffsetX = std::sin(progress * kTwoPi * kTutorialText0ShakeCycles) *
+				kTutorialText0ShakeAmplitude * (1.0f - progress);
+		}
+		tutorialText0View_->SetDisplayOffset({ shakeOffsetX, 0.0f, 0.0f });
+		tutorialText0View_->Update(isTutorial, advanceAnimation, deltaTime);
+	}
+	tutorialWasInTutorial_ = isTutorial;
 }
 
-void GameScene::DrawTutorialLogo()
+void GameScene::DrawTutorialViews()
 {
-	if (!tutorialLogo_ || !tutorialLogoCamera_)
-	{
-		return;
-	}
-
-	// ScoreViewと同じカメラローカル配置にし、カメラ移動・回転へ追従させる。
-	const Matrix4x4 cameraWorld = renderQueue_->GetUseDebugCamera()
-		? renderQueue_->GetDebugCameraWorldMatrix()
-		: tutorialLogoCamera_->GetWorldMatrix();
-	const float scale = (std::max)(tutorialLogoScale_, 0.0f);
-	tutorialLogo_->worldTransform_.UpdateWorldMatrix(
-		Math::MakeAffineMatrix(
-			{ scale, scale, scale },
-			tutorialLogoRotation_,
-			tutorialLogoPosition_) * cameraWorld);
-	tutorialLogo_->Draw(renderQueue_);
+	if (tutorialLogoView_) tutorialLogoView_->Draw(renderQueue_);
+	if (tutorialText0View_) tutorialText0View_->Draw(renderQueue_);
 }
 
 void GameScene::InputRegisterCommand() {

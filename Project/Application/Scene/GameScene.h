@@ -3,7 +3,6 @@
 
 // エンジン機能をインクルード
 #include "Camera.h"
-#include "EasingManager.h"
 
 #include "Application/Scene/Transition/Fade.h"
 #include "Application/Score/Score.h"
@@ -18,12 +17,12 @@ class GameFlow;
 class LockOnController;
 class Rocket;
 class UnitManager;
+class TutorialCameraModelView;
 
 namespace GameEngine
 {
 	class ControllerVibration;
 	class DebugParameter;
-	class ModelComponent;
 }
 
 class GameScene : public GameEngine::IScene {
@@ -74,10 +73,10 @@ private: // シーン機能
 
 	/// カメラ行列を更新してRenderQueueへ設定
 	void UpdateCamera();
-	/// tutorialLogoの調整値と移動アニメーションを更新
-	void UpdateTutorialLogo(bool advanceAnimation);
-	/// tutorialLogoをカメラへ追従させて描画
-	void DrawTutorialLogo();
+	/// チュートリアル表示の調整値と移動アニメーションを更新
+	void UpdateTutorialViews(bool advanceAnimation);
+	/// チュートリアル表示をカメラへ追従させて描画
+	void DrawTutorialViews();
 
 	std::unique_ptr<GameEngine::Camera> mainCamera_;                // 3D描画とマウスレイ投影に使うカメラ
 	std::unique_ptr<GameEngine::DebugParameter> mainCameraDebugParameter_; // Translate / Rotate の確認・調整用
@@ -96,20 +95,11 @@ private: // シーン機能
 	EnergyView* energyView_ = nullptr;
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;
-	const GameEngine::Camera* tutorialLogoCamera_ = nullptr;
-	std::unique_ptr<GameEngine::ModelComponent> tutorialLogo_;
-	std::unique_ptr<GameEngine::DebugParameter> tutorialLogoDebugParameter_;
-	Vector3 tutorialLogoStartPosition_ = { 0.0f, 2.8f, 10.0f };
-	Vector3 tutorialLogoEndPosition_ = { 0.0f, 2.8f, 10.0f };
-	Vector3 tutorialLogoPosition_ = tutorialLogoStartPosition_;
-	Vector3 tutorialLogoRotation_ = { 1.57079637f, 3.14159274f, 0.0f };
-	float tutorialLogoScale_ = 0.5f;
-	float tutorialLogoStartDelay_ = 0.0f;
-	float tutorialLogoMoveDuration_ = 1.0f;
-	EaseType tutorialLogoEaseType_ = EaseType::kEaseOutCubic;
-	float tutorialLogoAnimationElapsed_ = 0.0f;
-	bool tutorialLogoWasInTutorial_ = false;
-	bool tutorialLogoHasEnteredTutorial_ = false;
+	std::unique_ptr<TutorialCameraModelView> tutorialLogoView_;
+	std::unique_ptr<TutorialCameraModelView> tutorialText0View_;
+	bool tutorialEnergyClicked_ = false;
+	bool tutorialWasInTutorial_ = false;
+	float tutorialText0ErrorElapsed_ = 0.0f;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 	std::unique_ptr<GameEngine::Sprite> fadeSprite_;
 	float fadeElapsedTime_ = 0.0f;
