@@ -32,7 +32,7 @@ Field::Field(Model* circleModel, const FieldSettings& settings)
 		zoneModel = std::make_unique<ModelComponent>(circleModel);
 	}
 
-	debugParameter_ = std::make_unique<DebugParameter>("PrototypeField");
+	debugParameter_ = std::make_unique<DebugParameter>("Field");
 	for (size_t i = 0; i < kFieldZoneCount; ++i)
 	{
 		debugParameter_->Register(kZoneNames[i], settings_.radii[i], static_cast<int>(i), "Radius");
@@ -62,10 +62,10 @@ void Field::DebugUpdate()
 void Field::Draw() 
 {
 	// 大きな円から描画し、小さな円を上に重ねて各領域を見せる。
-	//for (size_t i = kFieldZoneCount; i-- > 0;)
-	//{
-	//	zoneModels_[i]->DrawRaytracing(renderQueue_);
-	//}
+	/*for (size_t i = kFieldZoneCount; i-- > 0;)
+	{
+		zoneModels_[i]->DrawRaytracing(renderQueue_);
+	}*/
 }
 
 FieldZone Field::GetZone(const Vector3& worldPosition) const 

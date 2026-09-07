@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "DebugParameter.h"
 #include "IGameObject.h"
 #include "ModelComponent.h"
@@ -12,6 +13,7 @@ public:
 
 	void Initialize() override;
 	void Update() override;
+	void DebugUpdate() override;
 	void Draw() override;
 
 private:
@@ -22,6 +24,7 @@ private:
 	std::vector<std::unique_ptr<GameEngine::ModelComponent>> ringModels_;
 	std::vector<GameEngine::BlackHoleRingMaterial> materials_;
 	std::vector<Vector4> glowColors_;
+	std::array<float, 3> ringModelScales_ = { 1.0f, 1.0f, 1.0f };
 
 	// 下地のリング
 	std::vector<std::unique_ptr<GameEngine::ModelComponent>> underRingModels_;
@@ -43,4 +46,10 @@ private:
 
 	// 登録する
 	void Register();
+
+	// Parameter Inspectorの変更をリングへ反映する
+	void ApplyDebugParameters();
+
+	// 発光リングと下地リングのXZスケールを揃えて更新する
+	void ApplyRingModelScales();
 };
