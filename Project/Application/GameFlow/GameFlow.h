@@ -21,6 +21,7 @@ public:
 	void AdvanceToNextPhase();
 	void ChangePhase(size_t index);
 	void BeginTutorialChargeEnergyStep();
+	void BeginTutorialEnemyCollisionStep();
 
 	IGamePhase* GetCurrentPhase() const
 	{

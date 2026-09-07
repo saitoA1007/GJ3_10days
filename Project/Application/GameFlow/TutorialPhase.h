@@ -1,4 +1,6 @@
 #pragma once
+#include <cstdint>
+
 #include "IGamePhase.h"
 
 class EnergyPickup;
@@ -12,6 +14,8 @@ public:
 		DispatchUnit,
 		WaitForChargeInstruction,
 		ChargeEnergy,
+		WaitForEnemyCollisionInstruction,
+		EnemyCollision,
 		Complete,
 	};
 
@@ -21,6 +25,7 @@ public:
 	void OnExit(GameFlowContext& context) override;
 
 	void BeginChargeEnergyStep(GameFlowContext& context);
+	void BeginEnemyCollisionStep(GameFlowContext& context);
 
 	const char* GetName() const override { return "Tutorial"; }
 	// 操作を許可
@@ -31,4 +36,5 @@ public:
 private:
 	Step step_ = Step::SelectEnergy;
 	EnergyPickup* chargeEnergy_ = nullptr;
+	uint64_t enemyHitCountAtSpawn_ = 0;
 };

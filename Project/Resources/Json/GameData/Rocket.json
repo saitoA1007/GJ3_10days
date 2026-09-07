@@ -1,8 +1,8 @@
 {
     "Rocket": {
         "Collider": {
-            "OffsetY": 1.75,
-            "Radius": 1.5
+            "OffsetY": -5.0,
+            "Radius": 4.0
         },
         "Debug": {
             "ChangeAmount": 10

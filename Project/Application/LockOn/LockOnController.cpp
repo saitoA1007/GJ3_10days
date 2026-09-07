@@ -96,6 +96,7 @@ void LockOnController::Initialize()
 	lockOnSeconds_ = 0.0f;
 	minimumDispatchHoldSeconds_ = 0.0f;
 	isCharging_ = false;
+	enemySelectionEnabled_ = true;
 	SyncCursorModel();
 }
 
@@ -170,6 +171,20 @@ void LockOnController::SetGameplayEnabled(bool enabled)
 void LockOnController::SetMinimumDispatchHoldSeconds(float seconds)
 {
 	minimumDispatchHoldSeconds_ = (std::max)(seconds, 0.0f);
+}
+
+void LockOnController::SetEnemySelectionEnabled(bool enabled)
+{
+	if (enemySelectionEnabled_ == enabled)
+	{
+		return;
+	}
+
+	enemySelectionEnabled_ = enabled;
+	if (!enemySelectionEnabled_ && selectedEnemy_)
+	{
+		CancelLockOn();
+	}
 }
 
 void LockOnController::ApplyDebugParameters()
@@ -343,7 +358,9 @@ void LockOnController::SyncChargeModel()
 void LockOnController::UpdateSelection()
 {
 	EnergyPickup* energy = energySpawner_->FindNearestAvailable(cursorPosition_, settings_.selectionRadius);
-	Enemy* enemy = enemyManager_->FindNearestTargetable(cursorPosition_, settings_.selectionRadius);
+	Enemy* enemy = enemySelectionEnabled_
+		? enemyManager_->FindNearestTargetable(cursorPosition_, settings_.selectionRadius)
+		: nullptr;
 
 	if (energy && enemy) {
 		// 両方が範囲内なら距離で比較し、同距離では防衛を優先してEnemyを選ぶ。
@@ -509,7 +526,7 @@ int32_t LockOnController::CalculateRequestedEnergy() const
 bool LockOnController::HasValidSelection() const
 {
 	return (selectedEnergy_ && selectedEnergy_->IsTargetable()) ||
-		(selectedEnemy_ && selectedEnemy_->IsTargetable());
+		(enemySelectionEnabled_ && selectedEnemy_ && selectedEnemy_->IsTargetable());
 }
 
 void LockOnController::SetSelection(EnergyPickup* energy, Enemy* enemy)

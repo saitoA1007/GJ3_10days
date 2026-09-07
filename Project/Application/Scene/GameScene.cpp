@@ -11,6 +11,7 @@ using namespace GameEngine;
 #include "Application//Energy/EnergySpawner.h"
 #include "Application/EnergyView/EnergyView.h"
 #include "Application/GameFlow/GameFlow.h"
+#include "Application/GameFlow/TutorialPhase.h"
 #include "Application//LockOn/LockOnController.h"
 #include "Application//Rocket/Rocket.h"
 #include "Application//Unit/UnitManager.h"
@@ -246,6 +247,67 @@ GameScene::GameScene() {
 		}
 	};
 
+	TutorialTextSequence::StepDefinition text5Definition{};
+	text5Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text5Definition.model = modelManager_->GetNameByModel("tutorialText5.obj");
+	text5Definition.parameterGroupName = "TutorialText5";
+	text5Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text5Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text5Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text5Definition.viewSettings.scale = 1.0f;
+	text5Definition.viewSettings.startDelay = 0.5f;
+	text5Definition.viewSettings.moveDuration = 0.5f;
+	text5Definition.viewSettings.holdDuration = 3.5f;
+	text5Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text5Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text6Definition{};
+	text6Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text6Definition.model = modelManager_->GetNameByModel("tutorialText6.obj");
+	text6Definition.parameterGroupName = "TutorialText6";
+	text6Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text6Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text6Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text6Definition.viewSettings.scale = 1.0f;
+	text6Definition.viewSettings.startDelay = 0.5f;
+	text6Definition.viewSettings.moveDuration = 0.5f;
+	text6Definition.viewSettings.holdDuration = 3.5f;
+	text6Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text6Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text7Definition{};
+	text7Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text7Definition.model = modelManager_->GetNameByModel("tutorialText7.obj");
+	text7Definition.parameterGroupName = "TutorialText7";
+	text7Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text7Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text7Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text7Definition.viewSettings.scale = 1.0f;
+	text7Definition.viewSettings.startDelay = 0.5f;
+	text7Definition.viewSettings.moveDuration = 0.5f;
+	text7Definition.viewSettings.holdDuration = 3.5f;
+	text7Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text7Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text8Definition{};
+	text8Definition.phaseStep = TutorialPhase::Step::EnemyCollision;
+	text8Definition.model = modelManager_->GetNameByModel("tutorialText8.obj");
+	text8Definition.parameterGroupName = "TutorialText8";
+	text8Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text8Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text8Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text8Definition.viewSettings.scale = 1.0f;
+	text8Definition.viewSettings.startDelay = 0.5f;
+	text8Definition.viewSettings.moveDuration = 0.5f;
+	text8Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text8Definition.onActivated = [this]()
+	{
+		if (gameFlow_)
+		{
+			gameFlow_->BeginTutorialEnemyCollisionStep();
+		}
+	};
+
 	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
 		gameCamera->GetCamera(),
 		gameFlow_,
@@ -256,7 +318,11 @@ GameScene::GameScene() {
 			text1Definition,
 			text2Definition,
 			text3Definition,
-			text4Definition });
+			text4Definition,
+			text5Definition,
+			text6Definition,
+			text7Definition,
+			text8Definition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,

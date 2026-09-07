@@ -4,7 +4,9 @@
 #include "FPSCounter.h"
 #include "InputCommand.h"
 #include "Application/Energy/EnergySpawner.h"
+#include "Application/Enemy/EnemyManager.h"
 #include "Application/LockOn/lockOnController.h"
+#include "Application/Rocket/Rocket.h"
 #include "Application/Unit/unitManager.h"
 
 using namespace GameEngine;
@@ -18,9 +20,11 @@ void TutorialPhase::OnEnter(GameFlowContext& context)
 {
 	step_ = Step::SelectEnergy;
 	chargeEnergy_ = nullptr;
+	enemyHitCountAtSpawn_ = context.rocket ? context.rocket->GetEnemyHitCount() : 0;
 	if (context.lockOnController)
 	{
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
+		context.lockOnController->SetEnemySelectionEnabled(true);
 	}
 
 	if (context.energySpawner && context.settings)
@@ -67,11 +71,23 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 		if (released && heldTargetEnergy &&
 			context.lockOnController->GetLockOnSeconds() >= requiredHoldDuration)
 		{
-			step_ = Step::Complete;
+			step_ = Step::WaitForEnemyCollisionInstruction;
 			context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
 		}
 		break;
 	}
+	case Step::WaitForEnemyCollisionInstruction:
+		break;
+	case Step::EnemyCollision:
+		if (context.rocket && context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_)
+		{
+			step_ = Step::Complete;
+			if (context.lockOnController)
+			{
+				context.lockOnController->SetEnemySelectionEnabled(true);
+			}
+		}
+		break;
 	case Step::Complete:
 		// TODO: チュートリアル完成後にPlayingへの遷移を再度有効化する。
 		return false;
@@ -84,6 +100,7 @@ void TutorialPhase::OnExit(GameFlowContext& context)
 	if (context.lockOnController)
 	{
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
+		context.lockOnController->SetEnemySelectionEnabled(true);
 	}
 	chargeEnergy_ = nullptr;
 }
@@ -106,4 +123,20 @@ void TutorialPhase::BeginChargeEnergyStep(GameFlowContext& context)
 		context.lockOnController->SetMinimumDispatchHoldSeconds(
 			context.settings->tutorialRequiredHoldDuration);
 	}
+}
+
+void TutorialPhase::BeginEnemyCollisionStep(GameFlowContext& context)
+{
+	if (step_ != Step::WaitForEnemyCollisionInstruction ||
+		!context.enemyManager || !context.rocket || !context.settings ||
+		!context.lockOnController)
+	{
+		return;
+	}
+
+	enemyHitCountAtSpawn_ = context.rocket->GetEnemyHitCount();
+	context.lockOnController->SetEnemySelectionEnabled(false);
+	const Vector2& positionXZ = context.settings->tutorialEnemyPositionXZ;
+	context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
+	step_ = Step::EnemyCollision;
 }

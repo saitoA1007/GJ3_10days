@@ -215,6 +215,8 @@ bool TutorialTextSequence::IsMistakeInput(const StepEntry& entry) const
 			(!lockOnController_ || !lockOnController_->GetSelectedEnergy());
 	case TutorialPhase::Step::DispatchUnit:
 	case TutorialPhase::Step::WaitForChargeInstruction:
+	case TutorialPhase::Step::WaitForEnemyCollisionInstruction:
+	case TutorialPhase::Step::EnemyCollision:
 		return false;
 	case TutorialPhase::Step::ChargeEnergy:
 		return inputCommand_->IsCommandActive(kLockOnReleaseCommand);

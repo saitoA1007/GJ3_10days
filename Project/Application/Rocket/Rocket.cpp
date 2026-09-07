@@ -55,6 +55,7 @@ void Rocket::Initialize()
 {
 	ApplyDebugParameters();
 	energy_.Reset(settings_.initialEnergy);
+	enemyHitCount_ = 0;
 	collider_.SetActive(true);
 	StartEntrance();
 	SyncComponents();
@@ -134,6 +135,7 @@ EnergyChange Rocket::AllocateEnergyToUnit(int32_t requestedAmount)
 
 EnergyChange Rocket::ReceiveEnemyHit() 
 {
+	++enemyHitCount_;
 	const EnergyChange change = energy_.ConsumeUpTo(settings_.enemyHitLoss, EnergyChangeReason::EnemyHit);
 	NotifyEnergyChanged(change);
 	return change;
