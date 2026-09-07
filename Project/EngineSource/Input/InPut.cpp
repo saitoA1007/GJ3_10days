@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "InPut.h"
 #include <cassert>
 #include <algorithm>

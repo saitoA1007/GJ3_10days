@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include <algorithm>
 #include "FractureInstance.h"
 #include "RuntimeMeshFracturer.h"

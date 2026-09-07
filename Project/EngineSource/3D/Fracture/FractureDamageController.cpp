@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include <algorithm>
 #include <queue>
 #include "FractureDamageController.h"
