@@ -12,7 +12,6 @@ void LaunchPhase::OnEnter(GameFlowContext& context)
 
 bool LaunchPhase::OnUpdate(GameFlowContext& context)
 {
-
 	isFinished_ = context.resultMovieManager_->IsFin();
 	return isFinished_;
 }
