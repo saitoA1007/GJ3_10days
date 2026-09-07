@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "FieldEffect.h"
 #include "MyMath.h"
 #include "FPSCounter.h"

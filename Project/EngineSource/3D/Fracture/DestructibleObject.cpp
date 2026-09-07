@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "DestructibleObject.h"
 #include "FPSCounter.h"
 #include "MyMath.h"

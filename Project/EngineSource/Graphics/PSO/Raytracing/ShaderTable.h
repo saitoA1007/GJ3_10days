@@ -1,5 +1,4 @@
 #pragma once
-#define NOMINMAX
 #include "ShaderRecord.h"
 #include <vector>
 

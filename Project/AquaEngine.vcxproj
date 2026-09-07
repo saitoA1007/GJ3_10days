@@ -76,7 +76,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;USE_PIX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_DEBUG;_WINDOWS;USE_IMGUI;USE_PIX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -106,7 +106,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -134,7 +134,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_WINDOWS;USE_IMGUI;USE_PIX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;USE_IMGUI;USE_PIX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -213,6 +213,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Score\Score.cpp" />
     <ClCompile Include="Application\Score\ScoreView.cpp" />
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
+    <ClCompile Include="Application\Utils\CameraEditor\CameraEditor.cpp" />
+    <ClCompile Include="Application\Utils\CameraEditor\Data\CameraEditorData.cpp" />
+    <ClCompile Include="Application\Utils\CameraEditor\Data\CurveData.cpp" />
     <ClCompile Include="Application\Utils\GameTimer.cpp" />
     <ClCompile Include="Application\Utils\GamingColor.cpp" />
     <ClCompile Include="Application\Utils\TimeController.cpp" />
@@ -519,6 +522,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\Transition\Fade.h" />
     <ClInclude Include="Application\Utils\Binary\BinaryManager.h" />
     <ClInclude Include="Application\Utils\Binary\Value.h" />
+    <ClInclude Include="Application\Utils\CameraEditor\CameraEditor.h" />
+    <ClInclude Include="Application\Utils\CameraEditor\Data\CameraEditorData.h" />
+    <ClInclude Include="Application\Utils\CameraEditor\Data\CurveData.h" />
     <ClInclude Include="Application\Utils\GameTimer.h" />
     <ClInclude Include="Application\Utils\GamingColor.h" />
     <ClInclude Include="Application\Utils\TimeController.h" />
