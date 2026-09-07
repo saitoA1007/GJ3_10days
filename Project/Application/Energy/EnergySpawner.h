@@ -12,12 +12,11 @@
 #include "Application/Field/Field.h"
 #include "EnergyPickup.h"
 
-/// @brief 空から降るエネルギー全体の生成設定。
+/// エネルギー全体の生成設定。
 struct EnergySpawnSettings 
 {
 	float spawnInterval = 2.5f;    // ランダム生成の間隔（秒）
-	float fallHeight = 10.0f;      // 地面からの生成高度
-	float fallSpeed = 5.0f;        // 1秒あたりの落下距離
+	float appearDuration = 1.0f;
 	float groundHeight = 0.25f;    // 着地時のY座標
 	float spawnAngleCenterDegrees = 0.0f; // 生成範囲の中心角（度）。0度は+X方向
 	float spawnAngleRangeDegrees = 360.0f; // 中心角から左右へ広がる生成角度幅（度）

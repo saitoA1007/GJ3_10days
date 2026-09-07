@@ -23,22 +23,26 @@ EnergyPickup::EnergyPickup(Model* model, GameEngine::Model* planeModel, GameEngi
 void EnergyPickup::Spawn(
 	EnergySize size,
 	const Vector3& groundPosition,
-	float fallHeight,
-	float fallSpeed,
+	float appearDuration,
 	const EnergyTypeSettings& typeSettings)
 {
 	// 着地点を保持したまま開始位置だけ上へずらし、Falling状態から始める。
 	size_ = size;
-	state_ = EnergyState::Falling;
+	state_ = EnergyState::Appearing;
 	typeSettings_ = typeSettings;
 	groundY_ = groundPosition.y;
-	fallSpeed_ = (std::max)(fallSpeed, 0.0f);
-	position_ = groundPosition;
-	position_.y += (std::max)(fallHeight, 0.0f);
+	position_ = groundPosition; 
+
 	animationTime_ = 0.0f;
 	rotationY_ = 0.0f;
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+
+	// ディゾルブの初期設定
+	appearTime_ = 0.0f;
+	appearDuration_ = appearDuration;
+	material_.materialData_->dissolveThreshold = 1.0f;
+
 	SyncModel();
 }
 
@@ -58,6 +62,7 @@ void EnergyPickup::SpawnOnGround(
 	rotationY_ = 0.0f;
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+	material_.materialData_->dissolveThreshold = 0.0f;
 	SyncModel();
 }
 
@@ -71,6 +76,7 @@ void EnergyPickup::Reset()
 	rotationY_ = 0.0f;
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+	material_.materialData_->dissolveThreshold = 0.0f;
 }
 
 void EnergyPickup::Update(
@@ -88,20 +94,26 @@ void EnergyPickup::Update(
 	particle_.Update();
 
 	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
-	if (state_ == EnergyState::Falling) 
+
+	// ディゾルブ出現中の処理
+	if (state_ == EnergyState::Appearing)
 	{
-		// 地面を通り抜けないよう、到達したフレームで位置をgroundY_へ固定する。
-		position_.y -= fallSpeed_ * safeDeltaTime;
-		if (position_.y <= groundY_) {
-			position_.y = groundY_;
-			state_ = EnergyState::OnGround;
+		appearTime_ += safeDeltaTime;
+
+		float threshold = 1.0f - (appearTime_ / appearDuration_);
+
+		if (appearTime_ >= appearDuration_)
+		{
+			threshold = 0.0f;
+			state_ = EnergyState::OnGround; 
 			animationTime_ = 0.0f;
 		}
+
+		material_.materialData_->dissolveThreshold = threshold;
 	}
 
 	if (state_ == EnergyState::OnGround || state_ == EnergyState::Reserved)
 	{
-		// 論理座標は地面に固定し、描画だけを上下させて距離判定へ影響させない。
 		floatingAmplitude_ = (std::max)(floatingAmplitude, 0.0f);
 		animationTime_ += safeDeltaTime * (std::max)(floatingSpeed, 0.0f);
 		rotationY_ += safeDeltaTime * rotationSpeed;
@@ -112,6 +124,8 @@ void EnergyPickup::Update(
 	{
 		floatingAmplitude_ = 0.0f;
 	}
+
+	material_.materialData_->time += safeDeltaTime;
 
 	SyncModel();
 }
