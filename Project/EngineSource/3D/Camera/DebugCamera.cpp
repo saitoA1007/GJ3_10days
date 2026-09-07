@@ -34,6 +34,7 @@ void DebugCamera::Initialize(const Vector3& translate,int width, int height) {
 	translate_.x = targetPos_.x + distance_ * std::sinf(mouseMove_.y) * std::sinf(mouseMove_.x);
 	translate_.y = targetPos_.y + distance_ * std::cosf(mouseMove_.y);
 	translate_.z = targetPos_.z + distance_ * std::sinf(mouseMove_.y) * std::cosf(mouseMove_.x);
+	rotate_ = Math::DirectionToEuler(targetPos_ - translate_);
 	// 回転行列に変換
 	rotateMatrix_ = LookAt(translate_, targetPos_, { 0.0f,1.0f,0.0f });
 	// ワールド行列
@@ -89,6 +90,7 @@ void DebugCamera::Update() {
 	translate_.x = targetPos_.x + distance_ * std::sinf(mouseMove_.y) * std::sinf(mouseMove_.x);
 	translate_.y = targetPos_.y + distance_ * std::cosf(mouseMove_.y);
 	translate_.z = targetPos_.z + distance_ * std::sinf(mouseMove_.y) * std::cosf(mouseMove_.x);
+	rotate_ = Math::DirectionToEuler(targetPos_ - translate_);
 	
 	// 回転行列に変換
 	rotateMatrix_ = LookAt(translate_, targetPos_, {0.0f,1.0f,0.0f});
