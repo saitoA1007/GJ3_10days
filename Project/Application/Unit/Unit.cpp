@@ -284,6 +284,18 @@ void Unit::StartCarryingEnergy(EnergyPickup* energy)
 		return;
 	}
 
+	if (targetEnemy_)
+	{
+		targetEnemy_->CancelAttackReservation();
+		targetEnemy_ = nullptr;
+	}
+
+	if (targetEnergy_ && targetEnergy_ != energy && targetEnergy_->IsActive())
+	{
+		targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
+		targetEnergy_ = nullptr;
+	}
+
 	// 生成されたEnergyの予約と運搬処理
 	if (energy->TryReserve() && energy->BeginCarry())
 	{
