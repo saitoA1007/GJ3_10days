@@ -76,6 +76,10 @@ TestScene::TestScene() {
 	m_ = std::make_unique<ModelComponent>(cModel);
 	m_->SetHitGroup(6);
 	m_->SetBufferMaterial(0, mat_.GetMaterialSrvIndex());
+
+	gameObjectManager_->AddObject<ParticleBehavior>("EnemyCommonEffect", 16, textureManager_, effectModel_);
+	auto pModel = modelManager_->GetNameByModel("Prick.gltf");
+	gameObjectManager_->AddObject<ParticleBehavior>("EnemyDeadEffect", 256, textureManager_, pModel);
 }
 
 void TestScene::Initialize() {
