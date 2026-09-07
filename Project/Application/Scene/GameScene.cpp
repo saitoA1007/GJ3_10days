@@ -205,9 +205,23 @@ GameScene::GameScene() {
 	text2Definition.viewSettings.scale = 1.0f;
 	text2Definition.viewSettings.startDelay = 0.5f;
 	text2Definition.viewSettings.moveDuration = 0.5f;
-	text2Definition.viewSettings.holdDuration = 2.5f;
+	text2Definition.viewSettings.holdDuration = 3.5f;
 	text2Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
 	text2Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text3Definition{};
+	text3Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text3Definition.model = modelManager_->GetNameByModel("tutorialText3.obj");
+	text3Definition.parameterGroupName = "TutorialText3";
+	text3Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text3Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text3Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text3Definition.viewSettings.scale = 1.0f;
+	text3Definition.viewSettings.startDelay = 0.5f;
+	text3Definition.viewSettings.moveDuration = 0.5f;
+	text3Definition.viewSettings.holdDuration = 3.5f;
+	text3Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text3Definition.showSuccessColor = false;
 
 	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
 		gameCamera->GetCamera(),
@@ -217,7 +231,8 @@ GameScene::GameScene() {
 		std::vector<TutorialTextSequence::StepDefinition>{
 			text0Definition,
 			text1Definition,
-			text2Definition });
+			text2Definition,
+			text3Definition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,
