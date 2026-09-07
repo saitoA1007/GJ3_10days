@@ -41,7 +41,7 @@
             },
             "IsActiveBlendAdd": true,
             "IsBillBoard": false,
-            "IsLoop": true,
+            "IsLoop": false,
             "LifeTimeEmit": {
                 "Enable": true,
                 "MaxLifeTime": 0.5899999737739563,

@@ -30,6 +30,7 @@ EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model,
 	typeMap_["Snake"] = EnemyType::Snake;
 
 	LoadPreset();
+
 }
 
 void EnemyManager::SetContext(Field* field, Rocket* rocket, EnergySpawner* energySpawner, UnitManager* unitManager) {

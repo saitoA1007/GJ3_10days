@@ -6,6 +6,7 @@
 #include <utility>
 #include "Enemy.h"
 #include "EnemyRenderer.h"
+#include <ParticleBehavior.h>
 
 class Field;
 class Rocket;
@@ -58,6 +59,9 @@ private:
 
 	std::vector<int> freeEnemyIndices_;
 	GameEngine::WorldTransforms worldTransforms_;
+
+	std::vector<GameEngine::ParticleBehavior> commonEffects_;
+	std::vector<GameEngine::ParticleBehavior> deadEffects_;
 
 	//敵のプール
 	std::vector<std::unique_ptr<Enemy>> enemies_;
