@@ -52,6 +52,9 @@ public:
 	// このフェーズ中にプレイヤーのゲーム操作を許可するか
 	virtual bool IsGameplayEnabled() const { return false; }
 
+	// このフェーズ中に敵とEnergyの自動生成を許可するか
+	virtual bool IsAutoSpawnEnabled() const { return false; }
+
 	// このフェーズ中にGameSceneのメインカメラを使用するか
 	virtual bool UsesGameSceneCamera() const { return true; }
 };

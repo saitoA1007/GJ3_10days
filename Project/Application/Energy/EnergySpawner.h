@@ -25,7 +25,7 @@ struct EnergySpawnSettings
 	float floatingSpeed = 2.0f;    // 浮遊アニメーションの角速度（rad/s）
 	float rotationSpeed = 1.5f;    // 着地後のY軸回転速度（rad/s）
 	int32_t maxActiveCount = 30;   // 落下・地上・運搬を含む同時存在上限
-	int32_t initialCountPerZone = 1; // 開始時にNear/Middle/Farへ置く個数
+	int32_t initialCountPerZone = 0; // 開始時にNear/Middle/Farへ置く個数
 };
 
 /// @brief 各フィールド領域の空からエネルギーを定期生成する。
@@ -63,6 +63,14 @@ public:
 	/// @brief ゲームプレイ処理が有効か取得する。
 	/// @return 有効ならtrue。
 	bool IsGameplayEnabled() const { return gameplayEnabled_; }
+
+	/// @brief 定期的な自動生成の有効状態を切り替える。
+	/// @param[in] enabled 有効にするならtrue。
+	void SetAutoSpawnEnabled(bool enabled) { autoSpawnEnabled_ = enabled; }
+
+	/// @brief 定期的な自動生成が有効か取得する。
+	/// @return 有効ならtrue。
+	bool IsAutoSpawnEnabled() const { return autoSpawnEnabled_; }
 
 	/// @brief 指定された生成可能領域へ空中生成する。
 	/// @param[in] zone Near・Middle・Farのいずれか。
@@ -132,5 +140,6 @@ private:
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;   // 設定とParameter Inspectorの接続
 	float spawnTimer_ = 0.0f;                                      // 次回自動生成までに経過した秒数
 	bool gameplayEnabled_ = true;                                  // Ready・TimeUp・Pause中はfalse
+	bool autoSpawnEnabled_ = false;                                // Playing中だけtrue
 };
 

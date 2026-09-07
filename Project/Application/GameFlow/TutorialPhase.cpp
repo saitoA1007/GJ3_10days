@@ -30,7 +30,8 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 		}
 		break;
 	case Step::Complete:
-		return true; // 次のフェーズへ
+		// TODO: チュートリアル完成後にPlayingへの遷移を再度有効化する。
+		return false;
 	}
 	return false;
 }

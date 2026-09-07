@@ -11,7 +11,7 @@
             "AngleRangeDegrees": 180.0,
             "AppearDuration": 1.2,
             "GroundHeight": 1.5,
-            "InitialCountPerZone": 1,
+            "InitialCountPerZone": 0,
             "MaxActiveCount": 64,
             "SpawnInterval": 2.0
         },

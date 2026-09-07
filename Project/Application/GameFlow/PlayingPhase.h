@@ -14,6 +14,7 @@ public:
 
 	const char* GetName() const override { return "Playing"; }
 	bool IsGameplayEnabled() const override { return true; }
+	bool IsAutoSpawnEnabled() const override { return true; }
 	float GetRemainingTime() const { return remainingTime_; }
 
 private:
