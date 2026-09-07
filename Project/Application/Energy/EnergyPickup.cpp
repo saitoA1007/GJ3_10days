@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "Model.h"
+#include "MyMath.h"
 #include "RenderQueue.h"
 
 using namespace GameEngine;
@@ -33,6 +35,10 @@ void EnergyPickup::Spawn(
 	fallSpeed_ = (std::max)(fallSpeed, 0.0f);
 	position_ = groundPosition;
 	position_.y += (std::max)(fallHeight, 0.0f);
+	animationTime_ = 0.0f;
+	rotationY_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
+	isHighlighted_ = false;
 	SyncModel();
 }
 
@@ -48,6 +54,9 @@ void EnergyPickup::SpawnOnGround(
 	groundY_ = groundPosition.y;
 	fallSpeed_ = 0.0f;
 	position_ = groundPosition;
+	animationTime_ = 0.0f;
+	rotationY_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
 	SyncModel();
 }
@@ -58,23 +67,46 @@ void EnergyPickup::Reset()
 	position_ = {};
 	groundY_ = 0.0f;
 	fallSpeed_ = 0.0f;
+	animationTime_ = 0.0f;
+	rotationY_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
 }
 
-void EnergyPickup::Update(float deltaTime)
+void EnergyPickup::Update(
+	float deltaTime,
+	float floatingAmplitude,
+	float floatingSpeed,
+	float rotationSpeed)
 {
 	if (!IsActive()) {
 		return;
 	}
 
+	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
 	if (state_ == EnergyState::Falling) 
 	{
 		// 地面を通り抜けないよう、到達したフレームで位置をgroundY_へ固定する。
-		position_.y -= fallSpeed_ * (std::max)(deltaTime, 0.0f);
+		position_.y -= fallSpeed_ * safeDeltaTime;
 		if (position_.y <= groundY_) {
 			position_.y = groundY_;
 			state_ = EnergyState::OnGround;
+			animationTime_ = 0.0f;
 		}
+	}
+
+	if (state_ == EnergyState::OnGround || state_ == EnergyState::Reserved)
+	{
+		// 論理座標は地面に固定し、描画だけを上下させて距離判定へ影響させない。
+		floatingAmplitude_ = (std::max)(floatingAmplitude, 0.0f);
+		animationTime_ += safeDeltaTime * (std::max)(floatingSpeed, 0.0f);
+		rotationY_ += safeDeltaTime * rotationSpeed;
+		animationTime_ = std::fmod(animationTime_, TWO_PI);
+		rotationY_ = std::fmod(rotationY_, TWO_PI);
+	}
+	else
+	{
+		floatingAmplitude_ = 0.0f;
 	}
 
 	SyncModel();
@@ -133,6 +165,8 @@ void EnergyPickup::DropOnGround(const Vector3& position)
 	position_ = position;
 	position_.y = groundY_;
 	state_ = EnergyState::OnGround;
+	animationTime_ = 0.0f;
+	floatingAmplitude_ = 0.0f;
 	SyncModel();
 }
 
@@ -177,7 +211,13 @@ void EnergyPickup::SyncModel()
 {
 	const float scale = typeSettings_.scale;
 	modelComponent_->worldTransform_.transform_.scale = { scale, scale, scale };
-	modelComponent_->worldTransform_.transform_.translate = position_;
+	Vector3 displayPosition = position_;
+	if (state_ == EnergyState::OnGround || state_ == EnergyState::Reserved)
+	{
+		displayPosition.y += std::sin(animationTime_) * floatingAmplitude_;
+	}
+	modelComponent_->worldTransform_.transform_.translate = displayPosition;
+	modelComponent_->worldTransform_.transform_.rotate.y = rotationY_;
 	Vector4 color = typeSettings_.color;
 	if (isHighlighted_) 
 	{
