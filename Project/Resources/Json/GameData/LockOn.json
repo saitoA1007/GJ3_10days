@@ -1,0 +1,43 @@
+{
+    "LockOn": {
+        "Charge": {
+            "MaxEnergyCost": 30,
+            "MaxSeconds": 3.0,
+            "StartSeconds": 0.20000000298023224
+        },
+        "Color": {
+            "ChargeColor": [
+                1.0,
+                0.3499999940395355,
+                0.20000000298023224,
+                1.0
+            ],
+            "CursorColor": [
+                0.25,
+                1.0,
+                0.44999998807907104,
+                1.0
+            ],
+            "TargetColor": [
+                1.0,
+                0.949999988079071,
+                0.25,
+                1.0
+            ]
+        },
+        "Cursor": {
+            "CursorSpeed": 12.0,
+            "FieldEdgeMargin": 0.5,
+            "GroundHeight": 0.3499999940395355,
+            "ModelHeightOffset": 1.0,
+            "ModelScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "MouseMoveThreshold": 0.009999999776482582,
+            "SelectionRadius": 1.5
+        },
+        "SceneName": "Game"
+    }
+}

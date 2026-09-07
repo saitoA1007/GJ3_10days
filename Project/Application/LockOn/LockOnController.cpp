@@ -59,16 +59,6 @@ LockOnController::LockOnController(
 	enemyManager_(enemyManager),
 	unitManager_(unitManager),
 	settings_(settings) {
-	assert(input_ != nullptr && "lock-on requires input");
-	assert(inputCommand_ != nullptr && "lock-on requires input commands");
-	assert(camera_ != nullptr && "lock-on requires a camera");
-	assert(cursorModel != nullptr && "lock-on requires cursor.obj");
-	assert(debugRenderer_ != nullptr && "lock-on requires a debug renderer");
-	assert(field_ != nullptr && "lock-on requires a field");
-	assert(rocket_ != nullptr && "lock-on requires a rocket");
-	assert(energySpawner_ != nullptr && "lock-on requires an energy spawner");
-	assert(enemyManager_ != nullptr && "lock-on requires an enemy manager");
-	assert(unitManager_ != nullptr && "lock-on requires a unit manager");
 
 	// カーソルは画面上で色を判別しやすいよう、ライティングの影響を受けない。
 	cursorModel_ = std::make_unique<ModelComponent>(cursorModel);
