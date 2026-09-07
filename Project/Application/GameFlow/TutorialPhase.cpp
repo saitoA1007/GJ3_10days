@@ -1,6 +1,7 @@
 #pragma once
 #include "TutorialPhase.h"
 #include "FPSCounter.h"
+#include "Application/Energy/EnergySpawner.h"
 #include "Application/LockOn/lockOnController.h"
 #include "Application/Unit/unitManager.h"
 
@@ -9,6 +10,14 @@ using namespace GameEngine;
 void TutorialPhase::OnEnter(GameFlowContext& context)
 {
 	step_ = Step::SelectEnergy;
+
+	if (context.energySpawner && context.settings)
+	{
+		const Vector2& positionXZ = context.settings->tutorialEnergyPositionXZ;
+		context.energySpawner->SpawnOnGround(
+			EnergySize::Small,
+			{ positionXZ.x, 0.0f, positionXZ.y });
+	}
 }
 
 bool TutorialPhase::OnUpdate(GameFlowContext& context)

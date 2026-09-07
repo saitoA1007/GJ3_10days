@@ -28,6 +28,10 @@ using namespace GameEngine;
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <algorithm>
+#include <cassert>
+#include <string_view>
+#include "ModelComponent.h"
+#include "MyMath.h"
 
 // 後で別クラスに纏めて消す
 namespace
@@ -116,6 +120,27 @@ GameScene::GameScene() {
 
 	// プレイヤーを見下ろしながら追従するメインカメラ
 	auto* gameCamera = gameObjectManager_->AddObject<GameCamera>(player_);
+
+	// Scoreと同様にカメラへ追従するチュートリアルロゴ
+	tutorialLogoCamera_ = gameCamera->GetCamera();
+	auto* tutorialLogoModel = modelManager_->GetNameByModel("tutorialLogo.obj");
+	assert(tutorialLogoModel && "tutorialLogo.obj must be loaded.");
+	if (tutorialLogoModel)
+	{
+		tutorialLogo_ = std::make_unique<ModelComponent>(tutorialLogoModel);
+		tutorialLogo_->SetEnableLighting(false);
+		tutorialLogo_->SetColor({ 1.0f, 1.0f, 1.0f });
+	}
+	tutorialLogoDebugParameter_ = std::make_unique<DebugParameter>("TutorialLogo");
+	tutorialLogoDebugParameter_->Register("StartPosition", tutorialLogoStartPosition_, 0);
+	tutorialLogoDebugParameter_->Register("EndPosition", tutorialLogoEndPosition_, 1);
+	tutorialLogoDebugParameter_->Register("StartDelay", tutorialLogoStartDelay_, 2);
+	tutorialLogoDebugParameter_->Register("MoveDuration", tutorialLogoMoveDuration_, 3);
+	tutorialLogoDebugParameter_->Register("EaseType", tutorialLogoEaseType_, 4);
+	tutorialLogoDebugParameter_->Register("Rotation", tutorialLogoRotation_, 5);
+	tutorialLogoDebugParameter_->Register("Scale", tutorialLogoScale_, 6);
+	tutorialLogoDebugParameter_->Apply();
+	tutorialLogoPosition_ = tutorialLogoStartPosition_;
 
 	// クリアのムービー
 	// 月のオブジェクト
@@ -216,6 +241,10 @@ void GameScene::Initialize() {
 	fadeSprite_->scale_ = kFadeScale;
 	fadeSprite_->Update();
 	fadeElapsedTime_ = 0.0f;
+	tutorialLogoAnimationElapsed_ = 0.0f;
+	tutorialLogoWasInTutorial_ = false;
+	tutorialLogoHasEnteredTutorial_ = false;
+	tutorialLogoPosition_ = tutorialLogoStartPosition_;
 }
 
 void GameScene::Update() {
@@ -229,6 +258,7 @@ void GameScene::Update() {
 	score_.Update(FpsCounter::deltaTime);
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
+	UpdateTutorialLogo(true);
 	UpdateCamera();
 	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
@@ -262,6 +292,7 @@ void GameScene::DebugUpdate()
 {
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
+	UpdateTutorialLogo(false);
 	UpdateCamera();
 	
 	// ゲーム更新を停止している間に振動が残らないようにする。
@@ -272,10 +303,84 @@ void GameScene::DebugUpdate()
 }
 
 void GameScene::Draw() {
+	DrawTutorialLogo();
 	scoreView_->Draw(renderQueue_);
 	if (fadeSprite_) {
 		renderQueue_->SubmitSprite(fadeSprite_.get());
 	}
+}
+
+void GameScene::UpdateTutorialLogo(bool advanceAnimation)
+{
+	if (tutorialLogoDebugParameter_)
+	{
+		tutorialLogoDebugParameter_->ApplyIfDirty();
+	}
+
+	const IGamePhase* currentPhase = gameFlow_ ? gameFlow_->GetCurrentPhase() : nullptr;
+	const bool isTutorial = currentPhase && std::string_view(currentPhase->GetName()) == "Tutorial";
+
+	if (isTutorial && !tutorialLogoWasInTutorial_)
+	{
+		tutorialLogoAnimationElapsed_ = 0.0f;
+		tutorialLogoHasEnteredTutorial_ = true;
+	}
+	else if (isTutorial && advanceAnimation)
+	{
+		tutorialLogoAnimationElapsed_ += (std::max)(FpsCounter::deltaTime, 0.0f);
+	}
+
+	if (isTutorial)
+	{
+		const float startDelay = (std::max)(tutorialLogoStartDelay_, 0.0f);
+		const float moveDuration = (std::max)(tutorialLogoMoveDuration_, 0.0f);
+		if (tutorialLogoAnimationElapsed_ <= startDelay)
+		{
+			tutorialLogoPosition_ = tutorialLogoStartPosition_;
+		}
+		else if (moveDuration <= 0.0f)
+		{
+			tutorialLogoPosition_ = tutorialLogoEndPosition_;
+		}
+		else
+		{
+			const float progress = (std::clamp)(
+				(tutorialLogoAnimationElapsed_ - startDelay) / moveDuration,
+				0.0f,
+				1.0f);
+			tutorialLogoPosition_ = Lerp(
+				tutorialLogoStartPosition_,
+				tutorialLogoEndPosition_,
+				progress,
+				tutorialLogoEaseType_);
+		}
+	}
+	else if (!tutorialLogoHasEnteredTutorial_)
+	{
+		tutorialLogoPosition_ = tutorialLogoStartPosition_;
+	}
+
+	tutorialLogoWasInTutorial_ = isTutorial;
+}
+
+void GameScene::DrawTutorialLogo()
+{
+	if (!tutorialLogo_ || !tutorialLogoCamera_)
+	{
+		return;
+	}
+
+	// ScoreViewと同じカメラローカル配置にし、カメラ移動・回転へ追従させる。
+	const Matrix4x4 cameraWorld = renderQueue_->GetUseDebugCamera()
+		? renderQueue_->GetDebugCameraWorldMatrix()
+		: tutorialLogoCamera_->GetWorldMatrix();
+	const float scale = (std::max)(tutorialLogoScale_, 0.0f);
+	tutorialLogo_->worldTransform_.UpdateWorldMatrix(
+		Math::MakeAffineMatrix(
+			{ scale, scale, scale },
+			tutorialLogoRotation_,
+			tutorialLogoPosition_) * cameraWorld);
+	tutorialLogo_->Draw(renderQueue_);
 }
 
 void GameScene::InputRegisterCommand() {

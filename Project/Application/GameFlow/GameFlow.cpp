@@ -30,6 +30,7 @@ GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& setti
 	debugParameter_->Register("OpeningDuration", settings_.openingDuration, 0, "Time");
 	debugParameter_->Register("GameDuration", settings_.gameDuration, 1, "Time");
 	debugParameter_->Register("LaunchDuration", settings_.launchDuration, 2, "Time");
+	debugParameter_->Register("EnergyPositionXZ", settings_.tutorialEnergyPositionXZ, 0, "Tutorial");
 	debugParameter_->Apply();
 
 	SetUpdateOrder(0);
