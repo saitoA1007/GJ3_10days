@@ -656,6 +656,8 @@
     <ClCompile Include="Application\Effect\SpawnFieldEffect.cpp" />
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
     <ClCompile Include="Application\GameFlow\PlayingPhase.cpp" />
+    <ClCompile Include="Application\GameFlow\StartPlayingPhase.cpp" />
+    <ClCompile Include="Application\StartPlaying\StartPlayingView.cpp" />
     <ClCompile Include="Application\GameFlow\TutorialPhase.cpp" />
     <ClCompile Include="Application\Tutorial\TutorialCameraModelView.cpp" />
     <ClCompile Include="Application\Tutorial\TutorialTextSequence.cpp" />
@@ -1281,6 +1283,8 @@
     <ClInclude Include="Application\Tutorial\TutorialCameraModelView.h" />
     <ClInclude Include="Application\Tutorial\TutorialTextSequence.h" />
     <ClInclude Include="Application\GameFlow\PlayingPhase.h" />
+    <ClInclude Include="Application\GameFlow\StartPlayingPhase.h" />
+    <ClInclude Include="Application\StartPlaying\StartPlayingView.h" />
     <ClInclude Include="Application\GameFlow\LaunchPhase.h" />
     <ClInclude Include="Application\GameFlow\ResultPhase.h" />
     <ClInclude Include="Application\Result\ShuffleNumber.h" />

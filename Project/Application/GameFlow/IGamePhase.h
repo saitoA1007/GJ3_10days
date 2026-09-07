@@ -15,10 +15,13 @@ class EnemyManager;
 class UnitManager;
 class LockOnController;
 class ResultMovieManager; // リザルトのムービー管理
+class TutorialCameraModelView;
+class StartPlayingView;
 
 struct GameFlowSettings
 {
 	float openingDuration = 3.0f; // OP時間
+	float startPlayingDuration = 3.0f; // プレイ開始演出時間
 	float gameDuration = 60.0f;   // 制限時間
 	float launchDuration = 3.0f;   // 打ち上げ時間
 	Vector2 tutorialEnergyPositionXZ = { 0.0f, -6.0f }; // チュートリアル用EnergyのX・Z座標
@@ -41,6 +44,8 @@ struct GameFlowContext
 	GameEngine::InputCommand* inputCommand = nullptr;
 	GameFlowSettings* settings = nullptr;
 	ResultMovieManager* resultMovieManager_ = nullptr;
+	TutorialCameraModelView* tutorialLogoView = nullptr;
+	StartPlayingView* startPlayingView = nullptr;
 
 	int32_t finalEnergy = 0; // スコア用
 };

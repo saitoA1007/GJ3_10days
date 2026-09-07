@@ -173,7 +173,7 @@ void TutorialCameraModelView::Update(bool isTutorial, bool advanceAnimation, flo
 		currentPosition_ = settings_.startPosition;
 	}
 
-	if (isTutorial && advanceAnimation && isSuccessAnimationActive)
+	if (advanceAnimation && isSuccessAnimationActive)
 	{
 		UpdateSuccessAnimation(deltaTime);
 	}

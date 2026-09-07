@@ -18,6 +18,7 @@ using namespace GameEngine;
 #include "Application/Field/FieldEffect.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Score/ScoreView.h"
+#include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
 #include "Application/Tutorial/TutorialTextSequence.h"
 #include "ControllerVibration.h"
@@ -134,6 +135,16 @@ GameScene::GameScene() {
 		"TutorialLogo",
 		TutorialCameraModelView::Settings{});
 
+	StartPlayingView::Models startPlayingModels{};
+	for (std::size_t i = 0; i < startPlayingModels.size(); ++i)
+	{
+		startPlayingModels[i] = modelManager_->GetNameByModel(
+			"playStartLogo" + std::to_string(i) + ".obj");
+	}
+	startPlayingView_ = std::make_unique<StartPlayingView>(
+		startPlayingModels,
+		gameCamera->GetCamera());
+
 	// クリアのムービー
 	// 月のオブジェクト
 	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
@@ -171,6 +182,8 @@ GameScene::GameScene() {
 	flowContext.lockOnController = lockOnController_;
 	flowContext.inputCommand = inputCommand_;
 	flowContext.resultMovieManager_ = resultMoiveManager;
+	flowContext.tutorialLogoView = tutorialLogoView_.get();
+	flowContext.startPlayingView = startPlayingView_.get();
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
@@ -388,6 +401,27 @@ GameScene::GameScene() {
 	text13Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
 	text13Definition.showSuccessColor = false;
 
+	TutorialTextSequence::StepDefinition textEndDefinition{};
+	textEndDefinition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	textEndDefinition.model = modelManager_->GetNameByModel("tutorialTextEnd.obj");
+	textEndDefinition.parameterGroupName = "TutorialTextEnd";
+	textEndDefinition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	textEndDefinition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	textEndDefinition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	textEndDefinition.viewSettings.scale = 1.0f;
+	textEndDefinition.viewSettings.startDelay = 0.5f;
+	textEndDefinition.viewSettings.moveDuration = 0.5f;
+	textEndDefinition.viewSettings.holdDuration = 3.5f;
+	textEndDefinition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	textEndDefinition.showSuccessColor = false;
+	textEndDefinition.onCompleted = [this]()
+	{
+		if (gameFlow_)
+		{
+			gameFlow_->AdvanceToNextPhase();
+		}
+	};
+
 	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
 		gameCamera->GetCamera(),
 		gameFlow_,
@@ -407,7 +441,8 @@ GameScene::GameScene() {
 			text10Definition,
 			text11Definition,
 			text12Definition,
-			text13Definition });
+			text13Definition,
+			textEndDefinition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,
@@ -471,6 +506,7 @@ void GameScene::Initialize() {
 	fadeElapsedTime_ = 0.0f;
 	if (tutorialLogoView_) tutorialLogoView_->Reset();
 	if (tutorialTextSequence_) tutorialTextSequence_->Reset();
+	if (startPlayingView_) startPlayingView_->Reset();
 }
 
 void GameScene::Update() {
@@ -530,6 +566,7 @@ void GameScene::DebugUpdate()
 
 void GameScene::Draw() {
 	DrawTutorialViews();
+	if (startPlayingView_) startPlayingView_->Draw(renderQueue_);
 	scoreView_->Draw(renderQueue_);
 	if (fadeSprite_) {
 		renderQueue_->SubmitSprite(fadeSprite_.get());

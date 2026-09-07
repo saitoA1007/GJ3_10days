@@ -44,6 +44,7 @@ public:
 		float shakeCycles = 4.0f;
 		bool showSuccessColor = true;
 		std::function<void()> onActivated;
+		std::function<void()> onCompleted;
 	};
 
 	TutorialTextSequence(
