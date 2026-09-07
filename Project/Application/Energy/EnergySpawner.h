@@ -38,6 +38,8 @@ public:
 	EnergySpawner(
 		GameEngine::Model* energyModel,
 		Field* field,
+		GameEngine::TextureManager* textureManager,
+		GameEngine::Model* planeModel,
 		size_t capacity = 64);
 	~EnergySpawner() override = default;
 

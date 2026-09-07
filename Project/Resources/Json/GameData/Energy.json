@@ -9,9 +9,7 @@
         "Spawn": {
             "AngleCenterDegrees": 270.0,
             "AngleRangeDegrees": 180.0,
-            "AppearDuration": 2.509999990463257,
-            "FallHeight": 10.0,
-            "FallSpeed": 5.0,
+            "AppearDuration": 1.2,
             "GroundHeight": 1.5,
             "InitialCountPerZone": 1,
             "MaxActiveCount": 64,

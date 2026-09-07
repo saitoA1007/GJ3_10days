@@ -58,11 +58,10 @@ TestScene::TestScene() {
 	// エフェクト用モデル
 	effectModel_ = modelManager_->GetNameByModel("plane.obj");
 	effectModel_->SetDefaultIsEnableLight(false);
-	gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 32, textureManager_, effectModel_);
+	primitiveEffect_ = gameObjectManager_->AddObject<ParticleBehavior>("HitAfterEffect", 128, textureManager_, effectModel_);
 
-
-	gameObjectManager_->AddObject<ParticleBehavior>("RocketFireEffect", 32, textureManager_, effectModel_);
-
+	//gameObjectManager_->AddObject<ParticleBehavior>("EnergyEffect", 16, textureManager_, effectModel_);
+	//gameObjectManager_->AddObject<ParticleBehavior>("RocketFireEffect", 32, textureManager_, effectModel_);
 
 	auto* sModel = modelManager_->GetNameByModel("beam.gltf");
 	sModel->SetDefaultIsEnableLight(false);
@@ -110,6 +109,9 @@ void TestScene::DebugUpdate() {
 	ImGui::DragFloat3("PlayerPos", &m_->worldTransform_.transform_.translate.x, 0.1f);
 	ImGui::DragFloat3("PlayerScale", &m_->worldTransform_.transform_.scale.x, 0.1f);
 	ImGui::ColorEdit4("PlayerColor", &playerColor_.x);
+
+	// 
+	primitiveEffect_->SetEmitterPos(m_->worldTransform_.transform_.translate);
 
 	ImGui::DragFloat3("lightDir", &dir_.x, 0.1f);
 	ImGui::DragFloat("lightIntensity", &intensity_, 0.1f);
@@ -177,5 +179,5 @@ void TestScene::Draw() {
 	// 地面を描画
 	renderQueue_->SubmitRaytracingModel(terrainModel_, terrainWorld_);
 
-	m_->DrawCustomRaytracing(renderQueue_);
+	//m_->DrawCustomRaytracing(renderQueue_);
 }

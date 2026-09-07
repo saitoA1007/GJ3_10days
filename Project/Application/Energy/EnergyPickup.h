@@ -8,11 +8,13 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "CrystalMaterial.h"
+#include "ParticleBehavior.h"
 
 namespace GameEngine 
 {
 	class Model;
 	class RenderQueue;
+	class TextureManager;
 }
 
 /// @brief エネルギーの大きさ。Scaleと獲得量は設定側で決まる。
@@ -52,7 +54,7 @@ class EnergyPickup final
 public:
 	/// @brief プールで再利用するエネルギーモデルを準備する。
 	/// @param[in] model エネルギーの描画モデル。
-	explicit EnergyPickup(GameEngine::Model* model);
+	explicit EnergyPickup(GameEngine::Model* model, GameEngine::Model* planeModel, GameEngine::TextureManager* textureManager);
 
 	/// @brief 空中から落下するエネルギーとして生成する。
 	/// @param[in] size 生成するエネルギーサイズ。
@@ -168,5 +170,8 @@ private:
 
 	// マテリアル
 	GameEngine::CrystalMaterial material_;
+
+	// オーラのパーティクル
+	GameEngine::ParticleBehavior particle_;
 };
 
