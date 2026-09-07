@@ -193,6 +193,7 @@ private:
 	Enemy* selectedEnemy_ = nullptr;                            
 	float lockOnSeconds_ = 0.0f;                                
 	bool isCharging_ = false;                                   
-	bool gameplayEnabled_ = true;                               
+	bool gameplayEnabled_ = true;  
+	int32_t chargedEnergy_ = 0;
 };
 

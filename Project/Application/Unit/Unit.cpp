@@ -237,8 +237,7 @@ void Unit::UpdateReturningToRocket(float deltaTime)
 void Unit::AllocateStamina(int32_t requestedEnergy) 
 {
 	// EnergyChange.amountは消費時に負数なので、符号を反転してスタミナ残量にする
-	const EnergyChange allocated = rocket_->AllocateEnergyToUnit((std::max)(requestedEnergy, 0));
-	stamina_ = static_cast<float>(std::abs(allocated.amount));
+	stamina_ = static_cast<float>((std::max)(requestedEnergy, 0));
 }
 
 void Unit::ReturnToStorageAfterDefeat()
