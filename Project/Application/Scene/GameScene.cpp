@@ -74,7 +74,7 @@ GameScene::GameScene() {
 	// 敵の演出管理機能
 	auto* enemyEffectManager = gameObjectManager_->AddObject<EnemyEffectManager>(modelManager_, textureManager_, gameObjectManager_);
 	//Enemy
-	auto enemyModel = modelManager_->GetNameByModel("Enemy.gltf");
+	auto enemyModel = modelManager_->GetNameByModel("Enemy.obj");
 	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(128, enemyModel, enemyEffectManager);
 	enemyManager_->SetOnEnemyDefeated([this]() {
 		score_.Add(kScorePerEnemy);

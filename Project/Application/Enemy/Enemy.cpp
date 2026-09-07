@@ -10,6 +10,8 @@
 #include "Application/Field/Field.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/Unit/UnitManager.h"
+#include <RandomGenerator.h>
+#include <numbers>
 
 Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	GameEngine::UserData userData;
@@ -25,8 +27,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			return;
 		}
 
-		switch (result.userData.typeID) 
-		{
+		switch (result.userData.typeID) {
 		case uint32_t(CollisionTypeID::kPlayer):
 			break;
 
@@ -36,17 +37,14 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			if (!hitUnit) break;
 
 			// UnitがEnergyを持って運搬中に当たった場合
-			if (hitUnit->IsCarryingEnergy())
-			{
+			if (hitUnit->IsCarryingEnergy()) {
 				// 敵の勝ち
 				// Unitは死に、運んでいたEnergyも消滅
-				hitUnit->DefeatAndDropEnergy(); 
+				hitUnit->DefeatAndDropEnergy();
 			}
 			// UnitがEnergyを持っていない場合
-			else
-			{
-				if (hitUnit->GetStamina() > 0.0f)
-				{
+			else {
+				if (hitUnit->GetStamina() > 0.0f) {
 					// スタミナが0より大きい場合：Unitの勝ち
 					hp_ = 0;
 					damageTimer_ = 0.0f;
@@ -54,15 +52,12 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 					if (hp_ <= 0) {
 						// 敵を倒し、ドロップしたEnergyのポインタを受け取る
 						EnergyPickup* droppedEnergy = this->DefeatAndDropEnergy();
-						if (droppedEnergy) 
-						{
+						if (droppedEnergy) {
 							// Unitに拾わせて帰還させる
 							hitUnit->StartCarryingEnergy(droppedEnergy);
 						}
 					}
-				}
-				else
-				{
+				} else {
 					// スタミナが0の場合：相打ち
 					// 強制的にEnemyをキルしてEnergyをドロップさせる
 					this->DefeatAndDropEnergy();
@@ -89,8 +84,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	collider_.SetActive(false);
 }
 
-void Enemy::SetUp(Vector2 position, Config config, EnemyType type) 
-{
+void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
 	config_ = config;
 	type_ = type;
 	snakeSpeed_ = 0.0f;
@@ -118,11 +112,12 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type)
 
 	collider_.SetActive(true);
 	collider_.SetRadius(collisionRadius_ * config.size_);
+
+	timer_ = RandomGenerator::Get(0.0f, 10.0f);
 }
 
 
-void Enemy::Initialize()
-{
+void Enemy::Initialize() {
 	isActive_ = false;
 	isDead_ = true;
 	wasDefeated_ = false;
@@ -137,18 +132,18 @@ void Enemy::Initialize()
 void Enemy::Update() {
 	if (!isActive_ || isDead_) return;
 
+	timer_ += GameEngine::FpsCounter::deltaTime;
+
 	// 運搬中ユニットの索敵
 	UpdateTarget();
 
 	// 移動（運搬ユニットがいればユニットへ、いなければ独自の軌道移動）
 	if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
 		TrackingMovement(GameEngine::FpsCounter::deltaTime);
-	}
-	else {
+	} else {
 		if (type_ == EnemyType::Round) {
 			RoundMovement();
-		}
-		else {
+		} else {
 			DefaultMovement();
 		}
 	}
@@ -167,11 +162,9 @@ void Enemy::Update() {
 	damageTimer_ += GameEngine::FpsCounter::deltaTime;
 	if (damageTimer_ < damageTime_) {
 		data_->color = config_.hitColor_;
-	}
-	else if (isHighlighted_) {
+	} else if (isHighlighted_) {
 		data_->color = config_.highlightColor_;
-	}
-	else {
+	} else {
 		data_->color = config_.normalColor_;
 	}
 }
@@ -191,7 +184,10 @@ void Enemy::DefaultMovement() {
 
 	Vector2 position = SF::RotDir(localPos, direction_);
 	data_->transform.translate.x = position.x;
+	data_->transform.translate.y = 0.7f * config_.size_ + sinf(timer_) * 0.5f;
 	data_->transform.translate.z = position.y;
+
+	data_->transform.rotate.y = -(std::atan2f(direction_.y, direction_.x) + std::numbers::pi_v<float> * 0.5f);
 }
 
 void Enemy::RoundMovement() {
@@ -199,7 +195,7 @@ void Enemy::RoundMovement() {
 	Vector2 localPos = {};
 
 	roundTimer_ += GameEngine::FpsCounter::deltaTime;
-	localPos += { std::cos(roundTimer_* roundSpeed_)* distance_, std::sin(roundTimer_* roundSpeed_)* distance_ };
+	localPos += { std::cos(roundTimer_* roundSpeed_) * distance_, std::sin(roundTimer_* roundSpeed_)* distance_ };
 
 	Vector2 position = SF::RotDir(localPos, direction_);
 	data_->transform.translate.x = position.x;

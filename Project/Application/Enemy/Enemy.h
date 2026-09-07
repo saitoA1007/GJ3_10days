@@ -103,6 +103,8 @@ private:
 	float distance_ = 0.0f;
 	Vector2 direction_ = { 0.0f, 0.0f };
 
+	float timer_ = 0.0f;
+
 	int hp_ = 1;
 	bool wasDefeated_ = false;
 	bool isReservedForAttack_ = false; // ユニット攻撃の予約状態
