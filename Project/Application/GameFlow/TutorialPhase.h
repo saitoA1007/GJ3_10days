@@ -12,7 +12,9 @@ public:
 
 	const char* GetName() const override { return "Tutorial"; }
 	// 操作を許可
-	bool IsGameplayEnabled() const override { return true; } 
+	bool IsGameplayEnabled() const override { return true; }
+
+	Step GetStep() const { return step_; }
 
 private:
 	Step step_ = Step::SelectEnergy;

@@ -17,9 +17,10 @@ using namespace GameEngine;
 #include "Application/Field/FieldEffect.h"
 #include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Score/ScoreView.h"
+#include "Application/Tutorial/TutorialCameraModelView.h"
+#include "Application/Tutorial/TutorialTextSequence.h"
 #include "ControllerVibration.h"
 #include "DebugParameter.h"
-#include "EasingManager.h"
 #include "FPSCounter.h"
 #include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
@@ -29,259 +30,9 @@ using namespace GameEngine;
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <algorithm>
-#include <cassert>
-#include <cmath>
 #include <string>
 #include <string_view>
-#include "ModelComponent.h"
 #include "MyMath.h"
-
-class TutorialCameraModelView final
-{
-public:
-	struct Settings
-	{
-		Vector3 startPosition = { 0.0f, 2.8f, 10.0f };
-		Vector3 endPosition = { 0.0f, 2.8f, 10.0f };
-		Vector3 rotation = { 1.57079637f, 3.14159274f, 0.0f };
-		float scale = 0.5f;
-		float startDelay = 0.0f;
-		float moveDuration = 1.0f;
-		EaseType easeType = EaseType::kEaseOutCubic;
-	};
-
-	TutorialCameraModelView(
-		GameEngine::Model* model,
-		const GameEngine::Camera* camera,
-		const std::string& parameterGroupName,
-		const Settings& defaults)
-		: camera_(camera), settings_(defaults), debugParameter_(parameterGroupName)
-	{
-		assert(model && "tutorial model must be loaded.");
-		assert(camera_ && "tutorial model requires a camera.");
-		if (model)
-		{
-			model_ = std::make_unique<GameEngine::ModelComponent>(model);
-			model_->SetEnableLighting(false);
-			model_->SetColor({ 1.0f, 1.0f, 1.0f });
-		}
-
-		debugParameter_.Register("StartPosition", settings_.startPosition, 0);
-		debugParameter_.Register("EndPosition", settings_.endPosition, 1);
-		debugParameter_.Register("StartDelay", settings_.startDelay, 2);
-		debugParameter_.Register("MoveDuration", settings_.moveDuration, 3);
-		debugParameter_.Register("EaseType", settings_.easeType, 4);
-		debugParameter_.Register("Rotation", settings_.rotation, 5);
-		debugParameter_.Register("Scale", settings_.scale, 6);
-		debugParameter_.Apply();
-		Reset();
-	}
-
-	void Reset()
-	{
-		currentPosition_ = settings_.startPosition;
-		animationElapsed_ = 0.0f;
-		wasInTutorial_ = false;
-		hasEnteredTutorial_ = false;
-		displayOffset_ = {};
-		ResetSuccessAnimation();
-	}
-
-	void ResetSuccessAnimation()
-	{
-		successAnimationState_ = SuccessAnimationState::Inactive;
-		successAnimationElapsed_ = 0.0f;
-		currentRotationX_ = settings_.rotation.x;
-	}
-
-	void StartSuccessAnimation(
-		float targetRotationX,
-		float rotateDuration,
-		float returnDuration)
-	{
-		if (successAnimationState_ != SuccessAnimationState::Inactive)
-		{
-			return;
-		}
-
-		successAnimationState_ = SuccessAnimationState::Rotate;
-		successAnimationElapsed_ = 0.0f;
-		successStartPosition_ = currentPosition_;
-		successStartRotationX_ = settings_.rotation.x;
-		successTargetRotationX_ = targetRotationX;
-		successRotateDuration_ = (std::max)(rotateDuration, 0.0f);
-		successReturnDuration_ = (std::max)(returnDuration, 0.0f);
-		successEaseType_ = settings_.easeType;
-		currentRotationX_ = successStartRotationX_;
-	}
-
-	void SetColor(const Vector3& color)
-	{
-		if (model_)
-		{
-			model_->SetColor(color);
-		}
-	}
-
-	void SetDisplayOffset(const Vector3& offset)
-	{
-		displayOffset_ = offset;
-	}
-
-	void Update(bool isTutorial, bool advanceAnimation, float deltaTime)
-	{
-		debugParameter_.ApplyIfDirty();
-		const bool isSuccessAnimationActive =
-			successAnimationState_ != SuccessAnimationState::Inactive;
-
-		if (isTutorial && !wasInTutorial_)
-		{
-			animationElapsed_ = 0.0f;
-			hasEnteredTutorial_ = true;
-		}
-		else if (isTutorial && advanceAnimation && !isSuccessAnimationActive)
-		{
-			animationElapsed_ += (std::max)(deltaTime, 0.0f);
-		}
-
-		if (isTutorial && !isSuccessAnimationActive)
-		{
-			currentRotationX_ = settings_.rotation.x;
-			const float startDelay = (std::max)(settings_.startDelay, 0.0f);
-			const float moveDuration = (std::max)(settings_.moveDuration, 0.0f);
-			if (animationElapsed_ <= startDelay)
-			{
-				currentPosition_ = settings_.startPosition;
-			}
-			else if (moveDuration <= 0.0f)
-			{
-				currentPosition_ = settings_.endPosition;
-			}
-			else
-			{
-				const float progress = (std::clamp)(
-					(animationElapsed_ - startDelay) / moveDuration,
-					0.0f,
-					1.0f);
-				currentPosition_ = GameEngine::Lerp(
-					settings_.startPosition,
-					settings_.endPosition,
-					progress,
-					settings_.easeType);
-			}
-		}
-		else if (!hasEnteredTutorial_)
-		{
-			currentPosition_ = settings_.startPosition;
-		}
-
-		if (isTutorial && advanceAnimation && isSuccessAnimationActive)
-		{
-			UpdateSuccessAnimation(deltaTime);
-		}
-
-		wasInTutorial_ = isTutorial;
-	}
-
-	void Draw(GameEngine::RenderQueue* renderQueue)
-	{
-		if (!model_ || !camera_ || !renderQueue)
-		{
-			return;
-		}
-
-		const Matrix4x4 cameraWorld = renderQueue->GetUseDebugCamera()
-			? renderQueue->GetDebugCameraWorldMatrix()
-			: camera_->GetWorldMatrix();
-		const float scale = (std::max)(settings_.scale, 0.0f);
-		Vector3 rotation = settings_.rotation;
-		rotation.x = currentRotationX_;
-		model_->worldTransform_.UpdateWorldMatrix(
-			GameEngine::Math::MakeAffineMatrix(
-				{ scale, scale, scale },
-				rotation,
-				currentPosition_ + displayOffset_) * cameraWorld);
-		model_->Draw(renderQueue);
-	}
-
-private:
-	enum class SuccessAnimationState
-	{
-		Inactive,
-		Rotate,
-		ReturnDown,
-		Complete,
-	};
-
-	void UpdateSuccessAnimation(float deltaTime)
-	{
-		const float elapsedStep = (std::max)(deltaTime, 0.0f);
-		switch (successAnimationState_)
-		{
-		case SuccessAnimationState::Rotate:
-		{
-			successAnimationElapsed_ = (std::min)(
-				successAnimationElapsed_ + elapsedStep,
-				successRotateDuration_);
-			const float progress = successRotateDuration_ <= 0.0f
-				? 1.0f
-				: successAnimationElapsed_ / successRotateDuration_;
-			currentRotationX_ = GameEngine::Lerp(
-				successStartRotationX_,
-				successTargetRotationX_,
-				progress,
-				successEaseType_);
-			if (progress >= 1.0f)
-			{
-				successAnimationState_ = SuccessAnimationState::ReturnDown;
-				successAnimationElapsed_ = 0.0f;
-			}
-			break;
-		}
-		case SuccessAnimationState::ReturnDown:
-		{
-			successAnimationElapsed_ = (std::min)(
-				successAnimationElapsed_ + elapsedStep,
-				successReturnDuration_);
-			const float progress = successReturnDuration_ <= 0.0f
-				? 1.0f
-				: successAnimationElapsed_ / successReturnDuration_;
-			currentPosition_ = GameEngine::Lerp(
-				successStartPosition_,
-				settings_.startPosition,
-				progress,
-				successEaseType_);
-			if (progress >= 1.0f)
-			{
-				successAnimationState_ = SuccessAnimationState::Complete;
-			}
-			break;
-		}
-		case SuccessAnimationState::Inactive:
-		case SuccessAnimationState::Complete:
-			break;
-		}
-	}
-
-	const GameEngine::Camera* camera_ = nullptr;
-	std::unique_ptr<GameEngine::ModelComponent> model_;
-	Settings settings_;
-	Vector3 currentPosition_ = {};
-	Vector3 displayOffset_ = {};
-	GameEngine::DebugParameter debugParameter_;
-	float animationElapsed_ = 0.0f;
-	SuccessAnimationState successAnimationState_ = SuccessAnimationState::Inactive;
-	Vector3 successStartPosition_ = {};
-	float currentRotationX_ = 0.0f;
-	float successStartRotationX_ = 0.0f;
-	float successTargetRotationX_ = 0.0f;
-	float successRotateDuration_ = 0.0f;
-	float successReturnDuration_ = 0.0f;
-	float successAnimationElapsed_ = 0.0f;
-	EaseType successEaseType_ = EaseType::kLinear;
-	bool wasInTutorial_ = false;
-	bool hasEnteredTutorial_ = false;
-};
 
 // 後で別クラスに纏めて消す
 namespace
@@ -295,14 +46,6 @@ namespace
 	constexpr float kFadeDuration = 1.0f;
 	constexpr Vector2 kFadeTextureSize = { 128.0f, 72.0f };
 	constexpr Vector2 kFadeScale = { 10.0f, 10.0f };
-	constexpr float kTutorialText0ErrorDuration = 0.35f;
-	constexpr float kTutorialText0ShakeAmplitude = 0.45f;
-	constexpr float kTutorialText0ShakeCycles = 4.0f;
-	constexpr float kTwoPi = 6.28318531f;
-	constexpr float kTutorialText0SuccessRotationX = 8.021f;
-	constexpr float kTutorialText0SuccessRotateDuration = 0.5f;
-	constexpr float kTutorialText0ReturnDuration = 0.5f;
-	constexpr const char* kLockOnTriggerCommand = "LockOnTrigger";
 }
 
 GameScene::~GameScene() {
@@ -387,19 +130,6 @@ GameScene::GameScene() {
 		"TutorialLogo",
 		TutorialCameraModelView::Settings{});
 
-	TutorialCameraModelView::Settings text0Defaults{};
-	text0Defaults.startPosition = { 16.0f, -29.0f, -26.0f };
-	text0Defaults.endPosition = { 5.5f, -29.0f, -26.0f };
-	text0Defaults.rotation = { 2.01099992f, 3.14159274f, 0.0f };
-	text0Defaults.scale = 0.5f;
-	text0Defaults.moveDuration = 0.5f;
-	text0Defaults.easeType = EaseType::kEaseOutElastic;
-	tutorialText0View_ = std::make_unique<TutorialCameraModelView>(
-		modelManager_->GetNameByModel("tutorialText0.obj"),
-		gameCamera->GetCamera(),
-		"TutorialText0",
-		text0Defaults);
-
 	// クリアのムービー
 	// 月のオブジェクト
 	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
@@ -438,6 +168,24 @@ GameScene::GameScene() {
 	flowContext.resultMovieManager_ = resultMoiveManager;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
+
+	// TutorialPhaseの工程に対応するTextを、登録順に表示する。
+	TutorialTextSequence::StepDefinition text0Definition{};
+	text0Definition.phaseStep = TutorialPhase::Step::SelectEnergy;
+	text0Definition.model = modelManager_->GetNameByModel("tutorialText0.obj");
+	text0Definition.parameterGroupName = "TutorialText0";
+	text0Definition.viewSettings.startPosition = { 16.0f, -29.0f, -26.0f };
+	text0Definition.viewSettings.endPosition = { 5.5f, -29.0f, -26.0f };
+	text0Definition.viewSettings.rotation = { 2.01099992f, 3.14159274f, 0.0f };
+	text0Definition.viewSettings.scale = 0.5f;
+	text0Definition.viewSettings.moveDuration = 0.5f;
+	text0Definition.viewSettings.easeType = EaseType::kEaseOutElastic;
+	tutorialTextSequence_ = std::make_unique<TutorialTextSequence>(
+		gameCamera->GetCamera(),
+		gameFlow_,
+		lockOnController_,
+		inputCommand_,
+		std::vector<TutorialTextSequence::StepDefinition>{ text0Definition });
 
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,
@@ -500,10 +248,7 @@ void GameScene::Initialize() {
 	fadeSprite_->Update();
 	fadeElapsedTime_ = 0.0f;
 	if (tutorialLogoView_) tutorialLogoView_->Reset();
-	if (tutorialText0View_) tutorialText0View_->Reset();
-	tutorialEnergyClicked_ = false;
-	tutorialWasInTutorial_ = false;
-	tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
+	if (tutorialTextSequence_) tutorialTextSequence_->Reset();
 }
 
 void GameScene::Update() {
@@ -573,70 +318,15 @@ void GameScene::UpdateTutorialViews(bool advanceAnimation)
 {
 	const IGamePhase* currentPhase = gameFlow_ ? gameFlow_->GetCurrentPhase() : nullptr;
 	const bool isTutorial = currentPhase && std::string_view(currentPhase->GetName()) == "Tutorial";
-	if (isTutorial && !tutorialWasInTutorial_)
-	{
-		tutorialEnergyClicked_ = false;
-		tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
-		if (tutorialText0View_) tutorialText0View_->ResetSuccessAnimation();
-	}
-	const bool energyClickedNow = isTutorial && !tutorialEnergyClicked_ && lockOnController_ &&
-		lockOnController_->GetSelectedEnergy() && lockOnController_->IsCharging();
-	if (energyClickedNow)
-	{
-		tutorialEnergyClicked_ = true;
-		tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
-		if (tutorialText0View_)
-		{
-			tutorialText0View_->StartSuccessAnimation(
-				kTutorialText0SuccessRotationX,
-				kTutorialText0SuccessRotateDuration,
-				kTutorialText0ReturnDuration);
-		}
-	}
-	else if (advanceAnimation && isTutorial && !tutorialEnergyClicked_ && inputCommand_ &&
-		inputCommand_->IsCommandActive(kLockOnTriggerCommand) &&
-		(!lockOnController_ || !lockOnController_->GetSelectedEnergy()))
-	{
-		tutorialText0ErrorElapsed_ = 0.0f;
-	}
-
-	if (advanceAnimation && tutorialText0ErrorElapsed_ < kTutorialText0ErrorDuration)
-	{
-		tutorialText0ErrorElapsed_ = (std::min)(
-			tutorialText0ErrorElapsed_ + (std::max)(FpsCounter::deltaTime, 0.0f),
-			kTutorialText0ErrorDuration);
-	}
-
 	const float deltaTime = FpsCounter::deltaTime;
 	if (tutorialLogoView_) tutorialLogoView_->Update(isTutorial, advanceAnimation, deltaTime);
-	if (tutorialText0View_)
-	{
-		const bool isErrorFeedbackActive =
-			isTutorial && tutorialText0ErrorElapsed_ < kTutorialText0ErrorDuration;
-		tutorialText0View_->SetColor(
-			isErrorFeedbackActive
-			? Vector3{ 1.0f, 0.0f, 0.0f }
-			: (isTutorial && tutorialEnergyClicked_
-				? Vector3{ 0.0f, 1.0f, 0.0f }
-				: Vector3{ 1.0f, 1.0f, 1.0f }));
-
-		float shakeOffsetX = 0.0f;
-		if (isErrorFeedbackActive)
-		{
-			const float progress = tutorialText0ErrorElapsed_ / kTutorialText0ErrorDuration;
-			shakeOffsetX = std::sin(progress * kTwoPi * kTutorialText0ShakeCycles) *
-				kTutorialText0ShakeAmplitude * (1.0f - progress);
-		}
-		tutorialText0View_->SetDisplayOffset({ shakeOffsetX, 0.0f, 0.0f });
-		tutorialText0View_->Update(isTutorial, advanceAnimation, deltaTime);
-	}
-	tutorialWasInTutorial_ = isTutorial;
+	if (tutorialTextSequence_) tutorialTextSequence_->Update(advanceAnimation, deltaTime);
 }
 
 void GameScene::DrawTutorialViews()
 {
 	if (tutorialLogoView_) tutorialLogoView_->Draw(renderQueue_);
-	if (tutorialText0View_) tutorialText0View_->Draw(renderQueue_);
+	if (tutorialTextSequence_) tutorialTextSequence_->Draw(renderQueue_);
 }
 
 void GameScene::InputRegisterCommand() {

@@ -25,8 +25,9 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 	switch (step_)
 	{
 	case Step::SelectEnergy:
-		// 今はとりあえずプレイヤーがEnergyを選択したかチェック
-		if (context.lockOnController->GetSelectedEnergy() != nullptr)
+		// カーソルが重なっただけではなく、Energyへのロックオン開始で次工程へ進む。
+		if (context.lockOnController->GetSelectedEnergy() != nullptr &&
+			context.lockOnController->IsCharging())
 		{
 			step_ = Step::DispatchUnit;
 		}

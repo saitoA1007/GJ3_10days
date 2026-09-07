@@ -18,6 +18,7 @@ class LockOnController;
 class Rocket;
 class UnitManager;
 class TutorialCameraModelView;
+class TutorialTextSequence;
 
 namespace GameEngine
 {
@@ -96,10 +97,7 @@ private: // シーン機能
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;
 	std::unique_ptr<TutorialCameraModelView> tutorialLogoView_;
-	std::unique_ptr<TutorialCameraModelView> tutorialText0View_;
-	bool tutorialEnergyClicked_ = false;
-	bool tutorialWasInTutorial_ = false;
-	float tutorialText0ErrorElapsed_ = 0.0f;
+	std::unique_ptr<TutorialTextSequence> tutorialTextSequence_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 	std::unique_ptr<GameEngine::Sprite> fadeSprite_;
 	float fadeElapsedTime_ = 0.0f;
