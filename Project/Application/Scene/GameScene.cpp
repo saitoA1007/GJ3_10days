@@ -84,6 +84,35 @@ public:
 		wasInTutorial_ = false;
 		hasEnteredTutorial_ = false;
 		displayOffset_ = {};
+		ResetSuccessAnimation();
+	}
+
+	void ResetSuccessAnimation()
+	{
+		successAnimationState_ = SuccessAnimationState::Inactive;
+		successAnimationElapsed_ = 0.0f;
+		currentRotationX_ = settings_.rotation.x;
+	}
+
+	void StartSuccessAnimation(
+		float targetRotationX,
+		float rotateDuration,
+		float returnDuration)
+	{
+		if (successAnimationState_ != SuccessAnimationState::Inactive)
+		{
+			return;
+		}
+
+		successAnimationState_ = SuccessAnimationState::Rotate;
+		successAnimationElapsed_ = 0.0f;
+		successStartPosition_ = currentPosition_;
+		successStartRotationX_ = settings_.rotation.x;
+		successTargetRotationX_ = targetRotationX;
+		successRotateDuration_ = (std::max)(rotateDuration, 0.0f);
+		successReturnDuration_ = (std::max)(returnDuration, 0.0f);
+		successEaseType_ = settings_.easeType;
+		currentRotationX_ = successStartRotationX_;
 	}
 
 	void SetColor(const Vector3& color)
@@ -102,19 +131,22 @@ public:
 	void Update(bool isTutorial, bool advanceAnimation, float deltaTime)
 	{
 		debugParameter_.ApplyIfDirty();
+		const bool isSuccessAnimationActive =
+			successAnimationState_ != SuccessAnimationState::Inactive;
 
 		if (isTutorial && !wasInTutorial_)
 		{
 			animationElapsed_ = 0.0f;
 			hasEnteredTutorial_ = true;
 		}
-		else if (isTutorial && advanceAnimation)
+		else if (isTutorial && advanceAnimation && !isSuccessAnimationActive)
 		{
 			animationElapsed_ += (std::max)(deltaTime, 0.0f);
 		}
 
-		if (isTutorial)
+		if (isTutorial && !isSuccessAnimationActive)
 		{
+			currentRotationX_ = settings_.rotation.x;
 			const float startDelay = (std::max)(settings_.startDelay, 0.0f);
 			const float moveDuration = (std::max)(settings_.moveDuration, 0.0f);
 			if (animationElapsed_ <= startDelay)
@@ -143,6 +175,11 @@ public:
 			currentPosition_ = settings_.startPosition;
 		}
 
+		if (isTutorial && advanceAnimation && isSuccessAnimationActive)
+		{
+			UpdateSuccessAnimation(deltaTime);
+		}
+
 		wasInTutorial_ = isTutorial;
 	}
 
@@ -157,15 +194,75 @@ public:
 			? renderQueue->GetDebugCameraWorldMatrix()
 			: camera_->GetWorldMatrix();
 		const float scale = (std::max)(settings_.scale, 0.0f);
+		Vector3 rotation = settings_.rotation;
+		rotation.x = currentRotationX_;
 		model_->worldTransform_.UpdateWorldMatrix(
 			GameEngine::Math::MakeAffineMatrix(
 				{ scale, scale, scale },
-				settings_.rotation,
+				rotation,
 				currentPosition_ + displayOffset_) * cameraWorld);
 		model_->Draw(renderQueue);
 	}
 
 private:
+	enum class SuccessAnimationState
+	{
+		Inactive,
+		Rotate,
+		ReturnDown,
+		Complete,
+	};
+
+	void UpdateSuccessAnimation(float deltaTime)
+	{
+		const float elapsedStep = (std::max)(deltaTime, 0.0f);
+		switch (successAnimationState_)
+		{
+		case SuccessAnimationState::Rotate:
+		{
+			successAnimationElapsed_ = (std::min)(
+				successAnimationElapsed_ + elapsedStep,
+				successRotateDuration_);
+			const float progress = successRotateDuration_ <= 0.0f
+				? 1.0f
+				: successAnimationElapsed_ / successRotateDuration_;
+			currentRotationX_ = GameEngine::Lerp(
+				successStartRotationX_,
+				successTargetRotationX_,
+				progress,
+				successEaseType_);
+			if (progress >= 1.0f)
+			{
+				successAnimationState_ = SuccessAnimationState::ReturnDown;
+				successAnimationElapsed_ = 0.0f;
+			}
+			break;
+		}
+		case SuccessAnimationState::ReturnDown:
+		{
+			successAnimationElapsed_ = (std::min)(
+				successAnimationElapsed_ + elapsedStep,
+				successReturnDuration_);
+			const float progress = successReturnDuration_ <= 0.0f
+				? 1.0f
+				: successAnimationElapsed_ / successReturnDuration_;
+			currentPosition_ = GameEngine::Lerp(
+				successStartPosition_,
+				settings_.startPosition,
+				progress,
+				successEaseType_);
+			if (progress >= 1.0f)
+			{
+				successAnimationState_ = SuccessAnimationState::Complete;
+			}
+			break;
+		}
+		case SuccessAnimationState::Inactive:
+		case SuccessAnimationState::Complete:
+			break;
+		}
+	}
+
 	const GameEngine::Camera* camera_ = nullptr;
 	std::unique_ptr<GameEngine::ModelComponent> model_;
 	Settings settings_;
@@ -173,6 +270,15 @@ private:
 	Vector3 displayOffset_ = {};
 	GameEngine::DebugParameter debugParameter_;
 	float animationElapsed_ = 0.0f;
+	SuccessAnimationState successAnimationState_ = SuccessAnimationState::Inactive;
+	Vector3 successStartPosition_ = {};
+	float currentRotationX_ = 0.0f;
+	float successStartRotationX_ = 0.0f;
+	float successTargetRotationX_ = 0.0f;
+	float successRotateDuration_ = 0.0f;
+	float successReturnDuration_ = 0.0f;
+	float successAnimationElapsed_ = 0.0f;
+	EaseType successEaseType_ = EaseType::kLinear;
 	bool wasInTutorial_ = false;
 	bool hasEnteredTutorial_ = false;
 };
@@ -193,6 +299,9 @@ namespace
 	constexpr float kTutorialText0ShakeAmplitude = 0.45f;
 	constexpr float kTutorialText0ShakeCycles = 4.0f;
 	constexpr float kTwoPi = 6.28318531f;
+	constexpr float kTutorialText0SuccessRotationX = 8.021f;
+	constexpr float kTutorialText0SuccessRotateDuration = 0.5f;
+	constexpr float kTutorialText0ReturnDuration = 0.5f;
 	constexpr const char* kLockOnTriggerCommand = "LockOnTrigger";
 }
 
@@ -468,12 +577,21 @@ void GameScene::UpdateTutorialViews(bool advanceAnimation)
 	{
 		tutorialEnergyClicked_ = false;
 		tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
+		if (tutorialText0View_) tutorialText0View_->ResetSuccessAnimation();
 	}
-	if (isTutorial && lockOnController_ &&
-		lockOnController_->GetSelectedEnergy() && lockOnController_->IsCharging())
+	const bool energyClickedNow = isTutorial && !tutorialEnergyClicked_ && lockOnController_ &&
+		lockOnController_->GetSelectedEnergy() && lockOnController_->IsCharging();
+	if (energyClickedNow)
 	{
 		tutorialEnergyClicked_ = true;
 		tutorialText0ErrorElapsed_ = kTutorialText0ErrorDuration;
+		if (tutorialText0View_)
+		{
+			tutorialText0View_->StartSuccessAnimation(
+				kTutorialText0SuccessRotationX,
+				kTutorialText0SuccessRotateDuration,
+				kTutorialText0ReturnDuration);
+		}
 	}
 	else if (advanceAnimation && isTutorial && !tutorialEnergyClicked_ && inputCommand_ &&
 		inputCommand_->IsCommandActive(kLockOnTriggerCommand) &&
