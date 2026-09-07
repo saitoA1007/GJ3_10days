@@ -96,7 +96,7 @@ GameScene::GameScene() {
 	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
 
 	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
-	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_);
+	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_,textureManager_, planeModel);
 
 	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
 	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, rocket_);

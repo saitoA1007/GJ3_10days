@@ -10,7 +10,7 @@
 
 using namespace GameEngine;
 
-EnergyPickup::EnergyPickup(Model* model)
+EnergyPickup::EnergyPickup(Model* model, GameEngine::Model* planeModel, GameEngine::TextureManager* textureManager) : particle_("EnergyEffect",16, textureManager, planeModel)
 {
 	assert(model != nullptr && "energy requires energy.obj");
 	modelComponent_ = std::make_unique<ModelComponent>(model);
@@ -83,6 +83,9 @@ void EnergyPickup::Update(
 		return;
 	}
 
+	// パーティクルの更新
+	particle_.Update();
+
 	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
 	if (state_ == EnergyState::Falling) 
 	{
@@ -117,6 +120,9 @@ void EnergyPickup::Draw(RenderQueue* renderQueue)
 	if (IsActive()) {
 		//modelComponent_->DrawRaytracing(renderQueue);
 		modelComponent_->DrawCustomRaytracing(renderQueue);
+
+		// パーティクルの描画
+		particle_.Draw();
 	}
 }
 
@@ -231,6 +237,17 @@ void EnergyPickup::SyncModel()
 	material_.materialData_->baseColor = color;
 	material_.materialData_->rimColor = typeSettings_.rimColor;
 	material_.materialData_->dissolveEdgeColor = typeSettings_.dissolveEdgeColor;
+
+	// 色を設定
+	particle_.SetColor(color);
+	// サイズを設定
+	float eScale = scale * 1.5f;
+	particle_.SetScale({ eScale, eScale, eScale });
+
+	// 出現位置を設定
+	Vector3 emitPos = modelComponent_->worldTransform_.transform_.translate;
+	emitPos.y = groundY_;
+	particle_.SetEmitterPos(emitPos);
 
 	modelComponent_->Update();
 }

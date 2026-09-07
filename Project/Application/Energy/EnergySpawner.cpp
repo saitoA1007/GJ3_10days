@@ -28,7 +28,8 @@ namespace
 	};
 }
 
-EnergySpawner::EnergySpawner(Model* energyModel, Field* field, size_t capacity)
+EnergySpawner::EnergySpawner(Model* energyModel, Field* field, GameEngine::TextureManager* textureManager,
+	GameEngine::Model* planeModel, size_t capacity)
 	: field_(field)
 {
 	assert(energyModel != nullptr && "energy spawner requires energy.obj");
@@ -38,7 +39,7 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, size_t capacity)
 	const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 	pickups_.reserve(safeCapacity);
 	for (size_t i = 0; i < safeCapacity; ++i) {
-		pickups_.push_back(std::make_unique<EnergyPickup>(energyModel));
+		pickups_.push_back(std::make_unique<EnergyPickup>(energyModel, planeModel, textureManager));
 	}
 
 	debugParameter_ = std::make_unique<DebugParameter>("Energy");
