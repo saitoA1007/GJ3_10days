@@ -42,6 +42,7 @@ struct LockOnSettings
 	Vector4 targetColor = { 1.00f, 0.95f, 0.25f, 1.0f };  // 選択対象ガイド色
 	Vector4 chargeColor = { 1.00f, 0.35f, 0.20f, 1.0f };  // チャージ量ガイド色
 	Vector4 injectColor = { 1.0f, 0.8f, 0.2f, 1.0f };
+	float injectRate = 20.0f;
 };
 
 /// @brief 2D入力をXZ平面上のカーソルへ変換し、長押しロックオンでユニットを出撃させる。

@@ -78,6 +78,7 @@ LockOnController::LockOnController(
 	debugParameter_->Register("MaxSeconds", settings_.maxLockOnSeconds, 0, "Charge");
 	debugParameter_->Register("StartSeconds", settings_.chargeStartSeconds, 1, "Charge");
 	debugParameter_->Register("MaxEnergyCost", settings_.maxChargeEnergyCost, 2, "Charge");
+	debugParameter_->Register("InjectRate", settings_.injectRate, 0, "Inject");
 	debugParameter_->Register("CursorColor", settings_.cursorColor, 0, "Color");
 	debugParameter_->Register("TargetColor", settings_.targetColor, 1, "Color");
 	debugParameter_->Register("ChargeColor", settings_.chargeColor, 2, "Color");
@@ -131,16 +132,14 @@ void LockOnController::Update()
 
 		if (isPushActive)
 		{
-			const float chargeDuration = settings_.maxLockOnSeconds - settings_.chargeStartSeconds;
-
-			if (chargeDuration > 0.0f && settings_.maxChargeEnergyCost > 0)
+			// 設定された注入速度を使って蓄積量を計算
+			if (settings_.injectRate > 0.0f)
 			{
-				const float energyPerSecond = static_cast<float>(settings_.maxChargeEnergyCost) / chargeDuration;
-				injectAccumulator_ += energyPerSecond * FpsCounter::gameDeltaTime;
+				injectAccumulator_ += settings_.injectRate * FpsCounter::gameDeltaTime;
 			}
 
 			int32_t rawAmount = static_cast<int32_t>(injectAccumulator_);
-			amountToInject = (rawAmount >= 1) ? (std::min)(rawAmount, 2) : 0;
+			amountToInject = (rawAmount >= 1) ? rawAmount : 0;
 		}
 		else
 		{
@@ -148,7 +147,7 @@ void LockOnController::Update()
 		}
 
 		bool injectedAny = false;
-		// 範囲内にユニットがいるかを取得しつつ、エネルギー注入判定を行う
+		// 範囲内にユニットがいるかを取得しつつ、エネルギー注入判定
 		hasUnitInRadius_ = unitManager_->InjectEnergyToUnitsAt(cursorPosition_, settings_.selectionRadius, amountToInject, &injectedAny);
 
 		if (injectedAny)

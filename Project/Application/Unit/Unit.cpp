@@ -387,7 +387,7 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		return false;
 	}
 
-	// 今回注入要求する量（空き容量を超えないように制御）
+	// 今回注入要求する量
 	const int32_t actualRequest = (std::min)(requestedAmount, static_cast<int32_t>(std::ceil(staminaDeficit)));
 
 	if (actualRequest <= 0)
@@ -404,7 +404,7 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		return false;
 	}
 
-	// 引き出せた分だけスタミナを回復・加算（上限を超えない）
+	// 引き出せた分だけスタミナを回復・加算
 	stamina_ = (std::min)(stamina_ + static_cast<float>(actualAllocated), upperLimit);
 
 	// スタミナが閾値以上になったらブラックホール化
@@ -443,22 +443,22 @@ float Unit::GetBlackholeRadius() const
 	float distToRocket = std::sqrt(DistanceSquaredXZ(position_, rocket_->GetPosition()));
 	float multiplier = 1.0f;
 
-	// 距離に応じて倍率を変化させる (LERPで滑らかに繋ぐ)
+	// 距離に応じて倍率を変化
 	if (distToRocket <= settings_->bhNearDistance)
 	{
-		// 近距離帯: 最低倍率 ～ 中間倍率へ向かって徐々に大きく
+		// 近距離帯
 		float t = distToRocket / settings_->bhNearDistance;
 		multiplier = std::lerp(settings_->bhRadiusNearMultiplier, settings_->bhRadiusMidMultiplier, t);
 	}
 	else if (distToRocket <= settings_->bhFarDistance)
 	{
-		// 中間～遠距離帯: 中間倍率 ～ 最大倍率へ向かって徐々に大きく
+		// 中間～遠距離帯
 		float t = (distToRocket - settings_->bhNearDistance) / (settings_->bhFarDistance - settings_->bhNearDistance);
 		multiplier = std::lerp(settings_->bhRadiusMidMultiplier, settings_->bhRadiusFarMultiplier, t);
 	}
 	else
 	{
-		// 遠距離帯: 外側の最大倍率で固定
+		// 外側の最大倍率で固定
 		multiplier = settings_->bhRadiusFarMultiplier;
 	}
 
@@ -520,7 +520,7 @@ void Unit::ProcessBlackholeAbsorption(
 				Vector3 dir = position_ - unit->GetPosition();
 				dir.y = 0.0f;
 				dir.Normalize();
-				unit->position_ += dir * settings_->bhPullSpeed * deltaTime; // UnitはfriendかSetter経由で更新
+				unit->position_ += dir * settings_->bhPullSpeed * deltaTime;
 			}
 		}
 	}
@@ -535,7 +535,7 @@ void Unit::ProcessBlackholeAbsorption(
 		{
 			if (distSq <= killRadiusSq)
 			{
-				// サイズに応じたポイントを加算
+				// サイズに応じたポイント
 				switch (energy->GetSize())
 				{
 				case EnergySize::Small:  absorbedBasePoint_ += 1; break;
@@ -570,29 +570,23 @@ void Unit::UpdateBlackhole(float deltaTime)
 	// ブラックホールエフェクトの更新
 	if (blackholeModel_)
 	{
-		// 1秒間に何回吸い込みの波を起こすか (例: 1.5回)
 		constexpr float kEffectSpeed = 1.5f;
 
-		// 1.0 から 0.0 に向かってループする係数を計算
 		float loopProgress = std::fmod(bhEffectTimer_ * kEffectSpeed, 1.0f);
 		float scaleRatio = 1.0f - loopProgress;
 
-		// 現在の最大影響半径を取得
 		float currentMaxRadius = GetBlackholeRadius();
 
-		// スケールを適用 (サークルが平らな板モデルであることを想定)
 		blackholeModel_->worldTransform_.transform_.scale =
 		{
 			currentMaxRadius * scaleRatio,
-			1.0f, // Y軸(厚み)はそのまま
+			1.0f, 
 			currentMaxRadius * scaleRatio
 		};
 
-		// ユニットと同じ位置（地面と重ならないようY軸にわずかなオフセットをかける）
 		blackholeModel_->worldTransform_.transform_.translate = position_;
 		blackholeModel_->worldTransform_.transform_.translate.y = settings_->groundY + 0.05f;
 
-		// 外側ほど濃く、中心に吸い込まれるにつれて透明になる演出
 		blackholeModel_->materialData_->color.w = scaleRatio * 0.8f;
 
 		blackholeModel_->Update();
@@ -610,17 +604,17 @@ void Unit::GenerateSpecialEnergy()
 	// 何も吸い込んでいなければ生成しない
 	if (absorbedBasePoint_ <= 0) return;
 
-	// 1. 最終的な獲得量を計算 (ベースポイント × パラメータ倍率)
+	// 最終的な獲得量
 	int32_t finalValue = static_cast<int32_t>(absorbedBasePoint_ * settings_->bhSpecialMultiplier);
 
-	// 2. EnergySpawner を使って Special サイズのエネルギーをドロップ
+	// Special のエネルギーをドロップ
 	if (energySpawner_)
 	{
 		EnergyPickup* specialEnergy = energySpawner_->SpawnOnGround(EnergySize::Special, position_);
 
 		if (specialEnergy)
 		{
-			// 3. 計算した獲得量を上書きする
+			// 計算した獲得量を上書き
 			specialEnergy->SetCustomValue(finalValue);
 		}
 	}
