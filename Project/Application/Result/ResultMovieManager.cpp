@@ -14,12 +14,16 @@ ResultMovieManager::ResultMovieManager(ResultMoveCamera* camera, MoonObject* moo
 	// 停止
 	explosionEffect_->SetActive(false);
 	resultMoveCamera_->SetActive(false);
-	moonObject_->SetActive(false);
+	moonObject_->SetActive(true);
 	rocketEffect_->SetActive(false);
 }
 
 void ResultMovieManager::Initialize() {
+	rocketEffect_->Reset();
 
+	explosionEffect_->SetActive(false);
+	resultMoveCamera_->SetActive(false);
+	rocketEffect_->SetActive(false);
 }
 
 void ResultMovieManager::Update() {
@@ -58,13 +62,16 @@ void ResultMovieManager::Draw() {
 void ResultMovieManager::Start() {
 	// 有効
 	resultMoveCamera_->SetActive(true);
-	moonObject_->SetActive(true);
+	//moonObject_->SetActive(true);
 	rocketEffect_->SetActive(true);
 	explosionEffect_->SetActive(true);
 
 	// カメラ演出を開始
 	resultMoveCamera_->Start();
 	rocketEffect_->Reset();
+
+	// リセット
+	moonObject_->Reset();
 
 	isExplo_ = false;
 }

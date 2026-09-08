@@ -31,7 +31,11 @@ public:
 	void Start(float energy);
 
 	void Reset() {
+		auto& tr = rocketModel_.worldTransform_.transform_;
+		tr.translate = startPos_;
+		tr.rotate.z = 0.0f;
 		isRocketStarted_ = false;
+		timer_ = 0.0f;
 	}
 
 	float GetEnergy() const { return energy_; }

@@ -21,10 +21,7 @@ public:
 		isFractureActive_ = true;
 	}
 
-	void Reset() {
-		pPos_.x = 60.0f;
-		isFractureActive_ = false;
-	}
+	void Reset();
 
 public:
 
