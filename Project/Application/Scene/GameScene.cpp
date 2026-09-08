@@ -36,6 +36,8 @@ using namespace GameEngine;
 #include <string_view>
 #include "MyMath.h"
 
+#include "Application/UI/TimeUI.h"
+
 // 後で別クラスに纏めて消す
 namespace
 {
@@ -488,6 +490,9 @@ GameScene::GameScene() {
 
 	// にぎやかし浮遊エフェクト
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldFloatingEffect", 256, textureManager_, effectModel);
+
+	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
+	gameObjectManager_->AddObject<TimeUI>(unitIconGH);
 }
 
 void GameScene::Initialize() {
