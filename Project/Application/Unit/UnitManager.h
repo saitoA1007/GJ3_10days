@@ -12,6 +12,8 @@
 
 class Enemy;
 class EnergyPickup;
+class EnergySpawner;
+class EnemyManager;
 class Rocket;
 
 /// @brief 使用するユニット数と、全個体で共有する設定。
@@ -26,14 +28,13 @@ class UnitManager final : public GameEngine::IGameObject
 {
 public:
 	/// @brief 再出撃可能な固定数のユニットをプールとして確保する。
-	/// @param[in] unitModel ユニットの描画モデル。
-	/// @param[in] rocket 全個体が共有する出撃位置・帰還先。
-	/// @param[in] capacity プールへ確保する最大個体数。
 	UnitManager(
-		GameEngine::Model* unitModel,
+		GameEngine::Model* unitModel, 
+		GameEngine::Model* circleModel,
 		Rocket* rocket,
 		GameEngine::Model* baemModel,
 		uint32_t beamGH,
+		EnergySpawner* energySpawner = nullptr,
 		size_t capacity = 16);
 	~UnitManager() override = default;
 
@@ -58,27 +59,20 @@ public:
 	bool IsGameplayEnabled() const { return gameplayEnabled_; }
 
 	/// @brief 待機ユニット1体をエネルギー回収へ派遣する。
-	/// @param[in] target 回収対象。
-	/// @param[in] requestedEnergy スタミナへ割り当てる要求量。
-	/// @return 派遣できた場合はtrue。
 	bool DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy);
 
 	/// @brief 待機ユニット1体を敵への攻撃へ派遣する。
-	/// @param[in] target 攻撃対象。
-	/// @param[in] requestedEnergy スタミナへ割り当てる要求量。
-	/// @return 派遣できた場合はtrue。
 	bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
 
 	bool DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy);
 
 	/// @brief 指定位置の索敵範囲内にいる、最も近い運搬ユニットを探す。
-	/// @param[in] position 検索中心のワールド座標。
-	/// @param[in] maxDistance 検索する最大距離。
-	/// @return 最も近い運搬ユニット。存在しなければnullptr。
 	Unit* FindNearestCarryingUnit(const Vector3& position, float maxDistance) const;
 
 	/// @brief 全ユニットの予約と運搬物を解放して待機状態へ戻す。
 	void RecallAll();
+
+	bool InjectEnergyToUnitsAt(const Vector3& position, float radius, int32_t amount, bool* outInjectedAny);
 
 	/// @brief 現在待機中で再出撃できるユニット数を取得する。
 	/// @return 待機ユニット数。
@@ -96,6 +90,9 @@ public:
 	/// @return ユニット管理設定への参照。
 	const UnitManagerSettings& GetSettings() const { return settings_; }
 
+	void SetEnemyManager(EnemyManager* enemyManager) { enemyManager_ = enemyManager; }
+	void SetEnergySpawner(EnergySpawner* energySpawner) { energySpawner_ = energySpawner; }
+
 private:
 	/// @brief Register値を反映して安全な範囲へ補正する。
 	void ApplyDebugParameters();
@@ -110,6 +107,8 @@ private:
 	void DrawDebugWindow();
 
 	Rocket* rocket_ = nullptr;                                  // 全個体が共有する帰還先
+	EnemyManager* enemyManager_ = nullptr;    
+	EnergySpawner* energySpawner_ = nullptr;
 	std::vector<std::unique_ptr<Unit>> units_;                   // 再利用するユニットのプール
 	UnitManagerSettings settings_;                              // Registerから編集される共有設定
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;// 設定とParameter Inspectorの接続

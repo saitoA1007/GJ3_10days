@@ -79,6 +79,20 @@ public:
 	// 運搬ユニットを追跡中かどうかを取得
 	bool IsTargetingCarrier() const { return isActive_ && !isDead_ && (targetUnit_ != nullptr); }
 
+	// ======== ブラックホール ========
+
+	void SetPosition(const Vector3& pos) {
+		if (data_) data_->transform.translate = pos;
+	}
+	// エネルギーをドロップせずに強制消滅
+	void ForceDestroy() {
+		Destroy();
+	}
+	// 吸い込み対象として有効かどうか判定
+	bool IsAlive() const {
+		return isActive_ && !isDead_;
+	}
+
 private:
 	void DefaultMovement();
 	void RoundMovement();

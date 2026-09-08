@@ -18,6 +18,7 @@ namespace
 		"Small",
 		"Medium",
 		"Large",
+		"Special",
 	};
 	// 自然落下するEnergyは生成禁止帯を除いた3領域だけから抽選する。
 	constexpr std::array<FieldZone, kEnergySizeCount> kEnergySpawnZones = 
@@ -252,22 +253,25 @@ void EnergySpawner::SanitizeSettings()
 
 void EnergySpawner::UpdatePickups(float deltaTime)
 {
+	// 毎フレームリストをクリアして再構築
+	activeEnergies_.clear();
+	activeEnergies_.reserve(pickups_.size());
+
 	for (auto& pickup : pickups_)
 	{
-		if (!pickup->IsActive())
+		if (pickup->IsActive())
 		{
-			continue;
-		}
+			pickup->Update(
+				deltaTime,
+				settings_.floatingAmplitude,
+				settings_.floatingSpeed,
+				settings_.rotationSpeed,
+				settings_.lifetime,
+				settings_.dissolveDuration);
 
-		// Register変更を既に存在する個体にも即時反映する。
-		pickup->ApplyTypeSettings(typeSettings_[static_cast<size_t>(pickup->GetSize())]);
-		pickup->Update(
-			deltaTime,
-			settings_.floatingAmplitude,
-			settings_.floatingSpeed,
-			settings_.rotationSpeed,
-			settings_.lifetime,
-			settings_.dissolveDuration);
+			// アクティブな個体のみ生ポインタを格納
+			activeEnergies_.push_back(pickup.get());
+		}
 	}
 }
 

@@ -81,6 +81,7 @@ LockOnController::LockOnController(
 	debugParameter_->Register("CursorColor", settings_.cursorColor, 0, "Color");
 	debugParameter_->Register("TargetColor", settings_.targetColor, 1, "Color");
 	debugParameter_->Register("ChargeColor", settings_.chargeColor, 2, "Color");
+	debugParameter_->Register("InjectColor", settings_.injectColor, 3, "Color");
 	debugParameter_->Apply();
 	SanitizeSettings();
 	SetUpdateOrder(30);
@@ -96,6 +97,7 @@ void LockOnController::Initialize()
 	lockOnSeconds_ = 0.0f;
 	minimumDispatchHoldSeconds_ = 0.0f;
 	isCharging_ = false;
+	injectAccumulator_ = 0.0f;
 	enemySelectionEnabled_ = true;
 	SyncCursorModel();
 }
@@ -112,18 +114,84 @@ void LockOnController::Update()
 
 	UpdateCursor(FpsCounter::gameDeltaTime);
 
-	// チャージ中は対象を固定し、それ以外のときだけ最寄り対象を探し直す。
-	if (isCharging_)
+	// チャージ速度に合わせたエネルギー注入
+	isInjecting_ = false;
+	hasUnitInRadius_ = false; 
+
+	const bool isPushActive = inputCommand_->IsCommandActive(kLockOnPushCommand);
+
+	if (!isPushActive)
 	{
-		UpdateLockOn(FpsCounter::gameDeltaTime);
+		suppressLockOn_ = false;
 	}
-	else {
-		UpdateSelection();
-		if (inputCommand_->IsCommandActive(kLockOnTriggerCommand)) 
+
+	if (unitManager_)
+	{
+		int32_t amountToInject = 0;
+
+		if (isPushActive)
 		{
-			StartLockOn();
+			const float chargeDuration = settings_.maxLockOnSeconds - settings_.chargeStartSeconds;
+
+			if (chargeDuration > 0.0f && settings_.maxChargeEnergyCost > 0)
+			{
+				const float energyPerSecond = static_cast<float>(settings_.maxChargeEnergyCost) / chargeDuration;
+				injectAccumulator_ += energyPerSecond * FpsCounter::gameDeltaTime;
+			}
+
+			int32_t rawAmount = static_cast<int32_t>(injectAccumulator_);
+			amountToInject = (rawAmount >= 1) ? (std::min)(rawAmount, 2) : 0;
+		}
+		else
+		{
+			injectAccumulator_ = 0.0f;
+		}
+
+		bool injectedAny = false;
+		// 範囲内にユニットがいるかを取得しつつ、エネルギー注入判定を行う
+		hasUnitInRadius_ = unitManager_->InjectEnergyToUnitsAt(cursorPosition_, settings_.selectionRadius, amountToInject, &injectedAny);
+
+		if (injectedAny)
+		{
+			injectAccumulator_ -= static_cast<float>(amountToInject);
+			isInjecting_ = true;
+		}
+		else if (amountToInject > 0 && !hasUnitInRadius_)
+		{
+			injectAccumulator_ = 0.0f;
 		}
 	}
+
+	if (isInjecting_)
+	{
+		injectAnimTimer_ += FpsCounter::gameDeltaTime * 10.0f;
+
+		suppressLockOn_ = true;
+		if (isCharging_)
+		{
+			CancelLockOn();
+		}
+	}
+	else
+	{
+		injectAnimTimer_ = 0.0f;
+	}
+
+	if (!suppressLockOn_)
+	{
+		if (isCharging_)
+		{
+			UpdateLockOn(FpsCounter::gameDeltaTime);
+		}
+		else {
+			UpdateSelection();
+			if (inputCommand_->IsCommandActive(kLockOnTriggerCommand))
+			{
+				StartLockOn();
+			}
+		}
+	}
+
 	SyncCursorModel();
 	SyncChargeModel();
 }
@@ -308,8 +376,7 @@ void LockOnController::ClampCursorToField()
 
 void LockOnController::SyncCursorModel() 
 {
-	// 選択範囲と見た目の大きさを一致させ、ModelScaleはモデル固有の補正倍率として使う。
-	cursorModel_->worldTransform_.transform_.scale = 
+	cursorModel_->worldTransform_.transform_.scale =
 	{
 		settings_.cursorModelScale.x * settings_.selectionRadius,
 		settings_.cursorModelScale.y * settings_.selectionRadius,
@@ -321,21 +388,51 @@ void LockOnController::SyncCursorModel()
 		cursorPosition_.y + settings_.cursorModelHeightOffset,
 		cursorPosition_.z,
 	};
-	cursorModel_->materialData_->color = settings_.cursorColor;
+
+	const bool isPushActive = inputCommand_ && inputCommand_->IsCommandActive(kLockOnPushCommand);
+	constexpr Vector4 kYellowColor = { 1.0f, 1.0f, 0.0f, 1.0f };
+
+	// クリック押下かつサークル内にユニットがいる場合のみ
+	cursorModel_->materialData_->color = (isPushActive && hasUnitInRadius_) ? kYellowColor : settings_.cursorColor;
 	cursorModel_->Update();
 }
 
 void LockOnController::SyncChargeModel()
 {
-	// チャージ中でなければ描画更新しない
-	if (!isCharging_)
+	// チャージ中も注入中もなければ描画更新しない
+	if (!isCharging_ && !isInjecting_)
 	{
 		return;
 	}
 
-	// ターゲット座標と初期半径を取得 (対象がない場合はカーソル位置)
 	Vector3 targetPosition = cursorPosition_;
 	float targetRadius = settings_.selectionRadius;
+	Vector4 currentColor = settings_.chargeColor;
+
+	if (isInjecting_)
+	{
+		// 注入中：サイン波で脈動（ポンピング）するスケールアニメーション
+		const float pulse = (std::sin(injectAnimTimer_) + 1.0f) * 0.15f; // スケールの揺れ幅
+		const float currentRadius = settings_.selectionRadius * (1.0f + pulse);
+
+		chargeModel_->worldTransform_.transform_.scale =
+		{
+			settings_.cursorModelScale.x * currentRadius,
+			settings_.cursorModelScale.y * currentRadius,
+			settings_.cursorModelScale.z * currentRadius,
+		};
+
+		chargeModel_->worldTransform_.transform_.translate =
+		{
+			cursorPosition_.x,
+			settings_.groundHeight + settings_.cursorModelHeightOffset + 0.01f,
+			cursorPosition_.z,
+		};
+
+		chargeModel_->materialData_->color = settings_.injectColor;
+		chargeModel_->Update();
+		return;
+	}
 
 	if (selectedEnemy_)
 	{

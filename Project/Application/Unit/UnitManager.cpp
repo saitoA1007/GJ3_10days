@@ -8,20 +8,23 @@
 
 #include "Application/Enemy/Enemy.h"
 #include "Application/Energy/EnergyPickup.h"
+#include "Application/Enemy/EnemyManager.h"
+#include "Application/Energy/EnergySpawner.h"
 #include "Application/Rocket/Rocket.h"
 
 using namespace GameEngine;
 
-UnitManager::UnitManager(Model* unitModel, Rocket* rocket, GameEngine::Model* baemModel,
-	uint32_t beamGH, size_t capacity)
-	: rocket_(rocket)
+UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocket* rocket, GameEngine::Model* baemModel,
+	uint32_t beamGH, EnergySpawner* energySpawner, size_t capacity)
+	: rocket_(rocket), energySpawner_(energySpawner)
 {
 	// Unitは倒れても再利用するため、最大候補数を固定プールとして確保する。
 	const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 	units_.reserve(safeCapacity);
 	for (size_t i = 0; i < safeCapacity; ++i)
 	{
-		units_.push_back(std::make_unique<Unit>(unitModel, rocket_, &settings_.unit, baemModel, beamGH));
+		units_.push_back(std::make_unique<Unit>(
+			unitModel, circleModel, rocket_, &settings_.unit, baemModel, beamGH, energySpawner_));
 	}
 
 	debugParameter_ = std::make_unique<DebugParameter>("Unit");
@@ -39,6 +42,18 @@ UnitManager::UnitManager(Model* unitModel, Rocket* rocket, GameEngine::Model* ba
 	debugParameter_->Register("DistanceDrainRate", settings_.unit.distanceDrainRate, 1, "Stamina");
 	debugParameter_->Register("Normal", settings_.unit.normalColor, 0, "Color");
 	debugParameter_->Register("WithStamina", settings_.unit.staminaColor, 1, "Color");
+
+	debugParameter_->Register("BHEnergyThreshold", settings_.unit.bhEnergyThreshold, 0, "Blackhole");
+	debugParameter_->Register("BHDuration", settings_.unit.bhDuration, 1, "Blackhole");
+	debugParameter_->Register("BHPullSpeed", settings_.unit.bhPullSpeed, 2, "Blackhole");
+	debugParameter_->Register("BHKillRadius", settings_.unit.bhKillRadius, 3, "Blackhole");
+	debugParameter_->Register("BHBaseRadius", settings_.unit.bhBaseRadius, 4, "Blackhole");
+	debugParameter_->Register("BHNearDistance", settings_.unit.bhNearDistance, 5, "Blackhole");
+	debugParameter_->Register("BHFarDistance", settings_.unit.bhFarDistance, 6, "Blackhole");
+	debugParameter_->Register("BHRadiusNearMult", settings_.unit.bhRadiusNearMultiplier, 7, "Blackhole");
+	debugParameter_->Register("BHRadiusMidMult", settings_.unit.bhRadiusMidMultiplier, 8, "Blackhole");
+	debugParameter_->Register("BHRadiusFarMult", settings_.unit.bhRadiusFarMultiplier, 9, "Blackhole");
+	debugParameter_->Register("BHSpecialMult", settings_.unit.bhSpecialMultiplier, 10, "Blackhole");
 	debugParameter_->Apply();
 	SanitizeSettings();
 	SetUpdateOrder(20);
@@ -58,14 +73,30 @@ void UnitManager::Update()
 {
 	ApplyDebugParameters();
 	ApplyUnitCount();
-	if (!gameplayEnabled_)
-	{
-		return;
+	if (!gameplayEnabled_) return;
+
+	// 吸い込み対象のリストを取得
+	const auto& enemies = enemyManager_ ? enemyManager_->GetEnemies() : std::vector<Enemy*>{};
+	const auto& energies = energySpawner_ ? energySpawner_->GetEnergies() : std::vector<EnergyPickup*>{};
+
+	// 生ポインタの Unit リストを作成（吸い込み判定用）
+	std::vector<Unit*> rawUnits;
+	rawUnits.reserve(GetUnitCount());
+	for (size_t i = 0; i < GetUnitCount(); ++i) {
+		rawUnits.push_back(units_[i].get());
 	}
 
-	// capacity全体ではなく、Registerで指定された先頭unitCount体だけを稼働させる。
+	const float deltaTime = FpsCounter::deltaTime;
+
+	// 稼働中の各 Unit を更新
 	for (size_t i = 0; i < GetUnitCount(); ++i)
 	{
+		// ブラックホール状態のユニットがあれば吸い込み処理を実行
+		if (units_[i]->IsBlackhole())
+		{
+			units_[i]->ProcessBlackholeAbsorption(enemies, rawUnits, energies, deltaTime);
+		}
+
 		units_[i]->Update();
 	}
 }
@@ -176,6 +207,39 @@ void UnitManager::RecallAll()
 	}
 }
 
+bool UnitManager::InjectEnergyToUnitsAt(const Vector3& position, float radius, int32_t amount, bool* outInjectedAny)
+{
+	if (!gameplayEnabled_) return false;
+
+	const float radiusSq = radius * radius;
+	bool hasUnitInRadius = false;
+	if (outInjectedAny) *outInjectedAny = false;
+
+	for (size_t i = 0; i < GetUnitCount(); ++i)
+	{
+		Unit* unit = units_[i].get();
+		if (!unit || !unit->IsDeployed()) continue;
+
+		const Vector3 offset = unit->GetPosition() - position;
+		const float distSq = offset.x * offset.x + offset.z * offset.z;
+
+		if (distSq <= radiusSq)
+		{
+			// カーソル範囲内に存在するためハイライト化
+			unit->Highlight();
+			hasUnitInRadius = true;
+
+			// 注入要求量が存在する場合のみ注入処理を行う
+			if (amount > 0 && unit->InjectEnergy(amount))
+			{
+				if (outInjectedAny) *outInjectedAny = true;
+			}
+		}
+	}
+
+	return hasUnitInRadius;
+}
+
 size_t UnitManager::GetAvailableCount() const 
 {
 	size_t count = 0;
@@ -216,6 +280,18 @@ void UnitManager::SanitizeSettings()
 	settings_.unit.collisionRadius = (std::max)(settings_.unit.collisionRadius, 0.0f);
 	settings_.unit.staminaDrainPerSecond = (std::max)(settings_.unit.staminaDrainPerSecond, 0.0f);
 	settings_.unit.distanceDrainRate = (std::max)(settings_.unit.distanceDrainRate, 0.0f);
+
+	settings_.unit.bhEnergyThreshold = (std::max)(settings_.unit.bhEnergyThreshold, 1);
+	settings_.unit.bhDuration = (std::max)(settings_.unit.bhDuration, 0.1f);
+	settings_.unit.bhPullSpeed = (std::max)(settings_.unit.bhPullSpeed, 0.0f);
+	settings_.unit.bhKillRadius = (std::max)(settings_.unit.bhKillRadius, 0.0f);
+	settings_.unit.bhBaseRadius = (std::max)(settings_.unit.bhBaseRadius, 0.0f);
+	settings_.unit.bhNearDistance = (std::max)(settings_.unit.bhNearDistance, 0.0f);
+	settings_.unit.bhFarDistance = (std::max)(settings_.unit.bhFarDistance, settings_.unit.bhNearDistance);
+	settings_.unit.bhRadiusNearMultiplier = (std::max)(settings_.unit.bhRadiusNearMultiplier, 0.0f);
+	settings_.unit.bhRadiusMidMultiplier = (std::max)(settings_.unit.bhRadiusMidMultiplier, 0.0f);
+	settings_.unit.bhRadiusFarMultiplier = (std::max)(settings_.unit.bhRadiusFarMultiplier, 0.0f);
+	settings_.unit.bhSpecialMultiplier = (std::max)(settings_.unit.bhSpecialMultiplier, 0.0f);
 }
 
 void UnitManager::ApplyUnitCount()

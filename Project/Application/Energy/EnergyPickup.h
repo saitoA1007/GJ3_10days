@@ -23,6 +23,7 @@ enum class EnergySize : uint8_t
 	Small,
 	Medium,
 	Large,
+	Special,
 	Count,
 };
 
@@ -122,6 +123,20 @@ public:
 	/// @brief カーソル選択中の強調表示を切り替える。
 	/// @param[in] highlighted 選択中として表示するならtrue。
 	void SetHighlighted(bool highlighted);
+
+	// 生成後に特別な獲得量を上書き設定するためのメソッド
+	void SetCustomValue(int32_t value) { typeSettings_.value = value; }
+
+	// ワールド座標を直接上書きし、描画位置を更新
+	void SetPosition(const Vector3& position) {
+		position_ = position;
+		SyncModel();
+	}
+
+	// 非アクティブ化してプールへ返却
+	void Deactivate() {
+		Reset();
+	}
 
 	/// @brief プール内で使用中かを取得する。
 	/// @return Inactive以外ならtrue。

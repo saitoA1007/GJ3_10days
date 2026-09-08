@@ -9,6 +9,7 @@
 #include "Vector4.h"
 #include "IGameObject.h"
 #include "Application/Effect/RopeEffect.h"
+#include "Application/Energy/EnergyPickup.h"
 
 namespace GameEngine 
 {
@@ -18,6 +19,7 @@ namespace GameEngine
 
 class Enemy;
 class EnergyPickup;
+class EnergySpawner;
 class Rocket;
 
 /// ユニット1体の行動状態
@@ -28,6 +30,7 @@ enum class UnitState : uint8_t
 	MovingToEnemy,     // 予約したEnemyへ移動中
 	MovingToPosition,
 	ReturningToRocket, // Energyを頭上に載せて帰還中
+	Blackhole,
 };
 
 /// 全ユニットで共有する移動・スタミナ・見た目の設定
@@ -45,7 +48,22 @@ struct UnitSettings
 	float distanceDrainRate = 0.08f;                    
 	Vector4 normalColor = { 1.0f, 1.0f, 1.0f, 1.0f };   
 	Vector4 staminaColor = { 0.25f, 0.85f, 1.0f, 1.0f };
-	float groundY = 0.0f;                               
+	float groundY = 0.0f;                
+
+	int32_t bhEnergyThreshold = 100;
+	float bhDuration = 3.0f;
+	float bhPullSpeed = 8.0f;
+	float bhKillRadius = 0.5f;
+
+	float bhBaseRadius = 10.0f;
+	float bhNearDistance = 10.0f;
+	float bhFarDistance = 30.0f;
+
+	float bhRadiusNearMultiplier = 0.2f;
+	float bhRadiusMidMultiplier = 1.0f;
+	float bhRadiusFarMultiplier = 1.3f;
+
+	float bhSpecialMultiplier = 5.0f;
 };
 
 /// @brief エネルギー回収または敵攻撃へ派遣されるユニット。
@@ -57,7 +75,8 @@ public:
 	// ==========================================
 
 	// 描画モデルと、エネルギー消費元となるロケットを受け取る。
-	Unit(GameEngine::Model* model, Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH);
+	Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
+		Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH, EnergySpawner* energySpawner);
 
 	// 待機状態と初期位置へ戻す
 	void Initialize() override;
@@ -103,6 +122,26 @@ public:
 	// 倒れた個体を消費せず待機状態へ戻す
 	void ReturnToStorageAfterDefeat();
 
+	// ==========================================
+	// ブラックホール
+	// ==========================================
+
+	// カーソルを合わせてエネルギーを注入
+	bool InjectEnergy(int32_t requestedAmount);
+
+	// ブラックホールの現在の有効半径を取得
+	float GetBlackholeRadius() const;
+
+	// 全オブジェクトのリストを渡して吸い込み処理を行う
+	void ProcessBlackholeAbsorption(
+		const std::vector<Enemy*>& enemies,
+		const std::vector<Unit*>& units,
+		const std::vector<EnergyPickup*>& energies,
+		float deltaTime);
+
+	bool IsBlackhole() const { return state_ == UnitState::Blackhole; }
+
+	void Highlight();
 
 	// ==========================================
 	// 状態取得・判定
@@ -137,6 +176,8 @@ private:
 	void UpdateMovingToEnemy(float deltaTime);
 	void UpdateMovingToPosition(float deltaTime);
 	void UpdateReturningToRocket(float deltaTime);
+	void UpdateBlackhole(float deltaTime);
+	void GenerateSpecialEnergy();
 
 	// ==========================================
 	// 内部処理 (移動・計算)
@@ -175,5 +216,15 @@ private:
 
 	// 目的地座標の保持用
 	Vector3 targetPosition_ = {};
+
+	// ブラックホール用変数
+	float blackholeTimer_ = 0.0f; // ブラックホールの残り持続時間
+	int32_t absorbedBasePoint_ = 0;  // 吸収した対象の重み付け合計
+
+	EnergySpawner* energySpawner_ = nullptr;
+	float highlightTimer_ = 0.0f;
+
+	std::unique_ptr<GameEngine::ModelComponent> blackholeModel_;
+	float bhEffectTimer_ = 0.0f;
 };
 

@@ -188,6 +188,12 @@ void EnemyManager::Update() {
 		}
 	}
 
+	activeEnemyVector_.clear();
+	activeEnemyVector_.reserve(activeEnemies_.size());
+	for (const auto& [index, enemy] : activeEnemies_) {
+		activeEnemyVector_.push_back(enemy);
+	}
+
 	worldTransforms_.UpdateTransformMatrix(maxEnemyNum_);
 }
 
