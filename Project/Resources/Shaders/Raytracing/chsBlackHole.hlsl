@@ -26,9 +26,16 @@ void MainBlackHoleLensCHS(inout Payload payload, MyAttribute attrib)
     // マテリアルデータを取得
     MaterialData material = gBufferData[ref.MaterialIndex].Load<MaterialData>(0);
 
-    float bhRadius = material.radius;
+    // ワールド行列。行ベクトル規約なので0～2行目が各軸、3行目が平行移動
+    float4x3 objectToWorld = ObjectToWorld4x3();
+    float3 bhCenter = objectToWorld[3];
 
-    float3 bhCenter = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), ObjectToWorld4x3());
+    // 各軸の長さからスケールを取り出す。これで大きさを変えても見た目が相似になる
+    float scale = (length(objectToWorld[0]) + length(objectToWorld[1]) + length(objectToWorld[2])) / 3.0f;
+    scale = max(scale, 1e-5f);
+
+    // 半径はスケールを除いたモデル基準の長さとして扱う
+    float bhRadius = material.radius;
 
     float3 worldPos = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     float3 rayDir = normalize(WorldRayDirection());
@@ -39,8 +46,11 @@ void MainBlackHoleLensCHS(inout Payload payload, MyAttribute attrib)
     float3 closestPoint = worldPos + rayDir * tClosest;
 
     float3 offset = bhCenter - closestPoint;
-    float b = length(offset); // 衝突径数
-    float3 pullDir = offset / max(b, 1e-5f); // 中心へ引き寄せる方向
+    float offsetLength = length(offset);
+    float3 pullDir = offset / max(offsetLength, 1e-5f); // 中心へ引き寄せる方向
+
+    // 衝突径数。スケールで割ってモデル基準の長さに揃える
+    float b = offsetLength / scale;
 
     // 事象の地平線の内側は完全に黒
     if (b < bhRadius)

@@ -460,8 +460,8 @@ GameScene::GameScene() {
 
 	// ブラックホールのテスト
 	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
 
 	//// ポール
 	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
