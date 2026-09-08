@@ -2,7 +2,7 @@
     "GameFlow": {
         "SceneName": "Game",
         "Time": {
-            "GameDuration": 60.0,
+            "GameDuration": 120.0,
             "LaunchDuration": 3.0,
             "OpeningDuration": 3.0,
             "StartPlayingDuration": 5.0
@@ -10,7 +10,7 @@
         "Tutorial": {
             "EnemyHoldPositionXZ": [
                 0.0,
-                -12.0
+                -24.0
             ],
             "EnemyPositionXZ": [
                 0.0,
@@ -23,7 +23,7 @@
             ],
             "LockOnEnemyPositionXZ": [
                 0.0,
-                -20.0
+                -24.0
             ],
             "MediumEnergyPositionXZ": [
                 0.0,
