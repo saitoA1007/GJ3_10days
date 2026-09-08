@@ -14,6 +14,9 @@
 
 #include "RocketEnergy.h"
 
+// 前方宣言
+class FieldEffect; // ロケットに対してアクションがあった時のフィールドの演出
+
 /// @brief ロケットの配置とエネルギー消費に関する調整値。
 struct RocketSettings 
 {
@@ -41,7 +44,7 @@ public:
 	/// @brief ロケットモデル、衝突判定、エネルギー管理を準備する。
 	/// @param[in] model ロケットの描画モデル。
 	/// @param[in] settings 配置・当たり判定・エネルギーの初期設定。
-	explicit Rocket(GameEngine::Model* model, const RocketSettings& settings = {});
+	explicit Rocket(GameEngine::Model* model, FieldEffect* fieldEffect, const RocketSettings& settings = {});
 	~Rocket() override = default;
 
 	/// @brief エネルギーを初期値へ戻し、モデルと当たり判定を同期する。
@@ -148,5 +151,8 @@ private:
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;// 設定とParameter Inspectorの接続
 	EnergyChangedCallback onEnergyChanged_;                     // UIや演出向けの任意通知先
 	uint64_t enemyHitCount_ = 0;                                // Enemy到達通知の累計
+
+	// ロケットにアクションがあった時のフィールドの演出
+	FieldEffect* fieldEffect_ = nullptr;
 };
 

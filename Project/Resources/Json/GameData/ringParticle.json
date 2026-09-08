@@ -1,0 +1,124 @@
+{
+    "ringParticle": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    0.5135581493377686,
+                    0.15444016456604004,
+                    1.0,
+                    1.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 0.4000000059604645,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsActiveBlendAdd": true,
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": false
+            },
+            "RotateEmit": {
+                "Enable": true,
+                "RangeRotate": {
+                    "_Max": [
+                        0.0,
+                        0.0,
+                        7.730000019073486
+                    ],
+                    "_Min": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": false
+            },
+            "ShapeEmit": {
+                "Enable": false
+            },
+            "SpawnCoolTime": 1.0,
+            "SpawnMaxCount": 4,
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": {
+                    "_TextureName": "Ring_02.png"
+                }
+            },
+            "VelocityEmit": {
+                "Enable": false
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInQuad"
+                },
+                "Enable": true,
+                "EndAlpha": 0.0
+            },
+            "Attraction": {
+                "Enable": false
+            },
+            "ColorOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInExpo"
+                },
+                "Enable": true,
+                "EndColor": [
+                    0.1647411584854126,
+                    0.752643883228302,
+                    0.992277979850769,
+                    1.0
+                ]
+            },
+            "RotationByVelocity": {
+                "Enable": false
+            },
+            "SizeOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInOutQuad"
+                },
+                "Enable": true,
+                "EndSize": -10.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "Enable": false
+            }
+        },
+        "SceneName": "Test"
+    }
+}

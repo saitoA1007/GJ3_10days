@@ -4,7 +4,7 @@ using namespace GameEngine;
 
 GameObjectManager::GameObjectManager() {
     // あらかじめメモリを確保
-    objects_.reserve(100);
+    objects_.reserve(512);
 }
 
 void GameObjectManager::InitializeAll() {

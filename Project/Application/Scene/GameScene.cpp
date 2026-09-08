@@ -36,6 +36,8 @@ using namespace GameEngine;
 #include <string_view>
 #include "MyMath.h"
 
+#include "Application/UI/TimeUI.h"
+
 // 後で別クラスに纏めて消す
 namespace
 {
@@ -95,11 +97,9 @@ GameScene::GameScene() {
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
-	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
-	//auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
 
 	auto* rocketModel = modelManager_->GetNameByModel("Rocket.gltf");
-	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
+	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel, fieldEffect);
 
 	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
 	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_,textureManager_, planeModel);
@@ -460,8 +460,8 @@ GameScene::GameScene() {
 
 	// ブラックホールのテスト
 	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
 
 	//// ポール
 	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
@@ -488,6 +488,9 @@ GameScene::GameScene() {
 
 	// にぎやかし浮遊エフェクト
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldFloatingEffect", 256, textureManager_, effectModel);
+
+	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
+	gameObjectManager_->AddObject<TimeUI>(unitIconGH);
 }
 
 void GameScene::Initialize() {

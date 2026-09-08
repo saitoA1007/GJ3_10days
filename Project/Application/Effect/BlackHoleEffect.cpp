@@ -1,5 +1,6 @@
 #include "BlackHoleEffect.h"
 #include "FPSCounter.h"
+#include "ImguiManager.h"
 using namespace GameEngine;
 
 BlackHoleEffect::BlackHoleEffect(GameEngine::Model* sphereModel, GameEngine::Model* ringModel)
@@ -36,6 +37,11 @@ void BlackHoleEffect::Update() {
 
 	// 時間を更新
 	blackHoleRingMaterial_.materialData_->time += FpsCounter::gameDeltaTime;
+
+	ImGui::Begin("a");
+	ImGui::DragFloat3("scale", &baseWorld_.transform_.scale.x, 0.1f);
+	ImGui::DragFloat3("p", &baseWorld_.transform_.translate.x, 0.1f);
+	ImGui::End();
 
 	baseWorld_.UpdateTransformMatrix();
 	sphereModel_.Update();
