@@ -25,6 +25,8 @@ struct EnergySpawnSettings
 	float rotationSpeed = 1.5f;    // 着地後のY軸回転速度（rad/s）
 	int32_t maxActiveCount = 30;   // 落下・地上・運搬を含む同時存在上限
 	int32_t initialCountPerZone = 0; // 開始時にNear/Middle/Farへ置く個数
+	float lifetime = 10.0f;       
+	float dissolveDuration = 1.0f;
 };
 
 /// @brief 各フィールド領域の空からエネルギーを定期生成する。

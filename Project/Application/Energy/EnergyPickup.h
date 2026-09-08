@@ -87,7 +87,9 @@ public:
 		float deltaTime,
 		float floatingAmplitude,
 		float floatingSpeed,
-		float rotationSpeed);
+		float rotationSpeed,
+		float lifetime,            
+		float dissolveDuration);
 
 	/// @brief アクティブな場合だけ描画する。
 	/// @param[in] renderQueue 描画命令の登録先。
@@ -173,5 +175,9 @@ private:
 
 	// オーラのパーティクル
 	GameEngine::ParticleBehavior particle_;
+
+	float lifetimeTimer_ = 0.0f; 
+	float dissolveTimer_ = 0.0f; 
+	bool isDissolving_ = false;
 };
 

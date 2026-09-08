@@ -9,9 +9,11 @@
         "Spawn": {
             "AngleCenterDegrees": 270.0,
             "AngleRangeDegrees": 180.0,
-            "AppearDuration": 1.2,
+            "AppearDuration": 1.2000000476837158,
+            "DissolveDuration": 3.0,
             "GroundHeight": 1.5,
             "InitialCountPerZone": 0,
+            "Lifetime": 20.0,
             "MaxActiveCount": 64,
             "SpawnInterval": 2.0
         },

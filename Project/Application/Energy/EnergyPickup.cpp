@@ -83,7 +83,9 @@ void EnergyPickup::Update(
 	float deltaTime,
 	float floatingAmplitude,
 	float floatingSpeed,
-	float rotationSpeed)
+	float rotationSpeed, 
+	float lifetime,
+	float dissolveDuration)
 {
 	if (!IsActive()) {
 		return;
@@ -95,23 +97,68 @@ void EnergyPickup::Update(
 
 	const float safeDeltaTime = (std::max)(deltaTime, 0.0f);
 
-	// ディゾルブ出現中の処理
+	// 出現ディゾルブ処理
 	if (state_ == EnergyState::Appearing)
 	{
-		appearTime_ += safeDeltaTime;
+		lifetimeTimer_ = 0.0f;
+		dissolveTimer_ = 0.0f;
+		isDissolving_ = false;
 
+		appearTime_ += safeDeltaTime;
 		float threshold = 1.0f - (appearTime_ / appearDuration_);
 
 		if (appearTime_ >= appearDuration_)
 		{
 			threshold = 0.0f;
-			state_ = EnergyState::OnGround; 
+			state_ = EnergyState::OnGround;
 			animationTime_ = 0.0f;
 		}
 
 		material_.materialData_->dissolveThreshold = threshold;
 	}
+	// ユニットによる予約中または運搬中
+	else if (state_ == EnergyState::Reserved || state_ == EnergyState::Carried)
+	{
+		lifetimeTimer_ = 0.0f;
+		dissolveTimer_ = 0.0f;
+		if (isDissolving_)
+		{
+			isDissolving_ = false;
+			material_.materialData_->dissolveThreshold = 0.0f; 
+		}
+	}
+	// 地上放置時・消去ディゾルブ処理
+	else if (state_ == EnergyState::OnGround)
+	{
+		if (!isDissolving_)
+		{
+			lifetimeTimer_ += safeDeltaTime;
+			// 一定時間放置されたら消去ディゾルブ開始
+			if (lifetimeTimer_ >= (std::max)(lifetime, 0.01f))
+			{
+				isDissolving_ = true;
+				dissolveTimer_ = 0.0f;
+			}
+		}
+		else
+		{
+			dissolveTimer_ += safeDeltaTime;
+			const float safeDuration = (std::max)(dissolveDuration, 0.01f);
+			const float progress = (std::clamp)(dissolveTimer_ / safeDuration, 0.0f, 1.0f);
 
+			// 閾値を変化
+			material_.materialData_->dissolveThreshold = progress;
+
+			// 完全透明になったら非アクティブ化してプールに戻す
+			if (progress >= 1.0f)
+			{
+				Reset();
+				return;
+			}
+		}
+	}
+
+	// 浮遊・回転アニメーション処理
 	if (state_ == EnergyState::OnGround || state_ == EnergyState::Reserved)
 	{
 		floatingAmplitude_ = (std::max)(floatingAmplitude, 0.0f);
