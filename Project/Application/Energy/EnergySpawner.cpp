@@ -97,7 +97,6 @@ void EnergySpawner::Update()
 		return;
 	}
 
-	// gameplayEnabled_がfalseの間は落下も生成タイマーも完全に停止する。
 	UpdatePickups(FpsCounter::gameDeltaTime);
 
 	if (autoSpawnEnabled_)
