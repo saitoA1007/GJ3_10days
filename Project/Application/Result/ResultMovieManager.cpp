@@ -5,7 +5,8 @@
 #include "Application/Effect/ExplosionEffect.h"
 using namespace GameEngine;
 
-ResultMovieManager::ResultMovieManager(ResultMoveCamera* camera, MoonObject* moonObject, RocketEffect* rocketEffect, ExplosionEffect* explosionEffect) {
+ResultMovieManager::ResultMovieManager(ResultMoveCamera* camera, MoonObject* moonObject, RocketEffect* rocketEffect, ExplosionEffect* explosionEffect)
+	: letterboxUI_("LetterboxUI") {
 	resultMoveCamera_ = camera;
 	moonObject_ = moonObject;
 	rocketEffect_ = rocketEffect;
@@ -19,6 +20,7 @@ ResultMovieManager::ResultMovieManager(ResultMoveCamera* camera, MoonObject* moo
 }
 
 void ResultMovieManager::Initialize() {
+	letterboxUI_.Initialize();
 	rocketEffect_->Reset();
 
 	explosionEffect_->SetActive(false);
@@ -50,13 +52,17 @@ void ResultMovieManager::Update() {
 			isExplo_ = true;
 			moonObject_->Break();
 			explosionEffect_->Start({80.0f,50.0f,0.0f});
+			// バーをおろす
+			letterboxUI_.SetBarActive(false);
 		}
 		break;
 	}
+
+	letterboxUI_.Update();
 }
 
 void ResultMovieManager::Draw() {
-
+	letterboxUI_.Draw();
 }
 
 void ResultMovieManager::Start() {
@@ -69,6 +75,9 @@ void ResultMovieManager::Start() {
 	// カメラ演出を開始
 	resultMoveCamera_->Start();
 	rocketEffect_->Reset();
+
+	// バーを出現
+	letterboxUI_.SetBarActive(true);
 
 	// リセット
 	moonObject_->Reset();

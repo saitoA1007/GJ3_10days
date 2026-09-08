@@ -1,11 +1,13 @@
 #pragma once
 #include "IGameObject.h"
 #include "ModelComponent.h"
+#include "Application/UI/LetterboxUI.h"
 
 class ResultMoveCamera;
 class MoonObject;
 class RocketEffect;
 class ExplosionEffect;
+class LetterBoxUI;
 
 // リザルトのムービー演出を管理
 class ResultMovieManager : public GameEngine::IGameObject {
@@ -34,6 +36,9 @@ private:
 
 	// 爆破演出
 	ExplosionEffect* explosionEffect_ = nullptr;
+
+	// 黒帯UI
+	LetterboxUI letterboxUI_;
 
 	bool isExplo_ = false;
 };
