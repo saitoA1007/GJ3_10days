@@ -96,6 +96,12 @@ bool TutorialCameraModelView::IsSuccessAnimationComplete() const
 	return successAnimationState_ == SuccessAnimationState::Complete;
 }
 
+bool TutorialCameraModelView::HasEntranceAnimationStarted() const
+{
+	const float startDelay = (std::max)(settings_.startDelay, 0.0f);
+	return hasEnteredTutorial_ && animationElapsed_ > startDelay;
+}
+
 bool TutorialCameraModelView::IsEntranceAnimationComplete() const
 {
 	const float startDelay = (std::max)(settings_.startDelay, 0.0f);

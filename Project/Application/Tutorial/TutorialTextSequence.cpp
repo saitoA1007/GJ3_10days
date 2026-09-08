@@ -5,6 +5,7 @@
 #include <cmath>
 #include <utility>
 
+#include "AudioManager.h"
 #include "InputCommand.h"
 
 #include "Application/GameFlow/GameFlow.h"
@@ -15,9 +16,18 @@ namespace
 	constexpr float kTwoPi = 6.28318531f;
 	constexpr const char* kLockOnTriggerCommand = "LockOnTrigger";
 	constexpr const char* kLockOnReleaseCommand = "LockOnRelease";
+	constexpr const char* kTextPopSoundName = "tutorialTextPop.mp3";
+	constexpr const char* kSuccessSoundName = "tutorialSuccess.mp3";
+	constexpr const char* kFailureSoundName = "tutorialFailure.mp3";
 	constexpr Vector3 kNormalColor = { 1.0f, 1.0f, 1.0f };
 	constexpr Vector3 kSuccessColor = { 0.0f, 1.0f, 0.0f };
 	constexpr Vector3 kErrorColor = { 1.0f, 0.0f, 0.0f };
+
+	void PlayTutorialSound(const char* soundName)
+	{
+		auto& audioManager = GameEngine::AudioManager::GetInstance();
+		audioManager.Play(audioManager.GetHandleByName(soundName), 1.0f, false);
+	}
 }
 
 struct TutorialTextSequence::StepEntry
@@ -36,6 +46,7 @@ struct TutorialTextSequence::StepEntry
 	bool successStarted = false;
 	bool showSuccessColor = true;
 	bool activated = false;
+	bool entranceSoundPlayed = false;
 	std::function<void()> onActivated;
 	std::function<void()> onCompleted;
 };
@@ -125,10 +136,12 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 			entry.successTargetRotationX,
 			entry.successRotateDuration,
 			entry.successReturnDuration);
+		PlayTutorialSound(kSuccessSoundName);
 	}
 	else if (advanceAnimation && !entry.successStarted && IsMistakeInput(entry))
 	{
 		entry.errorElapsed = 0.0f;
+		PlayTutorialSound(kFailureSoundName);
 	}
 
 	if (advanceAnimation && entry.errorElapsed < entry.errorDuration)
@@ -153,6 +166,11 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 	}
 	entry.view->SetDisplayOffset({ shakeOffsetX, 0.0f, 0.0f });
 	entry.view->Update(true, advanceAnimation, deltaTime);
+	if (!entry.entranceSoundPlayed && entry.view->HasEntranceAnimationStarted())
+	{
+		entry.entranceSoundPlayed = true;
+		PlayTutorialSound(kTextPopSoundName);
+	}
 
 	if (!entry.successStarted && entry.progressMode == ProgressMode::TimedHold &&
 		entry.view->IsEntranceAnimationComplete())
@@ -247,5 +265,6 @@ void TutorialTextSequence::ResetSteps()
 		entry->holdElapsed = 0.0f;
 		entry->successStarted = false;
 		entry->activated = false;
+		entry->entranceSoundPlayed = false;
 	}
 }

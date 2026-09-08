@@ -46,6 +46,7 @@ public:
 		float returnDuration);
 	void StartReturnAnimation(float returnDuration);
 	bool IsSuccessAnimationComplete() const;
+	bool HasEntranceAnimationStarted() const;
 	bool IsEntranceAnimationComplete() const;
 	float GetHoldDuration() const;
 	float GetMoveDuration() const;
