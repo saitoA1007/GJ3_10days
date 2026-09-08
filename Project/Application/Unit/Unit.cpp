@@ -48,8 +48,10 @@ void Unit::Initialize()
 
 	targetEnergy_ = nullptr;
 	targetEnemy_ = nullptr;
+	targetPosition_ = {};
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	destinationWaitElapsed_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 	collider_.SetActive(false);
@@ -68,8 +70,17 @@ void Unit::Update()
 	case UnitState::MovingToEnemy:
 		UpdateMovingToEnemy(FpsCounter::deltaTime);
 		break;
+	case UnitState::MovingToPosition:
+		UpdateMovingToPosition(FpsCounter::deltaTime);
+		break;
+	case UnitState::WaitingAtPosition:
+		UpdateWaitingAtPosition(FpsCounter::deltaTime);
+		break;
 	case UnitState::ReturningToRocket:
 		UpdateReturningToRocket(FpsCounter::deltaTime);
+		break;
+	case UnitState::ReturningEmpty:
+		UpdateReturningEmpty(FpsCounter::deltaTime);
 		break;
 	}
 
@@ -111,6 +122,8 @@ bool Unit::DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy)
 	position_.y = settings_->groundY;
 	targetEnergy_ = target;
 	targetEnemy_ = nullptr;
+	targetPosition_ = {};
+	destinationWaitElapsed_ = 0.0f;
 	state_ = UnitState::MovingToEnergy;
 	collider_.SetActive(true);
 	SyncModel();
@@ -130,7 +143,30 @@ bool Unit::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
 	position_.y = settings_->groundY;
 	targetEnergy_ = nullptr;
 	targetEnemy_ = target;
+	targetPosition_ = {};
+	destinationWaitElapsed_ = 0.0f;
 	state_ = UnitState::MovingToEnemy;
+	collider_.SetActive(true);
+	SyncModel();
+	return true;
+}
+
+bool Unit::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy)
+{
+	if (!IsAvailable())
+	{
+		return false;
+	}
+
+	AllocateStamina(requestedEnergy);
+	position_ = rocket_->GetPosition() + settings_->launchOffset;
+	position_.y = settings_->groundY;
+	targetEnergy_ = nullptr;
+	targetEnemy_ = nullptr;
+	targetPosition_ = targetPosition;
+	targetPosition_.y = settings_->groundY;
+	destinationWaitElapsed_ = 0.0f;
+	state_ = UnitState::MovingToPosition;
 	collider_.SetActive(true);
 	SyncModel();
 	return true;
@@ -163,8 +199,10 @@ void Unit::Recall()
 
 	targetEnergy_ = nullptr;
 	targetEnemy_ = nullptr;
+	targetPosition_ = {};
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	destinationWaitElapsed_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 	collider_.SetActive(false);
@@ -216,6 +254,31 @@ void Unit::UpdateMovingToEnemy(float deltaTime)
 	ConsumeStamina(deltaTime);
 }
 
+void Unit::UpdateMovingToPosition(float deltaTime)
+{
+	MoveTowards(targetPosition_, deltaTime);
+	ConsumeStamina(deltaTime);
+
+	const float arrivalRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
+	if (DistanceSquaredXZ(position_, targetPosition_) <= arrivalRadiusSquared)
+	{
+		// 到着時は目的地へ正確に合わせ、待機中に移動しないよう専用状態へ遷移する。
+		position_ = targetPosition_;
+		destinationWaitElapsed_ = 0.0f;
+		state_ = UnitState::WaitingAtPosition;
+	}
+}
+
+void Unit::UpdateWaitingAtPosition(float deltaTime)
+{
+	destinationWaitElapsed_ += (std::max)(deltaTime, 0.0f);
+	if (destinationWaitElapsed_ >= settings_->destinationWaitSeconds)
+	{
+		destinationWaitElapsed_ = 0.0f;
+		state_ = UnitState::ReturningEmpty;
+	}
+}
+
 void Unit::UpdateReturningToRocket(float deltaTime)
 {
 	if (!targetEnergy_ || !targetEnergy_->IsCarried())
@@ -236,6 +299,18 @@ void Unit::UpdateReturningToRocket(float deltaTime)
 		targetEnergy_ = nullptr;
 		state_ = UnitState::Stored;
 		stamina_ = 0.0f;
+	}
+}
+
+void Unit::UpdateReturningEmpty(float deltaTime)
+{
+	MoveTowards(rocket_->GetPosition(), deltaTime);
+	ConsumeStamina(deltaTime);
+
+	const float deliveryRadiusSquared = settings_->deliveryRadius * settings_->deliveryRadius;
+	if (DistanceSquaredXZ(position_, rocket_->GetPosition()) <= deliveryRadiusSquared)
+	{
+		Recall();
 	}
 }
 
@@ -271,8 +346,10 @@ void Unit::ReturnToStorageAfterDefeat()
 	// 状態のクリア
 	targetEnergy_ = nullptr;
 	targetEnemy_ = nullptr;
+	targetPosition_ = {};
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	destinationWaitElapsed_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 

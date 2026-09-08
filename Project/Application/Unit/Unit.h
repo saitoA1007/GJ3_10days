@@ -26,7 +26,10 @@ enum class UnitState : uint8_t
 	Stored,            // ロケット内で待機中。再出撃可能
 	MovingToEnergy,    // 予約したEnergyへ移動中
 	MovingToEnemy,     // 予約したEnemyへ移動中
+	MovingToPosition,  // 何もない指定位置へ移動中
+	WaitingAtPosition, // 指定位置へ到着し、帰還まで待機中
 	ReturningToRocket, // Energyを頭上に載せて帰還中
+	ReturningEmpty,    // 何も持たずロケットへ帰還中
 };
 
 /// 全ユニットで共有する移動・スタミナ・見た目の設定
@@ -39,6 +42,7 @@ struct UnitSettings
 	float boostedSpeed = 5.0f;                          
 	float pickupRadius = 0.45f;                         
 	float deliveryRadius = 1.6f;                        
+	float destinationWaitSeconds = 3.0f;                // 空地点へ到着してから帰還を始めるまでの秒数
 	float collisionRadius = 0.6f;                       
 	float staminaDrainPerSecond = 2.0f;                 
 	float distanceDrainRate = 0.08f;                    
@@ -81,6 +85,9 @@ public:
 	// 敵を予約して攻撃へ出撃する
 	bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
 
+	// 何もないフィールド上の指定位置へ出撃する
+	bool DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy);
+
 	// 予約を解放して強制的に待機状態へ戻す
 	void Recall();
 
@@ -109,9 +116,7 @@ public:
 
 	// フィールド上へ出撃中か判定
 	bool IsDeployed() const {
-		return state_ == UnitState::MovingToEnergy ||
-			state_ == UnitState::MovingToEnemy ||
-			state_ == UnitState::ReturningToRocket;
+		return state_ != UnitState::Stored;
 	}
 
 	// エネルギーを持って帰還中か判定
@@ -130,7 +135,10 @@ private:
 	// ==========================================
 	void UpdateMovingToEnergy(float deltaTime);
 	void UpdateMovingToEnemy(float deltaTime);
+	void UpdateMovingToPosition(float deltaTime);
+	void UpdateWaitingAtPosition(float deltaTime);
 	void UpdateReturningToRocket(float deltaTime);
+	void UpdateReturningEmpty(float deltaTime);
 
 	// ==========================================
 	// 内部処理 (移動・計算)
@@ -158,10 +166,12 @@ private:
 	UnitState state_ = UnitState::Stored;                
 	EnergyPickup* targetEnergy_ = nullptr;                 
 	Enemy* targetEnemy_ = nullptr;                        
+	Vector3 targetPosition_ = {};
 
 	// パラメータ
 	Vector3 position_ = {};                              
 	float stamina_ = 0.0f;                                
+	float destinationWaitElapsed_ = 0.0f;
 
 	// 繋がっている演出
 	RopeEffect RopeEffect_;

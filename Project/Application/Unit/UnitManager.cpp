@@ -37,6 +37,7 @@ UnitManager::UnitManager(Model* unitModel, Rocket* rocket, GameEngine::Model* ba
 	debugParameter_->Register("BoostedSpeed", settings_.unit.boostedSpeed, 1, "Move");
 	debugParameter_->Register("PickupRadius", settings_.unit.pickupRadius, 2, "Move");
 	debugParameter_->Register("DeliveryRadius", settings_.unit.deliveryRadius, 3, "Move");
+	debugParameter_->Register("DestinationWaitSeconds", settings_.unit.destinationWaitSeconds, 4, "Move");
 	debugParameter_->Register("Radius", settings_.unit.collisionRadius, 0, "Collision");
 	debugParameter_->Register("DrainPerSecond", settings_.unit.staminaDrainPerSecond, 0, "Stamina");
 	debugParameter_->Register("DistanceDrainRate", settings_.unit.distanceDrainRate, 1, "Stamina");
@@ -127,6 +128,23 @@ bool UnitManager::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
 	return false;
 }
 
+bool UnitManager::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy)
+{
+	if (!gameplayEnabled_)
+	{
+		return false;
+	}
+
+	for (size_t i = 0; i < GetUnitCount(); ++i)
+	{
+		if (units_[i]->IsAvailable())
+		{
+			return units_[i]->DispatchToPosition(targetPosition, requestedEnergy);
+		}
+	}
+	return false;
+}
+
 Unit* UnitManager::FindNearestCarryingUnit(const Vector3& position, float maxDistance) const 
 {
 	Unit* nearest = nullptr;
@@ -199,6 +217,7 @@ void UnitManager::SanitizeSettings()
 	settings_.unit.boostedSpeed = (std::max)(settings_.unit.boostedSpeed, settings_.unit.normalSpeed);
 	settings_.unit.pickupRadius = (std::max)(settings_.unit.pickupRadius, 0.0f);
 	settings_.unit.deliveryRadius = (std::max)(settings_.unit.deliveryRadius, 0.0f);
+	settings_.unit.destinationWaitSeconds = (std::max)(settings_.unit.destinationWaitSeconds, 0.0f);
 	settings_.unit.collisionRadius = (std::max)(settings_.unit.collisionRadius, 0.0f);
 	settings_.unit.staminaDrainPerSecond = (std::max)(settings_.unit.staminaDrainPerSecond, 0.0f);
 	settings_.unit.distanceDrainRate = (std::max)(settings_.unit.distanceDrainRate, 0.0f);

@@ -96,6 +96,7 @@ void LockOnController::Initialize()
 	lockOnSeconds_ = 0.0f;
 	minimumDispatchHoldSeconds_ = 0.0f;
 	isCharging_ = false;
+	isPositionTarget_ = false;
 	enemySelectionEnabled_ = true;
 	SyncCursorModel();
 }
@@ -146,7 +147,7 @@ void LockOnController::Draw()
 	{
 		cursorModel_->DrawRaytracing(renderQueue_);
 
-		if (isCharging_ && (selectedEnergy_ || selectedEnemy_))
+		if (isCharging_ && (selectedEnergy_ || selectedEnemy_ || isPositionTarget_))
 		{
 			chargeModel_->DrawRaytracing(renderQueue_);
 		}
@@ -321,18 +322,18 @@ void LockOnController::SyncCursorModel()
 
 void LockOnController::SyncChargeModel()
 {
-	if (!isCharging_ || (!selectedEnergy_ && !selectedEnemy_))
+	if (!isCharging_ || (!selectedEnergy_ && !selectedEnemy_ && !isPositionTarget_))
 	{
 		return;
 	}
 
-	Vector3 targetPosition = selectedEnemy_
-		? selectedEnemy_->GetPosition()
-		: selectedEnergy_->GetPosition();
+	Vector3 targetPosition = isPositionTarget_
+		? positionTarget_
+		: (selectedEnemy_ ? selectedEnemy_->GetPosition() : selectedEnergy_->GetPosition());
 
-	const float targetRadius = selectedEnemy_
-		? selectedEnemy_->GetDisplayScale() + 0.25f
-		: selectedEnergy_->GetScale() + 0.25f;
+	const float targetRadius = isPositionTarget_
+		? settings_.selectionRadius
+		: (selectedEnemy_ ? selectedEnemy_->GetDisplayScale() + 0.25f : selectedEnergy_->GetScale() + 0.25f);
 
 	const float ratio = CalculateChargeRatio();
 	const float currentRadius = targetRadius + ratio * settings_.selectionRadius;
@@ -382,12 +383,14 @@ void LockOnController::UpdateSelection()
 
 void LockOnController::StartLockOn()
 {
-	// 待機Unitがいない場合は、対象を選べてもチャージを開始しない。
-	if (!HasValidSelection() || unitManager_->GetAvailableCount() == 0)
+	// 空地点も派遣先にできるため、対象の有無にかかわらず待機Unitがいれば開始する。
+	if (unitManager_->GetAvailableCount() == 0)
 	{
 		return;
 	}
 
+	isPositionTarget_ = !HasValidSelection();
+	positionTarget_ = cursorPosition_;
 	isCharging_ = true;
 	lockOnSeconds_ = 0.0f;
 	chargedEnergy_ = 0;
@@ -396,7 +399,7 @@ void LockOnController::StartLockOn()
 void LockOnController::UpdateLockOn(float deltaTime)
 {
 	// 対象が他処理で消えた場合はEnergyを消費せずキャンセル
-	if (!HasValidSelection()) {
+	if (!isPositionTarget_ && !HasValidSelection()) {
 		CancelLockOn();
 		return;
 	}
@@ -461,6 +464,10 @@ void LockOnController::CompleteLockOn()
 	{
 		dispatched = unitManager_->DispatchToEnemy(selectedEnemy_, chargedEnergy_);
 	}
+	else if (isPositionTarget_)
+	{
+		dispatched = unitManager_->DispatchToPosition(positionTarget_, chargedEnergy_);
+	}
 
 	// 派遣に失敗した場合は引き落としたエネルギーをロケットに返却
 	if (!dispatched && chargedEnergy_ > 0)
@@ -471,6 +478,7 @@ void LockOnController::CompleteLockOn()
 	chargedEnergy_ = 0;
 	SetSelection(nullptr, nullptr);
 	isCharging_ = false;
+	isPositionTarget_ = false;
 	lockOnSeconds_ = 0.0f;
 
 	if (!dispatched)
@@ -488,6 +496,7 @@ void LockOnController::CancelLockOn()
 
 	chargedEnergy_ = 0;
 	isCharging_ = false;
+	isPositionTarget_ = false;
 	lockOnSeconds_ = 0.0f;
 	SetSelection(nullptr, nullptr);
 }
@@ -569,20 +578,20 @@ void LockOnController::DrawLockOnGuide()
 		settings_.cursorColor,
 		32);
 
-	if (!selectedEnergy_ && !selectedEnemy_)
+	if (!selectedEnergy_ && !selectedEnemy_ && !isPositionTarget_)
 	{
 		return;
 	}
 
 	// 選択中対象（敵優先）の位置と半径を取得
-	Vector3 targetPosition = selectedEnemy_
-		? selectedEnemy_->GetPosition()
-		: selectedEnergy_->GetPosition();
+	Vector3 targetPosition = isPositionTarget_
+		? positionTarget_
+		: (selectedEnemy_ ? selectedEnemy_->GetPosition() : selectedEnergy_->GetPosition());
 	targetPosition.y += 0.08f;
 
-	const float targetRadius = selectedEnemy_
-		? selectedEnemy_->GetDisplayScale() + 0.25f
-		: selectedEnergy_->GetScale() + 0.25f;
+	const float targetRadius = isPositionTarget_
+		? settings_.selectionRadius
+		: (selectedEnemy_ ? selectedEnemy_->GetDisplayScale() + 0.25f : selectedEnergy_->GetScale() + 0.25f);
 
 	debugRenderer_->AddCircle(
 		targetPosition,
@@ -622,7 +631,7 @@ void LockOnController::DrawDebugWindow()
 	ImGui::Text("Available Units: %zu", unitManager_->GetAvailableCount());
 	ImGui::Text("Rocket Energy: %d", rocket_->GetEnergy());
 
-	const char* selectedType = selectedEnemy_ ? "Enemy" : (selectedEnergy_ ? "Energy" : "None");
+	const char* selectedType = selectedEnemy_ ? "Enemy" : (selectedEnergy_ ? "Energy" : (isPositionTarget_ ? "Position" : "None"));
 	ImGui::Text("Selected: %s", selectedType);
 
 	ImGui::Text("Charge: %.2f / %.2f sec", lockOnSeconds_, settings_.maxLockOnSeconds);

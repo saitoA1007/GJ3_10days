@@ -197,9 +197,11 @@ private:
 	Vector3 cursorPosition_ = {};                               
 	EnergyPickup* selectedEnergy_ = nullptr;                    
 	Enemy* selectedEnemy_ = nullptr;                            
+	Vector3 positionTarget_ = {};
 	float lockOnSeconds_ = 0.0f;                                
 	float minimumDispatchHoldSeconds_ = 0.0f;
 	bool isCharging_ = false;                                   
+	bool isPositionTarget_ = false;
 	bool gameplayEnabled_ = true;  
 	bool enemySelectionEnabled_ = true;
 	int32_t chargedEnergy_ = 0;
