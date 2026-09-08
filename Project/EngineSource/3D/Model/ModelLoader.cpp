@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "ModelLoader.h"
 #include <cassert>
 #include "LogManager.h"

@@ -9,9 +9,13 @@
 
 #include <numbers>
 
-EnemyManager::EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model, EnemyEffectManager* effectManager) : maxEnemyNum_(maxEnemyNum) {
+EnemyManager::EnemyManager(uint32_t maxEnemyNum, EnemyEffectManager* effectManager, GameEngine::TextureManager* textureManager, GameEngine::ModelManager* modelManager) : maxEnemyNum_(maxEnemyNum) {
 	// 敵の演出管理機能を取得
 	effectManager_ = effectManager;
+
+	commonEffect_ = std::make_unique<EnemyCommonEffect>(textureManager, modelManager);
+
+	auto model = modelManager->GetNameByModel("Enemy.obj");
 
 	renderer_.SetModel(model);
 	worldTransforms_.Initialize(maxEnemyNum_, {});
@@ -174,6 +178,7 @@ void EnemyManager::Update() {
 		const auto [index, enemy] = *it;
 		if (!enemy->IsDead()) {
 			enemy->Update();
+			commonEffect_->SetPosition(enemy->GetEffectID(), enemy->GetWorldMatrix());
 		}
 
 		if (enemy->IsDead()) {
@@ -182,6 +187,8 @@ void EnemyManager::Update() {
 			if (enemy->WasDefeated() && onEnemyDefeated_) {
 				onEnemyDefeated_();
 			}
+
+			commonEffect_->ReleaseEffectID(enemy->GetEffectID());
 		}
 		else {
 			++it;
@@ -189,10 +196,13 @@ void EnemyManager::Update() {
 	}
 
 	worldTransforms_.UpdateTransformMatrix(maxEnemyNum_);
+
+	commonEffect_->Update();
 }
 
 void EnemyManager::Draw() {
 	renderer_.Draw();
+	commonEffect_->Draw();
 }
 
 void EnemyManager::DebugUpdate() {
@@ -232,10 +242,10 @@ Enemy* EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 		// 敵をアクティブにする
 		activeEnemies_[index] = enemies_[index].get();
 		enemies_[index]->SetActive(true);
-		enemies_[index]->SetUp(position, configList_[static_cast<int>(type)], type);
 		if (!firstSpawnedEnemy) {
 			firstSpawnedEnemy = enemies_[index].get();
 		}
+		enemies_[index]->SetUp(position, configList_[static_cast<int>(type)], type, commonEffect_->SecureEffectID());
 		// 敵の登場演出
 		effectManager_->StartSpawnEffect(Vector3(position.x,0.0f, position.y));
 
@@ -339,7 +349,7 @@ Enemy* EnemyManager::FindNearestTargetable(const Vector3& position, float maxDis
 size_t EnemyManager::GetCarrierTargetCount() const {
 	size_t count = 0;
 	for (const auto& [index, enemy] : activeEnemies_) {
-		if (enemy && enemy->IsTargetingCarrier()) {
+		if (enemy && enemy->IsTargetCarrier()) {
 			count++;
 		}
 	}

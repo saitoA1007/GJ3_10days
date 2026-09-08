@@ -84,7 +84,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	collider_.SetActive(false);
 }
 
-void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
+void Enemy::SetUp(Vector2 position, Config config, EnemyType type, uint32_t effectID) {
 	config_ = config;
 	type_ = type;
 	snakeSpeed_ = 0.0f;
@@ -117,6 +117,8 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
 	collider_.SetWorldPosition(data_->transform.translate);
 
 	timer_ = RandomGenerator::Get(0.0f, 10.0f);
+
+	effectID_ = effectID;
 }
 
 
