@@ -669,6 +669,7 @@
     <ClCompile Include="Application\Utils\CameraEditor\Data\CameraEditorData.cpp" />
     <ClCompile Include="Application\Utils\CameraEditor\Data\CurveData.cpp" />
     <ClCompile Include="Application\Utils\CameraEditor\CameraEditor.cpp" />
+    <ClCompile Include="Application\Enemy\EnemyCommonEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\GameScene.h">
@@ -1286,6 +1287,7 @@
     <ClInclude Include="Application\Utils\CameraEditor\Data\CameraEditorData.h" />
     <ClInclude Include="Application\Utils\CameraEditor\Data\CurveData.h" />
     <ClInclude Include="Application\Utils\CameraEditor\CameraEditor.h" />
+    <ClInclude Include="Application\Enemy\EnemyCommonEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Raytracing\RayGen.hlsl" />

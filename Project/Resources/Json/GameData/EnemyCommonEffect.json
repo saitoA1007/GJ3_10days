@@ -14,7 +14,7 @@
                 "EmittePos": [
                     0.0,
                     0.0,
-                    0.0
+                    1.2999999523162842
                 ],
                 "LifeTime": 1.0,
                 "Rotate": [
@@ -35,8 +35,8 @@
                     1.0399999618530273
                 ],
                 "Enable": true,
-                "MaxSpeed": 0.3700000047683716,
-                "MinSpeed": 0.5600000023841858,
+                "MaxSpeed": 1.8300000429153442,
+                "MinSpeed": 1.809999942779541,
                 "SpreadAngle": 0.0
             },
             "IsActiveBlendAdd": true,
