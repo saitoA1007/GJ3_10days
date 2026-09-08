@@ -20,6 +20,7 @@ void EnemyCommonEffect::Initialize() {
 
 	for (auto& effect : effects_) {
 		effect.backCircle->Initialize();
+		effect.backCircle->SetActive(false); // 初期化時に非アクティブ化
 	}
 }
 
