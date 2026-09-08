@@ -6,7 +6,7 @@
 #include <utility>
 #include "Enemy.h"
 #include "EnemyRenderer.h"
-#include <ParticleBehavior.h>
+#include "EnemyCommonEffect.h"
 
 class Field;
 class Rocket;
@@ -17,7 +17,7 @@ class EnemyEffectManager;
 class EnemyManager : public GameEngine::IGameObject {
 public:
 
-	EnemyManager(uint32_t maxEnemyNum, const GameEngine::Model* model, EnemyEffectManager* effectManager);
+	EnemyManager(uint32_t maxEnemyNum, EnemyEffectManager* effectManager, GameEngine::TextureManager* textureManager, GameEngine::ModelManager* modelManager);
 
 	void Initialize() override;
 	void Update() override;
@@ -60,9 +60,6 @@ private:
 	std::vector<int> freeEnemyIndices_;
 	GameEngine::WorldTransforms worldTransforms_;
 
-	std::vector<GameEngine::ParticleBehavior> commonEffects_;
-	std::vector<GameEngine::ParticleBehavior> deadEffects_;
-
 	//敵のプール
 	std::vector<std::unique_ptr<Enemy>> enemies_;
 	//アクティブな敵のマップ
@@ -79,6 +76,7 @@ private:
 private:
 	// 演出管理
 	EnemyEffectManager* effectManager_ = nullptr;
+	std::unique_ptr<EnemyCommonEffect> commonEffect_ = nullptr;
 
 	GameEngine::DebugParameter debugParam_{ "EnemyManager" };
 
