@@ -289,7 +289,6 @@ void EnergyPickup::SyncModel()
 	Vector4 color = typeSettings_.color;
 	if (isHighlighted_) 
 	{
-		// 選択中は元の色味を残しながら白へ寄せ、対象を判別しやすくする。
 		color.x = color.x + (1.0f - color.x) * 0.65f;
 		color.y = color.y + (1.0f - color.y) * 0.65f;
 		color.z = color.z + (1.0f - color.z) * 0.65f;
