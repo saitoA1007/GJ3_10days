@@ -5,6 +5,7 @@
 #include "FPSCounter.h"
 #include "Application/CollisionConfig.h"
 #include "Application/Effect/EnemySpawnEffect.h"
+#include "Application/Effect/BlackHoleEffect.h"
 using namespace GameEngine;
 
 TestScene::~TestScene() {}
@@ -71,6 +72,10 @@ TestScene::TestScene() {
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
 
+	//gameObjectManager_->AddObject<ParticleBehavior>("blackHoleParticle", 64, textureManager_, effectModel_);
+	//gameObjectManager_->AddObject<ParticleBehavior>("starParticle", 16, textureManager_, effectModel_);
+	//gameObjectManager_->AddObject<ParticleBehavior>("ringParticle", 8, textureManager_, effectModel_);
+
 	auto* cModel = modelManager_->GetNameByModel("Crystal.gltf");
 	cModel->SetDefaultIsEnableLight(false);
 	m_ = std::make_unique<ModelComponent>(cModel);
@@ -80,6 +85,10 @@ TestScene::TestScene() {
 	gameObjectManager_->AddObject<ParticleBehavior>("EnemyCommonEffect", 16, textureManager_, effectModel_);
 	auto pModel = modelManager_->GetNameByModel("Prick.gltf");
 	gameObjectManager_->AddObject<ParticleBehavior>("EnemyDeadEffect", 32, textureManager_, pModel);
+
+	auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
+	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
 }
 
 void TestScene::Initialize() {

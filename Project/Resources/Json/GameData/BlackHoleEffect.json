@@ -7,16 +7,16 @@
                 1.0,
                 1.0
             ],
-            "glowIntensity": 1.2400000095367432,
+            "glowIntensity": 1.159999966621399,
             "glowWidth": 0.25999999046325684,
-            "radius": 0.5899999737739563,
+            "radius": 0.4399999976158142,
             "scale": [
-                1.5,
-                1.5,
-                1.5
+                1.0,
+                1.0,
+                1.0
             ],
-            "strength": 3.5899999141693115,
-            "swirl": 4.420000076293945,
+            "strength": 3.809999942779541,
+            "swirl": 4.769999980926514,
             "translate": [
                 0.0,
                 0.0,
@@ -24,33 +24,33 @@
             ]
         },
         "Ring": {
-            "InnerRadius": 0.33000001311302185,
-            "OuterRadius": 6.920000076293945,
-            "ScrollSpeed": 1.7400000095367432,
-            "densityPower": 2.7699999809265137,
-            "dissolveEdge": 0.30000001192092896,
-            "dissolveThreshold": 1.2000000476837158,
-            "driftSpeed": 1.2000000476837158,
-            "emissionIntensity": 0.6000000238418579,
+            "InnerRadius": 0.49000000953674316,
+            "OuterRadius": 3.069999933242798,
+            "ScrollSpeed": 19.479999542236328,
+            "densityPower": 4.260000228881836,
+            "dissolveEdge": 0.5099999904632568,
+            "dissolveThreshold": 1.2599999904632568,
+            "driftSpeed": 0.7099999785423279,
+            "emissionIntensity": 0.6299999952316284,
             "glowColor": [
                 0.42740851640701294,
                 0.11196911334991455,
                 1.0,
                 1.0
             ],
-            "noiseJitter": 2.5899999141693115,
-            "noiseScale": 35.93000030517578,
+            "noiseJitter": 1.409999966621399,
+            "noiseScale": 26.25,
             "scale": [
-                5.0,
-                5.0,
-                5.0
+                4.0,
+                4.0,
+                4.0
             ],
             "translate": [
                 0.0,
-                1.4500000476837158,
+                1.0,
                 0.0
             ]
         },
-        "SceneName": "Game"
+        "SceneName": "Test"
     }
 }
