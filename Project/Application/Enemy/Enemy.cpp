@@ -73,6 +73,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			if (context_.rocket) {
 				context_.rocket->ReceiveEnemyHit();
 			}
+
 			hp_ = 0;
 			isDead_ = true;
 			break;

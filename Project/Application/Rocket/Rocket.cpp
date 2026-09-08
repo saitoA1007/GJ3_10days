@@ -8,6 +8,7 @@
 #include "AudioManager.h"
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
+#include "Application/Field/FieldEffect.h"
 
 using namespace GameEngine;
 
@@ -18,9 +19,11 @@ namespace
 	constexpr float kEntranceSoundVolume = 1.0f;
 }
 
-Rocket::Rocket(Model* model, const RocketSettings& settings)
+Rocket::Rocket(Model* model, FieldEffect* fieldEffect, const RocketSettings& settings)
 	: settings_(settings), energy_(settings.initialEnergy)
 {
+	fieldEffect_ = fieldEffect;
+
 	assert(model != nullptr && "rocket requires Rocket.gltf");
 	modelComponent_ = std::make_unique<ModelComponent>(model);
 	modelComponent_->materialData_->enableLighting = true;
@@ -122,6 +125,8 @@ EnergyChange Rocket::DepositEnergy(int32_t amount)
 	// 増減理由を付けておくことで、将来UIや演出が変化元を判別できる。
 	const EnergyChange change = energy_.Add(amount, EnergyChangeReason::Delivery);
 	NotifyEnergyChanged(change);
+	// 取得したことによるフィールド演出
+	fieldEffect_->Start({0.0f,1.0f,0.137f,1.0f});
 	return change;
 }
 
@@ -138,6 +143,8 @@ EnergyChange Rocket::ReceiveEnemyHit()
 	++enemyHitCount_;
 	const EnergyChange change = energy_.ConsumeUpTo(settings_.enemyHitLoss, EnergyChangeReason::EnemyHit);
 	NotifyEnergyChanged(change);
+	// ダメージを受けたことによるフィールド演出
+	fieldEffect_->Start({ 1.0f,0.0f,0.0f,1.0f });
 	return change;
 }
 
