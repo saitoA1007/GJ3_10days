@@ -32,6 +32,7 @@ using namespace GameEngine;
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <string_view>
 #include "MyMath.h"
@@ -65,11 +66,15 @@ GameScene::GameScene() {
 		{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, kCameraPosition },
 		1280,
 		720);
+	mainCameraBasePosition_ = mainCamera_->transform_.translate;
 	mainCameraEndRotation_ = mainCamera_->transform_.rotate;
 	mainCameraDebugParameter_ = std::make_unique<DebugParameter>("GameSceneMainCamera");
-	mainCameraDebugParameter_->Register("Translate", mainCamera_->transform_.translate, 0);
+	mainCameraDebugParameter_->Register("Translate", mainCameraBasePosition_, 0);
 	mainCameraDebugParameter_->Register("Rotate", mainCameraEndRotation_, 1);
 	mainCameraDebugParameter_->Register("StartRotateX", mainCameraEntranceStartRotateX_, 0, "Entrance");
+	mainCameraDebugParameter_->Register("Duration", enemyHitCameraShakeDuration_, 0, "EnemyHitShake");
+	mainCameraDebugParameter_->Register("Amplitude", enemyHitCameraShakeAmplitude_, 1, "EnemyHitShake");
+	mainCameraDebugParameter_->Register("Frequency", enemyHitCameraShakeFrequency_, 2, "EnemyHitShake");
 
 	dir_.Normalize();
 
@@ -494,10 +499,13 @@ GameScene::GameScene() {
 }
 
 void GameScene::Initialize() {
-	mainCamera_->transform_.translate = kCameraPosition;
+	mainCameraBasePosition_ = kCameraPosition;
 	mainCameraEndRotation_ = Math::DirectionToEuler(kCameraTarget - kCameraPosition);
+	isEnemyHitCameraShaking_ = false;
+	enemyHitCameraShakeElapsedTime_ = 0.0f;
+	lastHandledEnemyHitCount_ = rocket_ ? rocket_->GetEnemyHitCount() : 0;
 	mainCameraDebugParameter_->Apply();
-	UpdateCamera();
+	UpdateCamera(0.0f);
 
 	score_.Reset();
 	scoreView_->SetValue(score_.GetDisplayedValue());
@@ -532,7 +540,7 @@ void GameScene::Update() {
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
 	UpdateTutorialViews(true);
-	UpdateCamera();
+	UpdateCamera(FpsCounter::gameDeltaTime);
 	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
 	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
@@ -566,7 +574,7 @@ void GameScene::DebugUpdate()
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
 	UpdateTutorialViews(false);
-	UpdateCamera();
+	UpdateCamera(0.0f);
 	
 	// ゲーム更新を停止している間に振動が残らないようにする。
 	if (controllerVibration_)
@@ -644,9 +652,22 @@ void GameScene::InputRegisterCommand() {
 }
 
 
-void GameScene::UpdateCamera()
+void GameScene::UpdateCamera(float deltaTime)
 {
 	mainCameraDebugParameter_->ApplyIfDirty();
+
+	if (rocket_)
+	{
+		const uint64_t enemyHitCount = rocket_->GetEnemyHitCount();
+		if (enemyHitCount > lastHandledEnemyHitCount_)
+		{
+			StartEnemyHitCameraShake();
+		}
+		lastHandledEnemyHitCount_ = enemyHitCount;
+	}
+
+	mainCamera_->transform_.translate =
+		mainCameraBasePosition_ + CalculateEnemyHitCameraShakeOffset();
 	mainCamera_->transform_.rotate = mainCameraEndRotation_;
 	if (rocket_)
 	{
@@ -658,9 +679,48 @@ void GameScene::UpdateCamera()
 	}
 	mainCamera_->Update();
 
+	if (isEnemyHitCameraShaking_)
+	{
+		enemyHitCameraShakeElapsedTime_ += (std::max)(deltaTime, 0.0f);
+		if (enemyHitCameraShakeElapsedTime_ >= (std::max)(enemyHitCameraShakeDuration_, 0.0f))
+		{
+			isEnemyHitCameraShaking_ = false;
+			enemyHitCameraShakeElapsedTime_ = 0.0f;
+		}
+	}
+
 	// 打ち上げ演出以降はResultMoveCameraがRenderQueueのカメラを管理する。
 	if (!gameFlow_ || gameFlow_->UsesGameSceneCamera())
 	{
 		renderQueue_->SetCamera(mainCamera_.get());
 	}
+}
+
+void GameScene::StartEnemyHitCameraShake()
+{
+	enemyHitCameraShakeElapsedTime_ = 0.0f;
+	isEnemyHitCameraShaking_ =
+		enemyHitCameraShakeDuration_ > 0.0f && enemyHitCameraShakeAmplitude_ > 0.0f;
+}
+
+Vector3 GameScene::CalculateEnemyHitCameraShakeOffset() const
+{
+	const float duration = (std::max)(enemyHitCameraShakeDuration_, 0.0f);
+	const float amplitude = (std::max)(enemyHitCameraShakeAmplitude_, 0.0f);
+	if (!isEnemyHitCameraShaking_ || duration <= 0.0f || amplitude <= 0.0f)
+	{
+		return {};
+	}
+
+	const float progress = (std::clamp)(enemyHitCameraShakeElapsedTime_ / duration, 0.0f, 1.0f);
+	const float decay = 1.0f - progress;
+	const float strength = amplitude * decay * decay;
+	const float phase =
+		enemyHitCameraShakeElapsedTime_ * (std::max)(enemyHitCameraShakeFrequency_, 0.0f);
+
+	return {
+		(std::sin(phase) * 0.65f + std::sin(phase * 2.17f + 1.3f) * 0.35f) * strength,
+		(std::cos(phase * 1.23f) * 0.7f + std::sin(phase * 2.71f + 2.1f) * 0.3f) * strength,
+		std::sin(phase * 0.83f + 0.7f) * strength * 0.2f,
+	};
 }
