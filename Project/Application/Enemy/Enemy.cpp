@@ -39,29 +39,24 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			// UnitがEnergyを持って運搬中に当たった場合
 			if (hitUnit->IsCarryingEnergy()) {
 				// 敵の勝ち
-				// Unitは死に、運んでいたEnergyも消滅
 				hitUnit->DefeatAndDropEnergy();
 			}
 			// UnitがEnergyを持っていない場合
 			else {
 				if (hitUnit->GetStamina() > 0.0f) {
-					// スタミナが0より大きい場合：Unitの勝ち
 					hp_ = 0;
 					damageTimer_ = 0.0f;
 
 					if (hp_ <= 0) {
-						// 敵を倒し、ドロップしたEnergyのポインタを受け取る
 						EnergyPickup* droppedEnergy = this->DefeatAndDropEnergy();
 						if (droppedEnergy) {
-							// Unitに拾わせて帰還させる
 							hitUnit->StartCarryingEnergy(droppedEnergy);
 						}
 					}
 				} else {
 					// スタミナが0の場合：相打ち
-					// 強制的にEnemyをキルしてEnergyをドロップさせる
 					this->DefeatAndDropEnergy();
-					// Unitも死んで待機状態に戻る
+
 					hitUnit->ReturnToStorageAfterDefeat();
 				}
 			}
@@ -112,8 +107,7 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type) {
 
 	collider_.SetActive(true);
 	collider_.SetRadius(collisionRadius_ * config.size_);
-	// Scene更新中などEnemyManager::Update後に生成された場合でも、
-	// 衝突判定が前回位置や原点で行われないよう生成座標を即座に反映する。
+
 	collider_.SetWorldPosition(data_->transform.translate);
 
 	timer_ = RandomGenerator::Get(0.0f, 10.0f);
@@ -165,9 +159,11 @@ void Enemy::Update() {
 	damageTimer_ += GameEngine::FpsCounter::deltaTime;
 	if (damageTimer_ < damageTime_) {
 		data_->color = config_.hitColor_;
-	} else if (isHighlighted_) {
-		data_->color = config_.highlightColor_;
-	} else {
+	}
+	else if (isHighlighted_) {
+		data_->color = config_.highlightColor_ * 10.0f;
+	}
+	else {
 		data_->color = config_.normalColor_;
 	}
 }

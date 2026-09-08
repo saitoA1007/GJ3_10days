@@ -16,10 +16,6 @@ using namespace GameEngine;
 Unit::Unit(Model* model, Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH)
 	: rocket_(rocket), settings_(settings), RopeEffect_(bameModel, beamGH)
 {
-	assert(model != nullptr && "unit requires unit.obj");
-	assert(rocket_ != nullptr && "unit requires a rocket");
-	assert(settings_ != nullptr && "unit requires settings");
-
 	modelComponent_ = std::make_unique<ModelComponent>(model);
 	modelComponent_->materialData_->enableLighting = true;
 
@@ -67,6 +63,9 @@ void Unit::Update()
 		break;
 	case UnitState::MovingToEnemy:
 		UpdateMovingToEnemy(FpsCounter::deltaTime);
+		break;
+	case UnitState::MovingToPosition:
+		UpdateMovingToPosition(FpsCounter::deltaTime);
 		break;
 	case UnitState::ReturningToRocket:
 		UpdateReturningToRocket(FpsCounter::deltaTime);
@@ -131,6 +130,27 @@ bool Unit::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
 	targetEnergy_ = nullptr;
 	targetEnemy_ = target;
 	state_ = UnitState::MovingToEnemy;
+	collider_.SetActive(true);
+	SyncModel();
+	return true;
+}
+
+
+bool Unit::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy)
+{
+	if (!IsAvailable())
+	{
+		return false;
+	}
+
+	AllocateStamina(requestedEnergy);
+	position_ = rocket_->GetPosition() + settings_->launchOffset;
+	position_.y = settings_->groundY;
+	targetEnergy_ = nullptr;
+	targetEnemy_ = nullptr;
+	targetPosition_ = targetPosition;
+	targetPosition_.y = settings_->groundY;
+	state_ = UnitState::MovingToPosition;
 	collider_.SetActive(true);
 	SyncModel();
 	return true;
@@ -216,9 +236,21 @@ void Unit::UpdateMovingToEnemy(float deltaTime)
 	ConsumeStamina(deltaTime);
 }
 
+void Unit::UpdateMovingToPosition(float deltaTime)
+{
+	MoveTowards(targetPosition_, deltaTime);
+	ConsumeStamina(deltaTime);
+
+	const float arrivalRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
+	if (DistanceSquaredXZ(position_, targetPosition_) <= arrivalRadiusSquared)
+	{
+		state_ = UnitState::ReturningToRocket;
+	}
+}
+
 void Unit::UpdateReturningToRocket(float deltaTime)
 {
-	if (!targetEnergy_ || !targetEnergy_->IsCarried())
+	if (targetEnergy_ && !targetEnergy_->IsCarried())
 	{
 		Recall();
 		return;
@@ -226,16 +258,25 @@ void Unit::UpdateReturningToRocket(float deltaTime)
 
 	MoveTowards(rocket_->GetPosition(), deltaTime);
 	ConsumeStamina(deltaTime);
-	targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+
+	if (targetEnergy_ && targetEnergy_->IsCarried())
+	{
+		targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+	}
 
 	const float deliveryRadiusSquared = settings_->deliveryRadius * settings_->deliveryRadius;
 	if (DistanceSquaredXZ(position_, rocket_->GetPosition()) <= deliveryRadiusSquared)
 	{
-		// DeliverはEnergy個体をプールへ戻し、返された獲得量だけをRocketへ加算
-		rocket_->DepositEnergy(targetEnergy_->Deliver());
+		if (targetEnergy_ && targetEnergy_->IsCarried())
+		{
+			rocket_->DepositEnergy(targetEnergy_->Deliver());
+		}
+
 		targetEnergy_ = nullptr;
+		targetEnemy_ = nullptr;
 		state_ = UnitState::Stored;
 		stamina_ = 0.0f;
+		collider_.SetActive(false);
 	}
 }
 

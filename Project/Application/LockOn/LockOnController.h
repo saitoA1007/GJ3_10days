@@ -48,17 +48,6 @@ class LockOnController final : public GameEngine::IGameObject
 {
 public:
 	/// @brief 入力をフィールド座標へ変換し、対象検索とユニット派遣を仲介する。
-	/// @param[in] input マウス座標と移動量の取得元。
-	/// @param[in] inputCommand デバイス共通コマンドの取得元。
-	/// @param[in] camera マウスレイの逆変換に使うカメラ。
-	/// @param[in] cursorModel カーソルの描画モデル。
-	/// @param[in] debugRenderer 選択範囲とチャージ量の描画先。
-	/// @param[in] field カーソル移動範囲の参照先。
-	/// @param[in] rocket 派遣元かつエネルギー消費元。
-	/// @param[in] energySpawner エネルギーの検索先。
-	/// @param[in] enemyManager 敵の検索先。
-	/// @param[in] unitManager ユニット派遣の依頼先。
-	/// @param[in] settings カーソルとチャージの初期設定。
 	LockOnController(
 		GameEngine::Input* input,
 		GameEngine::InputCommand* inputCommand,

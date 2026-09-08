@@ -16,9 +16,6 @@ UnitManager::UnitManager(Model* unitModel, Rocket* rocket, GameEngine::Model* ba
 	uint32_t beamGH, size_t capacity)
 	: rocket_(rocket)
 {
-	assert(unitModel != nullptr && "unit manager requires unit.obj");
-	assert(rocket_ != nullptr && "unit manager requires a rocket");
-
 	// Unitは倒れても再利用するため、最大候補数を固定プールとして確保する。
 	const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 	units_.reserve(safeCapacity);
@@ -122,6 +119,23 @@ bool UnitManager::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
 		if (units_[i]->IsAvailable())
 		{
 			return units_[i]->DispatchToEnemy(target, requestedEnergy);
+		}
+	}
+	return false;
+}
+
+bool UnitManager::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy)
+{
+	if (!gameplayEnabled_)
+	{
+		return false;
+	}
+
+	for (size_t i = 0; i < GetUnitCount(); ++i)
+	{
+		if (units_[i]->IsAvailable())
+		{
+			return units_[i]->DispatchToPosition(targetPosition, requestedEnergy);
 		}
 	}
 	return false;

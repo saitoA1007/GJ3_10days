@@ -283,17 +283,23 @@ bool LockOnController::TrySetCursorFromMouse()
 	return true;
 }
 
-void LockOnController::ClampCursorToField() 
+void LockOnController::ClampCursorToField()
 {
 	const Vector3 center = field_->GetSettings().center;
 	const float fieldRadius = field_->GetRadius(FieldZone::OuterBuffer);
 	const float allowedRadius = (std::max)(fieldRadius - settings_.fieldEdgeMargin, 0.0f);
+
+	// 奥へ移動しないよう、中心点で押し戻死
+	if (cursorPosition_.z > center.z) {
+		cursorPosition_.z = center.z;
+	}
+
+	// 円形フィールドの外に出ないよう半径で制限
 	const float offsetX = cursorPosition_.x - center.x;
 	const float offsetZ = cursorPosition_.z - center.z;
 	const float distanceSquared = offsetX * offsetX + offsetZ * offsetZ;
 
 	if (distanceSquared > allowedRadius * allowedRadius && distanceSquared > 0.0f) {
-		// 中心からの方向は維持し、半径だけを許可範囲まで縮める。
 		const float scale = allowedRadius / std::sqrt(distanceSquared);
 		cursorPosition_.x = center.x + offsetX * scale;
 		cursorPosition_.z = center.z + offsetZ * scale;
@@ -321,18 +327,26 @@ void LockOnController::SyncCursorModel()
 
 void LockOnController::SyncChargeModel()
 {
-	if (!isCharging_ || (!selectedEnergy_ && !selectedEnemy_))
+	// チャージ中でなければ描画更新しない
+	if (!isCharging_)
 	{
 		return;
 	}
 
-	Vector3 targetPosition = selectedEnemy_
-		? selectedEnemy_->GetPosition()
-		: selectedEnergy_->GetPosition();
+	// ターゲット座標と初期半径を取得 (対象がない場合はカーソル位置)
+	Vector3 targetPosition = cursorPosition_;
+	float targetRadius = settings_.selectionRadius;
 
-	const float targetRadius = selectedEnemy_
-		? selectedEnemy_->GetDisplayScale() + 0.25f
-		: selectedEnergy_->GetScale() + 0.25f;
+	if (selectedEnemy_)
+	{
+		targetPosition = selectedEnemy_->GetPosition();
+		targetRadius = selectedEnemy_->GetDisplayScale() + 0.25f;
+	}
+	else if (selectedEnergy_)
+	{
+		targetPosition = selectedEnergy_->GetPosition();
+		targetRadius = selectedEnergy_->GetScale() + 0.25f;
+	}
 
 	const float ratio = CalculateChargeRatio();
 	const float currentRadius = targetRadius + ratio * settings_.selectionRadius;
@@ -340,7 +354,7 @@ void LockOnController::SyncChargeModel()
 	chargeModel_->worldTransform_.transform_.scale =
 	{
 		settings_.cursorModelScale.x * currentRadius,
-		targetPosition.y + settings_.cursorModelHeightOffset + 0.01f,
+		settings_.cursorModelScale.y * currentRadius,
 		settings_.cursorModelScale.z * currentRadius,
 	};
 
@@ -382,15 +396,8 @@ void LockOnController::UpdateSelection()
 
 void LockOnController::StartLockOn()
 {
-	// 待機Unitがいない場合は、対象を選べてもチャージを開始しない。
-	if (!HasValidSelection() || unitManager_->GetAvailableCount() == 0)
-	{
-		return;
-	}
-
 	isCharging_ = true;
 	lockOnSeconds_ = 0.0f;
-	chargedEnergy_ = 0;
 }
 
 void LockOnController::UpdateLockOn(float deltaTime)
@@ -444,39 +451,31 @@ void LockOnController::UpdateLockOn(float deltaTime)
 
 void LockOnController::CompleteLockOn()
 {
-	if (lockOnSeconds_ < minimumDispatchHoldSeconds_)
+	if (!isCharging_)
 	{
-		CancelLockOn();
-		UpdateSelection();
 		return;
 	}
 
-	// リアルタイムで引き落とした chargedEnergy_ をそのまま Unit に渡す
-	bool dispatched = false;
-	if (selectedEnergy_)
+	const int32_t requestedEnergy = CalculateRequestedEnergy();
+
+	// 敵が選択されている場合
+	if (selectedEnemy_)
 	{
-		dispatched = unitManager_->DispatchToEnergy(selectedEnergy_, chargedEnergy_);
+		unitManager_->DispatchToEnemy(selectedEnemy_, requestedEnergy);
 	}
-	else if (selectedEnemy_)
+	// エネルギーが選択されている場合
+	else if (selectedEnergy_)
 	{
-		dispatched = unitManager_->DispatchToEnemy(selectedEnemy_, chargedEnergy_);
+		unitManager_->DispatchToEnergy(selectedEnergy_, requestedEnergy);
+	}
+	else
+	{
+		unitManager_->DispatchToPosition(cursorPosition_, requestedEnergy);
 	}
 
-	// 派遣に失敗した場合は引き落としたエネルギーをロケットに返却
-	if (!dispatched && chargedEnergy_ > 0)
-	{
-		rocket_->DepositEnergy(chargedEnergy_);
-	}
-
-	chargedEnergy_ = 0;
-	SetSelection(nullptr, nullptr);
+	// チャージ解除
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
-
-	if (!dispatched)
-	{
-		UpdateSelection();
-	}
 }
 
 void LockOnController::CancelLockOn()
@@ -525,8 +524,7 @@ int32_t LockOnController::CalculateRequestedEnergy() const
 
 bool LockOnController::HasValidSelection() const
 {
-	return (selectedEnergy_ && selectedEnergy_->IsTargetable()) ||
-		(enemySelectionEnabled_ && selectedEnemy_ && selectedEnemy_->IsTargetable());
+	return true;
 }
 
 void LockOnController::SetSelection(EnergyPickup* energy, Enemy* enemy)

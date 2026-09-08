@@ -26,6 +26,7 @@ enum class UnitState : uint8_t
 	Stored,            // ロケット内で待機中。再出撃可能
 	MovingToEnergy,    // 予約したEnergyへ移動中
 	MovingToEnemy,     // 予約したEnemyへ移動中
+	MovingToPosition,
 	ReturningToRocket, // Energyを頭上に載せて帰還中
 };
 
@@ -81,6 +82,9 @@ public:
 	// 敵を予約して攻撃へ出撃する
 	bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
 
+	// 指定した地面の目標座標へ派遣する
+	bool DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy);
+
 	// 予約を解放して強制的に待機状態へ戻す
 	void Recall();
 
@@ -111,7 +115,8 @@ public:
 	bool IsDeployed() const {
 		return state_ == UnitState::MovingToEnergy ||
 			state_ == UnitState::MovingToEnemy ||
-			state_ == UnitState::ReturningToRocket;
+			state_ == UnitState::ReturningToRocket ||
+			state_ == UnitState::MovingToPosition;
 	}
 
 	// エネルギーを持って帰還中か判定
@@ -130,6 +135,7 @@ private:
 	// ==========================================
 	void UpdateMovingToEnergy(float deltaTime);
 	void UpdateMovingToEnemy(float deltaTime);
+	void UpdateMovingToPosition(float deltaTime);
 	void UpdateReturningToRocket(float deltaTime);
 
 	// ==========================================
@@ -165,5 +171,8 @@ private:
 
 	// 繋がっている演出
 	RopeEffect RopeEffect_;
+
+	// 目的地座標の保持用
+	Vector3 targetPosition_ = {};
 };
 

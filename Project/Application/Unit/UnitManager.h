@@ -69,6 +69,8 @@ public:
 	/// @return 派遣できた場合はtrue。
 	bool DispatchToEnemy(Enemy* target, int32_t requestedEnergy);
 
+	bool DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy);
+
 	/// @brief 指定位置の索敵範囲内にいる、最も近い運搬ユニットを探す。
 	/// @param[in] position 検索中心のワールド座標。
 	/// @param[in] maxDistance 検索する最大距離。
