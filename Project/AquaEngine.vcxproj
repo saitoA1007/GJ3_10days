@@ -193,7 +193,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Rocket\RocketEnergy.cpp" />
     <ClCompile Include="Application\TitleLogo\TitleLogo.cpp" />
     <ClCompile Include="Application\GameCamera\GameCamera.cpp" />
-    <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="Application\Unit\Pikumi.cpp" />
     <ClCompile Include="Application\Player\PlayerStateIdle.cpp" />
     <ClCompile Include="Application\Player\PlayerStateMove.cpp" />
@@ -487,7 +486,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Field\FieldEffect.h" />
     <ClInclude Include="Application\GameCamera\GameCamera.h" />
     <ClInclude Include="Application\Field\Field.h" />
-    <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="Application\GameCamera\ResultMoveCamera.h" />
     <ClInclude Include="Application\GameFlow\GameFlow.h" />
     <ClInclude Include="Application\GameFlow\IGamePhase.h" />
