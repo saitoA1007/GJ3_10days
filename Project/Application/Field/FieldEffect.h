@@ -50,7 +50,7 @@ public:
 private:
 
 	// リングの数(中心から外側に何重に並べるか)
-	uint32_t ringNum_ = 20;
+	uint32_t ringNum_ = 15;
 
 	// パーティクルの最大数。円状に並べるので リング数^2 * π 個ほど必要になる
 	uint32_t maxNum_ = ringNum_ * ringNum_ * 4;
