@@ -44,9 +44,6 @@ void ResultMessage::Initialize() {
 	isBoot_ = false;
 
 	debugParameter_.Apply();
-
-	//debug用
-	Boot(Type::Tobisugi);
 }
 
 void ResultMessage::Update() {
@@ -102,4 +99,12 @@ void ResultMessage::Boot(Type type) {
 	for (int i = 0; i < (int)data.models.size(); ++i) {
 		animators_[i].Initialize(data.models[i], &data.charAnimation);
 	}
+
+	timer_ = 0.0f;
+}
+
+bool ResultMessage::IsFin() const {
+	return isBoot_ &&
+		timer_ > resultDataList_[static_cast<int>(currentType_)].charAnimation.duration +
+		diray_ * float(resultDataList_[static_cast<int>(currentType_)].models.size());
 }

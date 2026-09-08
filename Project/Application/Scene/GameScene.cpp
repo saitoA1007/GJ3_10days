@@ -161,6 +161,8 @@ GameScene::GameScene() {
 	auto* explosionEffect = gameObjectManager_->AddObject<ExplosionEffect>(modelManager_, textureManager_, gameObjectManager_);
 	// リザルトムービー管理
 	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect, explosionEffect);
+	// リザルトメッセージ
+	auto resultMessage = gameObjectManager_->AddObject<ResultMessage>(modelManager_, animationManager_);
 
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
@@ -188,6 +190,7 @@ GameScene::GameScene() {
 	flowContext.resultMovieManager_ = resultMoiveManager;
 	flowContext.tutorialLogoView = tutorialLogoView_.get();
 	flowContext.startPlayingView = startPlayingView_.get();
+	flowContext.resultMessage = resultMessage;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
