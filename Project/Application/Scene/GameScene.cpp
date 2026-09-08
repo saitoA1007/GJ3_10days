@@ -24,6 +24,7 @@ using namespace GameEngine;
 #include "Application/Effect/SpawnFieldEffect.h"
 #include "Application/Effect/MoonObject.h"
 #include "Application/Effect/RocketEffect.h"
+#include "Application/Effect/ExplosionEffect.h"
 #include <Application/result/ShuffleNumber.h>
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
@@ -131,7 +132,10 @@ GameScene::GameScene() {
 	auto* reCamera =  gameObjectManager_->AddObject<ResultMoveCamera>();
 	// ロケット演出
 	auto* rocketEffect =  gameObjectManager_->AddObject<RocketEffect>(modelManager_, textureManager_,gameObjectManager_);
-	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect);
+	// 爆破演出
+	auto* explosionEffect = gameObjectManager_->AddObject<ExplosionEffect>(modelManager_, textureManager_, gameObjectManager_);
+	// リザルトムービー管理
+	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect, explosionEffect);
 
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {

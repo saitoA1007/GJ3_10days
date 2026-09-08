@@ -4,6 +4,37 @@
 #include "ParticleEmitModules.h"
 using namespace GameEngine;
 
+namespace {
+
+    /// <summary>
+    /// 位置に行列を掛ける（平行移動あり）
+    /// </summary>
+    Vector3 TransformPosition(const Vector3& v, const Matrix4x4& m) {
+        Vector3 result{};
+        result.x = v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0] + m.m[3][0];
+        result.y = v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1] + m.m[3][1];
+        result.z = v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2] + m.m[3][2];
+        float w = v.x * m.m[0][3] + v.y * m.m[1][3] + v.z * m.m[2][3] + m.m[3][3];
+        if (w != 0.0f) {
+            result.x /= w;
+            result.y /= w;
+            result.z /= w;
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 方向ベクトルに行列を掛ける（平行移動なし）
+    /// </summary>
+    Vector3 TransformDirection(const Vector3& v, const Matrix4x4& m) {
+        return {
+            v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0],
+            v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1],
+            v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2],
+        };
+    }
+}
+
 ParticleBehavior::ParticleBehavior(const std::string& name, uint32_t maxNum, TextureManager* textureManager, Model* model) {
     maxNumInstance_ = maxNum;
     name_ = name;
@@ -166,6 +197,9 @@ void ParticleBehavior::Move(const Matrix4x4& cameraMatrix) {
         isRotateVelocity = true;
     }
 
+    // 常に親に追従するか（ローカル空間のときのみ毎フレーム親行列を掛ける）
+    const bool isFollowParent = IsFollowParent();
+
     for (uint32_t i = 0; i < maxNumInstance_; ++i) {
         ParticleData& particle = particles_[i];
 
@@ -186,14 +220,38 @@ void ParticleBehavior::Move(const Matrix4x4& cameraMatrix) {
 
         // worldTransformsの更新
         if (main_.isBillBoard) {
+
+            // ビルボードは親の回転を掛けてしまうとカメラを向かなくなるので
+           // 「位置（と進行方向）だけ」を親空間からワールドへ変換して使う
+            Vector3 worldPos = particle.transform.translate;
+            Vector3 worldVelocity = particle.velocity;
+            if (isFollowParent) {
+                worldPos = TransformPosition(worldPos, *parentMatrix_);
+                worldVelocity = TransformDirection(worldVelocity, *parentMatrix_);
+            }
+
             // ビルボードを適応する
             if (isRotateVelocity) {
                 worldTransforms_->transformDatas_[currentNumInstance_].worldMatrix = Math::MakeDirectionalBillboardMatrix(particle.transform.scale, particle.transform.translate, cameraMatrix, camera_->GetViewMatrix(), particle.velocity, particle.transform.rotate.z);
             } else {
                 worldTransforms_->transformDatas_[currentNumInstance_].worldMatrix = Math::MakeBillboardMatrix(particle.transform.scale, particle.transform.translate, particle.transform.rotate.z,cameraMatrix);
             }
+
+            // ペアレント
+            if (parentMatrix_ != nullptr) {
+                worldTransforms_->transformDatas_[currentNumInstance_].worldMatrix *= *parentMatrix_;
+            }
         } else {
-            worldTransforms_->transformDatas_[currentNumInstance_].transform = particle.transform;
+            if (isFollowParent) {
+                // ローカル行列を作ってから親のワールド行列を掛ける
+                Matrix4x4 localMatrix = Math::MakeAffineMatrix(particle.transform.scale, particle.transform.rotate, particle.transform.translate);
+                worldTransforms_->transformDatas_[currentNumInstance_].worldMatrix = localMatrix * (*parentMatrix_);
+                // 後段のUpdateTransformMatrixで上書きされないように、transformも同期しておく
+                worldTransforms_->transformDatas_[currentNumInstance_].transform = particle.transform;
+            } else {
+                worldTransforms_->transformDatas_[currentNumInstance_].transform = particle.transform;
+            }
+            //worldTransforms_->transformDatas_[currentNumInstance_].transform = particle.transform;
         }
 
         worldTransforms_->transformDatas_[currentNumInstance_].color = particle.color;
@@ -202,7 +260,7 @@ void ParticleBehavior::Move(const Matrix4x4& cameraMatrix) {
     }
 
     // 行列の更新処理
-    if (!main_.isBillBoard) {
+    if (!main_.isBillBoard && !isFollowParent) {
         worldTransforms_->UpdateTransformMatrix(currentNumInstance_);
     }
 }

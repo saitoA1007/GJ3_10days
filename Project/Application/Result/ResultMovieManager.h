@@ -5,11 +5,12 @@
 class ResultMoveCamera;
 class MoonObject;
 class RocketEffect;
+class ExplosionEffect;
 
 // リザルトのムービー演出を管理
 class ResultMovieManager : public GameEngine::IGameObject {
 public:
-	ResultMovieManager(ResultMoveCamera* camera, MoonObject* moonObject, RocketEffect* rocketEffect);
+	ResultMovieManager(ResultMoveCamera* camera, MoonObject* moonObject, RocketEffect* rocketEffect, ExplosionEffect* explosionEffect);
 
 	void Initialize() override;
 	void Update() override;
@@ -30,4 +31,9 @@ private:
 
 	// ロケットの演出
 	RocketEffect* rocketEffect_ = nullptr;
+
+	// 爆破演出
+	ExplosionEffect* explosionEffect_ = nullptr;
+
+	bool isExplo_ = false;
 };
