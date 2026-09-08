@@ -1,7 +1,7 @@
 {
     "Unit": {
         "Blackhole": {
-            "BHBaseRadius": 10.0,
+            "BHBaseRadius": 18.0,
             "BHDuration": 3.0,
             "BHEnergyThreshold": 40,
             "BHFarDistance": 30.0,
