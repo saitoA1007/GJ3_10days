@@ -1,0 +1,33 @@
+{
+    "ExplosionEffect": {
+        "Particle": {
+            "DelayTime": 0.05000000074505806,
+            "PlayMaxTime": 2.0
+        },
+        "Ring": {
+            "Color": [
+                0.0,
+                0.24710440635681152,
+                1.0,
+                1.0
+            ],
+            "DelayTime": 0.05999999865889549,
+            "EndScale": 50.0,
+            "SpreadTime": 0.550000011920929,
+            "StartScale": 5.0
+        },
+        "SceneName": "Test",
+        "flash": {
+            "Color": [
+                0.3552122116088867,
+                0.0,
+                1.0,
+                1.0
+            ],
+            "EndScale": 10.0,
+            "FadeTime": 0.5,
+            "ScaleTime": 0.10000000149011612,
+            "StartScale": 0.5
+        }
+    }
+}

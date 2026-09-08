@@ -2,15 +2,17 @@
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include "Application/Effect/Moonobject.h"
 #include "Application/Effect/RocketEffect.h"
+#include "Application/Effect/ExplosionEffect.h"
 using namespace GameEngine;
 
-ResultMovieManager::ResultMovieManager(ResultMoveCamera* camera, MoonObject* moonObject, RocketEffect* rocketEffect) {
+ResultMovieManager::ResultMovieManager(ResultMoveCamera* camera, MoonObject* moonObject, RocketEffect* rocketEffect, ExplosionEffect* explosionEffect) {
 	resultMoveCamera_ = camera;
 	moonObject_ = moonObject;
 	rocketEffect_ = rocketEffect;
-
+	explosionEffect_ = explosionEffect;
 
 	// 停止
+	explosionEffect_->SetActive(false);
 	resultMoveCamera_->SetActive(false);
 	moonObject_->SetActive(false);
 	rocketEffect_->SetActive(false);
@@ -40,7 +42,10 @@ void ResultMovieManager::Update() {
 	case ResultMoveCamera::Phase::kStop:
 
 		if (rocketEffect_->GetEnergy() > 1.0f) {
+			if (isExplo_) { return; }
+			isExplo_ = true;
 			moonObject_->Break();
+			explosionEffect_->Start({80.0f,50.0f,0.0f});
 		}
 		break;
 	}
@@ -55,10 +60,13 @@ void ResultMovieManager::Start() {
 	resultMoveCamera_->SetActive(true);
 	moonObject_->SetActive(true);
 	rocketEffect_->SetActive(true);
+	explosionEffect_->SetActive(true);
 
 	// カメラ演出を開始
 	resultMoveCamera_->Start();
 	rocketEffect_->Reset();
+
+	isExplo_ = false;
 }
 
 bool ResultMovieManager::IsFin() const {
