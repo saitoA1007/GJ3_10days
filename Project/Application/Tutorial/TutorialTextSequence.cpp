@@ -17,6 +17,7 @@ namespace
 	constexpr const char* kLockOnTriggerCommand = "LockOnTrigger";
 	constexpr const char* kLockOnReleaseCommand = "LockOnRelease";
 	constexpr const char* kTextPopSoundName = "tutorialTextPop.mp3";
+	constexpr const char* kTextOutSoundName = "tutorialtextOut.mp3";
 	constexpr const char* kSuccessSoundName = "tutorialSuccess.mp3";
 	constexpr const char* kFailureSoundName = "tutorialFailure.mp3";
 	constexpr Vector3 kNormalColor = { 1.0f, 1.0f, 1.0f };
@@ -47,6 +48,7 @@ struct TutorialTextSequence::StepEntry
 	bool showSuccessColor = true;
 	bool activated = false;
 	bool entranceSoundPlayed = false;
+	bool returnSoundPlayed = false;
 	std::function<void()> onActivated;
 	std::function<void()> onCompleted;
 };
@@ -185,6 +187,11 @@ void TutorialTextSequence::Update(bool advanceAnimation, float deltaTime)
 			entry.view->StartReturnAnimation(entry.view->GetMoveDuration());
 		}
 	}
+	if (!entry.returnSoundPlayed && entry.view->HasReturnAnimationStarted())
+	{
+		entry.returnSoundPlayed = true;
+		PlayTutorialSound(kTextOutSoundName);
+	}
 
 	if (entry.successStarted && entry.view->IsSuccessAnimationComplete())
 	{
@@ -266,5 +273,6 @@ void TutorialTextSequence::ResetSteps()
 		entry->successStarted = false;
 		entry->activated = false;
 		entry->entranceSoundPlayed = false;
+		entry->returnSoundPlayed = false;
 	}
 }
