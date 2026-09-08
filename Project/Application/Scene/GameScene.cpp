@@ -97,11 +97,9 @@ GameScene::GameScene() {
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
-	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
-	//auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
 
 	auto* rocketModel = modelManager_->GetNameByModel("Rocket.gltf");
-	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);
+	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel, fieldEffect);
 
 	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
 	energySpawner_ = gameObjectManager_->AddObject<EnergySpawner>(energyModel, field_,textureManager_, planeModel);

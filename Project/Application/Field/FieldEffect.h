@@ -16,9 +16,14 @@ public:
 		Vector3 basePos = { 0.0f,0.0f,0.0f };   // 基準位置
 		float height = 0.0f;                    // 現在の高さ
 		float phase = 0.0f;                     // 揺れの位相
+	};
 
-		Vector4 startColor = { 1.0f,1.0f,1.0f,1.0f }; // 伝播開始時の色
-		float waveDist = 0.0f;                        // 伝播の中心からの距離
+	// 広がっていく色の波
+	struct ColorWave {
+		Vector3 origin = { 0.0f,0.0f,0.0f };      // 広がる中心
+		Vector4 color = { 1.0f,1.0f,1.0f,1.0f };  // 乗せる色
+		float radius = 0.0f;                      // 現在の半径
+		float maxDist = 0.0f;                     // 一番遠いcubeまでの距離
 	};
 
 public:
@@ -40,7 +45,7 @@ public:
 	void Start(const Vector4& color);
 
 	// 伝播中かどうか
-	bool IsPropagating() const { return isPropagating_; }
+	bool IsPropagating() const { return !waves_.empty(); }
 
 private:
 
@@ -100,20 +105,11 @@ private:
 
 private:
 
-	// 色を伝播させている最中か
-	bool isPropagating_ = false;
+	// 広がっている最中の波。後ろにあるものほど後から始まった波
+	std::vector<ColorWave> waves_;
 
-	// 伝播の中心。Start()を呼んだ瞬間のtargetPos_
-	Vector3 waveOrigin_ = { 0.0f,0.0f,0.0f };
-
-	// 伝播後の色
-	Vector4 waveColor_ = { 1.0f,1.0f,1.0f,1.0f };
-
-	// 現在の波の半径
-	float waveRadius_ = 0.0f;
-
-	// 波が届く必要のある最大距離。ここを超えたら伝播終了
-	float waveMaxDist_ = 0.0f;
+	// 同時に走らせる波の上限。超えた分は一番古い波を捨てる
+	size_t maxWaveNum_ = 8;
 
 	// 波の広がる速さ[単位/秒]
 	float wavePropagateSpeed_ = 12.0f;
@@ -150,4 +146,7 @@ private:
 
 	// 円状に粒を並べ直す
 	void ResetCircle();
+
+	// 波の先端が追い越した距離から、色をどれだけ乗せるかを求める
+	float CalcWaveBlend(float passed) const;
 };

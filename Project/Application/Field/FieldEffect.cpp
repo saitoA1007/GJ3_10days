@@ -36,6 +36,7 @@ FieldEffect::FieldEffect(GameEngine::Model* model, uint32_t texture) {
 
 	// メモリ確保
 	particles_.resize(maxNum_);
+	waves_.reserve(maxWaveNum_);
 	cubeModels_.reserve(maxNum_);
 	for (uint32_t i = 0; i < maxNum_; ++i) {
 		std::unique_ptr<ModelComponent> cube = std::make_unique<ModelComponent>(model);
@@ -87,9 +88,17 @@ void FieldEffect::Update() {
 	// フレームレートに依存しない補間の割合
 	const float rate = 1.0f - std::exp(-followRate_ * deltaTime);
 
-	// 波を外側へ広げる
-	if (isPropagating_) {
-		waveRadius_ += wavePropagateSpeed_ * deltaTime;
+	// 波を外側へ広げる。一番遠いcubeが元の色へ戻りきった波は消す
+	const float waveTotalWidth = waveBandWidth_ + waveHoldWidth_ + waveFadeWidth_;
+	for (size_t i = 0; i < waves_.size();) {
+		waves_[i].radius += wavePropagateSpeed_ * deltaTime;
+
+		if (waves_[i].radius >= waves_[i].maxDist + waveTotalWidth) {
+			// 消える時点で色の影響は0になっているので、途中で切れて見えることはない
+			waves_.erase(waves_.begin() + i);
+		} else {
+			++i;
+		}
 	}
 
 	for (uint32_t i = 0; i < activeNum_; ++i) {
@@ -124,35 +133,29 @@ void FieldEffect::Update() {
 		float waveHeight = idleWaveHeight_ + (nearWaveHeight_ - idleWaveHeight_) * t;
 		float wave = std::sin(particle.phase) * waveHeight;
 
-		// 色の伝播。波が通過する時に色を乗せ、通り過ぎたら元の色へ戻す
+		// 色の伝播。元の色から始めて、走っている波を古い順に重ねていく
+		particle.color = color_;
 		float pop = 0.0f;
-		if (isPropagating_) {
 
-			// 波の先端がこのcubeをどれだけ追い越したか
-			float passed = waveRadius_ - particle.waveDist;
+		for (const ColorWave& colorWave : waves_) {
 
-			// 0で元の色、1で伝播色になる割合
-			float blend = 0.0f;
-			// 色が乗るまでは今の色から、戻る時は元の色へ向かって補間する
-			Vector4 baseColor = color_;
+			// この波の中心からの距離
+			float waveDiffX = particle.basePos.x - colorWave.origin.x;
+			float waveDiffZ = particle.basePos.z - colorWave.origin.z;
+			float waveDist = std::sqrt(waveDiffX * waveDiffX + waveDiffZ * waveDiffZ);
 
-			if (passed < waveBandWidth_) {
-				// 色が乗っていく途中。伝播中に再度Start()されても繋がるように今の色から始める
-				blend = SmoothStep(passed / waveBandWidth_);
-				baseColor = particle.startColor;
-			} else if (passed < waveBandWidth_ + waveHoldWidth_) {
-				// 色が乗ったまま保たれる区間
-				blend = 1.0f;
-			} else {
-				// 元の色へ戻っていく区間
-				float fade = (passed - waveBandWidth_ - waveHoldWidth_) / waveFadeWidth_;
-				blend = 1.0f - SmoothStep(fade);
+			// 0なら影響なし、1ならこの波の色に染まりきる
+			float blend = CalcWaveBlend(colorWave.radius - waveDist);
+			if (blend <= 0.0f) {
+				continue;
 			}
 
-			particle.color = LerpColor(baseColor, waveColor_, blend);
+			// 後から始まった波ほど上に乗る
+			particle.color = LerpColor(particle.color, colorWave.color, blend);
 
 			// 色と同じ割合で持ち上げて、色の輪が地面を走っているように見せる
-			pop = blend * wavePopHeight_;
+			// 重なった所で高く伸びすぎないように、一番強い波に合わせる
+			pop = std::max(pop, blend * wavePopHeight_);
 		}
 
 		// 土台 + 揺れ + 波の跳ね。地面に潜らないように下限を設ける
@@ -168,40 +171,55 @@ void FieldEffect::Update() {
 		cubeModels_[i]->materialData_->color = particle.color;
 		cubeModels_[i]->Update();
 	}
+}
 
-	// 一番遠いcubeが元の色へ戻りきったら終了する
-	if (isPropagating_ && waveRadius_ >= waveMaxDist_ + waveBandWidth_ + waveHoldWidth_ + waveFadeWidth_) {
-		isPropagating_ = false;
-		// 端数を残さず、全てのcubeを元の色にそろえる
-		for (uint32_t i = 0; i < activeNum_; ++i) {
-			particles_[i].color = color_;
-		}
+float FieldEffect::CalcWaveBlend(float passed) const {
+
+	// passedは波の先端がそのcubeを追い越した距離。負なら波はまだ届いていない
+	if (passed <= 0.0f) {
+		return 0.0f;
 	}
+
+	// 色が乗っていく区間
+	if (passed < waveBandWidth_) {
+		return SmoothStep(passed / waveBandWidth_);
+	}
+
+	// 色が乗ったまま保たれる区間
+	if (passed < waveBandWidth_ + waveHoldWidth_) {
+		return 1.0f;
+	}
+
+	// 元の色へ戻っていく区間
+	float fade = (passed - waveBandWidth_ - waveHoldWidth_) / waveFadeWidth_;
+	return 1.0f - SmoothStep(fade);
 }
 
 void FieldEffect::Start(const Vector4& color) {
-	if (isPropagating_) { return; }
-	isPropagating_ = true;
 
+	ColorWave colorWave;
 	// 呼ばれた瞬間のターゲット位置を波の中心にする
-	waveOrigin_ = targetPos_;
-	waveColor_ = color;
-	waveRadius_ = 0.0f;
-	waveMaxDist_ = 0.0f;
+	colorWave.origin = targetPos_;
+	colorWave.color = color;
+	colorWave.radius = 0.0f;
+	colorWave.maxDist = 0.0f;
 
+	// 一番遠いcubeまでの距離を測っておく。ここまで届いたら波を消す
 	for (uint32_t i = 0; i < activeNum_; ++i) {
-		ParticleData& particle = particles_[i];
+		const Vector3& basePos = particles_[i].basePos;
 
-		// 伝播中にもう一度呼ばれても繋がるように、今の色から始める
-		particle.startColor = particle.color;
+		float diffX = basePos.x - colorWave.origin.x;
+		float diffZ = basePos.z - colorWave.origin.z;
 
-		// xz平面上での中心からの距離。ここに波が届いた時に色が変わる
-		float diffX = particle.basePos.x - waveOrigin_.x;
-		float diffZ = particle.basePos.z - waveOrigin_.z;
-		particle.waveDist = std::sqrt(diffX * diffX + diffZ * diffZ);
-
-		waveMaxDist_ = std::max(waveMaxDist_, particle.waveDist);
+		colorWave.maxDist = std::max(colorWave.maxDist, std::sqrt(diffX * diffX + diffZ * diffZ));
 	}
+
+	// 連打されても増え続けないように、古い波から捨てる
+	while (waves_.size() >= maxWaveNum_) {
+		waves_.erase(waves_.begin());
+	}
+
+	waves_.push_back(colorWave);
 }
 
 void FieldEffect::DebugUpdate() {
@@ -215,8 +233,10 @@ void FieldEffect::DebugUpdate() {
 	if (ImGui::Button("Start")) {
 		Start(debugStartColor_);
 	}
-	ImGui::Text("propagating : %s", isPropagating_ ? "true" : "false");
-	ImGui::Text("waveRadius  : %.2f / %.2f", waveRadius_, waveMaxDist_);
+	ImGui::Text("waveNum : %zu / %zu", waves_.size(), maxWaveNum_);
+	for (size_t i = 0; i < waves_.size(); ++i) {
+		ImGui::Text("  [%zu] radius %.2f / %.2f", i, waves_[i].radius, waves_[i].maxDist);
+	}
 
 	ImGui::End();
 #endif
@@ -273,14 +293,8 @@ void FieldEffect::ResetCircle() {
 			// cubeごとに開始位相をずらして、揃って動かないようにする
 			particle.phase = Rand(particle.basePos.x, particle.basePos.z) * TWO_PI;
 
-			// 色は現在の色でそろえる
+			// 色は元の色でそろえる。走っている波はUpdate()で上に乗る
 			particle.color = color_;
-			particle.startColor = color_;
-
-			// 波の中心からの距離。並べ直しても伝播が続くように計算しておく
-			float diffX = particle.basePos.x - waveOrigin_.x;
-			float diffZ = particle.basePos.z - waveOrigin_.z;
-			particle.waveDist = std::sqrt(diffX * diffX + diffZ * diffZ);
 
 			particle.height = minHeight_;
 			particle.transform.rotate = { 0.0f,0.0f,0.0f };
