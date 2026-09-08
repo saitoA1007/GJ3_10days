@@ -70,73 +70,73 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":15568,
+			"count":14061,
 			"max":[
-				1.2640528678894043,
+				1.3494386672973633,
 				2.73191499710083,
-				1.2130763530731201
+				1.4132697582244873
 			],
 			"min":[
-				-1.2670401334762573,
-				-1.8058805465698242,
-				-1.461327075958252
+				-1.4892349243164062,
+				-1.914246678352356,
+				-1.6124789714813232
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":15568,
+			"count":14061,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":15568,
+			"count":14061,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":15568,
+			"count":14061,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5123,
-			"count":25656,
+			"count":23232,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":186816,
+			"byteLength":168732,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":186816,
-			"byteOffset":186816,
+			"byteLength":168732,
+			"byteOffset":168732,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":124544,
-			"byteOffset":373632,
+			"byteLength":112488,
+			"byteOffset":337464,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":124544,
-			"byteOffset":498176,
+			"byteLength":112488,
+			"byteOffset":449952,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":51312,
-			"byteOffset":622720,
+			"byteLength":46464,
+			"byteOffset":562440,
 			"target":34963
 		}
 	],
@@ -148,7 +148,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":674032,
+			"byteLength":608904,
 			"uri":"Rocket.bin"
 		}
 	]
