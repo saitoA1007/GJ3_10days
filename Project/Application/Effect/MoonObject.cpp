@@ -41,7 +41,7 @@ MoonObject::MoonObject(GameEngine::Model* model, GameEngine::Model* fractureMode
 	// コールバック関数に登録する
 	collider_.SetOnCollisionCallback([this](const CollisionResult& result) {
 		this->OnCollisionEnter(result);
-		});
+	});
 
 	// 破壊用当たり判定
 	pCollider_.SetWorldPosition(pPos_);
@@ -82,4 +82,15 @@ void MoonObject::OnCollisionEnter([[maybe_unused]] const GameEngine::CollisionRe
 	if (!isFractureActive_) { return; }
 	// 破片を飛び散らせる
 	destructObject_.OnCollisionEnter(result);
+}
+
+void MoonObject::Reset() {
+	pPos_.x = 60.0f;
+
+	// カケラを元に戻す
+	if (isFractureActive_) {
+		destructObject_.Reassemble();
+	}
+
+	isFractureActive_ = false;
 }
