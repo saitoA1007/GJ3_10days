@@ -79,7 +79,7 @@ void UnitManager::Update()
 	const auto& enemies = enemyManager_ ? enemyManager_->GetEnemies() : std::vector<Enemy*>{};
 	const auto& energies = energySpawner_ ? energySpawner_->GetEnergies() : std::vector<EnergyPickup*>{};
 
-	// 生ポインタの Unit リストを作成（吸い込み判定用）
+	// 吸い込み判定用
 	std::vector<Unit*> rawUnits;
 	rawUnits.reserve(GetUnitCount());
 	for (size_t i = 0; i < GetUnitCount(); ++i) {
