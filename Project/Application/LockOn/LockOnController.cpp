@@ -573,6 +573,7 @@ void LockOnController::CompleteLockOn()
 	// チャージ解除
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
+	chargedEnergy_ = 0;
 }
 
 void LockOnController::CancelLockOn()
