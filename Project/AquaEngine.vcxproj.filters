@@ -633,7 +633,6 @@
       <Filter>Application\TitleLogo</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
-    <ClCompile Include="Application\Field\ImpactDetectionEffect.cpp" />
     <ClCompile Include="EngineSource\3D\Material\UniverseMaterial.cpp" />
     <ClCompile Include="Application\Utils\Binary\BinaryManager.cpp" />
     <ClCompile Include="Application\Field\FieldEffect.cpp" />
@@ -1254,7 +1253,6 @@
       <Filter>Application\TitleLogo</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\StageSelectScene.h" />
-    <ClInclude Include="Application\Field\ImpactDetectionEffect.h" />
     <ClInclude Include="EngineSource\3D\Material\UniverseMaterial.h" />
     <ClInclude Include="Application\Utils\Binary\BinaryManager.h" />
     <ClInclude Include="Application\Utils\Binary\Value.h" />

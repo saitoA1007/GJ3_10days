@@ -16,7 +16,6 @@ using namespace GameEngine;
 #include "Application//Rocket/Rocket.h"
 #include "Application//Unit/UnitManager.h"
 #include "Application/Field/FieldEffect.h"
-#include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Score/ScoreView.h"
 #include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
@@ -97,8 +96,8 @@ GameScene::GameScene() {
 
 	auto* planeModel = modelManager_->GetNameByModel("plane.obj");
 	planeModel->SetDefaultIsEnableLight(false);
-	uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
-	auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
+	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
+	//auto* impactEffect = gameObjectManager_->AddObject<ImpactDetectionEffect>(planeModel, pGH);
 
 	auto* rocketModel = modelManager_->GetNameByModel("Rocket.gltf");
 	rocket_ = gameObjectManager_->AddObject<Rocket>(rocketModel);

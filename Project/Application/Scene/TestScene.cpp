@@ -4,7 +4,6 @@
 #include "RandomGenerator.h"
 #include "FPSCounter.h"
 #include "Application/CollisionConfig.h"
-#include "Application/Field/ImpactDetectionEffect.h"
 #include "Application/Effect/EnemySpawnEffect.h"
 using namespace GameEngine;
 
