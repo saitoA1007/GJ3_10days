@@ -485,6 +485,9 @@ GameScene::GameScene() {
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingOneEffect", 32, textureManager_, effectModel);
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingTwoEffect", 128, textureManager_, effectModel);
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldRingThreeEffect", 128, textureManager_, effectModel);
+
+	// にぎやかし浮遊エフェクト
+	gameObjectManager_->AddObject<ParticleBehavior>("fieldFloatingEffect", 256, textureManager_, effectModel);
 }
 
 void GameScene::Initialize() {

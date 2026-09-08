@@ -42,6 +42,7 @@ FieldEffect::FieldEffect(GameEngine::Model* model, uint32_t texture) {
 	debugParame_->Register("waveSpeedByDist", waveSpeedByDist_);
 	debugParame_->Register("idleWaveHeight", idleWaveHeight_);
 	debugParame_->Register("nearWaveHeight", nearWaveHeight_);
+	debugParame_->Register("color", color_);
 	debugParame_->Apply();
 
 	// 円状に並べる
@@ -111,6 +112,7 @@ void FieldEffect::Update() {
 
 		// モデルに反映する
 		cubeModels_[i]->worldTransform_.transform_ = particle.transform;
+		cubeModels_[i]->materialData_->color = color_;
 		cubeModels_[i]->Update();
 	}
 }
