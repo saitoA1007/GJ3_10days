@@ -164,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Effect\EnemySpawnEffect.cpp" />
     <ClCompile Include="Application\Effect\ExplosionEffect.cpp" />
     <ClCompile Include="Application\Effect\HyperspaceEffect.cpp" />
+    <ClCompile Include="Application\Effect\IncorporateEffect.cpp" />
     <ClCompile Include="Application\Effect\MoonObject.cpp" />
     <ClCompile Include="Application\Effect\RocketEffect.cpp" />
     <ClCompile Include="Application\Effect\RopeEffect.cpp" />
@@ -478,6 +479,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Effect\EnemySpawnEffect.h" />
     <ClInclude Include="Application\Effect\ExplosionEffect.h" />
     <ClInclude Include="Application\Effect\HyperspaceEffect.h" />
+    <ClInclude Include="Application\Effect\IncorporateEffect.h" />
     <ClInclude Include="Application\Effect\MoonObject.h" />
     <ClInclude Include="Application\Effect\RocketEffect.h" />
     <ClInclude Include="Application\Effect\RopeEffect.h" />

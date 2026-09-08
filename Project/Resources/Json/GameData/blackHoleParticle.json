@@ -1,0 +1,137 @@
+{
+    "blackHoleParticle": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    0.3088803291320801,
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 1.5,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.5,
+                    1.5,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsActiveBlendAdd": true,
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": false
+            },
+            "RotateEmit": {
+                "Enable": false
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": false
+            },
+            "ShapeEmit": {
+                "Enable": true,
+                "Shape": {
+                    "_ShapeType": "Circle",
+                    "_boxSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "_emitFromShell": false,
+                    "_radius": 6.0
+                }
+            },
+            "SpawnCoolTime": 0.10000000149011612,
+            "SpawnMaxCount": 2,
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": {
+                    "_TextureName": "circle.png"
+                }
+            },
+            "VelocityEmit": {
+                "Enable": false
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInOutQuad"
+                },
+                "Enable": true,
+                "EndAlpha": 1.0
+            },
+            "Attraction": {
+                "Damping": 2.0,
+                "Enable": true,
+                "Strength": 10.0,
+                "TargetPos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ColorOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInQuad"
+                },
+                "Enable": true,
+                "EndColor": [
+                    0.0,
+                    1.0,
+                    0.7104246616363525,
+                    1.0
+                ]
+            },
+            "RotationByVelocity": {
+                "Enable": false
+            },
+            "SizeOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInOutQuad"
+                },
+                "Enable": true,
+                "EndSize": 0.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "AttractionSpeed": 6.289999961853027,
+                "AxisSpeed": 0.0,
+                "CenterPos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Enable": true,
+                "RotationSpeed": 5.0
+            }
+        },
+        "SceneName": "Test"
+    }
+}
