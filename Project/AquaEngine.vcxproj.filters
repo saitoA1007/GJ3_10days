@@ -248,6 +248,7 @@
     <ClCompile Include="Application\Utils\ShigeFunc.cpp" />
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
     <ClCompile Include="Application\UI\TimeUI.cpp" />
+    <ClCompile Include="Application\UI\LetterboxUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
@@ -526,6 +527,7 @@
     <ClInclude Include="Application\Utils\ShigeFunc.h" />
     <ClInclude Include="Application\Result\ResultMessage.h" />
     <ClInclude Include="Application\UI\TimeUI.h" />
+    <ClInclude Include="Application\UI\LetterboxUI.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />

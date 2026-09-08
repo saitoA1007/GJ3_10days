@@ -187,6 +187,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\LockOn\LockOnController.cpp" />
     <ClCompile Include="Application\Result\ResultMovieManager.cpp" />
     <ClCompile Include="Application\Result\ShuffleNumber.cpp" />
+    <ClCompile Include="Application\UI\LetterboxUI.cpp" />
     <ClCompile Include="Application\UI\TimeUI.cpp" />
     <ClCompile Include="Application\Unit\Unit.cpp" />
     <ClCompile Include="Application\Unit\UnitManager.cpp" />
@@ -503,6 +504,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\LockOn\LockOnController.h" />
     <ClInclude Include="Application\Result\ResultMovieManager.h" />
     <ClInclude Include="Application\Result\ShuffleNumber.h" />
+    <ClInclude Include="Application\UI\LetterboxUI.h" />
     <ClInclude Include="Application\UI\TimeUI.h" />
     <ClInclude Include="Application\Unit\Pikumi.h" />
     <ClInclude Include="Application\Unit\Unit.h" />
