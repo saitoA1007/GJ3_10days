@@ -110,7 +110,7 @@ GameScene::GameScene() {
 	uint32_t beamNoiseGH = textureManager_->GetHandleByName("beamNoise.png");
 	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
 	auto* blackHoleModel = modelManager_->GetNameByModel("cursor.obj");
-	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, energySpawner_);
+	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, energySpawner_, enemyManager_);
 
 	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");
 	lockOnController_ = gameObjectManager_->AddObject<LockOnController>(

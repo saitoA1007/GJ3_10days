@@ -15,8 +15,8 @@
 using namespace GameEngine;
 
 UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocket* rocket, GameEngine::Model* baemModel,
-	uint32_t beamGH, EnergySpawner* energySpawner, size_t capacity)
-	: rocket_(rocket), energySpawner_(energySpawner)
+	uint32_t beamGH, EnergySpawner* energySpawner, EnemyManager* enemyManager, size_t capacity)
+	: rocket_(rocket), energySpawner_(energySpawner), enemyManager_(enemyManager)
 {
 	// Unitは倒れても再利用するため、最大候補数を固定プールとして確保する。
 	const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });

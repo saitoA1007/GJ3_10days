@@ -113,15 +113,12 @@ void Unit::Update()
 
 void Unit::Draw()
 {
-	if (IsDeployed() || state_ == UnitState::Blackhole)
+	if (IsDeployed() && state_ != UnitState::Blackhole)
 	{
 		modelComponent_->DrawRaytracing(renderQueue_);
-
-		// 演出を描画
 		RopeEffect_.Draw();
 	}
 
-	// ブラックホール状態ならサークルを描画
 	if (state_ == UnitState::Blackhole && blackholeModel_)
 	{
 		blackholeModel_->DrawRaytracing(renderQueue_);
@@ -415,6 +412,9 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		absorbedBasePoint_ = 0;
 		bhEffectTimer_ = 0.0f;
 
+		// ブラックホール化したら本体の当たり判定をオフ
+		collider_.SetActive(false);
+
 		// ターゲットの解除・ドロップ処理
 		if (targetEnergy_)
 		{
@@ -492,11 +492,7 @@ void Unit::ProcessBlackholeAbsorption(
 			}
 			else
 			{
-				// 中心へ引き寄せる
-				Vector3 dir = position_ - enemy->GetPosition();
-				dir.y = 0.0f;
-				dir.Normalize();
-				enemy->SetPosition(enemy->GetPosition() + dir * settings_->bhPullSpeed * deltaTime);
+				enemy->PullTowards(position_, settings_->bhPullSpeed, deltaTime);
 			}
 		}
 	}
@@ -550,7 +546,6 @@ void Unit::ProcessBlackholeAbsorption(
 				Vector3 dir = position_ - energy->GetPosition();
 				dir.y = 0.0f;
 				dir.Normalize();
-				// (※EnergyPickupクラスにも SetPosition が必要です)
 				energy->SetPosition(energy->GetPosition() + dir * settings_->bhPullSpeed * deltaTime);
 			}
 		}

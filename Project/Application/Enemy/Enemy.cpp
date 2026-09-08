@@ -36,6 +36,8 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			Unit* hitUnit = static_cast<Unit*>(result.userData.object);
 			if (!hitUnit) break;
 
+			if (hitUnit->IsBlackhole()) break;
+
 			// UnitがEnergyを持って運搬中に当たった場合
 			if (hitUnit->IsCarryingEnergy()) {
 				// 敵の勝ち
@@ -134,13 +136,18 @@ void Enemy::Update() {
 	// 運搬中ユニットの索敵
 	UpdateTarget();
 
-	// 移動（運搬ユニットがいればユニットへ、いなければ独自の軌道移動）
-	if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
+	// 移動
+	if (isBeingPulled_) {
+		isBeingPulled_ = false; // 次フレーム用にフラグを落とす
+	}
+	else if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
 		TrackingMovement(GameEngine::FpsCounter::deltaTime);
-	} else {
+	}
+	else {
 		if (type_ == EnemyType::Round) {
 			RoundMovement();
-		} else {
+		}
+		else {
 			DefaultMovement();
 		}
 	}
@@ -275,6 +282,26 @@ EnergyPickup* Enemy::DefeatAndDropEnergy() {
 	}
 
 	return nullptr;
+}
+
+void Enemy::PullTowards(const Vector3& targetPos, float speed, float deltaTime) 
+{
+	if (!data_) return;
+	Vector3 currentPos = data_->transform.translate;
+	Vector3 dir = targetPos - currentPos;
+	dir.y = 0.0f;
+	if (dir.LengthSquared() > 0.0001f) {
+		dir.Normalize();
+		data_->transform.translate += dir * speed * deltaTime;
+
+		// ロケットからの距離・方向を再計算して保持
+		Vector2 pos2D = { data_->transform.translate.x, data_->transform.translate.z };
+		distance_ = pos2D.Length();
+		if (distance_ > 0.0001f) {
+			direction_ = pos2D / distance_;
+		}
+	}
+	isBeingPulled_ = true; // 吸い込みフラグを立てる
 }
 
 EnergySize Enemy::GetDropEnergySize() const {

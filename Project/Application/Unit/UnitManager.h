@@ -35,6 +35,7 @@ public:
 		GameEngine::Model* baemModel,
 		uint32_t beamGH,
 		EnergySpawner* energySpawner = nullptr,
+		EnemyManager* enemyManager = nullptr,
 		size_t capacity = 16);
 	~UnitManager() override = default;
 

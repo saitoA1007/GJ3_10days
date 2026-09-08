@@ -81,9 +81,9 @@ public:
 
 	// ======== ブラックホール ========
 
-	void SetPosition(const Vector3& pos) {
-		if (data_) data_->transform.translate = pos;
-	}
+
+	// ブラックホール等からの引き寄せ処理
+	void PullTowards(const Vector3& targetPos, float speed, float deltaTime);
 	// エネルギーをドロップせずに強制消滅
 	void ForceDestroy() {
 		Destroy();
@@ -140,4 +140,7 @@ private:
 	float snakeWidth_ = 0.0f;
 	float snakeSpeed_ = 0.0f;
 	float roundSpeed_ = 0.0f;
+
+	// ブラックホール
+	bool isBeingPulled_ = false;
 };
