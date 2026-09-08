@@ -46,6 +46,7 @@ void Unit::Initialize()
 	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	maxStamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 	collider_.SetActive(false);
@@ -72,7 +73,15 @@ void Unit::Update()
 		break;
 	}
 
-	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, {0.0f,5.0f,0.0f});
+	const float staminaRatio = (maxStamina_ > 0.0f) ? (stamina_ / maxStamina_) : 0.0f;
+
+	constexpr float minScale = 0.15f; 
+	constexpr float maxScale = 1.3f;
+
+	const float currentScale = minScale + (maxScale - minScale) * staminaRatio;
+	RopeEffect_.SetScale(currentScale);
+
+	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, { 0.0f, 5.0f, 0.0f });
 	RopeEffect_.Update();
 
 	SyncModel();
@@ -185,6 +194,7 @@ void Unit::Recall()
 	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	maxStamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 	collider_.SetActive(false);
@@ -276,6 +286,7 @@ void Unit::UpdateReturningToRocket(float deltaTime)
 		targetEnemy_ = nullptr;
 		state_ = UnitState::Stored;
 		stamina_ = 0.0f;
+		maxStamina_ = 0.0f;
 		collider_.SetActive(false);
 	}
 }
@@ -284,6 +295,7 @@ void Unit::AllocateStamina(int32_t requestedEnergy)
 {
 	// EnergyChange.amountは消費時に負数なので、符号を反転してスタミナ残量にする
 	stamina_ = static_cast<float>((std::max)(requestedEnergy, 0));
+	maxStamina_ = stamina_;
 }
 
 void Unit::ReturnToStorageAfterDefeat()
@@ -314,6 +326,7 @@ void Unit::ReturnToStorageAfterDefeat()
 	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	maxStamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 

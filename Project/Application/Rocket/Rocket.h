@@ -27,6 +27,7 @@ struct RocketSettings
 	float colliderRadius = 1.5f;                // 敵到達判定の球半径
 	float colliderOffsetY = 1.75f;              // モデル原点から球中心までのY差
 	int32_t initialEnergy = 0;                   // シーン開始時の保有量
+	int32_t requiredEnergy = 100;
 	int32_t enemyHitLoss = 10;                   // 敵1体の到達で失う量
 	int32_t debugEnergyAmount = 10;              // ImGuiの増減ボタンで使う量
 };
@@ -112,6 +113,9 @@ public:
 	void SetOnEnergyChanged(EnergyChangedCallback callback) {
 		onEnergyChanged_ = std::move(callback);
 	}
+
+	/// @brief クリア・打ち上げに必要な目標エネルギー量を取得
+	int32_t GetRequiredEnergy() const { return settings_.requiredEnergy; }
 
 private:
 	/// @brief Register値を反映して安全な範囲へ補正する。

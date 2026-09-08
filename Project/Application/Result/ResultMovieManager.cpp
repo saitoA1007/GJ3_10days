@@ -34,7 +34,7 @@ void ResultMovieManager::Update() {
 	case ResultMoveCamera::Phase::kMove:
 
 		// ロケット演出
-		rocketEffect_->Start(1.1f);
+		rocketEffect_->Start(clearRate_);
 		break;
 
 	case ResultMoveCamera::Phase::kStop:
@@ -50,7 +50,9 @@ void ResultMovieManager::Draw() {
 
 }
 
-void ResultMovieManager::Start() {
+void ResultMovieManager::Start(float clearRate) {
+	clearRate_ = clearRate;
+
 	// 有効
 	resultMoveCamera_->SetActive(true);
 	moonObject_->SetActive(true);

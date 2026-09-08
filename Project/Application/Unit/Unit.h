@@ -167,7 +167,8 @@ private:
 
 	// パラメータ
 	Vector3 position_ = {};                              
-	float stamina_ = 0.0f;                                
+	float stamina_ = 0.0f;   
+	float maxStamina_ = 0.0f;
 
 	// 繋がっている演出
 	RopeEffect RopeEffect_;
