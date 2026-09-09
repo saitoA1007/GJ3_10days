@@ -171,16 +171,32 @@ EnergyPickup* EnergySpawner::SpawnOnGround(EnergySize size, const Vector3& posit
 
 	auto available = std::find_if(pickups_.begin(), pickups_.end(), [](const auto& pickup)
 		{
-		return !pickup->IsActive();
+			return !pickup->IsActive();
 		});
-	if (available == pickups_.end()) 
+
+	if (available == pickups_.end())
 	{
-		return nullptr;
+		// 運搬されていない＆Specialではない既存エネルギーを探して再利用
+		available = std::find_if(pickups_.begin(), pickups_.end(), [](const auto& pickup)
+			{
+				return pickup->IsActive() && !pickup->IsCarried() && pickup->GetSize() != EnergySize::Special;
+			});
+
+		// 押し出せるエネルギーもなければ生成失敗
+		if (available == pickups_.end())
+		{
+			return nullptr;
+		}
+
+		// 既存の非アクティブ化
+		(*available)->Deactivate();
 	}
 
 	// 呼び出し元のY座標に関係なく、Energy用の地面高さへ揃える。
 	Vector3 groundPosition = position;
 	groundPosition.y = settings_.groundHeight;
+
+	// リサイクル時の初期化処理は呼出先の EnergyPickup::SpawnOnGround 内で行う
 	(*available)->SpawnOnGround(size, groundPosition, typeSettings_[sizeIndex]);
 	return available->get();
 }

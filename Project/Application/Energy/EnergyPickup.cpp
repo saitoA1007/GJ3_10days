@@ -63,6 +63,8 @@ void EnergyPickup::SpawnOnGround(
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
 	material_.materialData_->dissolveThreshold = 0.0f;
+	isDissolving_ = false;
+	dissolveTimer_ = 0.0f;
 	SyncModel();
 }
 

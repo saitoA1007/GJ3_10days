@@ -224,6 +224,10 @@ bool Unit::DefeatAndDropEnergy()
 
 void Unit::Recall() 
 {
+	if (state_ == UnitState::Blackhole)
+	{
+		GenerateSpecialEnergy();
+	}
 	if (targetEnergy_ && targetEnergy_->IsActive())
 	{
 		targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
