@@ -18,6 +18,7 @@ using namespace GameEngine;
 #include "Application//Unit/UnitEffectManager.h"
 #include "Application/Field/FieldEffect.h"
 #include "Application/Score/ScoreView.h"
+#include "Application/UI/UnitCountUI.h"
 #include "Application/HalfTime/HalfTimeView.h"
 #include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
@@ -121,11 +122,12 @@ GameScene::GameScene() {
 	uint32_t beamNoiseGH = textureManager_->GetHandleByName("beamNoise.png");
 	auto* unitModel = modelManager_->GetNameByModel("unit2.obj");
 	auto* blackHoleModel = modelManager_->GetNameByModel("cursor.obj");
+	auto* markerModel = modelManager_->GetNameByModel("cursor.obj");
 	uint32_t grainGH = textureManager_->GetHandleByName("grain.png");
 	// ユニットの演出管理機能
 	auto* unitEffectManager = gameObjectManager_->AddObject<UnitEffectManager>(modelManager_, textureManager_, gameObjectManager_);
 	// ユニット管理機能
-	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, energyModel, grainGH,
+	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, markerModel, beamNoiseGH, energyModel, grainGH,
 		unitEffectManager, energySpawner_, enemyManager_);
 
 	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");
@@ -214,9 +216,13 @@ GameScene::GameScene() {
 	);
 	enemyManager_->SetStage("Three");
 
+	// 時間表示
 	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
 	auto* timeUI = gameObjectManager_->AddObject<TimeUI>(unitIconGH);
 	timeUI->SetActive(false);
+
+	// ユニットの数を表示
+	auto* unitCountUI = gameObjectManager_->AddObject<UnitCountUI>(digitModels, mainCamera_.get(), unitManager_);
 
 	GameFlowContext flowContext{};
 	flowContext.rocket = rocket_;
@@ -232,6 +238,7 @@ GameScene::GameScene() {
 	flowContext.halfTimeView = halfTimeView_.get();
 	flowContext.resultMessage = resultStringManager_;
 	flowContext.timeUI = timeUI;
+	flowContext.unitCountUI = unitCountUI;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
