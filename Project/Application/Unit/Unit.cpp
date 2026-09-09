@@ -113,6 +113,17 @@ void Unit::Update()
 	RopeEffect_.Update();
 
 	SyncModel();
+
+	if (isBeingPulledByBlackhole_) {
+		collider_.SetActive(false);
+		isBeingPulledByBlackhole_ = false; // 次フレーム判定用にリセット
+	}
+	else if (IsDeployed() && state_ != UnitState::Blackhole) {
+		collider_.SetActive(true);  // 通常出撃中のみ有効化
+	}
+	else {
+		collider_.SetActive(false); // 待機中またはブラックホール中は無効化
+	}
 }
 
 void Unit::Draw()
@@ -518,6 +529,8 @@ void Unit::ProcessBlackholeAbsorption(
 			}
 			else
 			{
+				unit->SetBeingPulledByBlackhole(true);
+
 				// 渦巻きベクトルの計算
 				Vector3 pullDir = position_ - unit->position_;
 				pullDir.y = 0.0f;

@@ -11,7 +11,7 @@
             "BHRadiusFarMult": 1.2999999523162842,
             "BHRadiusMidMult": 1.0,
             "BHRadiusNearMult": 0.20000000298023224,
-            "BHSpecialMult": 5.0
+            "BHSpecialMult": 10.0
         },
         "Collision": {
             "Radius": 0.6000000238418579
