@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 
+#include "AudioManager.h"
 #include "Camera.h"
 #include "DebugRenderer.h"
 #include "FPSCounter.h"
@@ -37,6 +38,17 @@ namespace
 	constexpr float kViewportHeight = 720.0f;
 	constexpr float kMaxChargeBlinkIntervalSeconds = 0.15f;
 	constexpr Vector4 kMaxChargeBlinkColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+	constexpr const char* kCursorTargetSoundName = "cursolTarget.mp3";
+	constexpr float kCursorTargetSoundVolume = 1.0f;
+
+	void PlayCursorTargetSound()
+	{
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t soundHandle =
+			audioManager.GetHandleByName(kCursorTargetSoundName);
+		audioManager.Stop(soundHandle);
+		audioManager.Play(soundHandle, kCursorTargetSoundVolume, false);
+	}
 }
 
 LockOnController::LockOnController(
@@ -104,6 +116,7 @@ void LockOnController::Initialize()
 	injectAccumulator_ = 0.0f;
 	enemySelectionEnabled_ = true;
 	tutorialHoldTarget_ = nullptr;
+	hasUnitInRadius_ = false;
 	tutorialHoldTargetHovered_ = false;
 	SyncCursorModel();
 }
@@ -122,6 +135,7 @@ void LockOnController::Update()
 
 	// チャージ速度に合わせたエネルギー注入
 	isInjecting_ = false;
+	const bool hadUnitInRadius = hasUnitInRadius_;
 	hasUnitInRadius_ = false; 
 
 	const bool isPushActive = inputCommand_->IsCommandActive(kLockOnPushCommand);
@@ -135,6 +149,10 @@ void LockOnController::Update()
 			tutorialHoldTarget_->IsTutorialStatic() &&
 			distanceSquared <= selectionRadiusSquared;
 		hasUnitInRadius_ = tutorialHoldTargetHovered_;
+		if (hasUnitInRadius_ && !hadUnitInRadius)
+		{
+			PlayCursorTargetSound();
+		}
 		isInjecting_ = isPushActive && tutorialHoldTargetHovered_;
 		injectAccumulator_ = 0.0f;
 		if (tutorialHoldTargetHovered_)
@@ -187,6 +205,10 @@ void LockOnController::Update()
 		bool injectedAny = false;
 		// 範囲内にユニットがいるかを取得しつつ、エネルギー注入判定
 		hasUnitInRadius_ = unitManager_->InjectEnergyToUnitsAt(cursorPosition_, settings_.selectionRadius, amountToInject, &injectedAny);
+		if (hasUnitInRadius_ && !hadUnitInRadius)
+		{
+			PlayCursorTargetSound();
+		}
 
 		if (injectedAny)
 		{
@@ -271,6 +293,7 @@ void LockOnController::SetGameplayEnabled(bool enabled)
 	{
 		CancelLockOn();
 		isInjecting_ = false;
+		hasUnitInRadius_ = false;
 		tutorialHoldTargetHovered_ = false;
 	}
 }
@@ -514,6 +537,7 @@ void LockOnController::SetTutorialHoldTarget(Unit* unit)
 
 	CancelLockOn();
 	tutorialHoldTarget_ = unit;
+	hasUnitInRadius_ = false;
 	tutorialHoldTargetHovered_ = false;
 	isInjecting_ = false;
 	injectAccumulator_ = 0.0f;
@@ -730,6 +754,11 @@ void LockOnController::SetSelection(EnergyPickup* energy, Enemy* enemy)
 	if (selectedEnemy_)
 	{
 		selectedEnemy_->SetHighlighted(true);
+	}
+
+	if (selectedEnergy_ || selectedEnemy_)
+	{
+		PlayCursorTargetSound();
 	}
 }
 
