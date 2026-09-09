@@ -179,7 +179,7 @@ void ResultStringManager::Boot(int score) {
 		lerped /= 10;
 	}
 
-	if (score <= aimScore_) {
+	if (score < aimScore_) {
 		messageType_ = ResultMessage::Type::Mousukosi;
 	} else {
 		messageType_ = ResultMessage::Type::Tobisugi;
