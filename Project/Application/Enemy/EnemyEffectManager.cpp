@@ -26,7 +26,7 @@ EnemyEffectManager::EnemyEffectManager(GameEngine::ModelManager* modelManager, G
 
 	deadEffects_.reserve(16);
 	for (uint32_t i = 0; i < 16; ++i) {
-		auto* deadEffect = objectManager->AddObject<ParticleBehavior>("EnemyDead", 64, textureManager, planeModel);
+		auto* deadEffect = objectManager->AddObject<ParticleBehavior>("EnemyDeadEffect", 64, textureManager, planeModel);
 		deadEffect->SetActive(false);
 		deadEffects_.push_back(deadEffect);
 	}
@@ -58,6 +58,7 @@ void EnemyEffectManager::StartSpawnEffect(Vector3 pos) {
 }
 
 void EnemyEffectManager::StartDeadEffect(Vector3 pos) {
+	deadEffects_[deadEffectIndex_]->SetEmitterPos(pos);
 	deadEffects_[deadEffectIndex_]->Emit(pos);
 	deadEffects_[deadEffectIndex_]->SetActive(true);
 	deadEffectIndex_ = (deadEffectIndex_ + 1) % deadEffects_.size();
