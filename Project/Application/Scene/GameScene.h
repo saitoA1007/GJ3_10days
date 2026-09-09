@@ -8,6 +8,8 @@
 
 #include "Application/Scene/Transition/Fade.h"
 #include "Application/Score/Score.h"
+#include <ModelComponent.h>
+#include <DebugParameter.h>
 
 class Player;
 class ScoreView;
@@ -126,6 +128,11 @@ private: // シーン機能
 	float intensity_ = 2.0f;
 	Vector3 dir_ = { 0.0f,-1.0f,0.5f };
 	Vector4 lightColor_ = { 1.0f,1.0f,1.0f,1.0f };
+
+	std::vector<std::unique_ptr<GameEngine::ModelComponent>> scoreModels_;
+	std::vector<Transform> scoreModelTransforms_;
+	GameEngine::DebugParameter scoreModelTranformDebugParameter_{ "ScoreModel" };
+
 private:
 
 	/// <summary>

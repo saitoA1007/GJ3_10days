@@ -5,6 +5,26 @@
             "FloatingSpeed": 2.0,
             "RotationSpeed": 1.5
         },
+        "PlayingTimeline": {
+            "EventCount": 3,
+            "Events": {
+                "Event000": {
+                    "ArcPosition": 0.5,
+                    "EnergySize": 0,
+                    "TimeSeconds": 1.0
+                },
+                "Event001": {
+                    "ArcPosition": 1.0,
+                    "EnergySize": 0,
+                    "TimeSeconds": 1.0
+                },
+                "Event002": {
+                    "ArcPosition": 0.0,
+                    "EnergySize": 0,
+                    "TimeSeconds": 1.0
+                }
+            }
+        },
         "SceneName": "Game",
         "Spawn": {
             "AngleCenterDegrees": 270.0,
@@ -15,6 +35,7 @@
             "InitialCountPerZone": 0,
             "Lifetime": 20.0,
             "MaxActiveCount": 64,
+            "RandomSpawnEnabled": true,
             "SpawnInterval": 2.0
         },
         "Type": {

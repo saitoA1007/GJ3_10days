@@ -60,15 +60,19 @@ void InspectorWindow::Draw() {
     ImGui::Spacing();
 
     // ルートグループ全体を再帰的に描画
-    DrawGroup(itRoot->second);
+    DrawGroup(itRoot->second, rootGroupName);
 
     ImGui::End();
 }
 
-void InspectorWindow::DrawGroup(GameParamEditor::Group& group) {
+void InspectorWindow::DrawGroup(GameParamEditor::Group& group, const std::string& groupPath) {
+
+    if (groupPath == "Energy/PlayingTimeline") {
+        DrawEnergyTimelineControls(group);
+    }
 
     // このグループのアイテムを描画
-    DrawItems(group);
+    DrawItems(group, groupPath);
 
     // サブグループを再帰的に
     for (auto& [childName, childGroup] : group.children) {
@@ -76,7 +80,7 @@ void InspectorWindow::DrawGroup(GameParamEditor::Group& group) {
 
         if (ImGui::TreeNode(childName.c_str())) {
             // 再帰
-            DrawGroup(childGroup);
+            DrawGroup(childGroup, groupPath + "/" + childName);
             ImGui::TreePop();
         }
 
@@ -84,7 +88,7 @@ void InspectorWindow::DrawGroup(GameParamEditor::Group& group) {
     }
 }
 
-void InspectorWindow::DrawItems(GameParamEditor::Group& group) {
+void InspectorWindow::DrawItems(GameParamEditor::Group& group, const std::string& groupPath) {
     if (group.items.empty()) { return; }
 
     // 優先順位でソート
@@ -103,9 +107,86 @@ void InspectorWindow::DrawItems(GameParamEditor::Group& group) {
 
     // ソート済みの順序で描画
     for (auto& [itemName, itemPtr] : sortedItems) {
+		// EventCountは専用の追加・削除UIで扱い、数値ドラッグは表示しない。
+		if (groupPath == "Energy/PlayingTimeline" && itemName == "EventCount") {
+			continue;
+		}
+
         ImGui::PushID(itemName.c_str());
-        std::visit(DebugParameterVisitor{ itemName, itemPtr->isDirty, textureManager_ }, itemPtr->value);
+		if (!DrawEnergyTimelineItem(groupPath, itemName, *itemPtr)) {
+			std::visit(DebugParameterVisitor{ itemName, itemPtr->isDirty, textureManager_ }, itemPtr->value);
+		}
         ImGui::Separator();
         ImGui::PopID();
     }
+}
+
+void InspectorWindow::DrawEnergyTimelineControls(GameParamEditor::Group& group) {
+    auto countIt = group.items.find("EventCount");
+    if (countIt == group.items.end() || !std::holds_alternative<int32_t>(countIt->second.value)) {
+        ImGui::TextDisabled("Timeline is unavailable.");
+        return;
+    }
+
+    auto& eventCount = std::get<int32_t>(countIt->second.value);
+    eventCount = (std::max)(eventCount, 0);
+    ImGui::Text("Events: %d", eventCount);
+    if (ImGui::Button("Add Event")) {
+        ++eventCount;
+        countIt->second.isDirty = true;
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(eventCount <= 0);
+    if (ImGui::Button("Delete Last")) {
+        --eventCount;
+        countIt->second.isDirty = true;
+    }
+    ImGui::EndDisabled();
+    ImGui::TextDisabled("Arc Position: 0.0 = Left, 0.5 = Center, 1.0 = Right");
+    ImGui::Separator();
+}
+
+bool InspectorWindow::DrawEnergyTimelineItem(
+    const std::string& groupPath,
+    const std::string& itemName,
+    GameParamEditor::Item& item) {
+    if (!groupPath.starts_with("Energy/PlayingTimeline/Events/Event")) {
+        return false;
+    }
+
+    if (itemName == "EnergySize" && std::holds_alternative<int32_t>(item.value)) {
+        constexpr const char* kEnergySizeNames[] = { "Small", "Medium", "Large", "Special" };
+        auto& value = std::get<int32_t>(item.value);
+        value = (std::clamp)(value, 0, static_cast<int32_t>(std::size(kEnergySizeNames)) - 1);
+        ImGui::Text("Energy Size");
+        if (ImGui::Combo(
+            "##EnergySize",
+            &value,
+            kEnergySizeNames,
+            static_cast<int>(std::size(kEnergySizeNames)))) {
+            item.isDirty = true;
+        }
+        return true;
+    }
+
+    if (itemName == "TimeSeconds" && std::holds_alternative<float>(item.value)) {
+        auto& value = std::get<float>(item.value);
+        ImGui::Text("Time Seconds");
+        if (ImGui::DragFloat("##TimeSeconds", &value, 0.1f, 0.0f, 3600.0f, "%.2f s")) {
+            value = (std::max)(value, 0.0f);
+            item.isDirty = true;
+        }
+        return true;
+    }
+
+    if (itemName == "ArcPosition" && std::holds_alternative<float>(item.value)) {
+        auto& value = std::get<float>(item.value);
+        ImGui::Text("Arc Position");
+        if (ImGui::SliderFloat("##ArcPosition", &value, 0.0f, 1.0f, "%.3f")) {
+            item.isDirty = true;
+        }
+        return true;
+    }
+
+    return false;
 }
