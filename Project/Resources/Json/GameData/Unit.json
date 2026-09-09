@@ -31,12 +31,12 @@
             ]
         },
         "Manager": {
-            "UnitCount": 5
+            "UnitCount": 7
         },
         "Move": {
-            "BoostedSpeed": 5.0,
+            "BoostedSpeed": 7.0,
             "DeliveryRadius": 1.600000023841858,
-            "NormalSpeed": 1.5,
+            "NormalSpeed": 2.0,
             "PickupRadius": 0.44999998807907104
         },
         "SceneName": "Game",

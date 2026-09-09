@@ -6,6 +6,7 @@
 #include <ImGuiManager.h>
 #include <AudioManager.h>
 #include <Application/Utils/Binary/BinaryManager.h>
+#include <Application/Field/Field.h>
 #include "EnemyEffectManager.h"
 
 #include <numbers>
@@ -59,6 +60,7 @@ void EnemyManager::SetContext(Field* field, Rocket* rocket, EnergySpawner* energ
 void EnemyManager::Initialize() {
 	gameplayEnabled_ = true;
 	autoSpawnEnabled_ = false;
+	playingTimelineActive_ = false;
 	configList_.resize(static_cast<int>(EnemyType::Count));
 	ResetAll();
 
@@ -67,6 +69,8 @@ void EnemyManager::Initialize() {
 	debugParam_.Register("Pop", debugPop_);
 	debugParam_.Register("PopInterval", popInterval_);
 	debugParam_.Register("CollisionRadius", collisionRadius_);
+	debugParam_.Register("StageSpawnEnabled", stageSpawnEnabled_, 0, "Spawn");
+	debugParam_.Register("EventCount", timelineEventCount_, 0, "PlayingTimeline");
 
 	for (int i = 0; i < static_cast<int>(EnemyType::Count); ++i) {
 		std::string label = std::to_string(i) + "_" + enemyTypeNames_[i];
@@ -90,6 +94,7 @@ void EnemyManager::Initialize() {
 	}
 
 	debugParam_.Apply();
+	InitializeTimelineEvents();
 }
 
 void EnemyManager::ResetAll()
@@ -110,6 +115,10 @@ void EnemyManager::ResetAll()
 	popTimer_ = 0.0f;
 	stageTimer_ = 0.0f;
 	currentFaseIndex_ = 0;
+	playingTimelineElapsed_ = 0.0f;
+	for (auto& event : timelineEvents_) {
+		event->hasSpawned = false;
+	}
 	if (commonEffect_)
 	{
 		commonEffect_->Initialize();
@@ -118,13 +127,15 @@ void EnemyManager::ResetAll()
 }
 
 void EnemyManager::Update() {
-	debugParam_.ApplyIfDirty();
+	ApplyDebugParameters();
 	Enemy::SetCollisionRadius(collisionRadius_);
 
 	// ゲームプレイが無効なら更新をスキップ
 	if (!gameplayEnabled_) {
 		return;
 	}
+
+	UpdatePlayingTimeline(GameEngine::FpsCounter::deltaTime);
 
 	auto getRandomPos = [](float fieldSize)->Vector2 {
 		float range = RandomGenerator::Get(fieldSize / 2.f, fieldSize);
@@ -144,7 +155,7 @@ void EnemyManager::Update() {
 #endif
 
 	// 出現処理（ステージ名が設定されていてデータが存在する場合のみ実行）
-	if (autoSpawnEnabled_ && !currentStageName_.empty() && stageDataMap_.contains(currentStageName_)) {
+	if (autoSpawnEnabled_ && stageSpawnEnabled_ && !currentStageName_.empty() && stageDataMap_.contains(currentStageName_)) {
 		auto& stage = stageDataMap_[currentStageName_];
 
 		if (currentFaseIndex_ < stage.fases.size()) {
@@ -236,6 +247,7 @@ void EnemyManager::Draw() {
 }
 
 void EnemyManager::DebugUpdate() {
+	ApplyDebugParameters();
 #ifdef USE_IMGUI
 	ImGui::Begin("EnemyPop");
 	static int currentTypeIndex = 0;
@@ -244,6 +256,134 @@ void EnemyManager::DebugUpdate() {
 
 	currentType_ = static_cast<EnemyType>(currentTypeIndex);
 #endif
+}
+
+void EnemyManager::BeginPlayingTimeline() {
+	playingTimelineElapsed_ = 0.0f;
+	playingTimelineActive_ = true;
+	for (auto& event : timelineEvents_) {
+		event->hasSpawned = false;
+	}
+}
+
+void EnemyManager::EndPlayingTimeline() {
+	playingTimelineActive_ = false;
+}
+
+void EnemyManager::ApplyDebugParameters() {
+	debugParam_.ApplyIfDirty();
+
+	const int32_t clampedEventCount = (std::clamp)(
+		timelineEventCount_,
+		0,
+		static_cast<int32_t>(maxEnemyNum_));
+	if (clampedEventCount != timelineEventCount_) {
+		timelineEventCount_ = clampedEventCount;
+		RegisterTimelineEventCount();
+	}
+	if (static_cast<size_t>(timelineEventCount_) != timelineEvents_.size()) {
+		ResizeTimelineEvents(static_cast<size_t>(timelineEventCount_));
+		debugParam_.Apply();
+	}
+
+	SanitizeTimelineEvents();
+}
+
+void EnemyManager::UpdatePlayingTimeline(float deltaTime) {
+	if (!playingTimelineActive_) {
+		return;
+	}
+
+	playingTimelineElapsed_ += (std::max)(deltaTime, 0.0f);
+	for (auto& event : timelineEvents_) {
+		if (event->hasSpawned || playingTimelineElapsed_ < event->timeSeconds) {
+			continue;
+		}
+		if (freeEnemyIndices_.empty()) {
+			continue;
+		}
+
+		// タイムラインでは種類を増やさず、直進する標準敵だけを生成する。
+		event->hasSpawned =
+			Pop(1, MakeTimelineSpawnPosition(event->arcPosition), EnemyType::Straight_S) != nullptr;
+	}
+}
+
+Vector2 EnemyManager::MakeTimelineSpawnPosition(float arcPosition) const {
+	const float normalizedPosition = (std::clamp)(arcPosition, 0.0f, 1.0f);
+	const float angle = std::numbers::pi_v<float> + std::numbers::pi_v<float> * normalizedPosition;
+	const float radius = context_.field
+		? context_.field->GetRadius(FieldZone::OuterBuffer)
+		: 35.0f;
+	const Vector3 center = context_.field
+		? context_.field->GetSettings().center
+		: Vector3{};
+
+	return {
+		center.x + std::cos(angle) * radius,
+		center.z + std::sin(angle) * radius,
+	};
+}
+
+void EnemyManager::InitializeTimelineEvents() {
+	const int32_t clampedCount = (std::clamp)(
+		timelineEventCount_,
+		0,
+		static_cast<int32_t>(maxEnemyNum_));
+	if (clampedCount != timelineEventCount_) {
+		timelineEventCount_ = clampedCount;
+		RegisterTimelineEventCount();
+	}
+
+	ResizeTimelineEvents(static_cast<size_t>(timelineEventCount_));
+	debugParam_.Apply();
+	SanitizeTimelineEvents();
+}
+
+void EnemyManager::ResizeTimelineEvents(size_t count) {
+	const size_t safeCount = (std::min)(count, static_cast<size_t>(maxEnemyNum_));
+	while (timelineEvents_.size() > safeCount) {
+		const size_t removedIndex = timelineEvents_.size() - 1;
+		char groupName[64];
+		sprintf_s(groupName, "PlayingTimeline/Events/Event%03zu", removedIndex);
+		debugParam_.RemoveGroup(groupName);
+		timelineEvents_.pop_back();
+	}
+
+	while (timelineEvents_.size() < safeCount) {
+		const size_t index = timelineEvents_.size();
+		auto event = std::make_unique<ScheduledEnemySpawnEvent>();
+		if (!timelineEvents_.empty()) {
+			event->timeSeconds = timelineEvents_.back()->timeSeconds + 1.0f;
+		}
+		timelineEvents_.push_back(std::move(event));
+		RegisterTimelineEvent(index);
+	}
+
+	timelineEventCount_ = static_cast<int32_t>(timelineEvents_.size());
+}
+
+void EnemyManager::RegisterTimelineEvent(size_t index) {
+	if (index >= timelineEvents_.size()) {
+		return;
+	}
+
+	char groupName[64];
+	sprintf_s(groupName, "PlayingTimeline/Events/Event%03zu", index);
+	auto& event = *timelineEvents_[index];
+	debugParam_.Register("TimeSeconds", event.timeSeconds, 0, groupName);
+	debugParam_.Register("ArcPosition", event.arcPosition, 1, groupName);
+}
+
+void EnemyManager::RegisterTimelineEventCount() {
+	debugParam_.Register("EventCount", timelineEventCount_, 0, "PlayingTimeline");
+}
+
+void EnemyManager::SanitizeTimelineEvents() {
+	for (auto& event : timelineEvents_) {
+		event->timeSeconds = (std::max)(event->timeSeconds, 0.0f);
+		event->arcPosition = (std::clamp)(event->arcPosition, 0.0f, 1.0f);
+	}
 }
 
 void EnemyManager::SetStage(const std::string& stageName) {

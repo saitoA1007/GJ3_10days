@@ -24,12 +24,12 @@ namespace GameEngine {
 
 		void DrawItems(GameParamEditor::Group& group, const std::string& groupPath);
 
-		/// @brief EnergyのPlayingタイムラインへイベント追加・末尾削除UIを表示する。
-		void DrawEnergyTimelineControls(GameParamEditor::Group& group);
+		/// @brief Playingタイムラインへイベント追加・末尾削除UIを表示する。
+		void DrawPlayingTimelineControls(GameParamEditor::Group& group);
 
-		/// @brief Energyタイムライン専用の入力UIを描画する。
+		/// @brief Energy・Enemyタイムライン専用の入力UIを描画する。
 		/// @return 専用UIで描画した場合はtrue。
-		bool DrawEnergyTimelineItem(
+		bool DrawPlayingTimelineItem(
 			const std::string& groupPath,
 			const std::string& itemName,
 			GameParamEditor::Item& item);

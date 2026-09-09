@@ -5,6 +5,7 @@
 #include "FPSCounter.h"
 #include "Application/HalfTime/HalfTimeView.h"
 #include "Application/Energy/EnergySpawner.h"
+#include "Application/Enemy/EnemyManager.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/UI/TimeUI.h"
 
@@ -47,6 +48,10 @@ void PlayingPhase::OnEnter(GameFlowContext& context)
 	if (context.energySpawner)
 	{
 		context.energySpawner->BeginPlayingTimeline();
+	}
+	if (context.enemyManager)
+	{
+		context.enemyManager->BeginPlayingTimeline();
 	}
 }
 
@@ -91,6 +96,10 @@ void PlayingPhase::OnExit(GameFlowContext& context)
 	if (context.energySpawner)
 	{
 		context.energySpawner->EndPlayingTimeline();
+	}
+	if (context.enemyManager)
+	{
+		context.enemyManager->EndPlayingTimeline();
 	}
 
 	auto& audioManager = AudioManager::GetInstance();
