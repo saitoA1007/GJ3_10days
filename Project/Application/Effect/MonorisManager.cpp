@@ -17,8 +17,16 @@ MonorisManager::MonorisManager(GameEngine::Model* model, uint32_t maxMonorisNum)
 	debugParameter_.Register("MoveSpeedRatio", moveSpeedRatio_, 4, "Transform");
 	debugParameter_.Register("FloatingWidth", floatingWidth_, 5, "Transform");
 	debugParameter_.Register("FloatingSpeed", floatingSpeed_, 6, "Transform");
+	debugParameter_.Register("Color", color_);
 
 	debugParameter_.Apply();
+
+	Monoris::SetTransform(baseTransform_);
+	Monoris::SetRadius(radius_);
+	Monoris::SetMoveSpeedRatio(moveSpeedRatio_);
+	Monoris::SetFloatingWidth(floatingWidth_);
+	Monoris::SetFloatingSpeed(floatingSpeed_);
+	Monoris::SetColor(color_);
 }
 
 void MonorisManager::Initialize() {
@@ -47,12 +55,13 @@ void MonorisManager::DebugUpdate() {
 	Monoris::SetMoveSpeedRatio(moveSpeedRatio_);
 	Monoris::SetFloatingWidth(floatingWidth_);
 	Monoris::SetFloatingSpeed(floatingSpeed_);
+	Monoris::SetColor(color_);
 
-	model_->SetDefaultColor(color_, "default");
-	model_->SetDefaultMetallic(metallic_, "default");
-	model_->SetDefaultShininess(roughness_, "default");
+	//model_->SetDefaultColor(color_, "default");
+	//model_->SetDefaultMetallic(metallic_, "default");
+	//model_->SetDefaultShininess(roughness_, "default");
 
-	for (auto& m : monoris_) {
-		m.DebugUpdate();
-	}
+	//for (auto& m : monoris_) {
+	//	m.DebugUpdate();
+	//}
 }

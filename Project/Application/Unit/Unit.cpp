@@ -6,22 +6,27 @@
 
 #include "RenderQueue.h"
 
-#include "Application/Energy/EnergyPickup.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/Enemy/Enemy.h"
 #include "Application/CollisionConfig.h"
+#include "Application/Energy/EnergyPickup.h"
+#include "Application/Energy/EnergySpawner.h"
 #include "FPSCounter.h"
 using namespace GameEngine;
 
-Unit::Unit(Model* model, Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH)
-	: rocket_(rocket), settings_(settings), RopeEffect_(bameModel, beamGH)
+Unit::Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
+	Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH, EnergySpawner* energySpawner)
+	: rocket_(rocket), settings_(settings), RopeEffect_(bameModel, beamGH), energySpawner_(energySpawner)
 {
-	assert(model != nullptr && "unit requires unit.obj");
-	assert(rocket_ != nullptr && "unit requires a rocket");
-	assert(settings_ != nullptr && "unit requires settings");
-
 	modelComponent_ = std::make_unique<ModelComponent>(model);
 	modelComponent_->materialData_->enableLighting = true;
+
+	if (circleModel)
+	{
+		blackholeModel_ = std::make_unique<GameEngine::ModelComponent>(circleModel);
+		blackholeModel_->materialData_->enableLighting = false; // エフェクトなのでライティング不要
+		blackholeModel_->materialData_->color = { 0.1f, 0.1f, 0.1f, 0.8f }; // 黒系の半透明
+	}
 
 	// コライダーのセットアップ
 	GameEngine::UserData userData;
@@ -50,14 +55,23 @@ void Unit::Initialize()
 	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	maxStamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 	collider_.SetActive(false);
+	blackholeTimer_ = 0.0f;
+	highlightTimer_ = 0.0f;
+	absorbedBasePoint_ = 0;
 	SyncModel();
 }
 
 void Unit::Update()
 {
+	if (highlightTimer_ > 0.0f)
+	{
+		highlightTimer_ -= FpsCounter::deltaTime;
+	}
+
 	// 各状態の責務を分け、遷移は到達・衝突が成立した関数内だけで行う
 	switch (state_) {
 	case UnitState::Stored:
@@ -68,12 +82,30 @@ void Unit::Update()
 	case UnitState::MovingToEnemy:
 		UpdateMovingToEnemy(FpsCounter::deltaTime);
 		break;
+	case UnitState::MovingToPosition:
+		UpdateMovingToPosition(FpsCounter::deltaTime);
+		break;
 	case UnitState::ReturningToRocket:
 		UpdateReturningToRocket(FpsCounter::deltaTime);
 		break;
+	case UnitState::Blackhole:
+		UpdateBlackhole(FpsCounter::deltaTime);
+		break;
 	}
 
-	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, {0.0f,5.0f,0.0f});
+	// maxChargeEnergyCost に対する現在のスタミナ比率を計算 (0.0 ～ 1.0 にクランプ)
+	const float maxChargeEnergy = static_cast<float>(settings_->bhEnergyThreshold);
+	const float staminaRatio = (maxChargeEnergy > 0.0f)
+		? std::clamp(stamina_ / maxChargeEnergy, 0.0f, 1.0f)
+		: 0.0f;
+
+	constexpr float minScale = 0.05f;
+	constexpr float maxScale = 1.8f;
+
+	const float currentScale = minScale + (maxScale - minScale) * staminaRatio;
+	RopeEffect_.SetScale(currentScale);
+
+	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, { 0.0f, 5.0f, 0.0f });
 	RopeEffect_.Update();
 
 	SyncModel();
@@ -81,13 +113,17 @@ void Unit::Update()
 
 void Unit::Draw()
 {
-	if (IsDeployed())
+	if (IsDeployed() && state_ != UnitState::Blackhole)
 	{
 		modelComponent_->DrawRaytracing(renderQueue_);
-
-		// 演出を描画
 		RopeEffect_.Draw();
 	}
+
+	if (state_ == UnitState::Blackhole && blackholeModel_)
+	{
+		blackholeModel_->DrawRaytracing(renderQueue_);
+	}
+
 }
 
 void Unit::RefreshVisual() 
@@ -136,6 +172,27 @@ bool Unit::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
 	return true;
 }
 
+
+bool Unit::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy)
+{
+	if (!IsAvailable())
+	{
+		return false;
+	}
+
+	AllocateStamina(requestedEnergy);
+	position_ = rocket_->GetPosition() + settings_->launchOffset;
+	position_.y = settings_->groundY;
+	targetEnergy_ = nullptr;
+	targetEnemy_ = nullptr;
+	targetPosition_ = targetPosition;
+	targetPosition_.y = settings_->groundY;
+	state_ = UnitState::MovingToPosition;
+	collider_.SetActive(true);
+	SyncModel();
+	return true;
+}
+
 bool Unit::DefeatAndDropEnergy() 
 {
 	if (!IsCarryingEnergy())
@@ -165,9 +222,12 @@ void Unit::Recall()
 	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	maxStamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 	collider_.SetActive(false);
+	blackholeTimer_ = 0.0f;
+	absorbedBasePoint_ = 0;
 	SyncModel();
 }
 
@@ -190,7 +250,7 @@ void Unit::UpdateMovingToEnergy(float deltaTime) {
 
 	const float pickupRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
 	if (DistanceSquaredXZ(position_, targetEnergy_->GetPosition()) <= pickupRadiusSquared) {
-		// 回収成立後は同じEnergyを保持したまま帰還状態へ遷移する
+		// 回収成立後は同じEnergyを保持したまま帰還状態へ遷移
 		if (targetEnergy_->BeginCarry())
 		{
 			targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
@@ -216,9 +276,21 @@ void Unit::UpdateMovingToEnemy(float deltaTime)
 	ConsumeStamina(deltaTime);
 }
 
+void Unit::UpdateMovingToPosition(float deltaTime)
+{
+	MoveTowards(targetPosition_, deltaTime);
+	ConsumeStamina(deltaTime);
+
+	const float arrivalRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
+	if (DistanceSquaredXZ(position_, targetPosition_) <= arrivalRadiusSquared)
+	{
+		state_ = UnitState::ReturningToRocket;
+	}
+}
+
 void Unit::UpdateReturningToRocket(float deltaTime)
 {
-	if (!targetEnergy_ || !targetEnergy_->IsCarried())
+	if (targetEnergy_ && !targetEnergy_->IsCarried())
 	{
 		Recall();
 		return;
@@ -226,16 +298,26 @@ void Unit::UpdateReturningToRocket(float deltaTime)
 
 	MoveTowards(rocket_->GetPosition(), deltaTime);
 	ConsumeStamina(deltaTime);
-	targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+
+	if (targetEnergy_ && targetEnergy_->IsCarried())
+	{
+		targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+	}
 
 	const float deliveryRadiusSquared = settings_->deliveryRadius * settings_->deliveryRadius;
 	if (DistanceSquaredXZ(position_, rocket_->GetPosition()) <= deliveryRadiusSquared)
 	{
-		// DeliverはEnergy個体をプールへ戻し、返された獲得量だけをRocketへ加算
-		rocket_->DepositEnergy(targetEnergy_->Deliver());
+		if (targetEnergy_ && targetEnergy_->IsCarried())
+		{
+			rocket_->DepositEnergy(targetEnergy_->Deliver());
+		}
+
 		targetEnergy_ = nullptr;
+		targetEnemy_ = nullptr;
 		state_ = UnitState::Stored;
 		stamina_ = 0.0f;
+		maxStamina_ = 0.0f;
+		collider_.SetActive(false);
 	}
 }
 
@@ -243,6 +325,7 @@ void Unit::AllocateStamina(int32_t requestedEnergy)
 {
 	// EnergyChange.amountは消費時に負数なので、符号を反転してスタミナ残量にする
 	stamina_ = static_cast<float>((std::max)(requestedEnergy, 0));
+	maxStamina_ = static_cast<float>(settings_->bhEnergyThreshold);
 }
 
 void Unit::ReturnToStorageAfterDefeat()
@@ -273,12 +356,272 @@ void Unit::ReturnToStorageAfterDefeat()
 	targetEnemy_ = nullptr;
 	state_ = UnitState::Stored;
 	stamina_ = 0.0f;
+	maxStamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 
 	// コライダーの無効化（待機状態にするため）
 	collider_.SetActive(false);
 	SyncModel();
+}
+
+bool Unit::InjectEnergy(int32_t requestedAmount)
+{
+	if (!IsDeployed())
+	{
+		return false;
+	}
+
+	// スタミナの上限は常に maxChargeEnergyCost
+	const float upperLimit = static_cast<float>(settings_->bhEnergyThreshold);
+
+	// 現在のスタミナから上限までの空き容量を計算
+	const float staminaDeficit = upperLimit - stamina_;
+
+	// 既に上限に達している場合は注入しない
+	if (staminaDeficit <= 0.0f)
+	{
+		return false;
+	}
+
+	// 今回注入要求する量
+	const int32_t actualRequest = (std::min)(requestedAmount, static_cast<int32_t>(std::ceil(staminaDeficit)));
+
+	if (actualRequest <= 0)
+	{
+		return false;
+	}
+
+	// ロケットからエネルギーを引き落とす
+	const EnergyChange change = rocket_->AllocateEnergyToUnit(actualRequest);
+	const int32_t actualAllocated = std::abs(change.amount);
+
+	if (actualAllocated <= 0)
+	{
+		return false;
+	}
+
+	// 引き出せた分だけスタミナを回復・加算
+	stamina_ = (std::min)(stamina_ + static_cast<float>(actualAllocated), upperLimit);
+
+	// スタミナが閾値以上になったらブラックホール化
+	if (stamina_ >= settings_->bhEnergyThreshold)
+	{
+		state_ = UnitState::Blackhole;
+		blackholeTimer_ = settings_->bhDuration;
+		absorbedBasePoint_ = 0;
+		bhEffectTimer_ = 0.0f;
+
+		// ブラックホール化したら本体の当たり判定をオフ
+		collider_.SetActive(false);
+
+		// ターゲットの解除・ドロップ処理
+		if (targetEnergy_)
+		{
+			if (targetEnergy_->IsCarried()) {
+				targetEnergy_->DropOnGround(position_);
+			}
+			else {
+				targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
+			}
+			targetEnergy_ = nullptr;
+		}
+
+		if (targetEnemy_)
+		{
+			targetEnemy_->CancelAttackReservation();
+			targetEnemy_ = nullptr;
+		}
+	}
+
+	return true;
+}
+
+float Unit::GetBlackholeRadius() const
+{
+	// ロケットからの距離を計算
+	float distToRocket = std::sqrt(DistanceSquaredXZ(position_, rocket_->GetPosition()));
+	float multiplier = 1.0f;
+
+	// 距離に応じて倍率を変化
+	if (distToRocket <= settings_->bhNearDistance)
+	{
+		// 近距離帯
+		float t = distToRocket / settings_->bhNearDistance;
+		multiplier = std::lerp(settings_->bhRadiusNearMultiplier, settings_->bhRadiusMidMultiplier, t);
+	}
+	else if (distToRocket <= settings_->bhFarDistance)
+	{
+		// 中間～遠距離帯
+		float t = (distToRocket - settings_->bhNearDistance) / (settings_->bhFarDistance - settings_->bhNearDistance);
+		multiplier = std::lerp(settings_->bhRadiusMidMultiplier, settings_->bhRadiusFarMultiplier, t);
+	}
+	else
+	{
+		// 外側の最大倍率で固定
+		multiplier = settings_->bhRadiusFarMultiplier;
+	}
+
+	return settings_->bhBaseRadius * multiplier;
+}
+
+void Unit::ProcessBlackholeAbsorption(
+	const std::vector<Enemy*>& enemies,
+	const std::vector<Unit*>& units,
+	const std::vector<EnergyPickup*>& energies,
+	float deltaTime)
+{
+	if (state_ != UnitState::Blackhole) return;
+
+	const float radiusSq = std::pow(GetBlackholeRadius(), 2);
+	const float killRadiusSq = std::pow(settings_->bhKillRadius, 2);
+	const float rotateSpeed = settings_->bhPullSpeed * 2.0f; // 回転速度
+
+	// 敵の吸い込み
+	for (auto* enemy : enemies)
+	{
+		if (!enemy || !enemy->IsAlive()) continue;
+
+		float distSq = DistanceSquaredXZ(position_, enemy->GetPosition());
+		if (distSq <= radiusSq)
+		{
+			if (distSq <= killRadiusSq)
+			{
+				enemy->ForceDestroy();
+				absorbedBasePoint_ += 1;
+			}
+			else
+			{
+				enemy->PullTowards(position_, settings_->bhPullSpeed, deltaTime);
+			}
+		}
+	}
+
+	// 他のユニットの吸い込み
+	for (auto* unit : units)
+	{
+		if (unit == this || !unit->IsDeployed()) continue;
+		if (unit->IsBlackhole()) continue;
+
+		float distSq = DistanceSquaredXZ(position_, unit->GetPosition());
+		if (distSq <= radiusSq)
+		{
+			if (distSq <= killRadiusSq)
+			{
+				unit->Recall();
+				absorbedBasePoint_ += 1;
+			}
+			else
+			{
+				// 渦巻きベクトルの計算
+				Vector3 pullDir = position_ - unit->position_;
+				pullDir.y = 0.0f;
+				pullDir.Normalize();
+
+				Vector3 tangentDir = { -pullDir.z, 0.0f, pullDir.x };
+				Vector3 velocity = (pullDir * settings_->bhPullSpeed) + (tangentDir * rotateSpeed);
+
+				unit->position_ += velocity * deltaTime;
+			}
+		}
+	}
+
+	// エネルギーの吸い込み
+	for (auto* energy : energies)
+	{
+		if (!energy || !energy->IsActive() || energy->IsCarried()) continue;
+
+		float distSq = DistanceSquaredXZ(position_, energy->GetPosition());
+		if (distSq <= radiusSq)
+		{
+			if (distSq <= killRadiusSq)
+			{
+				switch (energy->GetSize())
+				{
+				case EnergySize::Small:   absorbedBasePoint_ += 1; break;
+				case EnergySize::Medium:  absorbedBasePoint_ += 2; break;
+				case EnergySize::Large:   absorbedBasePoint_ += 3; break;
+				case EnergySize::Special: absorbedBasePoint_ += 5; break;
+				}
+				energy->Deactivate();
+			}
+			else
+			{
+				// 渦巻きベクトルの計算
+				Vector3 pullDir = position_ - energy->GetPosition();
+				pullDir.y = 0.0f;
+				pullDir.Normalize();
+
+				Vector3 tangentDir = { -pullDir.z, 0.0f, pullDir.x };
+				Vector3 velocity = (pullDir * settings_->bhPullSpeed) + (tangentDir * rotateSpeed);
+
+				energy->SetPosition(energy->GetPosition() + velocity * deltaTime);
+			}
+		}
+	}
+}
+
+void Unit::Highlight()
+{
+	highlightTimer_ = 0.1f;
+}
+
+void Unit::UpdateBlackhole(float deltaTime)
+{
+	blackholeTimer_ -= deltaTime;
+	bhEffectTimer_ += deltaTime;
+
+	// ブラックホールエフェクトの更新
+	if (blackholeModel_)
+	{
+		constexpr float kEffectSpeed = 1.5f;
+
+		float loopProgress = std::fmod(bhEffectTimer_ * kEffectSpeed, 1.0f);
+		float scaleRatio = 1.0f - loopProgress;
+
+		float currentMaxRadius = GetBlackholeRadius();
+
+		blackholeModel_->worldTransform_.transform_.scale =
+		{
+			currentMaxRadius * scaleRatio,
+			1.0f, 
+			currentMaxRadius * scaleRatio
+		};
+
+		blackholeModel_->worldTransform_.transform_.translate = position_;
+		blackholeModel_->worldTransform_.transform_.translate.y = settings_->groundY + 0.05f;
+
+		blackholeModel_->materialData_->color.w = scaleRatio * 0.8f;
+
+		blackholeModel_->Update();
+	}
+
+	if (blackholeTimer_ <= 0.0f)
+	{
+		GenerateSpecialEnergy();
+		Recall();
+	}
+}
+
+void Unit::GenerateSpecialEnergy()
+{
+	// 何も吸い込んでいなければ生成しない
+	if (absorbedBasePoint_ <= 0) return;
+
+	// 最終的な獲得量
+	int32_t finalValue = static_cast<int32_t>(absorbedBasePoint_ * settings_->bhSpecialMultiplier);
+
+	// Special のエネルギーをドロップ
+	if (energySpawner_)
+	{
+		EnergyPickup* specialEnergy = energySpawner_->SpawnOnGround(EnergySize::Special, position_);
+
+		if (specialEnergy)
+		{
+			// 計算した獲得量を上書き
+			specialEnergy->SetCustomValue(finalValue);
+		}
+	}
 }
 
 void Unit::StartCarryingEnergy(EnergyPickup* energy)
@@ -363,10 +706,21 @@ void Unit::SyncModel()
 	{
 		collider_.SetWorldPosition(position_);
 	}
-	// 水色なら高速移動可能、通常色ならスタミナ切れであることを示す
-	modelComponent_->materialData_->color = stamina_ > 0.0f
-		? settings_->staminaColor
-		: settings_->normalColor;
+
+	// Push入力中かつ範囲内にいる場合はハイライトカラー
+	if (highlightTimer_ > 0.0f)
+	{
+		modelComponent_->materialData_->color = stamina_ > 0.0f
+			? settings_->staminaColor * 10.0f
+			: settings_->normalColor * 10.0f;
+	}
+	else
+	{
+		// 水色なら高速移動可能、通常色ならスタミナ切れであることを示す
+		modelComponent_->materialData_->color = stamina_ > 0.0f
+			? settings_->staminaColor
+			: settings_->normalColor;
+	}
 	modelComponent_->Update();
 }
 

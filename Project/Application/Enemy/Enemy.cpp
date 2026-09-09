@@ -36,32 +36,29 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			Unit* hitUnit = static_cast<Unit*>(result.userData.object);
 			if (!hitUnit) break;
 
+			if (hitUnit->IsBlackhole()) break;
+
 			// UnitがEnergyを持って運搬中に当たった場合
 			if (hitUnit->IsCarryingEnergy()) {
 				// 敵の勝ち
-				// Unitは死に、運んでいたEnergyも消滅
 				hitUnit->DefeatAndDropEnergy();
 			}
 			// UnitがEnergyを持っていない場合
 			else {
 				if (hitUnit->GetStamina() > 0.0f) {
-					// スタミナが0より大きい場合：Unitの勝ち
 					hp_ = 0;
 					damageTimer_ = 0.0f;
 
 					if (hp_ <= 0) {
-						// 敵を倒し、ドロップしたEnergyのポインタを受け取る
 						EnergyPickup* droppedEnergy = this->DefeatAndDropEnergy();
 						if (droppedEnergy) {
-							// Unitに拾わせて帰還させる
 							hitUnit->StartCarryingEnergy(droppedEnergy);
 						}
 					}
 				} else {
 					// スタミナが0の場合：相打ち
-					// 強制的にEnemyをキルしてEnergyをドロップさせる
 					this->DefeatAndDropEnergy();
-					// Unitも死んで待機状態に戻る
+
 					hitUnit->ReturnToStorageAfterDefeat();
 				}
 			}
@@ -113,8 +110,7 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type, uint32_t effe
 
 	collider_.SetActive(true);
 	collider_.SetRadius(collisionRadius_ * config.size_);
-	// Scene更新中などEnemyManager::Update後に生成された場合でも、
-	// 衝突判定が前回位置や原点で行われないよう生成座標を即座に反映する。
+
 	collider_.SetWorldPosition(data_->transform.translate);
 
 	timer_ = RandomGenerator::Get(0.0f, 10.0f);
@@ -143,13 +139,18 @@ void Enemy::Update() {
 	// 運搬中ユニットの索敵
 	UpdateTarget();
 
-	// 移動（運搬ユニットがいればユニットへ、いなければ独自の軌道移動）
-	if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
+	// 移動
+	if (isBeingPulled_) {
+		isBeingPulled_ = false; // 次フレーム用にフラグを落とす
+	}
+	else if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
 		TrackingMovement(GameEngine::FpsCounter::deltaTime);
-	} else {
+	}
+	else {
 		if (type_ == EnemyType::Round) {
 			RoundMovement();
-		} else {
+		}
+		else {
 			DefaultMovement();
 		}
 	}
@@ -168,9 +169,11 @@ void Enemy::Update() {
 	damageTimer_ += GameEngine::FpsCounter::deltaTime;
 	if (damageTimer_ < damageTime_) {
 		data_->color = config_.hitColor_;
-	} else if (isHighlighted_) {
-		data_->color = config_.highlightColor_;
-	} else {
+	}
+	else if (isHighlighted_) {
+		data_->color = config_.highlightColor_ * 10.0f;
+	}
+	else {
 		data_->color = config_.normalColor_;
 	}
 }
@@ -282,6 +285,33 @@ EnergyPickup* Enemy::DefeatAndDropEnergy() {
 	}
 
 	return nullptr;
+}
+
+void Enemy::PullTowards(const Vector3& targetPos, float speed, float deltaTime) 
+{
+	if (!data_) return;
+	Vector3 currentPos = data_->transform.translate;
+	Vector3 pullDir = targetPos - currentPos;
+	pullDir.y = 0.0f;
+
+	if (pullDir.LengthSquared() > 0.0001f) {
+		pullDir.Normalize();
+
+		Vector3 tangentDir = { -pullDir.z, 0.0f, pullDir.x };
+
+		float rotateSpeed = speed * 1.2f;
+
+		Vector3 velocity = (pullDir * speed) + (tangentDir * rotateSpeed);
+		data_->transform.translate += velocity * deltaTime;
+
+		// 距離と方向の再計算
+		Vector2 pos2D = { data_->transform.translate.x, data_->transform.translate.z };
+		distance_ = pos2D.Length();
+		if (distance_ > 0.0001f) {
+			direction_ = pos2D / distance_;
+		}
+	}
+	isBeingPulled_ = true; // 吸い込みフラグ
 }
 
 EnergySize Enemy::GetDropEnergySize() const {

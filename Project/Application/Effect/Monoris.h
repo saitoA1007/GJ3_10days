@@ -22,13 +22,17 @@ public:
 	static void SetFloatingWidth(float width) { floatingWidth_ = width; }
 	static void SetFloatingSpeed(float speed) { floatingSpeed_ = speed; }
 	static void SetMoveSpeedRatio(float ratio) { moveSpeedRatio_ = ratio; }
+	static void SetColor(Vector4 color) { color_ = color; }
 
 private:
 
 	float timer_ = 0.0f;
 	float moveSpeed_ = 1.0f;
+	float rotateSpeed_ = 1.0f;
+	float radiusRatio_ = 0.0f;
 
 	std::unique_ptr<GameEngine::ModelComponent> modelComponent_;
+	static inline Vector4 color_ = { 1.0f,1.0f,1.0f,1.0f };
 
 	static inline Transform baseTransform_;
 	static inline float radius_ = 0.0f;

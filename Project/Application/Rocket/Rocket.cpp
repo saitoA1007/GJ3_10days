@@ -49,8 +49,9 @@ Rocket::Rocket(Model* model, FieldEffect* fieldEffect, const RocketSettings& set
 	debugParameter_->Register("EaseType", settings_.entranceEaseType, 4, "Entrance");
 	debugParameter_->Register("Radius", settings_.colliderRadius, 0, "Collider");
 	debugParameter_->Register("OffsetY", settings_.colliderOffsetY, 1, "Collider");
-	debugParameter_->Register("InitialEnergy", settings_.initialEnergy, 0, "Energy");
-	debugParameter_->Register("EnemyHitLoss", settings_.enemyHitLoss, 1, "Energy");
+	debugParameter_->Register("RequiredEnergy", settings_.requiredEnergy, 0, "Energy");
+	debugParameter_->Register("InitialEnergy", settings_.initialEnergy, 1, "Energy");
+	debugParameter_->Register("EnemyHitLoss", settings_.enemyHitLoss, 2, "Energy");
 	debugParameter_->Register("ChangeAmount", settings_.debugEnergyAmount, 0, "Debug");
 	debugParameter_->Apply();
 	SanitizeSettings();

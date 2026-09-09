@@ -18,6 +18,12 @@
                 0.44999998807907104,
                 1.0
             ],
+            "InjectColor": [
+                1.0,
+                0.800000011920929,
+                0.20000000298023224,
+                1.0
+            ],
             "TargetColor": [
                 1.0,
                 0.949999988079071,
@@ -36,7 +42,7 @@
                 1.0
             ],
             "MouseMoveThreshold": 0.009999999776482582,
-            "SelectionRadius": 1.5
+            "SelectionRadius": 2.0
         },
         "SceneName": "Game"
     }

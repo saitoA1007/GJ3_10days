@@ -41,6 +41,8 @@ struct LockOnSettings
 	Vector4 cursorColor = { 0.25f, 1.00f, 0.45f, 1.0f };  // 通常カーソル色
 	Vector4 targetColor = { 1.00f, 0.95f, 0.25f, 1.0f };  // 選択対象ガイド色
 	Vector4 chargeColor = { 1.00f, 0.35f, 0.20f, 1.0f };  // チャージ量ガイド色
+	Vector4 injectColor = { 1.0f, 0.8f, 0.2f, 1.0f };
+	float injectRate = 20.0f;
 };
 
 /// @brief 2D入力をXZ平面上のカーソルへ変換し、長押しロックオンでユニットを出撃させる。
@@ -48,17 +50,6 @@ class LockOnController final : public GameEngine::IGameObject
 {
 public:
 	/// @brief 入力をフィールド座標へ変換し、対象検索とユニット派遣を仲介する。
-	/// @param[in] input マウス座標と移動量の取得元。
-	/// @param[in] inputCommand デバイス共通コマンドの取得元。
-	/// @param[in] camera マウスレイの逆変換に使うカメラ。
-	/// @param[in] cursorModel カーソルの描画モデル。
-	/// @param[in] debugRenderer 選択範囲とチャージ量の描画先。
-	/// @param[in] field カーソル移動範囲の参照先。
-	/// @param[in] rocket 派遣元かつエネルギー消費元。
-	/// @param[in] energySpawner エネルギーの検索先。
-	/// @param[in] enemyManager 敵の検索先。
-	/// @param[in] unitManager ユニット派遣の依頼先。
-	/// @param[in] settings カーソルとチャージの初期設定。
 	LockOnController(
 		GameEngine::Input* input,
 		GameEngine::InputCommand* inputCommand,
@@ -208,5 +199,11 @@ private:
 	bool gameplayEnabled_ = true;  
 	bool enemySelectionEnabled_ = true;
 	int32_t chargedEnergy_ = 0;
+
+	bool isInjecting_ = false;    
+	float injectAnimTimer_ = 0.0f;
+	float injectAccumulator_ = 0.0f;
+	bool suppressLockOn_ = false;
+	bool hasUnitInRadius_ = false;
 };
 

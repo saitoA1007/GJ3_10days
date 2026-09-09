@@ -35,8 +35,6 @@ namespace
 	// Camera初期化時の画面サイズと合わせ、マウス座標をワールドへ逆変換する。
 	constexpr float kViewportWidth = 1280.0f;
 	constexpr float kViewportHeight = 720.0f;
-	constexpr float kMaxChargeBlinkIntervalSeconds = 0.15f;
-	constexpr Vector4 kMaxChargeBlinkColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 }
 
 LockOnController::LockOnController(
@@ -80,9 +78,11 @@ LockOnController::LockOnController(
 	debugParameter_->Register("MaxSeconds", settings_.maxLockOnSeconds, 0, "Charge");
 	debugParameter_->Register("StartSeconds", settings_.chargeStartSeconds, 1, "Charge");
 	debugParameter_->Register("MaxEnergyCost", settings_.maxChargeEnergyCost, 2, "Charge");
+	debugParameter_->Register("InjectRate", settings_.injectRate, 0, "Inject");
 	debugParameter_->Register("CursorColor", settings_.cursorColor, 0, "Color");
 	debugParameter_->Register("TargetColor", settings_.targetColor, 1, "Color");
 	debugParameter_->Register("ChargeColor", settings_.chargeColor, 2, "Color");
+	debugParameter_->Register("InjectColor", settings_.injectColor, 3, "Color");
 	debugParameter_->Apply();
 	SanitizeSettings();
 	SetUpdateOrder(30);
@@ -96,9 +96,9 @@ void LockOnController::Initialize()
 	cursorPosition_ = rocket_->GetPosition();
 	cursorPosition_.y = settings_.groundHeight;
 	lockOnSeconds_ = 0.0f;
-	maxChargeBlinkElapsedTime_ = 0.0f;
 	minimumDispatchHoldSeconds_ = 0.0f;
 	isCharging_ = false;
+	injectAccumulator_ = 0.0f;
 	enemySelectionEnabled_ = true;
 	SyncCursorModel();
 }
@@ -115,18 +115,82 @@ void LockOnController::Update()
 
 	UpdateCursor(FpsCounter::gameDeltaTime);
 
-	// チャージ中は対象を固定し、それ以外のときだけ最寄り対象を探し直す。
-	if (isCharging_)
+	// チャージ速度に合わせたエネルギー注入
+	isInjecting_ = false;
+	hasUnitInRadius_ = false; 
+
+	const bool isPushActive = inputCommand_->IsCommandActive(kLockOnPushCommand);
+
+	if (!isPushActive)
 	{
-		UpdateLockOn(FpsCounter::gameDeltaTime);
+		suppressLockOn_ = false;
 	}
-	else {
-		UpdateSelection();
-		if (inputCommand_->IsCommandActive(kLockOnTriggerCommand)) 
+
+	if (unitManager_)
+	{
+		int32_t amountToInject = 0;
+
+		if (isPushActive)
 		{
-			StartLockOn();
+			// 設定された注入速度を使って蓄積量を計算
+			if (settings_.injectRate > 0.0f)
+			{
+				injectAccumulator_ += settings_.injectRate * FpsCounter::gameDeltaTime;
+			}
+
+			int32_t rawAmount = static_cast<int32_t>(injectAccumulator_);
+			amountToInject = (rawAmount >= 1) ? rawAmount : 0;
+		}
+		else
+		{
+			injectAccumulator_ = 0.0f;
+		}
+
+		bool injectedAny = false;
+		// 範囲内にユニットがいるかを取得しつつ、エネルギー注入判定
+		hasUnitInRadius_ = unitManager_->InjectEnergyToUnitsAt(cursorPosition_, settings_.selectionRadius, amountToInject, &injectedAny);
+
+		if (injectedAny)
+		{
+			injectAccumulator_ -= static_cast<float>(amountToInject);
+			isInjecting_ = true;
+		}
+		else if (amountToInject > 0 && !hasUnitInRadius_)
+		{
+			injectAccumulator_ = 0.0f;
 		}
 	}
+
+	if (isInjecting_)
+	{
+		injectAnimTimer_ += FpsCounter::gameDeltaTime * 10.0f;
+
+		suppressLockOn_ = true;
+		if (isCharging_)
+		{
+			CancelLockOn();
+		}
+	}
+	else
+	{
+		injectAnimTimer_ = 0.0f;
+	}
+
+	if (!suppressLockOn_)
+	{
+		if (isCharging_)
+		{
+			UpdateLockOn(FpsCounter::gameDeltaTime);
+		}
+		else {
+			UpdateSelection();
+			if (inputCommand_->IsCommandActive(kLockOnTriggerCommand))
+			{
+				StartLockOn();
+			}
+		}
+	}
+
 	SyncCursorModel();
 	SyncChargeModel();
 }
@@ -286,17 +350,23 @@ bool LockOnController::TrySetCursorFromMouse()
 	return true;
 }
 
-void LockOnController::ClampCursorToField() 
+void LockOnController::ClampCursorToField()
 {
 	const Vector3 center = field_->GetSettings().center;
 	const float fieldRadius = field_->GetRadius(FieldZone::OuterBuffer);
 	const float allowedRadius = (std::max)(fieldRadius - settings_.fieldEdgeMargin, 0.0f);
+
+	// 奥へ移動しないよう、中心点で押し戻死
+	if (cursorPosition_.z > center.z) {
+		cursorPosition_.z = center.z;
+	}
+
+	// 円形フィールドの外に出ないよう半径で制限
 	const float offsetX = cursorPosition_.x - center.x;
 	const float offsetZ = cursorPosition_.z - center.z;
 	const float distanceSquared = offsetX * offsetX + offsetZ * offsetZ;
 
 	if (distanceSquared > allowedRadius * allowedRadius && distanceSquared > 0.0f) {
-		// 中心からの方向は維持し、半径だけを許可範囲まで縮める。
 		const float scale = allowedRadius / std::sqrt(distanceSquared);
 		cursorPosition_.x = center.x + offsetX * scale;
 		cursorPosition_.z = center.z + offsetZ * scale;
@@ -305,8 +375,7 @@ void LockOnController::ClampCursorToField()
 
 void LockOnController::SyncCursorModel() 
 {
-	// 選択範囲と見た目の大きさを一致させ、ModelScaleはモデル固有の補正倍率として使う。
-	cursorModel_->worldTransform_.transform_.scale = 
+	cursorModel_->worldTransform_.transform_.scale =
 	{
 		settings_.cursorModelScale.x * settings_.selectionRadius,
 		settings_.cursorModelScale.y * settings_.selectionRadius,
@@ -318,24 +387,62 @@ void LockOnController::SyncCursorModel()
 		cursorPosition_.y + settings_.cursorModelHeightOffset,
 		cursorPosition_.z,
 	};
-	cursorModel_->materialData_->color = settings_.cursorColor;
+
+	const bool isPushActive = inputCommand_ && inputCommand_->IsCommandActive(kLockOnPushCommand);
+	constexpr Vector4 kYellowColor = { 1.0f, 1.0f, 0.0f, 1.0f };
+
+	// クリック押下かつサークル内にユニットがいる場合のみ
+	cursorModel_->materialData_->color = (isPushActive && hasUnitInRadius_) ? kYellowColor : settings_.cursorColor;
 	cursorModel_->Update();
 }
 
 void LockOnController::SyncChargeModel()
 {
-	if (!isCharging_ || (!selectedEnergy_ && !selectedEnemy_))
+	// チャージ中も注入中もなければ描画更新しない
+	if (!isCharging_ && !isInjecting_)
 	{
 		return;
 	}
 
-	Vector3 targetPosition = selectedEnemy_
-		? selectedEnemy_->GetPosition()
-		: selectedEnergy_->GetPosition();
+	Vector3 targetPosition = cursorPosition_;
+	float targetRadius = settings_.selectionRadius;
+	Vector4 currentColor = settings_.chargeColor;
 
-	const float targetRadius = selectedEnemy_
-		? selectedEnemy_->GetDisplayScale() + 0.25f
-		: selectedEnergy_->GetScale() + 0.25f;
+	if (isInjecting_)
+	{
+		// 注入中：サイン波で脈動（ポンピング）するスケールアニメーション
+		const float pulse = (std::sin(injectAnimTimer_) + 1.0f) * 0.15f; // スケールの揺れ幅
+		const float currentRadius = settings_.selectionRadius * (1.0f + pulse);
+
+		chargeModel_->worldTransform_.transform_.scale =
+		{
+			settings_.cursorModelScale.x * currentRadius,
+			settings_.cursorModelScale.y * currentRadius,
+			settings_.cursorModelScale.z * currentRadius,
+		};
+
+		chargeModel_->worldTransform_.transform_.translate =
+		{
+			cursorPosition_.x,
+			settings_.groundHeight + settings_.cursorModelHeightOffset + 0.01f,
+			cursorPosition_.z,
+		};
+
+		chargeModel_->materialData_->color = settings_.injectColor;
+		chargeModel_->Update();
+		return;
+	}
+
+	if (selectedEnemy_)
+	{
+		targetPosition = selectedEnemy_->GetPosition();
+		targetRadius = selectedEnemy_->GetDisplayScale() + 0.25f;
+	}
+	else if (selectedEnergy_)
+	{
+		targetPosition = selectedEnergy_->GetPosition();
+		targetRadius = selectedEnergy_->GetScale() + 0.25f;
+	}
 
 	const float ratio = CalculateChargeRatio();
 	const float currentRadius = targetRadius + ratio * settings_.selectionRadius;
@@ -343,7 +450,7 @@ void LockOnController::SyncChargeModel()
 	chargeModel_->worldTransform_.transform_.scale =
 	{
 		settings_.cursorModelScale.x * currentRadius,
-		targetPosition.y + settings_.cursorModelHeightOffset + 0.01f,
+		settings_.cursorModelScale.y * currentRadius,
 		settings_.cursorModelScale.z * currentRadius,
 	};
 
@@ -354,7 +461,7 @@ void LockOnController::SyncChargeModel()
 		targetPosition.z,
 	};
 
-	chargeModel_->materialData_->color = GetChargeDisplayColor();
+	chargeModel_->materialData_->color = settings_.chargeColor;
 	chargeModel_->Update();
 }
 
@@ -385,16 +492,8 @@ void LockOnController::UpdateSelection()
 
 void LockOnController::StartLockOn()
 {
-	// 待機Unitがいない場合は、対象を選べてもチャージを開始しない。
-	if (!HasValidSelection() || unitManager_->GetAvailableCount() == 0)
-	{
-		return;
-	}
-
 	isCharging_ = true;
 	lockOnSeconds_ = 0.0f;
-	maxChargeBlinkElapsedTime_ = 0.0f;
-	chargedEnergy_ = 0;
 }
 
 void LockOnController::UpdateLockOn(float deltaTime)
@@ -439,15 +538,6 @@ void LockOnController::UpdateLockOn(float deltaTime)
 		}
 	}
 
-	if (CalculateChargeRatio() >= 1.0f)
-	{
-		maxChargeBlinkElapsedTime_ += (std::max)(deltaTime, 0.0f);
-	}
-	else
-	{
-		maxChargeBlinkElapsedTime_ = 0.0f;
-	}
-
 	// 離した瞬間に現在のチャージ量を確定し、1体だけ派遣する。
 	if (inputCommand_->IsCommandActive(kLockOnReleaseCommand))
 	{
@@ -457,40 +547,32 @@ void LockOnController::UpdateLockOn(float deltaTime)
 
 void LockOnController::CompleteLockOn()
 {
-	if (lockOnSeconds_ < minimumDispatchHoldSeconds_)
+	if (!isCharging_)
 	{
-		CancelLockOn();
-		UpdateSelection();
 		return;
 	}
 
-	// リアルタイムで引き落とした chargedEnergy_ をそのまま Unit に渡す
-	bool dispatched = false;
-	if (selectedEnergy_)
+	const int32_t requestedEnergy = CalculateRequestedEnergy();
+
+	// 敵が選択されている場合
+	if (selectedEnemy_)
 	{
-		dispatched = unitManager_->DispatchToEnergy(selectedEnergy_, chargedEnergy_);
+		unitManager_->DispatchToEnemy(selectedEnemy_, requestedEnergy);
 	}
-	else if (selectedEnemy_)
+	// エネルギーが選択されている場合
+	else if (selectedEnergy_)
 	{
-		dispatched = unitManager_->DispatchToEnemy(selectedEnemy_, chargedEnergy_);
+		unitManager_->DispatchToEnergy(selectedEnergy_, requestedEnergy);
+	}
+	else
+	{
+		unitManager_->DispatchToPosition(cursorPosition_, requestedEnergy);
 	}
 
-	// 派遣に失敗した場合は引き落としたエネルギーをロケットに返却
-	if (!dispatched && chargedEnergy_ > 0)
-	{
-		rocket_->DepositEnergy(chargedEnergy_);
-	}
-
-	chargedEnergy_ = 0;
-	SetSelection(nullptr, nullptr);
+	// チャージ解除
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
-	maxChargeBlinkElapsedTime_ = 0.0f;
-
-	if (!dispatched)
-	{
-		UpdateSelection();
-	}
+	chargedEnergy_ = 0;
 }
 
 void LockOnController::CancelLockOn()
@@ -503,7 +585,6 @@ void LockOnController::CancelLockOn()
 	chargedEnergy_ = 0;
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
-	maxChargeBlinkElapsedTime_ = 0.0f;
 	SetSelection(nullptr, nullptr);
 }
 
@@ -531,20 +612,6 @@ float LockOnController::CalculateChargeRatio() const
 		1.0f);
 }
 
-Vector4 LockOnController::GetChargeDisplayColor() const
-{
-	if (CalculateChargeRatio() < 1.0f)
-	{
-		return settings_.chargeColor;
-	}
-
-	const uint64_t blinkStep = static_cast<uint64_t>(
-		maxChargeBlinkElapsedTime_ / kMaxChargeBlinkIntervalSeconds);
-	return blinkStep % 2 == 0
-		? kMaxChargeBlinkColor
-		: settings_.chargeColor;
-}
-
 int32_t LockOnController::CalculateRequestedEnergy() const 
 {
 	// 正数のstatic_castは小数点以下を切り捨てるため、低チャージの繰り上がりがない。
@@ -554,8 +621,7 @@ int32_t LockOnController::CalculateRequestedEnergy() const
 
 bool LockOnController::HasValidSelection() const
 {
-	return (selectedEnergy_ && selectedEnergy_->IsTargetable()) ||
-		(enemySelectionEnabled_ && selectedEnemy_ && selectedEnemy_->IsTargetable());
+	return true;
 }
 
 void LockOnController::SetSelection(EnergyPickup* energy, Enemy* enemy)
@@ -632,7 +698,7 @@ void LockOnController::DrawLockOnGuide()
 			targetPosition,
 			{ 0.0f, 1.0f, 0.0f },
 			targetRadius + ratio * settings_.selectionRadius,
-			GetChargeDisplayColor(),
+			settings_.chargeColor,
 			32);
 	}
 }
