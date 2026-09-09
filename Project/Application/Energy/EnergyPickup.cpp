@@ -37,6 +37,7 @@ void EnergyPickup::Spawn(
 	rotationY_ = 0.0f;
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+	rainbowHue_ = 0.0f;
 
 	// ディゾルブの初期設定
 	appearTime_ = 0.0f;
@@ -62,6 +63,7 @@ void EnergyPickup::SpawnOnGround(
 	rotationY_ = 0.0f;
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+	rainbowHue_ = 0.0f;
 	material_.materialData_->dissolveThreshold = 0.0f;
 	SyncModel();
 }
@@ -76,6 +78,7 @@ void EnergyPickup::Reset()
 	rotationY_ = 0.0f;
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
+	rainbowHue_ = 0.0f;
 	material_.materialData_->dissolveThreshold = 0.0f;
 }
 
@@ -173,6 +176,13 @@ void EnergyPickup::Update(
 	}
 
 	material_.materialData_->time += safeDeltaTime;
+
+	// Specialは色相を回し続けて虹色に見せる。
+	if (IsRainbow())
+	{
+		rainbowHue_ += safeDeltaTime * typeSettings_.rainbowSpeed;
+		rainbowHue_ -= std::floor(rainbowHue_);
+	}
 
 	SyncModel();
 }
@@ -286,8 +296,9 @@ void EnergyPickup::SyncModel()
 	}
 	modelComponent_->worldTransform_.transform_.translate = displayPosition;
 	modelComponent_->worldTransform_.transform_.rotate.y = rotationY_;
-	Vector4 color = typeSettings_.color;
-	if (isHighlighted_) 
+	const Vector4 displayColor = MakeDisplayColor();
+	Vector4 color = displayColor;
+	if (isHighlighted_)
 	{
 		color.x = color.x + (1.0f - color.x) * 0.65f;
 		color.y = color.y + (1.0f - color.y) * 0.65f;
@@ -296,11 +307,14 @@ void EnergyPickup::SyncModel()
 	modelComponent_->materialData_->color = color;
 
 	material_.materialData_->baseColor = color;
-	material_.materialData_->rimColor = typeSettings_.rimColor;
+	// 虹色のときは輪郭も補色側へずらし、色の変化が分かりやすいようにする。
+	material_.materialData_->rimColor = IsRainbow()
+		? HsvToRgb(rainbowHue_ + 0.5f, typeSettings_.rainbowSaturation, 1.0f, typeSettings_.rimColor.w)
+		: typeSettings_.rimColor;
 	material_.materialData_->dissolveEdgeColor = typeSettings_.dissolveEdgeColor;
 
 	// 色を設定
-	particle_.SetColor(typeSettings_.color);
+	particle_.SetColor(displayColor);
 	// サイズを設定
 	float eScale = scale * 1.2f;
 	particle_.SetScale({ eScale, eScale, eScale });
@@ -309,5 +323,42 @@ void EnergyPickup::SyncModel()
 	particle_.SetEmitterPos(modelComponent_->worldTransform_.transform_.translate);
 
 	modelComponent_->Update();
+}
+
+Vector4 EnergyPickup::MakeDisplayColor() const
+{
+	if (!IsRainbow())
+	{
+		return typeSettings_.color;
+	}
+
+	// アルファはRegisterで設定した値をそのまま使い、RGBだけ色相から作る。
+	return HsvToRgb(rainbowHue_, typeSettings_.rainbowSaturation, 0.3f, typeSettings_.color.w);
+}
+
+Vector4 EnergyPickup::HsvToRgb(float hue, float saturation, float value, float alpha)
+{
+	// 色相は1.0で1周するため、範囲外は折り返す。
+	hue -= std::floor(hue);
+	saturation = (std::clamp)(saturation, 0.0f, 1.0f);
+	value = (std::clamp)(value, 0.0f, 1.0f);
+
+	const float sector = hue * 6.0f;
+	const int index = static_cast<int>(sector) % 6;
+	const float fraction = sector - std::floor(sector);
+
+	const float p = value * (1.0f - saturation);
+	const float q = value * (1.0f - saturation * fraction);
+	const float t = value * (1.0f - saturation * (1.0f - fraction));
+
+	switch (index)
+	{
+	case 0:  return { value, t, p, alpha };
+	case 1:  return { q, value, p, alpha };
+	case 2:  return { p, value, t, alpha };
+	case 3:  return { p, q, value, alpha };
+	case 4:  return { t, p, value, alpha };
+	default: return { value, p, q, alpha };
+	}
 }
 
