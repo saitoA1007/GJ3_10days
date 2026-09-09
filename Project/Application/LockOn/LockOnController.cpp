@@ -115,9 +115,12 @@ void LockOnController::Initialize()
 	isCharging_ = false;
 	injectAccumulator_ = 0.0f;
 	enemySelectionEnabled_ = true;
+	tutorialAllowedEnergy_ = nullptr;
+	tutorialAllowedEnemy_ = nullptr;
 	tutorialHoldTarget_ = nullptr;
 	hasUnitInRadius_ = false;
 	tutorialHoldTargetHovered_ = false;
+	tutorialInteractionRestricted_ = false;
 	SyncCursorModel();
 }
 
@@ -182,7 +185,7 @@ void LockOnController::Update()
 		suppressLockOn_ = false;
 	}
 
-	if (unitManager_)
+	if (unitManager_ && !tutorialInteractionRestricted_)
 	{
 		int32_t amountToInject = 0;
 
@@ -315,6 +318,44 @@ void LockOnController::SetEnemySelectionEnabled(bool enabled)
 	{
 		CancelLockOn();
 	}
+}
+
+void LockOnController::SetTutorialAllowedTargets(
+	EnergyPickup* energy,
+	Enemy* enemy)
+{
+	if (tutorialInteractionRestricted_ && !tutorialHoldTarget_ &&
+		tutorialAllowedEnergy_ == energy && tutorialAllowedEnemy_ == enemy)
+	{
+		return;
+	}
+
+	CancelLockOn();
+	tutorialInteractionRestricted_ = true;
+	tutorialAllowedEnergy_ = energy;
+	tutorialAllowedEnemy_ = enemy;
+	tutorialHoldTarget_ = nullptr;
+	hasUnitInRadius_ = false;
+	tutorialHoldTargetHovered_ = false;
+	isInjecting_ = false;
+	injectAccumulator_ = 0.0f;
+	injectAnimTimer_ = 0.0f;
+	suppressLockOn_ = false;
+}
+
+void LockOnController::ClearTutorialInteractionRestriction()
+{
+	CancelLockOn();
+	tutorialInteractionRestricted_ = false;
+	tutorialAllowedEnergy_ = nullptr;
+	tutorialAllowedEnemy_ = nullptr;
+	tutorialHoldTarget_ = nullptr;
+	hasUnitInRadius_ = false;
+	tutorialHoldTargetHovered_ = false;
+	isInjecting_ = false;
+	injectAccumulator_ = 0.0f;
+	injectAnimTimer_ = 0.0f;
+	suppressLockOn_ = false;
 }
 
 void LockOnController::ApplyDebugParameters()
@@ -530,12 +571,16 @@ void LockOnController::SyncChargeModel()
 
 void LockOnController::SetTutorialHoldTarget(Unit* unit)
 {
-	if (tutorialHoldTarget_ == unit)
+	if (tutorialInteractionRestricted_ && tutorialHoldTarget_ == unit &&
+		!tutorialAllowedEnergy_ && !tutorialAllowedEnemy_)
 	{
 		return;
 	}
 
 	CancelLockOn();
+	tutorialInteractionRestricted_ = unit != nullptr;
+	tutorialAllowedEnergy_ = nullptr;
+	tutorialAllowedEnemy_ = nullptr;
 	tutorialHoldTarget_ = unit;
 	hasUnitInRadius_ = false;
 	tutorialHoldTargetHovered_ = false;
@@ -546,6 +591,38 @@ void LockOnController::SetTutorialHoldTarget(Unit* unit)
 
 void LockOnController::UpdateSelection()
 {
+	if (tutorialInteractionRestricted_)
+	{
+		EnergyPickup* energy = nullptr;
+		Enemy* enemy = nullptr;
+		const float selectionRadiusSquared =
+			settings_.selectionRadius * settings_.selectionRadius;
+
+		if (tutorialAllowedEnergy_ && tutorialAllowedEnergy_->IsTargetable())
+		{
+			const Vector3 offset = tutorialAllowedEnergy_->GetPosition() - cursorPosition_;
+			const float distanceSquared = offset.x * offset.x + offset.z * offset.z;
+			if (distanceSquared <= selectionRadiusSquared)
+			{
+				energy = tutorialAllowedEnergy_;
+			}
+		}
+
+		if (tutorialAllowedEnemy_ && enemySelectionEnabled_ &&
+			tutorialAllowedEnemy_->IsTargetable())
+		{
+			const Vector3 offset = tutorialAllowedEnemy_->GetPosition() - cursorPosition_;
+			const float distanceSquared = offset.x * offset.x + offset.z * offset.z;
+			if (distanceSquared <= selectionRadiusSquared)
+			{
+				enemy = tutorialAllowedEnemy_;
+			}
+		}
+
+		SetSelection(energy, enemy);
+		return;
+	}
+
 	EnergyPickup* energy = energySpawner_->FindNearestAvailable(cursorPosition_, settings_.selectionRadius);
 	Enemy* enemy = enemySelectionEnabled_
 		? enemyManager_->FindNearestTargetable(cursorPosition_, settings_.selectionRadius)
@@ -571,6 +648,11 @@ void LockOnController::UpdateSelection()
 
 void LockOnController::StartLockOn()
 {
+	if (!HasValidSelection())
+	{
+		return;
+	}
+
 	isCharging_ = true;
 	lockOnSeconds_ = 0.0f;
 	maxChargeBlinkElapsedTime_ = 0.0f;
@@ -638,6 +720,11 @@ void LockOnController::CompleteLockOn()
 {
 	if (!isCharging_)
 	{
+		return;
+	}
+	if (lockOnSeconds_ < minimumDispatchHoldSeconds_)
+	{
+		CancelLockOn();
 		return;
 	}
 
@@ -726,6 +813,17 @@ int32_t LockOnController::CalculateRequestedEnergy() const
 
 bool LockOnController::HasValidSelection() const
 {
+	if (tutorialInteractionRestricted_)
+	{
+		const bool hasAllowedEnergy = selectedEnergy_ &&
+			selectedEnergy_ == tutorialAllowedEnergy_ &&
+			selectedEnergy_->IsTargetable();
+		const bool hasAllowedEnemy = selectedEnemy_ &&
+			selectedEnemy_ == tutorialAllowedEnemy_ &&
+			selectedEnemy_->IsTargetable();
+		return hasAllowedEnergy || hasAllowedEnemy;
+	}
+
 	return true;
 }
 

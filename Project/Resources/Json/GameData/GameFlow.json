@@ -54,7 +54,7 @@
                 4.0,
                 -14.0
             ],
-            "UnitRequiredHoldDuration": 2.0
+            "UnitRequiredHoldDuration": 1.0
         }
     }
 }

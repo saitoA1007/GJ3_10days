@@ -91,6 +91,13 @@ public:
 	/// @brief Enemyをロックオン候補に含めるか切り替える。
 	void SetEnemySelectionEnabled(bool enabled);
 
+	/// @brief チュートリアル中の操作対象を指定したEnergyまたはEnemyだけに制限する。
+	/// @details 両方nullptrならカーソル移動以外の操作を禁止する。
+	void SetTutorialAllowedTargets(EnergyPickup* energy, Enemy* enemy);
+
+	/// @brief チュートリアル専用の操作制限を解除する。
+	void ClearTutorialInteractionRestriction();
+
 	/// @brief Text14中に長押し判定する静止Unitを設定する。
 	void SetTutorialHoldTarget(Unit* unit);
 	bool IsTutorialHoldTargetHovered() const { return tutorialHoldTargetHovered_; }
@@ -197,6 +204,8 @@ private:
 	Vector3 cursorPosition_ = {};                               
 	EnergyPickup* selectedEnergy_ = nullptr;                    
 	Enemy* selectedEnemy_ = nullptr;                            
+	EnergyPickup* tutorialAllowedEnergy_ = nullptr;
+	Enemy* tutorialAllowedEnemy_ = nullptr;
 	Unit* tutorialHoldTarget_ = nullptr;
 	float lockOnSeconds_ = 0.0f;                                
 	float maxChargeBlinkElapsedTime_ = 0.0f;
@@ -212,5 +221,6 @@ private:
 	bool suppressLockOn_ = false;
 	bool hasUnitInRadius_ = false;
 	bool tutorialHoldTargetHovered_ = false;
+	bool tutorialInteractionRestricted_ = false;
 };
 

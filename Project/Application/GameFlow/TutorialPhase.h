@@ -47,7 +47,9 @@ public:
 
 private:
 	Step step_ = Step::SelectEnergy;
+	EnergyPickup* tutorialEnergy_ = nullptr;
 	EnergyPickup* chargeEnergy_ = nullptr;
+	Enemy* enemyLockOnTarget_ = nullptr;
 	Enemy* enemyHoldTarget_ = nullptr;
 	Unit* tutorialUnitHoldTarget_ = nullptr;
 	std::array<EnergyPickup*, 3> tutorialUnitEnergies_{};

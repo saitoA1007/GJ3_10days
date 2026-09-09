@@ -30,7 +30,9 @@ void TutorialPhase::OnEnter(GameFlowContext& context)
 	audioManager.Play(tutorialBgmHandle, kTutorialBgmVolume, true);
 
 	step_ = Step::SelectEnergy;
+	tutorialEnergy_ = nullptr;
 	chargeEnergy_ = nullptr;
+	enemyLockOnTarget_ = nullptr;
 	enemyHoldTarget_ = nullptr;
 	tutorialUnitHoldTarget_ = nullptr;
 	tutorialUnitEnergies_.fill(nullptr);
@@ -43,14 +45,19 @@ void TutorialPhase::OnEnter(GameFlowContext& context)
 	{
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
 		context.lockOnController->SetEnemySelectionEnabled(true);
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 	}
 
 	if (context.energySpawner && context.settings)
 	{
 		const Vector2& positionXZ = context.settings->tutorialEnergyPositionXZ;
-		context.energySpawner->SpawnOnGround(
+		tutorialEnergy_ = context.energySpawner->SpawnOnGround(
 			EnergySize::Small,
 			{ positionXZ.x, 0.0f, positionXZ.y });
+		if (context.lockOnController)
+		{
+			context.lockOnController->SetTutorialAllowedTargets(tutorialEnergy_, nullptr);
+		}
 	}
 }
 
@@ -66,7 +73,7 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 	{
 	case Step::SelectEnergy:
 		// カーソルが重なっただけではなく、Energyへのロックオン開始で次工程へ進む。
-		if (context.lockOnController->GetSelectedEnergy() != nullptr &&
+		if (context.lockOnController->GetSelectedEnergy() == tutorialEnergy_ &&
 			context.lockOnController->IsCharging())
 		{
 			step_ = Step::DispatchUnit;
@@ -77,9 +84,11 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 		if (context.unitManager->GetDeployedCount() > 0)
 		{
 			step_ = Step::WaitForChargeInstruction;
+			context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 		}
 		break;
 	case Step::WaitForChargeInstruction:
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 		break;
 	case Step::ChargeEnergy:
 	{
@@ -101,6 +110,7 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 		break;
 	}
 	case Step::WaitForEnemyCollisionInstruction:
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 		break;
 	case Step::EnemyCollision:
 		if (context.rocket && context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_)
@@ -113,11 +123,12 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 		}
 		break;
 	case Step::WaitForEnemyLockOnInstruction:
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 		break;
 	case Step::EnemyLockOnOrCollision:
 	{
 		const bool enemyLockOnStarted = context.lockOnController &&
-			context.lockOnController->GetSelectedEnemy() != nullptr &&
+			context.lockOnController->GetSelectedEnemy() == enemyLockOnTarget_ &&
 			context.lockOnController->IsCharging();
 		const bool enemyReachedRocket = context.rocket &&
 			context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_;
@@ -128,6 +139,7 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 		break;
 	}
 	case Step::WaitForEnemyHoldInstruction:
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 		break;
 	case Step::EnemyHoldOrCollision:
 	{
@@ -154,6 +166,7 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 		break;
 	}
 	case Step::WaitForUnitHoldInstruction:
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 		break;
 	case Step::UnitHold:
 	{
@@ -218,7 +231,7 @@ void TutorialPhase::OnExit(GameFlowContext& context)
 	{
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
 		context.lockOnController->SetEnemySelectionEnabled(true);
-		context.lockOnController->SetTutorialHoldTarget(nullptr);
+		context.lockOnController->ClearTutorialInteractionRestriction();
 	}
 	if (context.unitManager)
 	{
@@ -238,7 +251,9 @@ void TutorialPhase::OnExit(GameFlowContext& context)
 			context.enemyManager->Despawn(enemy);
 		}
 	}
+	tutorialEnergy_ = nullptr;
 	chargeEnergy_ = nullptr;
+	enemyLockOnTarget_ = nullptr;
 	enemyHoldTarget_ = nullptr;
 	tutorialUnitHoldTarget_ = nullptr;
 	tutorialUnitEnergies_.fill(nullptr);
@@ -263,6 +278,7 @@ void TutorialPhase::BeginChargeEnergyStep(GameFlowContext& context)
 	if (chargeEnergy_)
 	{
 		step_ = Step::ChargeEnergy;
+		context.lockOnController->SetTutorialAllowedTargets(chargeEnergy_, nullptr);
 		context.lockOnController->SetMinimumDispatchHoldSeconds(
 			context.settings->tutorialRequiredHoldDuration);
 	}
@@ -279,6 +295,7 @@ void TutorialPhase::BeginEnemyCollisionStep(GameFlowContext& context)
 
 	enemyHitCountAtSpawn_ = context.rocket->GetEnemyHitCount();
 	context.lockOnController->SetEnemySelectionEnabled(false);
+	context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 	const Vector2& positionXZ = context.settings->tutorialEnemyPositionXZ;
 	context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
 	step_ = Step::EnemyCollision;
@@ -296,8 +313,16 @@ void TutorialPhase::BeginEnemyLockOnStep(GameFlowContext& context)
 	enemyHitCountAtSpawn_ = context.rocket->GetEnemyHitCount();
 	context.lockOnController->SetEnemySelectionEnabled(true);
 	const Vector2& positionXZ = context.settings->tutorialLockOnEnemyPositionXZ;
-	context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
-	step_ = Step::EnemyLockOnOrCollision;
+	enemyLockOnTarget_ = context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
+	if (enemyLockOnTarget_)
+	{
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, enemyLockOnTarget_);
+		step_ = Step::EnemyLockOnOrCollision;
+	}
+	else
+	{
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
+	}
 }
 
 void TutorialPhase::BeginEnemyHoldStep(GameFlowContext& context)
@@ -319,10 +344,12 @@ void TutorialPhase::BeginEnemyHoldStep(GameFlowContext& context)
 	enemyHoldTarget_ = context.enemyManager->Pop(1, positionXZ, EnemyType::Straight_S);
 	if (enemyHoldTarget_)
 	{
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, enemyHoldTarget_);
 		step_ = Step::EnemyHoldOrCollision;
 	}
 	else
 	{
+		context.lockOnController->SetTutorialAllowedTargets(nullptr, nullptr);
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
 	}
 }
