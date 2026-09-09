@@ -1,9 +1,9 @@
 {
     "Unit": {
         "Blackhole": {
-            "BHBaseRadius": 18.0,
+            "BHBaseRadius": 12.0,
             "BHDuration": 2.0,
-            "BHEnergyThreshold": 35,
+            "BHEnergyThreshold": 25,
             "BHFarDistance": 30.0,
             "BHKillRadius": 0.5,
             "BHNearDistance": 10.0,
@@ -35,7 +35,7 @@
         },
         "Move": {
             "BoostedSpeed": 7.0,
-            "DeliveryRadius": 1.600000023841858,
+            "DeliveryRadius": 3.0,
             "NormalSpeed": 2.0,
             "PickupRadius": 0.44999998807907104
         },

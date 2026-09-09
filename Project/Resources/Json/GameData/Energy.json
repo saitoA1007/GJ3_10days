@@ -6,7 +6,7 @@
             "RotationSpeed": 1.5
         },
         "PlayingTimeline": {
-            "EventCount": 6,
+            "EventCount": 14,
             "Events": {
                 "Event000": {
                     "ArcPosition": 0.5,
@@ -37,6 +37,46 @@
                     "ArcPosition": 0.5,
                     "EnergySize": 2,
                     "TimeSeconds": 5.0
+                },
+                "Event006": {
+                    "ArcPosition": 0.5,
+                    "EnergySize": 1,
+                    "TimeSeconds": 10.0
+                },
+                "Event007": {
+                    "ArcPosition": 0.6510000228881836,
+                    "EnergySize": 2,
+                    "TimeSeconds": 7.5
+                },
+                "Event008": {
+                    "ArcPosition": 0.34700000286102295,
+                    "EnergySize": 2,
+                    "TimeSeconds": 7.5
+                },
+                "Event009": {
+                    "ArcPosition": 0.5,
+                    "EnergySize": 0,
+                    "TimeSeconds": 15.0
+                },
+                "Event010": {
+                    "ArcPosition": 0.10199999809265137,
+                    "EnergySize": 0,
+                    "TimeSeconds": 15.0
+                },
+                "Event011": {
+                    "ArcPosition": 0.9010000228881836,
+                    "EnergySize": 0,
+                    "TimeSeconds": 15.0
+                },
+                "Event012": {
+                    "ArcPosition": 0.30399999022483826,
+                    "EnergySize": 0,
+                    "TimeSeconds": 15.0
+                },
+                "Event013": {
+                    "ArcPosition": 0.7020000219345093,
+                    "EnergySize": 0,
+                    "TimeSeconds": 15.0
                 }
             }
         },
@@ -86,7 +126,7 @@
                     1.0
                 ],
                 "Scale": 1.7999999523162842,
-                "Value": 25,
+                "Value": 30,
                 "dissolveEdgeColor": [
                     0.17625486850738525,
                     1.0,
@@ -110,7 +150,7 @@
                     1.0
                 ],
                 "Scale": 1.0,
-                "Value": 10,
+                "Value": 15,
                 "dissolveEdgeColor": [
                     1.0,
                     0.1499999761581421,

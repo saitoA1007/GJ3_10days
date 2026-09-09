@@ -661,15 +661,19 @@ void GameScene::Draw() {
 		renderQueue_->SubmitSprite(fadeSprite_.get());
 	}
 
-	for (auto& s : scoreModels_) {
-		s->Draw(renderQueue_);
+	const bool hideRightScoreModels = ShouldHideRightScoreModels();
+	for (std::size_t i = 0; i < scoreModels_.size(); ++i) {
+		// 登録順は各スコアの Right, Left。対象フェーズ中は右側だけ非表示にする。
+		if (hideRightScoreModels && i % 2 == 0) {
+			continue;
+		}
+		scoreModels_[i]->Draw(renderQueue_);
 	}
 }
 
 void GameScene::UpdateTutorialViews(bool advanceAnimation)
 {
-	const IGamePhase* currentPhase = gameFlow_ ? gameFlow_->GetCurrentPhase() : nullptr;
-	const bool isTutorial = currentPhase && std::string_view(currentPhase->GetName()) == "Tutorial";
+	const bool isTutorial = IsTutorialPhase();
 	const float deltaTime = FpsCounter::deltaTime;
 	if (tutorialLogoView_) tutorialLogoView_->Update(isTutorial, advanceAnimation, deltaTime);
 	if (tutorialLogo2View_) tutorialLogo2View_->Update(isTutorial, advanceAnimation, deltaTime);
@@ -681,6 +685,23 @@ void GameScene::DrawTutorialViews()
 	if (tutorialLogoView_) tutorialLogoView_->Draw(renderQueue_);
 	if (tutorialLogo2View_) tutorialLogo2View_->Draw(renderQueue_);
 	if (tutorialTextSequence_) tutorialTextSequence_->Draw(renderQueue_);
+}
+
+bool GameScene::IsTutorialPhase() const
+{
+	const IGamePhase* currentPhase = gameFlow_ ? gameFlow_->GetCurrentPhase() : nullptr;
+	return currentPhase && std::string_view(currentPhase->GetName()) == "Tutorial";
+}
+
+bool GameScene::ShouldHideRightScoreModels() const
+{
+	const IGamePhase* currentPhase = gameFlow_ ? gameFlow_->GetCurrentPhase() : nullptr;
+	if (!currentPhase) {
+		return false;
+	}
+
+	const std::string_view phaseName = currentPhase->GetName();
+	return phaseName == "Tutorial" || phaseName == "Opening Cutscene";
 }
 
 void GameScene::InputRegisterCommand() {
