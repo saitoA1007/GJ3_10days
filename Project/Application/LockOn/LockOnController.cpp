@@ -35,6 +35,8 @@ namespace
 	// Camera初期化時の画面サイズと合わせ、マウス座標をワールドへ逆変換する。
 	constexpr float kViewportWidth = 1280.0f;
 	constexpr float kViewportHeight = 720.0f;
+	constexpr float kMaxChargeBlinkIntervalSeconds = 0.15f;
+	constexpr Vector4 kMaxChargeBlinkColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 }
 
 LockOnController::LockOnController(
@@ -96,6 +98,7 @@ void LockOnController::Initialize()
 	cursorPosition_ = rocket_->GetPosition();
 	cursorPosition_.y = settings_.groundHeight;
 	lockOnSeconds_ = 0.0f;
+	maxChargeBlinkElapsedTime_ = 0.0f;
 	minimumDispatchHoldSeconds_ = 0.0f;
 	isCharging_ = false;
 	injectAccumulator_ = 0.0f;
@@ -461,7 +464,7 @@ void LockOnController::SyncChargeModel()
 		targetPosition.z,
 	};
 
-	chargeModel_->materialData_->color = settings_.chargeColor;
+	chargeModel_->materialData_->color = GetChargeDisplayColor();
 	chargeModel_->Update();
 }
 
@@ -494,6 +497,7 @@ void LockOnController::StartLockOn()
 {
 	isCharging_ = true;
 	lockOnSeconds_ = 0.0f;
+	maxChargeBlinkElapsedTime_ = 0.0f;
 }
 
 void LockOnController::UpdateLockOn(float deltaTime)
@@ -538,6 +542,15 @@ void LockOnController::UpdateLockOn(float deltaTime)
 		}
 	}
 
+	if (CalculateChargeRatio() >= 1.0f)
+	{
+		maxChargeBlinkElapsedTime_ += (std::max)(deltaTime, 0.0f);
+	}
+	else
+	{
+		maxChargeBlinkElapsedTime_ = 0.0f;
+	}
+
 	// 離した瞬間に現在のチャージ量を確定し、1体だけ派遣する。
 	if (inputCommand_->IsCommandActive(kLockOnReleaseCommand))
 	{
@@ -572,6 +585,7 @@ void LockOnController::CompleteLockOn()
 	// チャージ解除
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
+	maxChargeBlinkElapsedTime_ = 0.0f;
 	chargedEnergy_ = 0;
 }
 
@@ -585,6 +599,7 @@ void LockOnController::CancelLockOn()
 	chargedEnergy_ = 0;
 	isCharging_ = false;
 	lockOnSeconds_ = 0.0f;
+	maxChargeBlinkElapsedTime_ = 0.0f;
 	SetSelection(nullptr, nullptr);
 }
 
@@ -610,6 +625,20 @@ float LockOnController::CalculateChargeRatio() const
 		(lockOnSeconds_ - settings_.chargeStartSeconds) / chargeDuration,
 		0.0f,
 		1.0f);
+}
+
+Vector4 LockOnController::GetChargeDisplayColor() const
+{
+	if (CalculateChargeRatio() < 1.0f)
+	{
+		return settings_.chargeColor;
+	}
+
+	const uint64_t blinkStep = static_cast<uint64_t>(
+		maxChargeBlinkElapsedTime_ / kMaxChargeBlinkIntervalSeconds);
+	return blinkStep % 2 == 0
+		? kMaxChargeBlinkColor
+		: settings_.chargeColor;
 }
 
 int32_t LockOnController::CalculateRequestedEnergy() const 
@@ -698,7 +727,7 @@ void LockOnController::DrawLockOnGuide()
 			targetPosition,
 			{ 0.0f, 1.0f, 0.0f },
 			targetRadius + ratio * settings_.selectionRadius,
-			settings_.chargeColor,
+			GetChargeDisplayColor(),
 			32);
 	}
 }

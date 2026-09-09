@@ -11,6 +11,7 @@ using namespace GameEngine;
 
 namespace {
 	constexpr Vector3 kCameraPosition = { 0.0f, 1.0f, -15.0f };
+	constexpr float kStartDelayDuration = 47.2f;
 }
 
 TitleScene::~TitleScene() {}
@@ -49,13 +50,22 @@ TitleScene::TitleScene() {
 
 void TitleScene::Initialize() {
 	isFinished_ = false;
+	startDelayTimer_.Start(kStartDelayDuration);
 	titleLogo_->ResetAnimation();
 	hyperspaceEffect_->ResetAnimation();
+	hyperspaceEffect_->SetActive(false);
 	mainCamera_->transform_.translate = kCameraPosition;
 	mainCamera_->Update();
 }
 
 void TitleScene::Update() {
+	// 10秒経過するまでは、タイトルシーン内の演出・入力・音声を開始しない。
+	startDelayTimer_.Update(FpsCounter::deltaTime);
+	if (!startDelayTimer_.IsFinished()) {
+		return;
+	}
+	hyperspaceEffect_->SetActive(true);
+
 	// Decision入力を受けたらタイトル終了演出を開始する。
 	if (inputCommand_->IsCommandActive("Decision")) {
 		if (titleLogo_->GetAnimationState() == AnimationState::Idle) {
@@ -115,5 +125,9 @@ void TitleScene::DebugUpdate() {
 }
 
 void TitleScene::Draw() {
+	if (!startDelayTimer_.IsFinished()) {
+		return;
+	}
+
 	titleLogo_->Draw(renderQueue_);
 }

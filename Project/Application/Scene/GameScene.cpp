@@ -117,7 +117,7 @@ GameScene::GameScene() {
 	auto* crossBeamModel = modelManager_->GetNameByModel("crossBeam.gltf");
 	crossBeamModel->SetDefaultIsEnableLight(false);
 	uint32_t beamNoiseGH = textureManager_->GetHandleByName("beamNoise.png");
-	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
+	auto* unitModel = modelManager_->GetNameByModel("unit2.obj");
 	auto* blackHoleModel = modelManager_->GetNameByModel("cursor.obj");
 	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, energySpawner_, enemyManager_);
 

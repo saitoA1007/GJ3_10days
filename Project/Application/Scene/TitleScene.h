@@ -69,6 +69,9 @@ private: // シーン機能
 	// タイトルロゴ
 	std::unique_ptr<TitleLogo> titleLogo_;
 
+	// タイトルシーンの開始待機時間
+	GameTimer startDelayTimer_;
+
 	GameTimer hyperspaceAudioTimer_;
 	bool isHyperspaceAudioPlayed_ = false;
 
