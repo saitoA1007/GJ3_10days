@@ -19,6 +19,7 @@ class LockOnController;
 class ResultMovieManager; // リザルトのムービー管理
 class TutorialCameraModelView;
 class StartPlayingView;
+class HalfTimeView;
 class TimeUI;
 
 struct GameFlowSettings
@@ -50,6 +51,7 @@ struct GameFlowContext
 	TutorialCameraModelView* tutorialLogoView = nullptr;
 	TutorialCameraModelView* tutorialLogo2View = nullptr;
 	StartPlayingView* startPlayingView = nullptr;
+	HalfTimeView* halfTimeView = nullptr;
 	TimeUI* timeUI = nullptr;
 	ResultStringManager* resultMessage = nullptr;
 

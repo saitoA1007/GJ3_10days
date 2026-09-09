@@ -20,4 +20,5 @@ public:
 private:
 	float remainingTime_ = 0.0f;
 	bool hasStartedSecondHalfBgm_ = false;
+	bool hasStartedHalfTimeView_ = false;
 };
