@@ -47,6 +47,8 @@ struct EnergyTypeSettings
 	Vector4 color = { 1.0f, 0.9f, 0.2f, 1.0f };     // 通常時の表示色
 	Vector4 rimColor = { 0.45f,0.75f,1.0f,1.0f };           // 輪郭の発光色
 	Vector4 dissolveEdgeColor = { 1.0f,0.55f,0.15f,1.0f };  // ディゾルブ境界の発光色
+	float rainbowSpeed = 0.25f;                      // 虹色時に色相が1秒で進む量（1.0で1周）
+	float rainbowSaturation = 0.85f;                 // 虹色の彩度
 };
 
 /// @brief フィールドに落下し、ユニットによって運ばれるエネルギー。
@@ -170,6 +172,22 @@ private:
 	/// @brief 現在位置・サイズ・色をモデルへ反映する。
 	void SyncModel();
 
+	/// @brief このサイズが虹色表示かを取得する。
+	/// @return Specialならtrue。
+	bool IsRainbow() const { return size_ == EnergySize::Special; }
+
+	/// @brief 現在の表示色を求める。虹色なら色相が時間で回る。
+	/// @return モデルとパーティクルへ渡す色。
+	Vector4 MakeDisplayColor() const;
+
+	/// @brief HSVをRGBAへ変換する。
+	/// @param[in] hue 色相（0.0〜1.0で1周。範囲外も内部で折り返す）。
+	/// @param[in] saturation 彩度（0.0〜1.0）。
+	/// @param[in] value 明度（0.0〜1.0）。
+	/// @param[in] alpha そのまま設定する不透明度。
+	/// @return 変換後の色。
+	static Vector4 HsvToRgb(float hue, float saturation, float value, float alpha);
+
 	std::unique_ptr<GameEngine::ModelComponent> modelComponent_; // 数字ではなくenergy.objの描画情報
 	EnergySize size_ = EnergySize::Small;                        // この個体の現在サイズ
 	EnergyState state_ = EnergyState::Inactive;                  // 現在のライフサイクル状態
@@ -181,6 +199,7 @@ private:
 	float rotationY_ = 0.0f;                                    // モデル表示へ適用するY軸回転角
 	float floatingAmplitude_ = 0.0f;                             // 上下に浮遊する振幅
 	bool isHighlighted_ = false;                                 // カーソル選択中か
+	float rainbowHue_ = 0.0f;                                    // 虹色表示に使う現在の色相（0.0〜1.0）
 
 	float appearTime_ = 0.0f;       
 	float appearDuration_ = 1.0f;

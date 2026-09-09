@@ -191,6 +191,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\UI\LetterboxUI.cpp" />
     <ClCompile Include="Application\UI\TimeUI.cpp" />
     <ClCompile Include="Application\Unit\Unit.cpp" />
+    <ClCompile Include="Application\Unit\UnitEffectManager.cpp" />
     <ClCompile Include="Application\Unit\UnitManager.cpp" />
     <ClCompile Include="Application\Rocket\Rocket.cpp" />
     <ClCompile Include="Application\Rocket\RocketEnergy.cpp" />
@@ -513,6 +514,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\UI\TimeUI.h" />
     <ClInclude Include="Application\Unit\Pikumi.h" />
     <ClInclude Include="Application\Unit\Unit.h" />
+    <ClInclude Include="Application\Unit\UnitEffectManager.h" />
     <ClInclude Include="Application\Unit\UnitManager.h" />
     <ClInclude Include="Application\Player\IPlayerState.h" />
     <ClInclude Include="Application\Player\PlayerStateIdle.h" />

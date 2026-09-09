@@ -61,6 +61,9 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, GameEngine::Textu
 		debugParameter_->Register("Color", typeSettings_[i].color, 2, group);
 		debugParameter_->Register("rimColor", typeSettings_[i].rimColor, 2, group);
 		debugParameter_->Register("dissolveEdgeColor", typeSettings_[i].dissolveEdgeColor, 2, group);
+		// Specialだけが使う虹色アニメーションの設定。
+		debugParameter_->Register("rainbowSpeed", typeSettings_[i].rainbowSpeed, 3, group);
+		debugParameter_->Register("rainbowSaturation", typeSettings_[i].rainbowSaturation, 4, group);
 	}
 
 	debugParameter_->Apply();
@@ -254,6 +257,8 @@ void EnergySpawner::SanitizeSettings()
 	{
 		type.scale = (std::max)(type.scale, 0.0f);
 		type.value = (std::max)(type.value, 0);
+		type.rainbowSpeed = (std::max)(type.rainbowSpeed, 0.0f);
+		type.rainbowSaturation = (std::clamp)(type.rainbowSaturation, 0.0f, 1.0f);
 	}
 }
 

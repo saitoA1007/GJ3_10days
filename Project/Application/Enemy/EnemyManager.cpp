@@ -211,6 +211,8 @@ void EnemyManager::Update() {
 			}
 
 			commonEffect_->ReleaseEffectID(enemy->GetEffectID());
+
+			effectManager_->StartDeadEffect(enemy->GetPosition());
 		}
 		else {
 			++it;

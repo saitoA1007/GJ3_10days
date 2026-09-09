@@ -11,8 +11,15 @@
 #include "Application/CollisionConfig.h"
 #include "Application/Energy/EnergyPickup.h"
 #include "Application/Energy/EnergySpawner.h"
+#include "UnitEffectManager.h"
 #include "FPSCounter.h"
 using namespace GameEngine;
+
+UnitEffectManager* Unit::unitEffectManager_ = nullptr;
+
+void Unit::StaticInitialize(UnitEffectManager* unitEffectManager) {
+	unitEffectManager_ = unitEffectManager;
+}
 
 Unit::Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
 	Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH, EnergySpawner* energySpawner)
@@ -429,6 +436,10 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		blackholeTimer_ = settings_->bhDuration;
 		absorbedBasePoint_ = 0;
 		bhEffectTimer_ = 0.0f;
+
+		// ブラックホールの演出を開始
+		Vector3 pos = modelComponent_->worldTransform_.transform_.translate;
+		unitEffectManager_->StartBlackHole(pos, GetBlackholeRadius() * 0.2f );
 
 		collider_.SetActive(false);
 
