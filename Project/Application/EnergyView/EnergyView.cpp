@@ -5,21 +5,32 @@
 #include <cmath>
 
 #include "Application/Rocket/Rocket.h"
+#include "Camera.h"
 #include "FPSCounter.h"
+#include "MyMath.h"
+#include "RenderQueue.h"
 
 EnergyView::EnergyView(
 	const ScoreView::DigitModels& digitModels,
 	const GameEngine::Camera* camera,
-	const Rocket* rocket)
+	const Rocket* rocket,
+	GameEngine::Model* model)
 	: rocket_(rocket),
+	  camera_(camera),
 	  numberView_(digitModels, camera, "EnergyView"),
-	  debugParameter_("EnergyView")
+	  debugParameter_("EnergyView"),
+	  energyIcon_(model)
 {
 	assert(rocket_ != nullptr && "energy view requires a rocket");
+	assert(camera_ != nullptr && "energy view requires a camera");
 	debugParameter_.Register("ChangeDuration", changeDuration_, 5);
+	debugParameter_.RegisterWorld("Icon", energyIcon_.worldTransform_);
+	debugParameter_.Register("IconColor", energyIcon_.materialData_->color);
 	debugParameter_.Apply();
 	changeDuration_ = (std::max)(changeDuration_, 0.0f);
 	SetUpdateOrder(40);
+
+	energyIcon_.materialData_->enableLighting = false;
 }
 
 void EnergyView::Initialize() 
@@ -46,6 +57,16 @@ void EnergyView::DebugUpdate()
 void EnergyView::Draw()
 {
 	numberView_.Draw(renderQueue_);
+
+	// 数字と同じカメラ行列を掛け、カメラが動いても画面上の同じ位置へ表示する。
+	const Matrix4x4 cameraWorld = renderQueue_->GetUseDebugCamera()
+		? renderQueue_->GetDebugCameraWorldMatrix()
+		: camera_->GetWorldMatrix();
+	const Transform& iconTransform = energyIcon_.worldTransform_.transform_;
+	energyIcon_.worldTransform_.UpdateWorldMatrix(
+		GameEngine::Math::MakeAffineMatrix(
+			iconTransform.scale, iconTransform.rotate, iconTransform.translate) * cameraWorld);
+	energyIcon_.Draw(renderQueue_);
 }
 
 void EnergyView::SyncValue(float deltaTime)
@@ -84,5 +105,6 @@ void EnergyView::SyncValue(float deltaTime)
 	// 値の分解やモデル配置は既存ScoreViewへ任せる。
 	numberView_.SetValue(static_cast<int>(std::round(displayedValue_)));
 	numberView_.Update();
+	// アイコンのワールド行列はカメラ追従込みでDrawが組み立てるため、ここでは更新しない。
 }
 
