@@ -2,6 +2,7 @@
 
 #include "DebugParameter.h"
 #include "IGameObject.h"
+#include "ModelComponent.h"
 
 #include "Application/Score/ScoreView.h"
 
@@ -23,7 +24,8 @@ public:
 	EnergyView(
 		const ScoreView::DigitModels& digitModels,
 		const GameEngine::Camera* camera,
-		const Rocket* rocket);
+		const Rocket* rocket,
+		GameEngine::Model* model);
 	~EnergyView() override = default;
 
 	/// @brief 初期エネルギーを数字表示へ反映する。
@@ -43,7 +45,8 @@ private:
 	/// @param[in] deltaTime 前フレームからのゲーム内経過秒数。
 	void SyncValue(float deltaTime);
 
-	const Rocket* rocket_ = nullptr; // 表示するEnergyの取得元
+	const Rocket* rocket_ = nullptr;              // 表示するEnergyの取得元
+	const GameEngine::Camera* camera_ = nullptr;  // アイコンを画面固定配置にするためのカメラ
 	ScoreView numberView_;           // 数字モデルの配置・色・5桁分解を担当する既存View
 	GameEngine::DebugParameter debugParameter_; // 数値変動時間の調整用Register
 	float changeDuration_ = 0.5f;    // 現在の表示値から新しい値へ変化する秒数
@@ -51,4 +54,6 @@ private:
 	float changeStartValue_ = 0.0f;  // 今回の補間を開始した時点の表示値
 	float changeElapsedTime_ = 0.0f; // 今回の補間に使った経過秒数
 	int32_t targetValue_ = 0;        // ロケットが持つ最新の実Energy
+
+	GameEngine::ModelComponent energyIcon_;
 };

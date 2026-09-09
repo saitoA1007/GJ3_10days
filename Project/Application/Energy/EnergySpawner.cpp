@@ -80,6 +80,7 @@ void EnergySpawner::Initialize()
 	ApplyDebugParameters();
 	gameplayEnabled_ = true;
 	autoSpawnEnabled_ = false;
+	playingRandomSpawnEnabled_ = false;
 	playingTimelineActive_ = false;
 	ResetAll();
 }
@@ -120,7 +121,7 @@ void EnergySpawner::Update()
 	UpdatePickups(FpsCounter::gameDeltaTime);
 	UpdatePlayingTimeline(FpsCounter::deltaTime);
 
-	if (autoSpawnEnabled_ && settings_.randomSpawnEnabled)
+	if (autoSpawnEnabled_ && playingRandomSpawnEnabled_ && settings_.randomSpawnEnabled)
 	{
 		spawnTimer_ += FpsCounter::gameDeltaTime;
 		if (spawnTimer_ >= settings_.spawnInterval)
@@ -135,6 +136,7 @@ void EnergySpawner::BeginPlayingTimeline()
 {
 	playingTimelineElapsed_ = 0.0f;
 	playingTimelineActive_ = true;
+	playingRandomSpawnEnabled_ = false;
 	for (auto& event : timelineEvents_)
 	{
 		event->hasSpawned = false;
@@ -144,6 +146,7 @@ void EnergySpawner::BeginPlayingTimeline()
 void EnergySpawner::EndPlayingTimeline()
 {
 	playingTimelineActive_ = false;
+	playingRandomSpawnEnabled_ = false;
 }
 
 void EnergySpawner::DebugUpdate()
