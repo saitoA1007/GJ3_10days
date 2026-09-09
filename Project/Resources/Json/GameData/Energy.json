@@ -6,7 +6,7 @@
             "RotationSpeed": 1.5
         },
         "PlayingTimeline": {
-            "EventCount": 14,
+            "EventCount": 26,
             "Events": {
                 "Event000": {
                     "ArcPosition": 0.5,
@@ -26,17 +26,17 @@
                 "Event003": {
                     "ArcPosition": 0.25099998712539673,
                     "EnergySize": 1,
-                    "TimeSeconds": 2.5
+                    "TimeSeconds": 0.0
                 },
                 "Event004": {
                     "ArcPosition": 0.7509999871253967,
                     "EnergySize": 1,
-                    "TimeSeconds": 2.5
+                    "TimeSeconds": 0.0
                 },
                 "Event005": {
                     "ArcPosition": 0.5,
                     "EnergySize": 2,
-                    "TimeSeconds": 5.0
+                    "TimeSeconds": 0.0
                 },
                 "Event006": {
                     "ArcPosition": 0.5,
@@ -46,12 +46,12 @@
                 "Event007": {
                     "ArcPosition": 0.6510000228881836,
                     "EnergySize": 2,
-                    "TimeSeconds": 7.5
+                    "TimeSeconds": 5.0
                 },
                 "Event008": {
                     "ArcPosition": 0.34700000286102295,
                     "EnergySize": 2,
-                    "TimeSeconds": 7.5
+                    "TimeSeconds": 5.0
                 },
                 "Event009": {
                     "ArcPosition": 0.5,
@@ -77,6 +77,66 @@
                     "ArcPosition": 0.7020000219345093,
                     "EnergySize": 0,
                     "TimeSeconds": 15.0
+                },
+                "Event014": {
+                    "ArcPosition": 0.652999997138977,
+                    "EnergySize": 1,
+                    "TimeSeconds": 20.0
+                },
+                "Event015": {
+                    "ArcPosition": 0.35199999809265137,
+                    "EnergySize": 0,
+                    "TimeSeconds": 20.0
+                },
+                "Event016": {
+                    "ArcPosition": 0.24799999594688416,
+                    "EnergySize": 2,
+                    "TimeSeconds": 30.0
+                },
+                "Event017": {
+                    "ArcPosition": 0.753000020980835,
+                    "EnergySize": 2,
+                    "TimeSeconds": 30.0
+                },
+                "Event018": {
+                    "ArcPosition": 0.8069999814033508,
+                    "EnergySize": 0,
+                    "TimeSeconds": 35.0
+                },
+                "Event019": {
+                    "ArcPosition": 0.375,
+                    "EnergySize": 0,
+                    "TimeSeconds": 35.0
+                },
+                "Event020": {
+                    "ArcPosition": 1.0,
+                    "EnergySize": 0,
+                    "TimeSeconds": 35.0
+                },
+                "Event021": {
+                    "ArcPosition": 0.07100000232458115,
+                    "EnergySize": 1,
+                    "TimeSeconds": 40.0
+                },
+                "Event022": {
+                    "ArcPosition": 0.628000020980835,
+                    "EnergySize": 0,
+                    "TimeSeconds": 40.0
+                },
+                "Event023": {
+                    "ArcPosition": 0.7760000228881836,
+                    "EnergySize": 0,
+                    "TimeSeconds": 40.0
+                },
+                "Event024": {
+                    "ArcPosition": 0.8500000238418579,
+                    "EnergySize": 2,
+                    "TimeSeconds": 50.0
+                },
+                "Event025": {
+                    "ArcPosition": 0.15199999511241913,
+                    "EnergySize": 0,
+                    "TimeSeconds": 50.0
                 }
             }
         },
@@ -88,10 +148,10 @@
             "DissolveDuration": 3.0,
             "GroundHeight": 1.5,
             "InitialCountPerZone": 0,
-            "Lifetime": 20.0,
+            "Lifetime": 30.0,
             "MaxActiveCount": 64,
-            "RandomSpawnEnabled": false,
-            "SpawnInterval": 2.0
+            "RandomSpawnEnabled": true,
+            "SpawnInterval": 3.0
         },
         "Type": {
             "Large": {

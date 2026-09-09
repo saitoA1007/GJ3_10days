@@ -120,87 +120,171 @@
         },
         "CollisionRadius": 1.2200000286102295,
         "PlayingTimeline": {
-            "EventCount": 20,
+            "EventCount": 41,
             "Events": {
                 "Event000": {
                     "ArcPosition": 0.3540000021457672,
-                    "TimeSeconds": 5.0
+                    "TimeSeconds": 7.5
                 },
                 "Event001": {
                     "ArcPosition": 0.6510000228881836,
-                    "TimeSeconds": 5.0
+                    "TimeSeconds": 7.5
                 },
                 "Event002": {
                     "ArcPosition": 0.10100000351667404,
-                    "TimeSeconds": 10.0
+                    "TimeSeconds": 15.0
                 },
                 "Event003": {
                     "ArcPosition": 0.20100000500679016,
-                    "TimeSeconds": 10.0
+                    "TimeSeconds": 15.0
                 },
                 "Event004": {
                     "ArcPosition": 0.8989999890327454,
-                    "TimeSeconds": 15.0
+                    "TimeSeconds": 22.5
                 },
                 "Event005": {
                     "ArcPosition": 0.7990000247955322,
-                    "TimeSeconds": 15.0
+                    "TimeSeconds": 22.5
                 },
                 "Event006": {
                     "ArcPosition": 0.5,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 32.0
                 },
                 "Event007": {
                     "ArcPosition": 0.5529999732971191,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 32.0
                 },
                 "Event008": {
                     "ArcPosition": 0.4519999921321869,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 32.0
                 },
                 "Event009": {
                     "ArcPosition": 0.6010000109672546,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 32.0
                 },
                 "Event010": {
                     "ArcPosition": 0.4020000100135803,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 32.0
                 },
                 "Event011": {
                     "ArcPosition": 0.9020000100135803,
-                    "TimeSeconds": 25.0
+                    "TimeSeconds": 40.0
                 },
                 "Event012": {
                     "ArcPosition": 0.7990000247955322,
-                    "TimeSeconds": 25.0
+                    "TimeSeconds": 40.0
                 },
                 "Event013": {
                     "ArcPosition": 0.7009999752044678,
-                    "TimeSeconds": 25.0
+                    "TimeSeconds": 40.0
                 },
                 "Event014": {
                     "ArcPosition": 0.0989999994635582,
-                    "TimeSeconds": 30.0
+                    "TimeSeconds": 47.5
                 },
                 "Event015": {
                     "ArcPosition": 0.20200000703334808,
-                    "TimeSeconds": 30.0
+                    "TimeSeconds": 47.5
                 },
                 "Event016": {
                     "ArcPosition": 0.3009999990463257,
-                    "TimeSeconds": 30.0
+                    "TimeSeconds": 47.5
                 },
                 "Event017": {
                     "ArcPosition": 0.5,
-                    "TimeSeconds": 35.0
+                    "TimeSeconds": 55.0
                 },
                 "Event018": {
                     "ArcPosition": 0.5509999990463257,
-                    "TimeSeconds": 35.0
+                    "TimeSeconds": 55.0
                 },
                 "Event019": {
                     "ArcPosition": 0.45399999618530273,
-                    "TimeSeconds": 35.0
+                    "TimeSeconds": 55.0
+                },
+                "Event020": {
+                    "ArcPosition": 0.5,
+                    "TimeSeconds": 61.5
+                },
+                "Event021": {
+                    "ArcPosition": 0.5,
+                    "TimeSeconds": 62.5
+                },
+                "Event022": {
+                    "ArcPosition": 0.5,
+                    "TimeSeconds": 63.5
+                },
+                "Event023": {
+                    "ArcPosition": 0.30300000309944153,
+                    "TimeSeconds": 70.0
+                },
+                "Event024": {
+                    "ArcPosition": 0.7979999780654907,
+                    "TimeSeconds": 70.0
+                },
+                "Event025": {
+                    "ArcPosition": 0.29899999499320984,
+                    "TimeSeconds": 72.0
+                },
+                "Event026": {
+                    "ArcPosition": 0.8019999861717224,
+                    "TimeSeconds": 72.0
+                },
+                "Event027": {
+                    "ArcPosition": 0.0,
+                    "TimeSeconds": 80.0
+                },
+                "Event028": {
+                    "ArcPosition": 1.0,
+                    "TimeSeconds": 81.0
+                },
+                "Event029": {
+                    "ArcPosition": 0.2549999952316284,
+                    "TimeSeconds": 82.0
+                },
+                "Event030": {
+                    "ArcPosition": 0.7429999709129333,
+                    "TimeSeconds": 83.0
+                },
+                "Event031": {
+                    "ArcPosition": 0.5,
+                    "TimeSeconds": 84.0
+                },
+                "Event032": {
+                    "ArcPosition": 0.5,
+                    "TimeSeconds": 100.0
+                },
+                "Event033": {
+                    "ArcPosition": 0.5529999732971191,
+                    "TimeSeconds": 100.0
+                },
+                "Event034": {
+                    "ArcPosition": 0.6029999852180481,
+                    "TimeSeconds": 100.0
+                },
+                "Event035": {
+                    "ArcPosition": 0.6520000100135803,
+                    "TimeSeconds": 100.0
+                },
+                "Event036": {
+                    "ArcPosition": 0.703000009059906,
+                    "TimeSeconds": 100.0
+                },
+                "Event037": {
+                    "ArcPosition": 0.44999998807907104,
+                    "TimeSeconds": 100.0
+                },
+                "Event038": {
+                    "ArcPosition": 0.4020000100135803,
+                    "TimeSeconds": 100.0
+                },
+                "Event039": {
+                    "ArcPosition": 0.35100001096725464,
+                    "TimeSeconds": 100.0
+                },
+                "Event040": {
+                    "ArcPosition": 0.30300000309944153,
+                    "TimeSeconds": 100.0
                 }
             }
         },
