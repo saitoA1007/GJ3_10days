@@ -76,7 +76,7 @@ private:
 	// 落下用
 	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
 	float kGravity_ = -60.0f;   // 落下加速度
-	float kGroundY_ = 0.0f;     // 地面の高さ
+	float kGroundY_ = -10.0f;     // 地面の高さ
 
 	// 通過後の追加移動
 	float kOverrunDistanceX_ = 20.0f;
