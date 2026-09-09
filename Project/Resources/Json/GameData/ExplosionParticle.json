@@ -1,0 +1,142 @@
+{
+    "ExplosionParticle": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    1.0,
+                    0.9964222311973572,
+                    0.07335907220840454,
+                    1.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 1.0,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsActiveBlendAdd": true,
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": false
+            },
+            "RotateEmit": {
+                "Enable": false
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": true,
+                "RangeScale": {
+                    "_Max": [
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    "_Min": [
+                        0.10000000149011612,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "SeparateAxes": false
+            },
+            "ShapeEmit": {
+                "Enable": true,
+                "Shape": {
+                    "_ShapeType": "Sphere",
+                    "_boxSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "_emitFromShell": false,
+                    "_radius": 1.0
+                }
+            },
+            "SpawnCoolTime": 1.0,
+            "SpawnMaxCount": 64,
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": {
+                    "_TextureName": "circle.png"
+                }
+            },
+            "VelocityEmit": {
+                "Enable": false
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInQuad"
+                },
+                "Enable": true,
+                "EndAlpha": 0.0
+            },
+            "Attraction": {
+                "Damping": -5.0,
+                "Enable": true,
+                "Strength": -15.0,
+                "TargetPos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ColorOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "Linear"
+                },
+                "Enable": true,
+                "EndColor": [
+                    1.0,
+                    0.14671814441680908,
+                    0.14671814441680908,
+                    1.0
+                ]
+            },
+            "RotationByVelocity": {
+                "Enable": false
+            },
+            "SizeOverLifeTime": {
+                "EaseType": {
+                    "_EaseType": "EaseInQuad"
+                },
+                "Enable": true,
+                "EndSize": 0.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "Enable": false
+            }
+        },
+        "SceneName": "Test"
+    }
+}

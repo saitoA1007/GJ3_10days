@@ -16,6 +16,16 @@ namespace GameEngine{
 	// 前方宣言
 	class TextureManager;
 
+	/// <summary>
+	/// パーティクルのシミュレーション空間
+	/// </summary>
+	enum class ParticleSimulationSpace {
+		// ローカル空間：発生後も常に親に追従する（親が動くとパーティクルも一緒に動く）
+		kLocal,
+		// ワールド空間：発生時だけ親の影響を受け、その後は世界に置き去りになる
+		kWorld,
+	};
+
 	class ParticleBehavior : public IGameObject {
 	public:
 		ParticleBehavior(const std::string& name, uint32_t maxNum, TextureManager* textureManager, Model* model);
@@ -70,6 +80,20 @@ namespace GameEngine{
 			}
 		}
 
+		// 発射形状の半径の範囲を設定
+		void SetShapeEmit(float radius) {
+			if (auto* ShapeEmit = modulesControl_->GetModule<ShapeEmitModule>("ShapeEmit")) {
+				ShapeEmit->SetRadius(radius);
+			}
+		}
+
+		// 最終的な大きさ
+		void SetSizeOverLifeTime(float endScale) {
+			if (auto* ShapeEmit = modulesControl_->GetModule<SizeOverLifeTimeModule>("SizeOverLifeTime")) {
+				ShapeEmit->SetEndScale(endScale);
+			}
+		}
+
 		void SetIsLoop(bool isLoop) {
 			main_.isLoop = isLoop;
 		}
@@ -99,6 +123,40 @@ namespace GameEngine{
 		void SetScale(Vector3 scale) {
 			main_.scale = scale;
 		}
+
+		/// <summary>
+		/// 親を設定する
+		/// </summary>
+		/// <param name="parentMatrix">親のワールド行列（nullptrで親子付けを解除）</param>
+		/// <param name="space">
+		/// kLocal : 発生後も常に親に追従する
+		/// kWorld : 発生時の親の姿勢だけを反映し、その後は追従しない
+		/// </param>
+		void SetParent(const Matrix4x4* parentMatrix, ParticleSimulationSpace space = ParticleSimulationSpace::kLocal) {
+			parentMatrix_ = parentMatrix;
+			simulationSpace_ = space;
+		}
+
+		/// <summary>
+		/// 親子付けを解除する
+		/// </summary>
+		/// <param name="keepWorldPosition">
+		/// true にすると、現在生きているパーティクルを解除時のワールド座標に焼き込んでその場に残す
+		/// </param>
+		void ClearParent(bool keepWorldPosition = true);
+
+		/// <summary>
+		/// シミュレーション空間を切り替える
+		/// </summary>
+		void SetSimulationSpace(ParticleSimulationSpace space) { simulationSpace_ = space; }
+
+		// 親の行列を取得（未設定ならnullptr）
+		const Matrix4x4* GetParent() const { return parentMatrix_; }
+
+		// 親が設定されているか
+		bool HasParent() const { return parentMatrix_ != nullptr; }
+		// シミュレーション空間を取得
+		ParticleSimulationSpace GetSimulationSpace() const { return simulationSpace_; }
 
 	private:
 		// パラメータ機能
@@ -142,6 +200,12 @@ namespace GameEngine{
 		// メインモジュール
 		MainModule main_;
 
+		// 親行列
+		const Matrix4x4* parentMatrix_ = nullptr;
+
+		// シミュレーション空間
+		ParticleSimulationSpace simulationSpace_ = ParticleSimulationSpace::kLocal;
+
 	private:
 
 		/// <summary>
@@ -159,6 +223,13 @@ namespace GameEngine{
 		/// 移動処理
 		/// </summary>
 		void Move(const Matrix4x4& cameraMatrix);
+
+		/// <summary>
+		/// 常に親に追従するか（親があり、かつローカル空間のとき true）
+		/// </summary>
+		bool IsFollowParent() const {
+			return parentMatrix_ != nullptr && simulationSpace_ == ParticleSimulationSpace::kLocal;
+		}
 	};
 }
 

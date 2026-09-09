@@ -1,6 +1,7 @@
 #pragma once
 #include "TutorialPhase.h"
 #include <algorithm>
+#include "AudioManager.h"
 #include "FPSCounter.h"
 #include "InputCommand.h"
 #include "Application/Energy/EnergySpawner.h"
@@ -14,10 +15,18 @@ using namespace GameEngine;
 namespace
 {
 	constexpr const char* kLockOnReleaseCommand = "LockOnRelease";
+	constexpr const char* kTutorialBgmName = "tutorialBGM.mp3";
+	constexpr float kTutorialBgmVolume = 1.0f;
 }
 
 void TutorialPhase::OnEnter(GameFlowContext& context)
 {
+	auto& audioManager = AudioManager::GetInstance();
+	const uint32_t tutorialBgmHandle = audioManager.GetHandleByName(kTutorialBgmName);
+	// デバッグ操作などで再入場しても多重再生にならないよう、既存の再生を止めてから開始する。
+	audioManager.Stop(tutorialBgmHandle);
+	audioManager.Play(tutorialBgmHandle, kTutorialBgmVolume, true);
+
 	step_ = Step::SelectEnergy;
 	chargeEnergy_ = nullptr;
 	enemyHoldTarget_ = nullptr;
@@ -139,6 +148,9 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 
 void TutorialPhase::OnExit(GameFlowContext& context)
 {
+	auto& audioManager = AudioManager::GetInstance();
+	audioManager.Stop(audioManager.GetHandleByName(kTutorialBgmName));
+
 	if (context.lockOnController)
 	{
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);

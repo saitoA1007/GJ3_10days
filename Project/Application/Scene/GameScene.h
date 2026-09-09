@@ -1,6 +1,8 @@
 #pragma once
 #include "IScene.h"
 
+#include <cstdint>
+
 // エンジン機能をインクルード
 #include "Camera.h"
 
@@ -74,7 +76,13 @@ public:
 private: // シーン機能
 
 	/// カメラ行列を更新してRenderQueueへ設定
-	void UpdateCamera();
+	void UpdateCamera(float deltaTime);
+	/// 敵がロケットへ到達したときのカメラシェイクを開始
+	void StartEnemyHitCameraShake();
+	/// 敵がロケットへ到達したときのダメージ音を再生
+	void PlayRocketDamageSound();
+	/// 現在のシェイク時間から減衰付きの位置オフセットを計算
+	Vector3 CalculateEnemyHitCameraShakeOffset() const;
 	/// チュートリアル表示の調整値と移動アニメーションを更新
 	void UpdateTutorialViews(bool advanceAnimation);
 	/// チュートリアル表示をカメラへ追従させて描画
@@ -82,8 +90,15 @@ private: // シーン機能
 
 	std::unique_ptr<GameEngine::Camera> mainCamera_;                // 3D描画とマウスレイ投影に使うカメラ
 	std::unique_ptr<GameEngine::DebugParameter> mainCameraDebugParameter_; // Translate / Rotate の確認・調整用
+	Vector3 mainCameraBasePosition_ = {};                           // シェイクを含まないカメラ位置
 	Vector3 mainCameraEndRotation_ = {};                            // ロケット着地時のカメラ回転
 	float mainCameraEntranceStartRotateX_ = 0.5f;                   // ロケット降下開始時のX回転
+	float enemyHitCameraShakeDuration_ = 0.35f;                     // 敵衝突時に揺れる時間（秒）
+	float enemyHitCameraShakeAmplitude_ = 0.75f;                    // 敵衝突直後の最大位置オフセット
+	float enemyHitCameraShakeFrequency_ = 42.0f;                    // 敵衝突時の揺れの速さ
+	float enemyHitCameraShakeElapsedTime_ = 0.0f;                   // 現在のシェイク経過時間
+	bool isEnemyHitCameraShaking_ = false;                          // 敵衝突シェイクの再生中か
+	uint64_t lastHandledEnemyHitCount_ = 0;                         // 同じ衝突を複数回再生しないための監視値
 	// 終了フラグ
 	bool isFinished_ = false;
 	Player* player_ = nullptr;

@@ -27,6 +27,8 @@ public:
 	//Typeに沿ったAnimationを起動して描画する。
 	void Boot(Type type);
 
+	bool IsFin() const;
+
 private:
 
 	struct ResultData {

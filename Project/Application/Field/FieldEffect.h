@@ -18,6 +18,14 @@ public:
 		float phase = 0.0f;                     // 揺れの位相
 	};
 
+	// 広がっていく色の波
+	struct ColorWave {
+		Vector3 origin = { 0.0f,0.0f,0.0f };      // 広がる中心
+		Vector4 color = { 1.0f,1.0f,1.0f,1.0f };  // 乗せる色
+		float radius = 0.0f;                      // 現在の半径
+		float maxDist = 0.0f;                     // 一番遠いcubeまでの距離
+	};
+
 public:
 	FieldEffect(GameEngine::Model* model, uint32_t texture);
 	~FieldEffect() = default;
@@ -33,10 +41,16 @@ public:
 	// 高さを持ち上げる位置を設定
 	void ApplayPosition(Vector3 pos);
 
+	// 色を伝播させる演出を開始する
+	void Start(const Vector4& color);
+
+	// 伝播中かどうか
+	bool IsPropagating() const { return !waves_.empty(); }
+
 private:
 
 	// リングの数(中心から外側に何重に並べるか)
-	uint32_t ringNum_ = 20;
+	uint32_t ringNum_ = 15;
 
 	// パーティクルの最大数。円状に並べるので リング数^2 * π 個ほど必要になる
 	uint32_t maxNum_ = ringNum_ * ringNum_ * 4;
@@ -87,6 +101,34 @@ private:
 	// 目標に近いcubeの揺れ幅
 	float nearWaveHeight_ = 0.5f;
 
+	Vector4 color_ = { 0.0f,0.0f,0.0f,1.0f };
+
+private:
+
+	// 広がっている最中の波。後ろにあるものほど後から始まった波
+	std::vector<ColorWave> waves_;
+
+	// 同時に走らせる波の上限。超えた分は一番古い波を捨てる
+	size_t maxWaveNum_ = 8;
+
+	// 波の広がる速さ[単位/秒]
+	float wavePropagateSpeed_ = 12.0f;
+
+	// 色が乗るまでの境界の幅。大きいほどグラデーションが緩やかになる
+	float waveBandWidth_ = 2.0f;
+
+	// 色が乗ったまま保たれる帯の幅
+	float waveHoldWidth_ = 2.0f;
+
+	// 元の色へ戻るまでの帯の幅。ここを広くすると余韻が長く残る
+	float waveFadeWidth_ = 6.0f;
+
+	// 波が通過した瞬間に持ち上がる高さ
+	float wavePopHeight_ = 1.5f;
+
+	// デバッグ用の伝播させる色
+	Vector4 debugStartColor_ = { 0.1f,0.6f,1.0f,1.0f };
+
 private:
 	GameEngine::Model* model_ = nullptr;
 
@@ -104,4 +146,7 @@ private:
 
 	// 円状に粒を並べ直す
 	void ResetCircle();
+
+	// 波の先端が追い越した距離から、色をどれだけ乗せるかを求める
+	float CalcWaveBlend(float passed) const;
 };

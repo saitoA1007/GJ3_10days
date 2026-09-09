@@ -5,12 +5,10 @@
 #include "FPSCounter.h"
 #include "EasingManager.h"
 #include "Application/CollisionConfig.h"
-#include "Application/Field/ImpactDetectionEffect.h"
 using namespace GameEngine;
 
-Pikumi::Pikumi(GameEngine::Model* model, ImpactDetectionEffect* impactDetectionEffect) : modelComponent_(model)
+Pikumi::Pikumi(GameEngine::Model* model) : modelComponent_(model)
 {
-    impactDetectionEffect_ = impactDetectionEffect;
     modelComponent_.worldTransform_.Initialize({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} });
 
     std::random_device rd;
@@ -232,7 +230,7 @@ void Pikumi::OnCollisionEnter(const GameEngine::CollisionResult& result)
             // 衝突演出
             if (result.userData.typeID == static_cast<uint32_t>(CollisionTypeID::kEnemy))
             {
-                impactDetectionEffect_->ApplayImpact(modelComponent_.worldTransform_.transform_.translate, 50.0f);
+                //impactDetectionEffect_->ApplayImpact(modelComponent_.worldTransform_.transform_.translate, 50.0f);
             }
 
             Vector3 normal = result.contactNormal;

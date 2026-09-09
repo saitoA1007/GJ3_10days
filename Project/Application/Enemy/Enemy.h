@@ -52,32 +52,35 @@ public:
 	// 外部システムの参照を設定
 	void SetContext(const Context& context) { context_ = context; }
 
-	void SetUp(Vector2 position, Config config, EnemyType type);
+	void SetUp(Vector2 position, Config config, EnemyType type, uint32_t effectID);
 
 	void Initialize() override;
 	void Update() override;
 	void DeadUpdate();
 
 	Vector3 GetPosition() const { return data_->transform.translate; }
-	bool WasDefeated() const { return wasDefeated_; }
+	float GetCollisionRadius() const { return collisionRadius_ * config_.size_; }
+	float GetDisplayScale() const { return config_.size_; }
+	uint32_t GetEffectID() const { return effectID_; }
+	Matrix4x4 GetWorldMatrix() const { return data_->worldMatrix; }
 
 	void SetSnake(float width, float speed) { snakeWidth_ = width; snakeSpeed_ = speed; }
 	void SetRound(float speed) { roundSpeed_ = speed; }
 	void SetDamageTime(float time) { damageTime_ = time; }
+	void SetHighlighted(bool highlighted);
+
+	bool IsTargetable() const { return isActive_ && !isDead_ && !isReservedForAttack_; }
+	bool IsTargetCarrier() const { return isActive_ && !isDead_ && (targetUnit_ != nullptr); }
 
 	// LockOn / ユニット派遣用連携機能
-	bool IsTargetable() const { return isActive_ && !isDead_ && !isReservedForAttack_; }
+	bool WasDefeated() const { return wasDefeated_; }
+
 	bool TryReserveForAttack();
 	void CancelAttackReservation();
-	void SetHighlighted(bool highlighted);
-	float GetDisplayScale() const { return config_.size_; }
-	/// XZ平面上の当たり判定半径を取得（基本半径 × スケール）
-	float GetCollisionRadius() const { return collisionRadius_ * config_.size_; }
 
 	// 撃破時エネルギー生成
 	EnergyPickup* DefeatAndDropEnergy();
 	// 運搬ユニットを追跡中かどうかを取得
-	bool IsTargetingCarrier() const { return isActive_ && !isDead_ && (targetUnit_ != nullptr); }
 
 	// ======== ブラックホール ========
 
@@ -94,6 +97,7 @@ public:
 	}
 
 private:
+
 	void DefaultMovement();
 	void RoundMovement();
 	void TrackingMovement(float deltaTime); // 運搬ユニット追跡移動
@@ -143,4 +147,5 @@ private:
 
 	// ブラックホール
 	bool isBeingPulled_ = false;
+	uint32_t effectID_ = 0; // 恒常処理のID
 };
