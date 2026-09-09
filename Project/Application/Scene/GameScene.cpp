@@ -195,7 +195,7 @@ GameScene::GameScene() {
 	// リザルトムービー管理
 	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect, explosionEffect);
 	// リザルトメッセージ
-	auto resultMessage = gameObjectManager_->AddObject<ResultStringManager>(modelManager_, animationManager_);
+	resultStringManager_ = gameObjectManager_->AddObject<ResultStringManager>(inputCommand_, modelManager_, animationManager_);
 
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
@@ -229,7 +229,7 @@ GameScene::GameScene() {
 	flowContext.tutorialLogo2View = tutorialLogo2View_.get();
 	flowContext.startPlayingView = startPlayingView_.get();
 	flowContext.halfTimeView = halfTimeView_.get();
-	flowContext.resultMessage = resultMessage;
+	flowContext.resultMessage = resultStringManager_;
 	flowContext.timeUI = timeUI;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
@@ -588,6 +588,10 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+
+	// フラグを受け取れば終了する
+	isFinished_ = resultStringManager_->IsSceneFinished();
+
 	if (fadeSprite_ && fadeElapsedTime_ < kFadeDuration) {
 		fadeElapsedTime_ = std::min(fadeElapsedTime_ + FpsCounter::deltaTime, kFadeDuration);
 		const float progress = fadeElapsedTime_ / kFadeDuration;

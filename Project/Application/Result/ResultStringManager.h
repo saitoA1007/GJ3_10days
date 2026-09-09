@@ -7,10 +7,14 @@
 #include "ResultMessage.h"
 #include <ModelComponent.h>
 
+namespace GameEngine {
+	class InputCommand;
+}
+
 class ResultStringManager : public GameEngine::IGameObject {
 public:
 
-	ResultStringManager(GameEngine::ModelManager* modelManager, GameEngine::AnimationManager* animationManager);
+	ResultStringManager(GameEngine::InputCommand* inputCommand, GameEngine::ModelManager* modelManager, GameEngine::AnimationManager* animationManager);
 
 	void Initialize() override;
 	void Update() override;
@@ -21,6 +25,12 @@ public:
 	void Boot(int score);
 
 	bool CanControl() const { return currentType_ == Type::Control; }
+
+	// シーンが終了することを伝える
+	bool IsSceneFinished() const { 
+		if (!isBoot_) { return false; }
+		return isSceneFinished_;
+	}
 
 private:
 
@@ -36,6 +46,10 @@ private:
 	float GetControlTime() const { return messageActivateTime_ + GetMessageActivateTime(); }
 
 	void RegistTransform(Transform& transform, std::string groop);
+
+	// 入力機能
+	GameEngine::InputCommand* inputCommand_ = nullptr;
+	bool isSceneFinished_ = false;
 
 	const int aimScore_ = 150;
 	const int aimScoreDistance_ = 1000000;
@@ -66,6 +80,13 @@ private:
 	Transform kmTransform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	Transform spaceTransform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	Transform arrowTransform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+
+	// シャッフル中の音
+	uint32_t shuffleSH_ = 0;
+	// 数字が決まった時の音
+	uint32_t setNumSH_ = 0;
+	// タイトル
+	uint32_t backTitleSH_ = 0;
 
 	enum Type {
 		Shuffle,

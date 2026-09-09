@@ -1,6 +1,9 @@
 #include "ResultStringManager.h"
 #include <FPSCounter.h>
 #include <EasingManager.h>
+#include "AudioManager.h"
+#include "InputCommand.h"
+using namespace GameEngine;
 
 namespace {
 	//強制リニアの線形補完
@@ -10,8 +13,10 @@ namespace {
 	}
 }
 
-ResultStringManager::ResultStringManager(GameEngine::ModelManager* modelManager, GameEngine::AnimationManager* animationManager) {
+ResultStringManager::ResultStringManager(GameEngine::InputCommand* inputCommand, GameEngine::ModelManager* modelManager, GameEngine::AnimationManager* animationManager) {
 	resultMessage_ = std::make_unique<ResultMessage>(modelManager, animationManager);
+
+	inputCommand_ = inputCommand;
 
 	for (uint32_t i = 0; i < 7; ++i) {
 		auto& num = shuffleNumbers_.emplace_back(std::make_unique<ShuffleNumber>(modelManager, i));
@@ -35,10 +40,15 @@ ResultStringManager::ResultStringManager(GameEngine::ModelManager* modelManager,
 	kmModel_ = std::make_unique<GameEngine::ModelComponent>(modelManager->GetNameByModel("km.obj"));
 	spaceModel_ = std::make_unique<GameEngine::ModelComponent>(modelManager->GetNameByModel("bottom0.obj"));
 	arrowModel_ = std::make_unique<GameEngine::ModelComponent>(modelManager->GetNameByModel("ResultArrow.obj"));
+
+	shuffleSH_ = AudioManager::GetInstance().GetHandleByName("resultShuffle.mp3");
+	setNumSH_ = AudioManager::GetInstance().GetHandleByName("resultSetNum.mp3");
+	backTitleSH_ = AudioManager::GetInstance().GetHandleByName("resultSetNum.mp3");
 }
 
 void ResultStringManager::Initialize() {
 	resultMessage_->Initialize();
+	isSceneFinished_ = false;
 	for (auto& num : shuffleNumbers_) {
 		num->Initialize();
 	}
@@ -55,11 +65,20 @@ void ResultStringManager::Update() {
 
 	switch (currentType_) {
 	case ResultStringManager::Shuffle:
+
+		if (!AudioManager::GetInstance().IsPlay(shuffleSH_)) {
+			AudioManager::GetInstance().Play(shuffleSH_, 0.2f, false);
+		}
+
 		if (timer_ >= shuffleStopTime_) {
 			currentType_ = ResultStringManager::Stopping;
 		}
 		break;
 	case ResultStringManager::Stopping:
+
+		if (!AudioManager::GetInstance().IsPlay(shuffleSH_)) {
+			AudioManager::GetInstance().Play(shuffleSH_, 0.2f, false);
+		}
 
 		for (int i = 0; i < maxDigit_; ++i) {
 			if (timer_ >= GetStopTime(i)) {
@@ -70,6 +89,8 @@ void ResultStringManager::Update() {
 		if (timer_ >= GetStopTime(maxDigit_ - 1)) {
 			currentType_ = ResultStringManager::Message;
 			resultMessage_->Boot(ResultMessage::Type::Mousukosi);
+			AudioManager::GetInstance().Stop(shuffleSH_);
+			AudioManager::GetInstance().Play(setNumSH_, 0.5f, false);
 		}
 
 		break;
@@ -81,9 +102,13 @@ void ResultStringManager::Update() {
 
 		break;
 	case ResultStringManager::Control:
-
 		//入力によってシーンの切り替えを行うことを許す。
 
+		// スペースでタイトルへ
+		if (inputCommand_->IsCommandActive("Decision")) {
+			AudioManager::GetInstance().Play(backTitleSH_, 0.2f, false);
+			isSceneFinished_ = true;
+		}
 		break;
 	}
 
@@ -132,6 +157,7 @@ void ResultStringManager::DebugUpdate() {
 }
 
 void ResultStringManager::Boot(int score) {
+	isSceneFinished_ = false;
 	isBoot_ = true;
 	for (auto& num : shuffleNumbers_) {
 		num->ShuffleStart();

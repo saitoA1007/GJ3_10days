@@ -25,6 +25,7 @@ class TutorialCameraModelView;
 class TutorialTextSequence;
 class StartPlayingView;
 class HalfTimeView;
+class ResultStringManager;
 
 namespace GameEngine
 {
@@ -123,6 +124,9 @@ private: // シーン機能
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 	std::unique_ptr<GameEngine::Sprite> fadeSprite_;
 	float fadeElapsedTime_ = 0.0f;
+
+	// リザルト
+	ResultStringManager* resultStringManager_ = nullptr;
 
 	// シーンライト
 	float intensity_ = 2.0f;
