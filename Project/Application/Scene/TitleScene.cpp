@@ -11,7 +11,7 @@ using namespace GameEngine;
 
 namespace {
 	constexpr Vector3 kCameraPosition = { 0.0f, 1.0f, -15.0f };
-	constexpr float kStartDelayDuration = 47.2f;
+	constexpr float kStartDelayDuration = 0.0f;
 }
 
 TitleScene::~TitleScene() {}
