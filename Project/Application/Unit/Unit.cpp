@@ -174,8 +174,7 @@ bool Unit::DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy)
 	}
 
 	AllocateStamina(requestedEnergy);
-	position_ = rocket_->GetPosition() + settings_->launchOffset;
-	position_.y = settings_->groundY;
+	SetLaunchPositionTowards(target->GetPosition());
 	targetEnergy_ = target;
 	targetEnemy_ = nullptr;
 	state_ = UnitState::MovingToEnergy;
@@ -193,8 +192,7 @@ bool Unit::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
 	}
 
 	AllocateStamina(requestedEnergy);
-	position_ = rocket_->GetPosition() + settings_->launchOffset;
-	position_.y = settings_->groundY;
+	SetLaunchPositionTowards(target->GetPosition());
 	targetEnergy_ = nullptr;
 	targetEnemy_ = target;
 	state_ = UnitState::MovingToEnemy;
@@ -212,12 +210,11 @@ bool Unit::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEn
 	}
 
 	AllocateStamina(requestedEnergy);
-	position_ = rocket_->GetPosition() + settings_->launchOffset;
-	position_.y = settings_->groundY;
 	targetEnergy_ = nullptr;
 	targetEnemy_ = nullptr;
 	targetPosition_ = targetPosition;
 	targetPosition_.y = settings_->groundY;
+	SetLaunchPositionTowards(targetPosition_);
 	state_ = UnitState::MovingToPosition;
 	collider_.SetActive(true);
 	SyncModel();
@@ -365,6 +362,23 @@ void Unit::AllocateStamina(int32_t requestedEnergy)
 	// EnergyChange.amountは消費時に負数なので、符号を反転してスタミナ残量にする
 	stamina_ = static_cast<float>((std::max)(requestedEnergy, 0));
 	maxStamina_ = static_cast<float>(settings_->bhEnergyThreshold);
+}
+
+void Unit::SetLaunchPositionTowards(const Vector3& destination)
+{
+	position_ = rocket_->GetPosition() + settings_->launchOffset;
+	position_.y = settings_->groundY;
+
+	Vector3 direction = destination - position_;
+	direction.y = 0.0f;
+	const float distance = direction.Length();
+	if (distance <= 0.0f)
+	{
+		return;
+	}
+
+	direction.Normalize();
+	position_ += direction * (std::min)(settings_->launchDistance, distance);
 }
 
 void Unit::ReturnToStorageAfterDefeat()

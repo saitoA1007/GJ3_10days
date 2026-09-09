@@ -51,6 +51,7 @@
                 0.0
             ],
             "GroundY": 0.0,
+            "LaunchDistance": 3.0,
             "LaunchOffset": [
                 0.0,
                 0.0,

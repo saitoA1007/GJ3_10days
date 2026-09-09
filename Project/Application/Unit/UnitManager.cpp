@@ -36,8 +36,9 @@ UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocke
 	debugParameter_->Register("UnitCount", settings_.unitCount, 0, "Manager");
 	debugParameter_->Register("GroundY", settings_.unit.groundY, 0, "Transform");
 	debugParameter_->Register("LaunchOffset", settings_.unit.launchOffset, 1, "Transform");
-	debugParameter_->Register("Scale", settings_.unit.scale, 2, "Transform");
-	debugParameter_->Register("CarryOffset", settings_.unit.carryOffset, 3, "Transform");
+	debugParameter_->Register("LaunchDistance", settings_.unit.launchDistance, 2, "Transform");
+	debugParameter_->Register("Scale", settings_.unit.scale, 3, "Transform");
+	debugParameter_->Register("CarryOffset", settings_.unit.carryOffset, 4, "Transform");
 	debugParameter_->Register("NormalSpeed", settings_.unit.normalSpeed, 0, "Move");
 	debugParameter_->Register("BoostedSpeed", settings_.unit.boostedSpeed, 1, "Move");
 	debugParameter_->Register("PickupRadius", settings_.unit.pickupRadius, 2, "Move");
@@ -278,6 +279,7 @@ void UnitManager::SanitizeSettings()
 	settings_.unit.scale.x = (std::max)(settings_.unit.scale.x, 0.0f);
 	settings_.unit.scale.y = (std::max)(settings_.unit.scale.y, 0.0f);
 	settings_.unit.scale.z = (std::max)(settings_.unit.scale.z, 0.0f);
+	settings_.unit.launchDistance = (std::max)(settings_.unit.launchDistance, 0.0f);
 	settings_.unit.normalSpeed = (std::max)(settings_.unit.normalSpeed, 0.0f);
 	settings_.unit.boostedSpeed = (std::max)(settings_.unit.boostedSpeed, settings_.unit.normalSpeed);
 	settings_.unit.pickupRadius = (std::max)(settings_.unit.pickupRadius, 0.0f);

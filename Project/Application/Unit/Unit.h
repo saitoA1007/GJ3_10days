@@ -38,7 +38,8 @@ enum class UnitState : uint8_t
 /// 全ユニットで共有する移動・スタミナ・見た目の設定
 struct UnitSettings
 {
-	Vector3 launchOffset = { 0.0f, 0.0f, 0.0f };        
+	Vector3 launchOffset = { 0.0f, 0.0f, 0.0f };
+	float launchDistance = 2.0f;                        // 目的地方向へ進めた出現位置の最大距離
 	Vector3 scale = { 0.7f, 0.7f, 0.7f };               
 	Vector3 carryOffset = { 0.0f, 1.45f, 0.0f };        
 	float normalSpeed = 1.5f;                           
@@ -198,6 +199,7 @@ private:
 	// 内部処理 (移動・計算)
 	// ==========================================
 	void AllocateStamina(int32_t requestedEnergy);
+	void SetLaunchPositionTowards(const Vector3& destination);
 	void MoveTowards(const Vector3& target, float deltaTime);
 	void ConsumeStamina(float deltaTime);
 	float DistanceSquaredXZ(const Vector3& a, const Vector3& b) const;

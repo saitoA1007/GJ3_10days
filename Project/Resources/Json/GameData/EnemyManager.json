@@ -120,7 +120,7 @@
         },
         "CollisionRadius": 1.2200000286102295,
         "PlayingTimeline": {
-            "EventCount": 11,
+            "EventCount": 20,
             "Events": {
                 "Event000": {
                     "ArcPosition": 0.3540000021457672,
@@ -165,6 +165,42 @@
                 "Event010": {
                     "ArcPosition": 0.4020000100135803,
                     "TimeSeconds": 10.0
+                },
+                "Event011": {
+                    "ArcPosition": 0.9020000100135803,
+                    "TimeSeconds": 13.0
+                },
+                "Event012": {
+                    "ArcPosition": 0.7990000247955322,
+                    "TimeSeconds": 13.0
+                },
+                "Event013": {
+                    "ArcPosition": 0.7009999752044678,
+                    "TimeSeconds": 13.0
+                },
+                "Event014": {
+                    "ArcPosition": 0.0989999994635582,
+                    "TimeSeconds": 16.0
+                },
+                "Event015": {
+                    "ArcPosition": 0.20200000703334808,
+                    "TimeSeconds": 16.0
+                },
+                "Event016": {
+                    "ArcPosition": 0.3009999990463257,
+                    "TimeSeconds": 16.0
+                },
+                "Event017": {
+                    "ArcPosition": 0.5,
+                    "TimeSeconds": 20.0
+                },
+                "Event018": {
+                    "ArcPosition": 0.5509999990463257,
+                    "TimeSeconds": 20.0
+                },
+                "Event019": {
+                    "ArcPosition": 0.45399999618530273,
+                    "TimeSeconds": 20.0
                 }
             }
         },
