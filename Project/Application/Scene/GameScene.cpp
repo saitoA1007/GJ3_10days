@@ -475,6 +475,34 @@ GameScene::GameScene() {
 		}
 	};
 
+	TutorialTextSequence::StepDefinition text15Definition{};
+	text15Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text15Definition.model = modelManager_->GetNameByModel("tutorialText15.obj");
+	text15Definition.parameterGroupName = "TutorialText15";
+	text15Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text15Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text15Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text15Definition.viewSettings.scale = 1.0f;
+	text15Definition.viewSettings.startDelay = 0.5f;
+	text15Definition.viewSettings.moveDuration = 0.5f;
+	text15Definition.viewSettings.holdDuration = 3.5f;
+	text15Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text15Definition.showSuccessColor = false;
+
+	TutorialTextSequence::StepDefinition text16Definition{};
+	text16Definition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
+	text16Definition.model = modelManager_->GetNameByModel("tutorialText16.obj");
+	text16Definition.parameterGroupName = "TutorialText16";
+	text16Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text16Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text16Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text16Definition.viewSettings.scale = 1.0f;
+	text16Definition.viewSettings.startDelay = 0.5f;
+	text16Definition.viewSettings.moveDuration = 0.5f;
+	text16Definition.viewSettings.holdDuration = 3.5f;
+	text16Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text16Definition.showSuccessColor = false;
+
 	TutorialTextSequence::StepDefinition textEndDefinition{};
 	textEndDefinition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
 	textEndDefinition.model = modelManager_->GetNameByModel("tutorialTextEnd.obj");
@@ -517,6 +545,8 @@ GameScene::GameScene() {
 			text12Definition,
 			text13Definition,
 			text14Definition,
+			text15Definition,
+			text16Definition,
 			textEndDefinition });
 
 	// エネルギーアイコン
