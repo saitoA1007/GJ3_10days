@@ -61,6 +61,26 @@ void ResultStringManager::Update() {
 		return;
 	}
 
+	debugParameter_.ApplyIfDirty();
+
+	resultMessage_->DebugUpdate();
+	for (int i = 0; i < maxDigit_; ++i) {
+		Transform transform = numberTransform_;
+		transform.translate.x += numberMergin_ * i;
+		shuffleNumbers_[i]->SetTransform(transform);
+
+		shuffleNumbers_[i]->DebugUpdate();
+	}
+
+	kmModel_->worldTransform_.transform_ = kmTransform_;
+	kmModel_->Update();
+
+	spaceModel_->worldTransform_.transform_ = spaceTransform_;
+	spaceModel_->Update();
+
+	arrowModel_->worldTransform_.transform_ = arrowTransform_;
+	arrowModel_->Update();
+
 	timer_ += GameEngine::FpsCounter::deltaTime;
 
 	switch (currentType_) {
@@ -135,25 +155,6 @@ void ResultStringManager::Draw() {
 }
 
 void ResultStringManager::DebugUpdate() {
-	debugParameter_.ApplyIfDirty();
-
-	resultMessage_->DebugUpdate();
-	for (int i = 0; i < maxDigit_; ++i) {
-		Transform transform = numberTransform_;
-		transform.translate.x += numberMergin_ * i;
-		shuffleNumbers_[i]->SetTransform(transform);
-
-		shuffleNumbers_[i]->DebugUpdate();
-	}
-
-	kmModel_->worldTransform_.transform_ = kmTransform_;
-	kmModel_->Update();
-
-	spaceModel_->worldTransform_.transform_ = spaceTransform_;
-	spaceModel_->Update();
-
-	arrowModel_->worldTransform_.transform_ = arrowTransform_;
-	arrowModel_->Update();
 }
 
 void ResultStringManager::Boot(int score) {
