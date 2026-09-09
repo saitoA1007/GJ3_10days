@@ -1,16 +1,33 @@
 #pragma once
 #include "PlayingPhase.h"
 #include <algorithm>
+#include "AudioManager.h"
 #include "FPSCounter.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/UI/TimeUI.h"
 
 using namespace GameEngine;
 
+namespace
+{
+	constexpr const char* kFirstHalfBgmName = "gameFirstHalfBGM.mp3";
+	constexpr const char* kSecondHalfBgmName = "gameSecondHalfBGM.mp3";
+	constexpr float kBgmVolume = 1.0f;
+	constexpr float kSecondHalfStartProgress = 0.5f;
+}
+
 PlayingPhase::PlayingPhase() {};
 
 void PlayingPhase::OnEnter(GameFlowContext& context)
 {
+	auto& audioManager = AudioManager::GetInstance();
+	const uint32_t firstHalfBgmHandle = audioManager.GetHandleByName(kFirstHalfBgmName);
+	// デバッグ操作などで再入場してもBGMが重ならないよう、両方を停止してから開始する。
+	audioManager.Stop(firstHalfBgmHandle);
+	audioManager.Stop(audioManager.GetHandleByName(kSecondHalfBgmName));
+	audioManager.Play(firstHalfBgmHandle, kBgmVolume, true);
+	hasStartedSecondHalfBgm_ = false;
+
 	if (context.settings)
 	{
 		remainingTime_ = context.settings->gameDuration;
@@ -26,10 +43,24 @@ bool PlayingPhase::OnUpdate(GameFlowContext& context)
 {
 	remainingTime_ = (std::max)(remainingTime_ - FpsCounter::deltaTime, 0.0f);
 
-	if (context.timeUI && context.settings)
+	if (context.settings)
 	{
 		const float progress = 1.0f - remainingTime_ / context.settings->gameDuration;
-		context.timeUI->SetUnit((std::clamp)(progress, 0.0f, 1.0f));
+		if (context.timeUI)
+		{
+			context.timeUI->SetUnit((std::clamp)(progress, 0.0f, 1.0f));
+		}
+
+		if (!hasStartedSecondHalfBgm_ && progress >= kSecondHalfStartProgress)
+		{
+			auto& audioManager = AudioManager::GetInstance();
+			audioManager.Stop(audioManager.GetHandleByName(kFirstHalfBgmName));
+			audioManager.Play(
+				audioManager.GetHandleByName(kSecondHalfBgmName),
+				kBgmVolume,
+				true);
+			hasStartedSecondHalfBgm_ = true;
+		}
 	}
 
 	return remainingTime_ <= 0.0f; // 時間切れで終了
@@ -37,6 +68,10 @@ bool PlayingPhase::OnUpdate(GameFlowContext& context)
 
 void PlayingPhase::OnExit(GameFlowContext& context)
 {
+	auto& audioManager = AudioManager::GetInstance();
+	audioManager.Stop(audioManager.GetHandleByName(kFirstHalfBgmName));
+	audioManager.Stop(audioManager.GetHandleByName(kSecondHalfBgmName));
+
 	if (context.timeUI)
 	{
 		context.timeUI->SetUnit(1.0f);
