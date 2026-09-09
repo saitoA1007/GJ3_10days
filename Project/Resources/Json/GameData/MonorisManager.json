@@ -1,5 +1,11 @@
 {
     "MonorisManager": {
+        "Color": [
+            0.830115795135498,
+            0.830115795135498,
+            0.830115795135498,
+            1.0
+        ],
         "Material": {
             "Color": [
                 1.0,
@@ -19,9 +25,9 @@
         "SceneName": "Game",
         "Transform": {
             "FloatingSpeed": 2.0,
-            "FloatingWidth": 2.0,
+            "FloatingWidth": 1.2400000095367432,
             "MoveSpeedRatio": 0.14000000059604645,
-            "Radius": 35.790000915527344,
+            "Radius": 40.0,
             "Rotate": [
                 0.0,
                 0.0,
