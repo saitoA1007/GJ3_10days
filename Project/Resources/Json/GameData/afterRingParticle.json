@@ -1,30 +1,30 @@
 {
-    "blackHoleParticle": {
+    "afterRingParticle": {
         "Emitter": {
             "ColorEmit": {
                 "Enable": false
             },
             "Defalut": {
                 "Color": [
-                    0.3088803291320801,
+                    0.4247102737426758,
                     0.0,
                     1.0,
-                    0.0
+                    1.0
                 ],
                 "EmittePos": [
                     0.0,
                     0.0,
                     0.0
                 ],
-                "LifeTime": 1.5,
+                "LifeTime": 0.4000000059604645,
                 "Rotate": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "Scale": [
-                    1.5,
-                    1.5,
+                    5.0,
+                    5.0,
                     1.0
                 ]
             },
@@ -38,7 +38,19 @@
                 "Enable": false
             },
             "RotateEmit": {
-                "Enable": false
+                "Enable": true,
+                "RangeRotate": {
+                    "_Max": [
+                        0.0,
+                        0.0,
+                        1.899999976158142
+                    ],
+                    "_Min": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
             },
             "RotateVelocityEmit": {
                 "Enable": false
@@ -47,24 +59,14 @@
                 "Enable": false
             },
             "ShapeEmit": {
-                "Enable": true,
-                "Shape": {
-                    "_ShapeType": "Circle",
-                    "_boxSize": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "_emitFromShell": false,
-                    "_radius": 6.0
-                }
+                "Enable": false
             },
-            "SpawnCoolTime": 0.0,
-            "SpawnMaxCount": 2,
+            "SpawnCoolTime": 1.0,
+            "SpawnMaxCount": 4,
             "TextureEmit": {
                 "Enable": true,
                 "Texture": {
-                    "_TextureName": "circle.png"
+                    "_TextureName": "Ring_02.png"
                 }
             },
             "VelocityEmit": {
@@ -73,31 +75,20 @@
         },
         "Particle": {
             "AlphaOverLifeTime": {
-                "EaseType": {
-                    "_EaseType": "EaseInOutQuad"
-                },
-                "Enable": true,
-                "EndAlpha": 1.0
+                "Enable": false
             },
             "Attraction": {
-                "Damping": 2.0,
-                "Enable": true,
-                "Strength": 10.0,
-                "TargetPos": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
+                "Enable": false
             },
             "ColorOverLifeTime": {
                 "EaseType": {
-                    "_EaseType": "EaseInQuad"
+                    "_EaseType": "EaseInBack"
                 },
                 "Enable": true,
                 "EndColor": [
                     0.0,
                     1.0,
-                    0.7104246616363525,
+                    0.5714285373687744,
                     1.0
                 ]
             },
@@ -106,7 +97,7 @@
             },
             "SizeOverLifeTime": {
                 "EaseType": {
-                    "_EaseType": "EaseInOutQuad"
+                    "_EaseType": "EaseInBack"
                 },
                 "Enable": true,
                 "EndSize": 0.0,
@@ -121,17 +112,9 @@
                 "Enable": false
             },
             "Vortex": {
-                "AttractionSpeed": 50.0,
-                "AxisSpeed": 0.0,
-                "CenterPos": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Enable": true,
-                "RotationSpeed": 40.0
+                "Enable": false
             }
         },
-        "SceneName": "Game"
+        "SceneName": "Test"
     }
 }

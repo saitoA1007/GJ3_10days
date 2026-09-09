@@ -80,6 +80,20 @@ namespace GameEngine{
 			}
 		}
 
+		// 発射形状の半径の範囲を設定
+		void SetShapeEmit(float radius) {
+			if (auto* ShapeEmit = modulesControl_->GetModule<ShapeEmitModule>("ShapeEmit")) {
+				ShapeEmit->SetRadius(radius);
+			}
+		}
+
+		// 最終的な大きさ
+		void SetSizeOverLifeTime(float endScale) {
+			if (auto* ShapeEmit = modulesControl_->GetModule<SizeOverLifeTimeModule>("SizeOverLifeTime")) {
+				ShapeEmit->SetEndScale(endScale);
+			}
+		}
+
 		void SetIsLoop(bool isLoop) {
 			main_.isLoop = isLoop;
 		}
