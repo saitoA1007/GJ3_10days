@@ -20,6 +20,7 @@ using namespace GameEngine;
 #include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
 #include "Application/Tutorial/TutorialTextSequence.h"
+#include "AudioManager.h"
 #include "ControllerVibration.h"
 #include "DebugParameter.h"
 #include "FPSCounter.h"
@@ -28,11 +29,14 @@ using namespace GameEngine;
 #include "Application/Effect/MoonObject.h"
 #include "Application/Effect/RocketEffect.h"
 #include "Application/Effect/ExplosionEffect.h"
+#include "Application/Effect/IncorporateEffect.h"
 #include <Application/result/ShuffleNumber.h>
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <Application/Result/ResultStringManager.h>
+#include <Application/Effect/MonorisManager.h>
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <string_view>
 #include "MyMath.h"
@@ -46,6 +50,8 @@ namespace
 	constexpr int kChargeVibrationThreshold = 5;        // 振動を開始するためのチャージされたピクミの数
 	constexpr float kChargeVibrationLeftMotor = 0.35f;  // 左モーターの振動強度
 	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
+	constexpr const char* kRocketDamageSoundName = "RocketDamage.mp3";
+	constexpr float kRocketDamageSoundVolume = 1.0f;
 	constexpr Vector3 kCameraPosition = { 0.0f, 60.0f, -60.0f };
 	constexpr Vector3 kCameraTarget = { 0.0f, 0.0f, 0.0f };
 	constexpr float kFadeDuration = 1.0f;
@@ -66,11 +72,15 @@ GameScene::GameScene() {
 		{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, kCameraPosition },
 		1280,
 		720);
+	mainCameraBasePosition_ = mainCamera_->transform_.translate;
 	mainCameraEndRotation_ = mainCamera_->transform_.rotate;
 	mainCameraDebugParameter_ = std::make_unique<DebugParameter>("GameSceneMainCamera");
-	mainCameraDebugParameter_->Register("Translate", mainCamera_->transform_.translate, 0);
+	mainCameraDebugParameter_->Register("Translate", mainCameraBasePosition_, 0);
 	mainCameraDebugParameter_->Register("Rotate", mainCameraEndRotation_, 1);
 	mainCameraDebugParameter_->Register("StartRotateX", mainCameraEntranceStartRotateX_, 0, "Entrance");
+	mainCameraDebugParameter_->Register("Duration", enemyHitCameraShakeDuration_, 0, "EnemyHitShake");
+	mainCameraDebugParameter_->Register("Amplitude", enemyHitCameraShakeAmplitude_, 1, "EnemyHitShake");
+	mainCameraDebugParameter_->Register("Frequency", enemyHitCameraShakeFrequency_, 2, "EnemyHitShake");
 
 	dir_.Normalize();
 
@@ -109,7 +119,8 @@ GameScene::GameScene() {
 	crossBeamModel->SetDefaultIsEnableLight(false);
 	uint32_t beamNoiseGH = textureManager_->GetHandleByName("beamNoise.png");
 	auto* unitModel = modelManager_->GetNameByModel("energy.obj");
-	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, rocket_, crossBeamModel, beamNoiseGH);
+	auto* blackHoleModel = modelManager_->GetNameByModel("cursor.obj");
+	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, energySpawner_, enemyManager_);
 
 	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");
 	lockOnController_ = gameObjectManager_->AddObject<LockOnController>(
@@ -179,6 +190,10 @@ GameScene::GameScene() {
 	);
 	enemyManager_->SetStage("Tutorial");
 
+	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
+	auto* timeUI = gameObjectManager_->AddObject<TimeUI>(unitIconGH);
+	timeUI->SetActive(false);
+
 	GameFlowContext flowContext{};
 	flowContext.rocket = rocket_;
 	flowContext.energySpawner = energySpawner_;
@@ -190,6 +205,7 @@ GameScene::GameScene() {
 	flowContext.tutorialLogoView = tutorialLogoView_.get();
 	flowContext.startPlayingView = startPlayingView_.get();
 	flowContext.resultMessage = resultMessage;
+	flowContext.timeUI = timeUI;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
@@ -461,8 +477,10 @@ GameScene::GameScene() {
 
 	// ブラックホールのテスト
 	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+
+	//gameObjectManager_->AddObject<IncorporateEffect>(modelManager_, textureManager_, gameObjectManager_);
 
 	//// ポール
 	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
@@ -490,15 +508,19 @@ GameScene::GameScene() {
 	// にぎやかし浮遊エフェクト
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldFloatingEffect", 256, textureManager_, effectModel);
 
-	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
-	gameObjectManager_->AddObject<TimeUI>(unitIconGH);
+
+	auto monorisModel = modelManager_->GetNameByModel("Monoris.obj");
+	gameObjectManager_->AddObject<MonorisManager>(monorisModel, 32);
 }
 
 void GameScene::Initialize() {
-	mainCamera_->transform_.translate = kCameraPosition;
+	mainCameraBasePosition_ = kCameraPosition;
 	mainCameraEndRotation_ = Math::DirectionToEuler(kCameraTarget - kCameraPosition);
+	isEnemyHitCameraShaking_ = false;
+	enemyHitCameraShakeElapsedTime_ = 0.0f;
+	lastHandledEnemyHitCount_ = rocket_ ? rocket_->GetEnemyHitCount() : 0;
 	mainCameraDebugParameter_->Apply();
-	UpdateCamera();
+	UpdateCamera(0.0f);
 
 	score_.Reset();
 	scoreView_->SetValue(score_.GetDisplayedValue());
@@ -533,7 +555,7 @@ void GameScene::Update() {
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
 	UpdateTutorialViews(true);
-	UpdateCamera();
+	UpdateCamera(FpsCounter::gameDeltaTime);
 	
 	// Playerはゲーム状態だけを公開し、振動の強度と出力はシーン側で管理する。
 	if (controllerVibration_ && player_ && player_->GetChargedPikumiCount() >= kChargeVibrationThreshold)
@@ -571,7 +593,7 @@ void GameScene::DebugUpdate()
 	scoreView_->SetValue(score_.GetDisplayedValue());
 	scoreView_->Update();
 	UpdateTutorialViews(false);
-	UpdateCamera();
+	UpdateCamera(0.0f);
 	
 	// ゲーム更新を停止している間に振動が残らないようにする。
 	if (controllerVibration_)
@@ -649,9 +671,23 @@ void GameScene::InputRegisterCommand() {
 }
 
 
-void GameScene::UpdateCamera()
+void GameScene::UpdateCamera(float deltaTime)
 {
 	mainCameraDebugParameter_->ApplyIfDirty();
+
+	if (rocket_)
+	{
+		const uint64_t enemyHitCount = rocket_->GetEnemyHitCount();
+		if (enemyHitCount > lastHandledEnemyHitCount_)
+		{
+			StartEnemyHitCameraShake();
+			PlayRocketDamageSound();
+		}
+		lastHandledEnemyHitCount_ = enemyHitCount;
+	}
+
+	mainCamera_->transform_.translate =
+		mainCameraBasePosition_ + CalculateEnemyHitCameraShakeOffset();
 	mainCamera_->transform_.rotate = mainCameraEndRotation_;
 	if (rocket_)
 	{
@@ -663,9 +699,55 @@ void GameScene::UpdateCamera()
 	}
 	mainCamera_->Update();
 
+	if (isEnemyHitCameraShaking_)
+	{
+		enemyHitCameraShakeElapsedTime_ += (std::max)(deltaTime, 0.0f);
+		if (enemyHitCameraShakeElapsedTime_ >= (std::max)(enemyHitCameraShakeDuration_, 0.0f))
+		{
+			isEnemyHitCameraShaking_ = false;
+			enemyHitCameraShakeElapsedTime_ = 0.0f;
+		}
+	}
+
 	// 打ち上げ演出以降はResultMoveCameraがRenderQueueのカメラを管理する。
 	if (!gameFlow_ || gameFlow_->UsesGameSceneCamera())
 	{
 		renderQueue_->SetCamera(mainCamera_.get());
 	}
+}
+
+void GameScene::StartEnemyHitCameraShake()
+{
+	enemyHitCameraShakeElapsedTime_ = 0.0f;
+	isEnemyHitCameraShaking_ =
+		enemyHitCameraShakeDuration_ > 0.0f && enemyHitCameraShakeAmplitude_ > 0.0f;
+}
+
+void GameScene::PlayRocketDamageSound()
+{
+	auto& audioManager = AudioManager::GetInstance();
+	const uint32_t soundHandle = audioManager.GetHandleByName(kRocketDamageSoundName);
+	audioManager.Play(soundHandle, kRocketDamageSoundVolume, false);
+}
+
+Vector3 GameScene::CalculateEnemyHitCameraShakeOffset() const
+{
+	const float duration = (std::max)(enemyHitCameraShakeDuration_, 0.0f);
+	const float amplitude = (std::max)(enemyHitCameraShakeAmplitude_, 0.0f);
+	if (!isEnemyHitCameraShaking_ || duration <= 0.0f || amplitude <= 0.0f)
+	{
+		return {};
+	}
+
+	const float progress = (std::clamp)(enemyHitCameraShakeElapsedTime_ / duration, 0.0f, 1.0f);
+	const float decay = 1.0f - progress;
+	const float strength = amplitude * decay * decay;
+	const float phase =
+		enemyHitCameraShakeElapsedTime_ * (std::max)(enemyHitCameraShakeFrequency_, 0.0f);
+
+	return {
+		(std::sin(phase) * 0.65f + std::sin(phase * 2.17f + 1.3f) * 0.35f) * strength,
+		(std::cos(phase * 1.23f) * 0.7f + std::sin(phase * 2.71f + 2.1f) * 0.3f) * strength,
+		std::sin(phase * 0.83f + 0.7f) * strength * 0.2f,
+	};
 }

@@ -42,18 +42,19 @@ void ResultMovieManager::Update() {
 	case ResultMoveCamera::Phase::kMove:
 
 		// ロケット演出
-		rocketEffect_->Start(1.1f);
+		rocketEffect_->Start(clearRate_);
 		break;
 
 	case ResultMoveCamera::Phase::kStop:
+
+		// バーをおろす
+		letterboxUI_.SetBarActive(false);
 
 		if (rocketEffect_->GetEnergy() > 1.0f) {
 			if (isExplo_) { return; }
 			isExplo_ = true;
 			moonObject_->Break();
 			explosionEffect_->Start({80.0f,50.0f,0.0f});
-			// バーをおろす
-			letterboxUI_.SetBarActive(false);
 		}
 		break;
 	}
@@ -65,7 +66,9 @@ void ResultMovieManager::Draw() {
 	letterboxUI_.Draw();
 }
 
-void ResultMovieManager::Start() {
+void ResultMovieManager::Start(float clearRate) {
+	clearRate_ = clearRate;
+
 	// 有効
 	resultMoveCamera_->SetActive(true);
 	//moonObject_->SetActive(true);

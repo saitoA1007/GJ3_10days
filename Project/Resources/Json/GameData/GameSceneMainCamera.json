@@ -1,5 +1,10 @@
 {
     "GameSceneMainCamera": {
+        "EnemyHitShake": {
+            "Amplitude": 1.25,
+            "Duration": 0.5,
+            "Frequency": 42.0
+        },
         "Entrance": {
             "StartRotateX": 0.25
         },

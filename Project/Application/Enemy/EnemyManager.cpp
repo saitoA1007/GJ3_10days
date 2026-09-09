@@ -78,6 +78,7 @@ void EnemyManager::Initialize() {
 		debugParam_.Register("HP", configList_[i].hp, 0, label);
 		debugParam_.Register("Size", configList_[i].size_, 0, label);
 		debugParam_.Register("NormalColor", configList_[i].normalColor_, 0, label);
+		debugParam_.Register("HighlightColor", configList_[i].highlightColor_, 0, label);
 		debugParam_.Register("HitColor", configList_[i].hitColor_, 0, label);
 
 		enemyTypeNamesForImGuiList_[i] = enemyTypeNames_[i].c_str();
@@ -193,6 +194,12 @@ void EnemyManager::Update() {
 		else {
 			++it;
 		}
+	}
+
+	activeEnemyVector_.clear();
+	activeEnemyVector_.reserve(activeEnemies_.size());
+	for (const auto& [index, enemy] : activeEnemies_) {
+		activeEnemyVector_.push_back(enemy);
 	}
 
 	worldTransforms_.UpdateTransformMatrix(maxEnemyNum_);

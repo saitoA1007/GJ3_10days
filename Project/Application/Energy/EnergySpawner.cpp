@@ -18,6 +18,7 @@ namespace
 		"Small",
 		"Medium",
 		"Large",
+		"Special",
 	};
 	// 自然落下するEnergyは生成禁止帯を除いた3領域だけから抽選する。
 	constexpr std::array<FieldZone, kEnergySizeCount> kEnergySpawnZones = 
@@ -32,10 +33,7 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, GameEngine::Textu
 	GameEngine::Model* planeModel, size_t capacity)
 	: field_(field)
 {
-	assert(energyModel != nullptr && "energy spawner requires energy.obj");
-	assert(field_ != nullptr && "energy spawner requires a field");
-
-	// Energyは生成頻度が高いため、固定プールを作って実行中の確保を避ける。
+	// Energyは生成頻度が高いため、固定プールを作って実行中の確保を避ける
 	const size_t safeCapacity = (std::max)(capacity, size_t{ 1 });
 	pickups_.reserve(safeCapacity);
 	for (size_t i = 0; i < safeCapacity; ++i) {
@@ -45,11 +43,13 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, GameEngine::Textu
 	debugParameter_ = std::make_unique<DebugParameter>("Energy");
 	debugParameter_->Register("SpawnInterval", settings_.spawnInterval, 0, "Spawn");
 	debugParameter_->Register("AppearDuration", settings_.appearDuration, 1, "Spawn");
-	debugParameter_->Register("GroundHeight", settings_.groundHeight, 3, "Spawn");
-	debugParameter_->Register("MaxActiveCount", settings_.maxActiveCount, 4, "Spawn");
-	debugParameter_->Register("InitialCountPerZone", settings_.initialCountPerZone, 5, "Spawn");
-	debugParameter_->Register("AngleCenterDegrees", settings_.spawnAngleCenterDegrees, 6, "Spawn");
-	debugParameter_->Register("AngleRangeDegrees", settings_.spawnAngleRangeDegrees, 7, "Spawn");
+	debugParameter_->Register("Lifetime", settings_.lifetime, 2, "Spawn");
+	debugParameter_->Register("DissolveDuration", settings_.dissolveDuration, 3, "Spawn");
+	debugParameter_->Register("GroundHeight", settings_.groundHeight, 4, "Spawn");
+	debugParameter_->Register("MaxActiveCount", settings_.maxActiveCount, 5, "Spawn");
+	debugParameter_->Register("InitialCountPerZone", settings_.initialCountPerZone, 6, "Spawn");
+	debugParameter_->Register("AngleCenterDegrees", settings_.spawnAngleCenterDegrees, 7, "Spawn");
+	debugParameter_->Register("AngleRangeDegrees", settings_.spawnAngleRangeDegrees, 8, "Spawn");
 	debugParameter_->Register("FloatingAmplitude", settings_.floatingAmplitude, 0, "Animation");
 	debugParameter_->Register("FloatingSpeed", settings_.floatingSpeed, 1, "Animation");
 	debugParameter_->Register("RotationSpeed", settings_.rotationSpeed, 2, "Animation");
@@ -97,7 +97,6 @@ void EnergySpawner::Update()
 		return;
 	}
 
-	// gameplayEnabled_がfalseの間は落下も生成タイマーも完全に停止する。
 	UpdatePickups(FpsCounter::gameDeltaTime);
 
 	if (autoSpawnEnabled_)
@@ -230,6 +229,8 @@ void EnergySpawner::SanitizeSettings()
 {
 	settings_.spawnInterval = (std::max)(settings_.spawnInterval, 0.1f);
 	settings_.appearDuration = (std::max)(settings_.appearDuration, 0.01f);
+	settings_.lifetime = (std::max)(settings_.lifetime, 0.1f);
+	settings_.dissolveDuration = (std::max)(settings_.dissolveDuration, 0.01f);
 	settings_.spawnAngleRangeDegrees = (std::clamp)(settings_.spawnAngleRangeDegrees, 0.0f, 360.0f);
 	settings_.floatingAmplitude = (std::max)(settings_.floatingAmplitude, 0.0f);
 	settings_.floatingSpeed = (std::max)(settings_.floatingSpeed, 0.0f);
@@ -251,20 +252,25 @@ void EnergySpawner::SanitizeSettings()
 
 void EnergySpawner::UpdatePickups(float deltaTime)
 {
+	// 毎フレームリストをクリアして再構築
+	activeEnergies_.clear();
+	activeEnergies_.reserve(pickups_.size());
+
 	for (auto& pickup : pickups_)
 	{
-		if (!pickup->IsActive())
+		if (pickup->IsActive())
 		{
-			continue;
-		}
+			pickup->Update(
+				deltaTime,
+				settings_.floatingAmplitude,
+				settings_.floatingSpeed,
+				settings_.rotationSpeed,
+				settings_.lifetime,
+				settings_.dissolveDuration);
 
-		// Register変更を既に存在する個体にも即時反映する。
-		pickup->ApplyTypeSettings(typeSettings_[static_cast<size_t>(pickup->GetSize())]);
-		pickup->Update(
-			deltaTime,
-			settings_.floatingAmplitude,
-			settings_.floatingSpeed,
-			settings_.rotationSpeed);
+			// アクティブな個体のみ生ポインタを格納
+			activeEnergies_.push_back(pickup.get());
+		}
 	}
 }
 

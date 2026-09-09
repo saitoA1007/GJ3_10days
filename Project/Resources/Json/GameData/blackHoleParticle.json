@@ -59,7 +59,7 @@
                     "_radius": 6.0
                 }
             },
-            "SpawnCoolTime": 0.10000000149011612,
+            "SpawnCoolTime": 0.0,
             "SpawnMaxCount": 2,
             "TextureEmit": {
                 "Enable": true,
@@ -121,7 +121,7 @@
                 "Enable": false
             },
             "Vortex": {
-                "AttractionSpeed": 6.289999961853027,
+                "AttractionSpeed": 50.0,
                 "AxisSpeed": 0.0,
                 "CenterPos": [
                     0.0,
@@ -129,9 +129,9 @@
                     0.0
                 ],
                 "Enable": true,
-                "RotationSpeed": 5.0
+                "RotationSpeed": 40.0
             }
         },
-        "SceneName": "Test"
+        "SceneName": "Game"
     }
 }

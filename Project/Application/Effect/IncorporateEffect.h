@@ -12,6 +12,9 @@ namespace GameEngine {
 
 class BlackHoleEffect;
 
+/// <summary>
+/// ブラックホールに取り込む演出
+/// </summary>
 class IncorporateEffect : public GameEngine::IGameObject {
 public:
 
@@ -37,6 +40,17 @@ public:
 	/// <param name="scale">ブラックホールの発生サイズ(1.0fで1m)</param>
 	void Start(Vector3 pos, float scale);
 
+	/// <summary>
+	/// 演出を強制的に終了させる
+	/// </summary>
+	void Stop();
+
+	// 再生中か
+	bool IsPlay() const { return isPlay_; }
+
+	// 現在のフェーズを取得
+	Phase GetPhase() const { return phase_; }
+
 private:
 
 	// 入りの演出時間
@@ -53,6 +67,9 @@ private:
 	float ringDelayTime_ = 0.06f;    // フラッシュの後に出す為の遅延
 	float ringSpreadTime_ = 0.55f;   // 広がりきる時間
 
+	// ブラックホールが出現しきるまでの時間
+	float blackHoleAppearTime_ = 0.20f;
+
 private:
 	// パラメータ機能
 	GameEngine::DebugParameter debugParame_{ "IncorporateEffect" };
@@ -67,6 +84,9 @@ private:
 	// 入りで使用するリングパーティクル
 	GameEngine::ParticleBehavior* ringParticle_ = nullptr;
 
+	// 終わりのリング
+	GameEngine::ParticleBehavior* afterRingParticle_ = nullptr;
+
 	float endBlacHoleScale_ = 0.0f;
 
 	// 現在のフェーズ
@@ -79,9 +99,29 @@ private:
 	bool isEmitRing_ = false;
 
 	// 発生位置
-	Vector3 emitPos_ = { 0.0f,0.0f,0.0f };
-
+	Vector3 emitPos_ = { 0.0f,1.0f,-10.0f };
 private:
 
+	// 登録する
+	void Register();
+
+	/// <summary>
+	/// 遅延と長さから進行度(0.0～1.0)を求める
+	/// </summary>
 	float GetProgress(float delayTime, float maxTime) const;
+
+	/// <summary>
+	/// フェーズを切り替える。タイマーはフェーズごとに数え直す
+	/// </summary>
+	void ChangePhase(Phase phase);
+
+	/// <summary>
+	/// ブラックホールの大きさを設定する
+	/// </summary>
+	void SetBlackHoleScale(float scale);
+
+	/// <summary>
+	/// 発生させたパーティクルが全て寿命を迎えていたら更新を止める
+	/// </summary>
+	void StopFinishedParticle(GameEngine::ParticleBehavior* particle, bool isEmitted, float endTime) const;
 };

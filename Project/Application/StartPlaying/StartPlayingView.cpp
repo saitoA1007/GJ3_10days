@@ -5,6 +5,7 @@
 #include <cmath>
 #include <string>
 
+#include "AudioManager.h"
 #include "Camera.h"
 #include "ModelComponent.h"
 #include "MyMath.h"
@@ -92,6 +93,10 @@ void StartPlayingView::Start()
 	if ((std::max)(shakeDuration_, 0.0f) > 0.0f)
 	{
 		isShaking_ = true;
+		auto& audioManager = GameEngine::AudioManager::GetInstance();
+		const uint32_t shakeSoundHandle =
+			audioManager.GetHandleByName("StartPlayingShake.mp3");
+		audioManager.Play(shakeSoundHandle, 1.0f, false);
 	}
 	else
 	{
@@ -173,6 +178,11 @@ void StartPlayingView::StartBurstFall()
 	burstElapsedTime_ = 0.0f;
 	burstOffsets_.fill({});
 	burstRotationOffsets_.fill({});
+
+	auto& audioManager = GameEngine::AudioManager::GetInstance();
+	const uint32_t breakSoundHandle =
+		audioManager.GetHandleByName("StartPlayingBreak.mp3");
+	audioManager.Play(breakSoundHandle, 1.0f, false);
 
 	const float centerIndex = static_cast<float>(kModelCount - 1) * 0.5f;
 	const float horizontalVelocity = (std::max)(burstHorizontalVelocity_, 0.0f);

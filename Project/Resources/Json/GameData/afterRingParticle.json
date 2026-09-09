@@ -1,54 +1,56 @@
 {
-    "EnemyCommonEffect": {
+    "afterRingParticle": {
         "Emitter": {
             "ColorEmit": {
                 "Enable": false
             },
             "Defalut": {
                 "Color": [
-                    0.028622103855013847,
-                    0.47936534881591797,
-                    0.9266409277915955,
+                    0.4247102737426758,
+                    0.0,
+                    1.0,
                     1.0
                 ],
                 "EmittePos": [
                     0.0,
-                    -1.0700000524520874,
+                    0.0,
                     0.0
                 ],
-                "LifeTime": 1.0,
+                "LifeTime": 0.4000000059604645,
                 "Rotate": [
-                    1.5700000524520874,
+                    0.0,
                     0.0,
                     0.0
                 ],
                 "Scale": [
-                    0.10000000149011612,
-                    0.10000000149011612,
-                    0.10000000149011612
+                    5.0,
+                    5.0,
+                    1.0
                 ]
             },
             "DirectionEmit": {
-                "Direction": [
-                    0.0,
-                    -1.9600000381469727,
-                    2.5199999809265137
-                ],
-                "Enable": true,
-                "MaxSpeed": 0.20000000298023224,
-                "MinSpeed": 0.20000000298023224,
-                "SpreadAngle": 0.0
+                "Enable": false
             },
             "IsActiveBlendAdd": true,
-            "IsBillBoard": false,
+            "IsBillBoard": true,
             "IsLoop": true,
             "LifeTimeEmit": {
-                "Enable": true,
-                "MaxLifeTime": 1.5,
-                "MinLifeTime": 1.5
+                "Enable": false
             },
             "RotateEmit": {
-                "Enable": false
+                "Enable": true,
+                "RangeRotate": {
+                    "_Max": [
+                        0.0,
+                        0.0,
+                        1.899999976158142
+                    ],
+                    "_Min": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
             },
             "RotateVelocityEmit": {
                 "Enable": false
@@ -59,12 +61,12 @@
             "ShapeEmit": {
                 "Enable": false
             },
-            "SpawnCoolTime": 0.3799999952316284,
-            "SpawnMaxCount": 3,
+            "SpawnCoolTime": 1.0,
+            "SpawnMaxCount": 4,
             "TextureEmit": {
                 "Enable": true,
                 "Texture": {
-                    "_TextureName": "Ring_01.png"
+                    "_TextureName": "Ring_02.png"
                 }
             },
             "VelocityEmit": {
@@ -73,32 +75,37 @@
         },
         "Particle": {
             "AlphaOverLifeTime": {
-                "EaseType": {
-                    "_EaseType": "Linear"
-                },
-                "Enable": true,
-                "EndAlpha": 0.0
+                "Enable": false
             },
             "Attraction": {
                 "Enable": false
             },
             "ColorOverLifeTime": {
-                "Enable": false
+                "EaseType": {
+                    "_EaseType": "EaseInBack"
+                },
+                "Enable": true,
+                "EndColor": [
+                    0.0,
+                    1.0,
+                    0.5714285373687744,
+                    1.0
+                ]
             },
             "RotationByVelocity": {
                 "Enable": false
             },
             "SizeOverLifeTime": {
                 "EaseType": {
-                    "_EaseType": "Linear"
+                    "_EaseType": "EaseInBack"
                 },
                 "Enable": true,
-                "EndSize": 0.9900000095367432,
+                "EndSize": 0.0,
                 "SeparateAxes": false,
                 "SeparateAxesEndSize": [
-                    0.9900000095367432,
-                    0.8199999928474426,
-                    1.25
+                    0.0,
+                    0.0,
+                    0.0
                 ]
             },
             "VelocityOverLifeTime": {
