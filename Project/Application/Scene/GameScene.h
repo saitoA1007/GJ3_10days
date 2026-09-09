@@ -6,7 +6,6 @@
 // エンジン機能をインクルード
 #include "Camera.h"
 
-#include "Application/Scene/Transition/Fade.h"
 #include "Application/Score/Score.h"
 #include <ModelComponent.h>
 #include <DebugParameter.h>
@@ -25,6 +24,7 @@ class TutorialCameraModelView;
 class TutorialTextSequence;
 class StartPlayingView;
 class HalfTimeView;
+class ResultStringManager;
 
 namespace GameEngine
 {
@@ -74,7 +74,7 @@ public:
 	/// 遷移する演出
 	/// </summary>
 	/// <returns></returns>
-	std::unique_ptr<ITransitionEffect> GetTransitionEffect() override { return std::make_unique<Fade>(); }
+	std::unique_ptr<ITransitionEffect> GetTransitionEffect() override;
 
 private: // シーン機能
 
@@ -123,6 +123,9 @@ private: // シーン機能
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 	std::unique_ptr<GameEngine::Sprite> fadeSprite_;
 	float fadeElapsedTime_ = 0.0f;
+
+	// リザルト
+	ResultStringManager* resultStringManager_ = nullptr;
 
 	// シーンライト
 	float intensity_ = 2.0f;

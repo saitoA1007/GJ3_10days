@@ -256,6 +256,7 @@
     <ClCompile Include="Application\Result\ResultStringManager.cpp" />
     <ClCompile Include="Application\Unit\UnitEffectManager.cpp" />
     <ClCompile Include="Application\Effect\NaviEffect.cpp" />
+    <ClCompile Include="Application\Scene\Transition\DissolveFade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
@@ -542,6 +543,7 @@
     <ClInclude Include="Application\Effect\MonorisManager.h" />
     <ClInclude Include="Application\Unit\UnitEffectManager.h" />
     <ClInclude Include="Application\Effect\NaviEffect.h" />
+    <ClInclude Include="Application\Scene\Transition\DissolveFade.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />

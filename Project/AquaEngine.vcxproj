@@ -183,6 +183,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\GameFlow\ResultPhase.cpp" />
     <ClCompile Include="Application\GameFlow\StartPlayingPhase.cpp" />
     <ClCompile Include="Application\HalfTime\HalfTimeView.cpp" />
+    <ClCompile Include="Application\Scene\Transition\DissolveFade.cpp" />
     <ClCompile Include="Application\StartPlaying\StartPlayingView.cpp" />
     <ClCompile Include="Application\GameFlow\TutorialPhase.cpp" />
     <ClCompile Include="Application\Tutorial\TutorialCameraModelView.cpp" />
@@ -507,6 +508,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\GameFlow\ResultPhase.h" />
     <ClInclude Include="Application\GameFlow\StartPlayingPhase.h" />
     <ClInclude Include="Application\HalfTime\HalfTimeView.h" />
+    <ClInclude Include="Application\Scene\Transition\DissolveFade.h" />
     <ClInclude Include="Application\StartPlaying\StartPlayingView.h" />
     <ClInclude Include="Application\GameFlow\TutorialPhase.h" />
     <ClInclude Include="Application\Tutorial\TutorialCameraModelView.h" />

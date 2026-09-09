@@ -35,6 +35,7 @@ using namespace GameEngine;
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <Application/Result/ResultStringManager.h>
 #include <Application/Effect/MonorisManager.h>
+#include "Application/Scene/Transition/DissolveFade.h"
 #include <algorithm>
 #include <cmath>
 #include <string>
@@ -195,7 +196,7 @@ GameScene::GameScene() {
 	// リザルトムービー管理
 	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect, explosionEffect);
 	// リザルトメッセージ
-	auto resultMessage = gameObjectManager_->AddObject<ResultStringManager>(modelManager_, animationManager_);
+	resultStringManager_ = gameObjectManager_->AddObject<ResultStringManager>(inputCommand_, modelManager_, animationManager_);
 
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
@@ -229,7 +230,7 @@ GameScene::GameScene() {
 	flowContext.tutorialLogo2View = tutorialLogo2View_.get();
 	flowContext.startPlayingView = startPlayingView_.get();
 	flowContext.halfTimeView = halfTimeView_.get();
-	flowContext.resultMessage = resultMessage;
+	flowContext.resultMessage = resultStringManager_;
 	flowContext.timeUI = timeUI;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
@@ -588,6 +589,10 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+
+	// フラグを受け取れば終了する
+	isFinished_ = resultStringManager_->IsSceneFinished();
+
 	if (fadeSprite_ && fadeElapsedTime_ < kFadeDuration) {
 		fadeElapsedTime_ = std::min(fadeElapsedTime_ + FpsCounter::deltaTime, kFadeDuration);
 		const float progress = fadeElapsedTime_ / kFadeDuration;
@@ -808,4 +813,10 @@ Vector3 GameScene::CalculateEnemyHitCameraShakeOffset() const
 		(std::cos(phase * 1.23f) * 0.7f + std::sin(phase * 2.71f + 2.1f) * 0.3f) * strength,
 		std::sin(phase * 0.83f + 0.7f) * strength * 0.2f,
 	};
+}
+
+std::unique_ptr<ITransitionEffect> GameScene::GetTransitionEffect() {
+	Dissolve* dissolve = postEffectManager_->GetPostEffect<Dissolve>("DissolvePass");
+	dissolve->SetNoiseTextureIndex(textureManager_->GetHandleByName("noise0.png"));
+	return std::make_unique<DissolveFade>(dissolve);
 }
