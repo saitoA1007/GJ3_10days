@@ -15,6 +15,7 @@ using namespace GameEngine;
 #include "Application//LockOn/LockOnController.h"
 #include "Application//Rocket/Rocket.h"
 #include "Application//Unit/UnitManager.h"
+#include "Application//Unit/UnitEffectManager.h"
 #include "Application/Field/FieldEffect.h"
 #include "Application/Score/ScoreView.h"
 #include "Application/StartPlaying/StartPlayingView.h"
@@ -24,12 +25,10 @@ using namespace GameEngine;
 #include "ControllerVibration.h"
 #include "DebugParameter.h"
 #include "FPSCounter.h"
-#include "Application/Effect/BlackHoleEffect.h"
 #include "Application/Effect/SpawnFieldEffect.h"
 #include "Application/Effect/MoonObject.h"
 #include "Application/Effect/RocketEffect.h"
 #include "Application/Effect/ExplosionEffect.h"
-#include "Application/Effect/IncorporateEffect.h"
 #include <Application/result/ShuffleNumber.h>
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
@@ -120,7 +119,10 @@ GameScene::GameScene() {
 	uint32_t beamNoiseGH = textureManager_->GetHandleByName("beamNoise.png");
 	auto* unitModel = modelManager_->GetNameByModel("unit2.obj");
 	auto* blackHoleModel = modelManager_->GetNameByModel("cursor.obj");
-	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, energySpawner_, enemyManager_);
+	// ユニットの演出管理機能
+	auto* unitEffectManager = gameObjectManager_->AddObject<UnitEffectManager>(modelManager_, textureManager_, gameObjectManager_);
+	// ユニット管理機能
+	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, unitEffectManager, energySpawner_, enemyManager_);
 
 	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");
 	lockOnController_ = gameObjectManager_->AddObject<LockOnController>(
@@ -475,16 +477,6 @@ GameScene::GameScene() {
 	// これより下はエフェクトのテストで書いています
 	//==============================================
 
-	// ブラックホールのテスト
-	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
-
-	//gameObjectManager_->AddObject<IncorporateEffect>(modelManager_, textureManager_, gameObjectManager_);
-
-	//// ポール
-	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
-	//poleModel->SetDefaultIsEnableLight(false);
 	//// 円
 	auto* circleModel = modelManager_->GetNameByModel("stageCircle.gltf");
 	circleModel->SetDefaultIsEnableLight(false);

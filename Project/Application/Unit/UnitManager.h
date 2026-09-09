@@ -15,6 +15,7 @@ class EnergyPickup;
 class EnergySpawner;
 class EnemyManager;
 class Rocket;
+class UnitEffectManager; // ユニットの演出管理機能
 
 /// @brief 使用するユニット数と、全個体で共有する設定。
 struct UnitManagerSettings
@@ -29,11 +30,12 @@ class UnitManager final : public GameEngine::IGameObject
 public:
 	/// @brief 再出撃可能な固定数のユニットをプールとして確保する。
 	UnitManager(
-		GameEngine::Model* unitModel, 
+		GameEngine::Model* unitModel,
 		GameEngine::Model* circleModel,
 		Rocket* rocket,
 		GameEngine::Model* baemModel,
 		uint32_t beamGH,
+		UnitEffectManager* unitEffectManager,
 		EnergySpawner* energySpawner = nullptr,
 		EnemyManager* enemyManager = nullptr,
 		size_t capacity = 16);
@@ -114,5 +116,7 @@ private:
 	UnitManagerSettings settings_;                              // Registerから編集される共有設定
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;// 設定とParameter Inspectorの接続
 	bool gameplayEnabled_ = true;                               // Ready・TimeUp・Pause中はfalse
+
+	UnitEffectManager* unitEffectManager_ = nullptr; // 演出管理
 };
 
