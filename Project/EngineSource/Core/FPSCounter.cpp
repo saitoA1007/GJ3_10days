@@ -35,4 +35,7 @@ void FpsCounter::Update() {
 		deltaTime = 1.0f / static_cast<float>(maxFrameCount_);
 		gameDeltaTime = deltaTime;
 	}
+
+	deltaTime = 1.0f / 60.0f;
+	gameDeltaTime = deltaTime;
 }
