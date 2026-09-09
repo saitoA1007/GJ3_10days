@@ -21,6 +21,7 @@ class TutorialCameraModelView;
 class StartPlayingView;
 class HalfTimeView;
 class TimeUI;
+class UnitCountUI;
 
 struct GameFlowSettings
 {
@@ -54,6 +55,7 @@ struct GameFlowContext
 	HalfTimeView* halfTimeView = nullptr;
 	TimeUI* timeUI = nullptr;
 	ResultStringManager* resultMessage = nullptr;
+	UnitCountUI* unitCountUI = nullptr;
 
 	int32_t finalEnergy = 0; // スコア用
 };
