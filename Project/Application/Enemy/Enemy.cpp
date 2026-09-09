@@ -149,8 +149,7 @@ void Enemy::Update() {
 
 		if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
 			TrackingMovement(GameEngine::FpsCounter::deltaTime);
-		}
-		else {
+		} else {
 			if (type_ == EnemyType::Round) {
 				RoundMovement();
 			}
@@ -160,6 +159,7 @@ void Enemy::Update() {
 		}
 	}
 
+	data_->transform.rotate.y = -(std::atan2f(direction_.y, direction_.x) + std::numbers::pi_v<float> *0.5f);
 	collider_.SetWorldPosition(data_->transform.translate);
 
 	// ロケット到達等の距離判定
@@ -200,8 +200,6 @@ void Enemy::DefaultMovement() {
 	data_->transform.translate.x = position.x;
 	data_->transform.translate.y = 0.7f * config_.size_ + sinf(timer_) * 0.5f;
 	data_->transform.translate.z = position.y;
-
-	data_->transform.rotate.y = -(std::atan2f(direction_.y, direction_.x) + std::numbers::pi_v<float> * 0.5f);
 }
 
 void Enemy::RoundMovement() {
@@ -232,10 +230,7 @@ void Enemy::TrackingMovement(float deltaTime) {
 		Vector2 pos2D = { data_->transform.translate.x, data_->transform.translate.z };
 		distance_ = pos2D.Length();
 
-		// 現在地からロケットへの方向を再計算し、direction_ を上書き
-		if (distance_ > 0.0001f) {
-			direction_ = pos2D / distance_;
-		}
+		direction_ = { -dir.x, -dir.z };
 	}
 }
 
