@@ -4,10 +4,17 @@
 #include <RandomGenerator.h>
 #include <FPSCounter.h>
 #include <ImGuiManager.h>
+#include <AudioManager.h>
 #include <Application/Utils/Binary/BinaryManager.h>
 #include "EnemyEffectManager.h"
 
 #include <numbers>
+
+namespace
+{
+	constexpr const char* kEnemySpawnSoundName = "enemySpawn.mp3";
+	constexpr float kEnemySpawnSoundVolume = 1.0f;
+}
 
 EnemyManager::EnemyManager(uint32_t maxEnemyNum, EnemyEffectManager* effectManager, GameEngine::TextureManager* textureManager, GameEngine::ModelManager* modelManager) : maxEnemyNum_(maxEnemyNum) {
 	// 敵の演出管理機能を取得
@@ -251,6 +258,12 @@ Enemy* EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 		enemies_[index]->SetActive(true);
 		if (!firstSpawnedEnemy) {
 			firstSpawnedEnemy = enemies_[index].get();
+
+			auto& audioManager = GameEngine::AudioManager::GetInstance();
+			const uint32_t enemySpawnSoundHandle =
+				audioManager.GetHandleByName(kEnemySpawnSoundName);
+			audioManager.Stop(enemySpawnSoundHandle);
+			audioManager.Play(enemySpawnSoundHandle, kEnemySpawnSoundVolume, false);
 		}
 		enemies_[index]->SetUp(position, configList_[static_cast<int>(type)], type, commonEffect_->SecureEffectID());
 		// 敵の登場演出

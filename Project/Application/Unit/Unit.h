@@ -143,6 +143,13 @@ public:
 
 	void Highlight();
 
+	void SetBeingPulledByBlackhole(bool pulled) {
+		isBeingPulledByBlackhole_ = pulled;
+		if (pulled) {
+			collider_.SetActive(false);
+		}
+	}
+
 	// ==========================================
 	// 状態取得・判定
 	// ==========================================
@@ -226,5 +233,10 @@ private:
 
 	std::unique_ptr<GameEngine::ModelComponent> blackholeModel_;
 	float bhEffectTimer_ = 0.0f;
+
+	float injectionTimer_ = 0.0f;
+	bool IsBeingInjected() const { return injectionTimer_ > 0.0f; }
+
+	bool isBeingPulledByBlackhole_ = false;
 };
 

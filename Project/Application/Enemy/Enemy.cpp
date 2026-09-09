@@ -141,17 +141,22 @@ void Enemy::Update() {
 
 	// 移動
 	if (isBeingPulled_) {
-		isBeingPulled_ = false; // 次フレーム用にフラグを落とす
-	}
-	else if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
-		TrackingMovement(GameEngine::FpsCounter::deltaTime);
+		collider_.SetActive(false); 
+		isBeingPulled_ = false;     // 次フレーム用にフラグを落とす
 	}
 	else {
-		if (type_ == EnemyType::Round) {
-			RoundMovement();
+		collider_.SetActive(true);  
+
+		if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
+			TrackingMovement(GameEngine::FpsCounter::deltaTime);
 		}
 		else {
-			DefaultMovement();
+			if (type_ == EnemyType::Round) {
+				RoundMovement();
+			}
+			else {
+				DefaultMovement();
+			}
 		}
 	}
 
@@ -290,6 +295,9 @@ EnergyPickup* Enemy::DefeatAndDropEnergy() {
 void Enemy::PullTowards(const Vector3& targetPos, float speed, float deltaTime) 
 {
 	if (!data_) return;
+
+	collider_.SetActive(false);
+
 	Vector3 currentPos = data_->transform.translate;
 	Vector3 pullDir = targetPos - currentPos;
 	pullDir.y = 0.0f;
