@@ -521,9 +521,36 @@ GameScene::GameScene() {
 	// にぎやかし浮遊エフェクト
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldFloatingEffect", 256, textureManager_, effectModel);
 
+	{
+		std::vector<std::string> tmp = {
+			"High",
+			"Middle",
+			"Low"
+		};
 
-	auto monorisModel = modelManager_->GetNameByModel("Monoris.obj");
-	gameObjectManager_->AddObject<MonorisManager>(monorisModel, 32);
+		std::vector<std::string> direction = {
+			"Right",
+			"Left"
+		};
+
+		auto registTransform = [&](Transform& transform, std::string groop) {
+			scoreModelTranformDebugParameter_.Register("Scale", transform.scale, 0, groop);
+			scoreModelTranformDebugParameter_.Register("Rotate", transform.rotate, 1, groop);
+			scoreModelTranformDebugParameter_.Register("Translate", transform.translate, 2, groop);
+			};
+
+		scoreModels_.reserve(6);
+		scoreModelTransforms_.resize(6);
+		for (uint32_t i = 0; i < 3; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				auto& model = scoreModels_.emplace_back(std::make_unique<GameEngine::ModelComponent>(modelManager_->GetNameByModel(tmp[i] + "Score.obj")));
+
+				registTransform(scoreModelTransforms_[i * 2 + j], tmp[i] + direction[j]);
+			}
+		}
+
+		scoreModelTranformDebugParameter_.Apply();
+	}
 }
 
 void GameScene::Initialize() {
@@ -598,6 +625,12 @@ void GameScene::Update() {
 	ImGui::End();
 #endif
 
+	scoreModelTranformDebugParameter_.ApplyIfDirty();
+	for (uint32_t i = 0; i < (uint32_t)scoreModels_.size(); ++i) {
+		scoreModels_[i]->worldTransform_.transform_ = scoreModelTransforms_[i];
+		scoreModels_[i]->Update();
+	}
+
 	if (gameFlow_->BackToTitle() /* && 確定キーの入力動作 */) {
 		/* Titleへ戻る処理 */
 	}
@@ -624,6 +657,10 @@ void GameScene::Draw() {
 	scoreView_->Draw(renderQueue_);
 	if (fadeSprite_) {
 		renderQueue_->SubmitSprite(fadeSprite_.get());
+	}
+
+	for (auto& s : scoreModels_) {
+		s->Draw(renderQueue_);
 	}
 }
 
