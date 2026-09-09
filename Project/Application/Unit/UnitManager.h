@@ -35,6 +35,8 @@ public:
 		Rocket* rocket,
 		GameEngine::Model* baemModel,
 		uint32_t beamGH,
+		GameEngine::Model* arrowModel,
+		uint32_t lineGH,
 		UnitEffectManager* unitEffectManager,
 		EnergySpawner* energySpawner = nullptr,
 		EnemyManager* enemyManager = nullptr,

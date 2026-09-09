@@ -22,8 +22,11 @@ void Unit::StaticInitialize(UnitEffectManager* unitEffectManager) {
 }
 
 Unit::Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
-	Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH, EnergySpawner* energySpawner)
-	: rocket_(rocket), settings_(settings), RopeEffect_(bameModel, beamGH), energySpawner_(energySpawner)
+	Rocket* rocket, const UnitSettings* settings,
+	GameEngine::Model* bameModel, uint32_t beamGH,
+	GameEngine::Model* arrowModel, uint32_t lineGH,
+	EnergySpawner* energySpawner)
+	: rocket_(rocket), settings_(settings), RopeEffect_(bameModel, beamGH), energySpawner_(energySpawner), NaviEffect_(bameModel, lineGH, arrowModel)
 {
 	modelComponent_ = std::make_unique<ModelComponent>(model);
 	modelComponent_->materialData_->enableLighting = true;
@@ -48,6 +51,8 @@ Unit::Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
 
 	// 最初は待機状態なのでOFF
 	collider_.SetActive(false);
+
+	NaviEffect_.Initialize();
 }
 
 void Unit::Initialize() 
@@ -119,6 +124,9 @@ void Unit::Update()
 	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, { 0.0f, 5.0f, 0.0f });
 	RopeEffect_.Update();
 
+	NaviEffect_.Start(modelComponent_->worldTransform_.transform_.translate, {});
+	NaviEffect_.Update();
+
 	SyncModel();
 
 	if (isBeingPulledByBlackhole_) {
@@ -139,6 +147,7 @@ void Unit::Draw()
 	{
 		modelComponent_->DrawRaytracing(renderQueue_);
 		RopeEffect_.Draw();
+		NaviEffect_.Draw();
 	}
 
 	if (state_ == UnitState::Blackhole && blackholeModel_)
