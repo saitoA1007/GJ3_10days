@@ -59,19 +59,8 @@ void EnemyManager::SetContext(Field* field, Rocket* rocket, EnergySpawner* energ
 void EnemyManager::Initialize() {
 	gameplayEnabled_ = true;
 	autoSpawnEnabled_ = false;
-	freeEnemyIndices_.clear();
-	activeEnemies_.clear();
-	deadEnemies_.clear();
-
-	freeEnemyIndices_.reserve(maxEnemyNum_);
 	configList_.resize(static_cast<int>(EnemyType::Count));
-
-	for (uint32_t i = 0; i < maxEnemyNum_; ++i) {
-		enemies_[i]->Initialize();
-		// 初期化時にも一度コンテキストを設定
-		enemies_[i]->SetContext(context_);
-		freeEnemyIndices_.push_back(i);
-	}
+	ResetAll();
 
 	renderer_.SetTransforms(&worldTransforms_);
 
@@ -101,6 +90,31 @@ void EnemyManager::Initialize() {
 	}
 
 	debugParam_.Apply();
+}
+
+void EnemyManager::ResetAll()
+{
+	freeEnemyIndices_.clear();
+	activeEnemies_.clear();
+	activeEnemyVector_.clear();
+	deadEnemies_.clear();
+	freeEnemyIndices_.reserve(maxEnemyNum_);
+
+	for (uint32_t i = 0; i < maxEnemyNum_; ++i)
+	{
+		enemies_[i]->Initialize();
+		enemies_[i]->SetContext(context_);
+		freeEnemyIndices_.push_back(static_cast<int>(i));
+	}
+
+	popTimer_ = 0.0f;
+	stageTimer_ = 0.0f;
+	currentFaseIndex_ = 0;
+	if (commonEffect_)
+	{
+		commonEffect_->Initialize();
+	}
+	worldTransforms_.UpdateTransformMatrix(maxEnemyNum_);
 }
 
 void EnemyManager::Update() {

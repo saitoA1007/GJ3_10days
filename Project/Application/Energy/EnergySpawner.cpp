@@ -73,8 +73,15 @@ void EnergySpawner::Initialize()
 	ApplyDebugParameters();
 	gameplayEnabled_ = true;
 	autoSpawnEnabled_ = false;
+	ResetAll();
+}
+
+void EnergySpawner::ResetAll()
+{
 	spawnTimer_ = 0.0f;
-	// シーン再初期化時に落下・予約・運搬状態を残さない。
+	activeEnergies_.clear();
+
+	// 落下・予約・運搬状態を残さず、全個体をプールへ戻す。
 	for (auto& pickup : pickups_)
 	{
 		pickup->Reset();

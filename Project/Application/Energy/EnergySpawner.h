@@ -57,6 +57,9 @@ public:
 	/// @brief プール内のアクティブなエネルギーを描画する。
 	void Draw() override;
 
+	/// @brief 全Energyと生成タイマーを初期状態へ戻し、設定された初期個数を再配置する。
+	void ResetAll();
+
 	/// @brief 落下と自動生成の有効状態を切り替える。
 	/// @param[in] enabled 有効にするならtrue。
 	void SetGameplayEnabled(bool enabled) { gameplayEnabled_ = enabled; }

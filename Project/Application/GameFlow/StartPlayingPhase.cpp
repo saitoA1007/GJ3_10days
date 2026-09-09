@@ -3,15 +3,39 @@
 #include <algorithm>
 
 #include "FPSCounter.h"
+#include "Application/Enemy/EnemyManager.h"
+#include "Application/Energy/EnergySpawner.h"
+#include "Application/LockOn/LockOnController.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
+#include "Application/Unit/UnitManager.h"
 
 void StartPlayingPhase::OnEnter(GameFlowContext& context)
 {
 	remainingTime_ = context.settings
 		? (std::max)(context.settings->startPlayingDuration, 0.0f)
 		: 0.0f;
+
+	// チャージ中の返却Energyがリセット後に加算されないよう、最初に操作を解除する。
+	if (context.lockOnController)
+	{
+		context.lockOnController->SetGameplayEnabled(false);
+	}
+
+	// 運搬物と攻撃予約を解放してから、チュートリアル中の全オブジェクトを初期化する。
+	if (context.unitManager)
+	{
+		context.unitManager->RecallAll();
+	}
+	if (context.energySpawner)
+	{
+		context.energySpawner->ResetAll();
+	}
+	if (context.enemyManager)
+	{
+		context.enemyManager->ResetAll();
+	}
 
 	// チュートリアル中の増減を持ち越さず、本編開始演出では初期Energyから始める。
 	if (context.rocket)

@@ -25,6 +25,9 @@ public:
 
 	void DebugUpdate() override;
 
+	/// @brief 全Enemyを非アクティブ化し、プールと生成進行を初期状態へ戻す。
+	void ResetAll();
+
 	void SetStage(const std::string& stageName);
 	/// @brief 敵を生成し、最初に生成できた個体を返す。
 	Enemy* Pop(int num, Vector2 position, EnemyType type);
