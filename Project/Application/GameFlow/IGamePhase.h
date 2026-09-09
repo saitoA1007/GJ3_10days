@@ -4,7 +4,7 @@
 
 #include "Vector2.h"
 
-#include <Application/Result/ResultMessage.h>
+#include <Application/Result/ResultStringManager.h>
 
 namespace GameEngine
 {
@@ -48,7 +48,7 @@ struct GameFlowContext
 	ResultMovieManager* resultMovieManager_ = nullptr;
 	TutorialCameraModelView* tutorialLogoView = nullptr;
 	StartPlayingView* startPlayingView = nullptr;
-	ResultMessage* resultMessage = nullptr;
+	ResultStringManager* resultMessage = nullptr;
 
 	int32_t finalEnergy = 0; // スコア用
 };

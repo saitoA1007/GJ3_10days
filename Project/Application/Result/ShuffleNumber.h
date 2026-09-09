@@ -8,7 +8,7 @@
 class ShuffleNumber : public GameEngine::IGameObject {
 public:
 
-	ShuffleNumber(GameEngine::ModelManager* modelManager);
+	ShuffleNumber(GameEngine::ModelManager* modelManager, int digit = 0);
 	~ShuffleNumber();
 
 	void Initialize() override;
@@ -21,7 +21,7 @@ public:
 
 	// シャッフル開始
 	void ShuffleStart();
-	// シャッフル停止(初期値だと現在の値で止まる)
+	// シャッフル停止(初期値だと描画されなくなる)
 	void Stop(int number = -1);
 
 private:
@@ -29,6 +29,9 @@ private:
 	std::vector<GameEngine::Model*> numberModels_;
 
 	GameEngine::WorldTransform worldTransform_;
+	Transform transform_;
+
+	float timer_ = 0.0f;
 
 	int currentIndex_ = 0;
 

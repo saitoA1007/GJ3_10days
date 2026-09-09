@@ -17,7 +17,6 @@
 #include "StartPlayingPhase.h"
 #include "TutorialPhase.h"
 #include "LaunchPhase.h"
-#include "ResultPhase.h"
 
 using namespace GameEngine;
 
@@ -149,6 +148,10 @@ void GameFlow::BeginTutorialEnemyHoldStep()
 	{
 		tutorialPhase->BeginEnemyHoldStep(context_);
 	}
+}
+
+bool GameFlow::BackToTitle() const {
+	return context_.resultMessage->CanControl();
 }
 
 void GameFlow::AdvanceToNextPhase()
