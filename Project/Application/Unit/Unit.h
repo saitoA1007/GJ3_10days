@@ -10,6 +10,7 @@
 #include "IGameObject.h"
 #include "Application/Effect/RopeEffect.h"
 #include "Application/Energy/EnergyPickup.h"
+#include "Application/Effect/NaviEffect.h"
 
 namespace GameEngine 
 {
@@ -80,7 +81,10 @@ public:
 
 	// 描画モデルと、エネルギー消費元となるロケットを受け取る。
 	Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
-		Rocket* rocket, const UnitSettings* settings, GameEngine::Model* bameModel, uint32_t beamGH, EnergySpawner* energySpawner);
+		Rocket* rocket, const UnitSettings* settings,
+		GameEngine::Model* bameModel, uint32_t beamGH,
+		GameEngine::Model* arrowModel, uint32_t lineGH,
+		EnergySpawner* energySpawner);
 
 	// 待機状態と初期位置へ戻す
 	void Initialize() override;
@@ -224,6 +228,8 @@ private:
 
 	// 繋がっている演出
 	RopeEffect RopeEffect_;
+	// 目的地までのナビ演出
+	NaviEffect NaviEffect_;
 
 	// 目的地座標の保持用
 	Vector3 targetPosition_ = {};

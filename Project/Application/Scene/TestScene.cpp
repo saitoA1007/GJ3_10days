@@ -6,6 +6,7 @@
 #include "Application/CollisionConfig.h"
 #include "Application/Effect/EnemySpawnEffect.h"
 #include "Application/Effect/BlackHoleEffect.h"
+#include "Application/Effect/NaviEffect.h"
 using namespace GameEngine;
 
 TestScene::~TestScene() {}
@@ -68,6 +69,13 @@ TestScene::TestScene() {
 	auto* rModel = modelManager_->GetNameByModel("RushPower.obj");
 	rModel->SetDefaultIsEnableLight(false);
 	gameObjectManager_->AddObject<EnemySpawnEffect>(sModel,effectModel_, rModel, textureManager_);
+
+	auto* energyModel = modelManager_->GetNameByModel("Crystal.gltf");
+	auto* crossBeamModel = modelManager_->GetNameByModel("crossBeam.gltf");
+	crossBeamModel->SetDefaultIsEnableLight(false);
+	uint32_t beamNoiseGH = textureManager_->GetHandleByName("grain.png");
+	auto* navi = gameObjectManager_->AddObject<NaviEffect>(crossBeamModel, beamNoiseGH, energyModel);
+	navi->Start({ 0.0f,0.0f,0.0f }, { 10.0f,0.0f,0.0f });
 
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
