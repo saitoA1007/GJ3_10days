@@ -21,6 +21,7 @@ class Enemy;
 class EnergyPickup;
 class EnergySpawner;
 class Rocket;
+class UnitEffectManager;
 
 /// ユニット1体の行動状態
 enum class UnitState : uint8_t
@@ -73,6 +74,9 @@ public:
 	// ==========================================
 	// ライフサイクル・基本更新
 	// ==========================================
+
+	// 静的初期化。主にエフェクト管理機能を取得するのに使用
+	static void StaticInitialize(UnitEffectManager* unitEffectManager);
 
 	// 描画モデルと、エネルギー消費元となるロケットを受け取る。
 	Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
@@ -238,5 +242,7 @@ private:
 	bool IsBeingInjected() const { return injectionTimer_ > 0.0f; }
 
 	bool isBeingPulledByBlackhole_ = false;
+
+	static UnitEffectManager* unitEffectManager_;
 };
 
