@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdio>
 
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
@@ -21,7 +22,7 @@ namespace
 		"Special",
 	};
 	// 自然落下するEnergyは生成禁止帯を除いた3領域だけから抽選する。
-	constexpr std::array<FieldZone, kEnergySizeCount> kEnergySpawnZones = 
+	constexpr std::array<FieldZone, 3> kEnergySpawnZones =
 	{
 		FieldZone::Near,
 		FieldZone::Middle,
@@ -42,14 +43,15 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, GameEngine::Textu
 
 	debugParameter_ = std::make_unique<DebugParameter>("Energy");
 	debugParameter_->Register("SpawnInterval", settings_.spawnInterval, 0, "Spawn");
-	debugParameter_->Register("AppearDuration", settings_.appearDuration, 1, "Spawn");
-	debugParameter_->Register("Lifetime", settings_.lifetime, 2, "Spawn");
-	debugParameter_->Register("DissolveDuration", settings_.dissolveDuration, 3, "Spawn");
-	debugParameter_->Register("GroundHeight", settings_.groundHeight, 4, "Spawn");
-	debugParameter_->Register("MaxActiveCount", settings_.maxActiveCount, 5, "Spawn");
-	debugParameter_->Register("InitialCountPerZone", settings_.initialCountPerZone, 6, "Spawn");
-	debugParameter_->Register("AngleCenterDegrees", settings_.spawnAngleCenterDegrees, 7, "Spawn");
-	debugParameter_->Register("AngleRangeDegrees", settings_.spawnAngleRangeDegrees, 8, "Spawn");
+	debugParameter_->Register("RandomSpawnEnabled", settings_.randomSpawnEnabled, 1, "Spawn");
+	debugParameter_->Register("AppearDuration", settings_.appearDuration, 2, "Spawn");
+	debugParameter_->Register("Lifetime", settings_.lifetime, 3, "Spawn");
+	debugParameter_->Register("DissolveDuration", settings_.dissolveDuration, 4, "Spawn");
+	debugParameter_->Register("GroundHeight", settings_.groundHeight, 5, "Spawn");
+	debugParameter_->Register("MaxActiveCount", settings_.maxActiveCount, 6, "Spawn");
+	debugParameter_->Register("InitialCountPerZone", settings_.initialCountPerZone, 7, "Spawn");
+	debugParameter_->Register("AngleCenterDegrees", settings_.spawnAngleCenterDegrees, 8, "Spawn");
+	debugParameter_->Register("AngleRangeDegrees", settings_.spawnAngleRangeDegrees, 9, "Spawn");
 	debugParameter_->Register("FloatingAmplitude", settings_.floatingAmplitude, 0, "Animation");
 	debugParameter_->Register("FloatingSpeed", settings_.floatingSpeed, 1, "Animation");
 	debugParameter_->Register("RotationSpeed", settings_.rotationSpeed, 2, "Animation");
@@ -65,9 +67,11 @@ EnergySpawner::EnergySpawner(Model* energyModel, Field* field, GameEngine::Textu
 		debugParameter_->Register("rainbowSpeed", typeSettings_[i].rainbowSpeed, 3, group);
 		debugParameter_->Register("rainbowSaturation", typeSettings_[i].rainbowSaturation, 4, group);
 	}
+	debugParameter_->Register("EventCount", timelineEventCount_, 0, "PlayingTimeline");
 
 	debugParameter_->Apply();
 	SanitizeSettings();
+	InitializeTimelineEvents();
 	SetUpdateOrder(10);
 }
 
@@ -76,12 +80,18 @@ void EnergySpawner::Initialize()
 	ApplyDebugParameters();
 	gameplayEnabled_ = true;
 	autoSpawnEnabled_ = false;
+	playingTimelineActive_ = false;
 	ResetAll();
 }
 
 void EnergySpawner::ResetAll()
 {
 	spawnTimer_ = 0.0f;
+	playingTimelineElapsed_ = 0.0f;
+	for (auto& event : timelineEvents_)
+	{
+		event->hasSpawned = false;
+	}
 	activeEnergies_.clear();
 
 	// 落下・予約・運搬状態を残さず、全個体をプールへ戻す。
@@ -108,8 +118,9 @@ void EnergySpawner::Update()
 	}
 
 	UpdatePickups(FpsCounter::gameDeltaTime);
+	UpdatePlayingTimeline(FpsCounter::deltaTime);
 
-	if (autoSpawnEnabled_)
+	if (autoSpawnEnabled_ && settings_.randomSpawnEnabled)
 	{
 		spawnTimer_ += FpsCounter::gameDeltaTime;
 		if (spawnTimer_ >= settings_.spawnInterval)
@@ -118,6 +129,21 @@ void EnergySpawner::Update()
 			SpawnRandom();
 		}
 	}
+}
+
+void EnergySpawner::BeginPlayingTimeline()
+{
+	playingTimelineElapsed_ = 0.0f;
+	playingTimelineActive_ = true;
+	for (auto& event : timelineEvents_)
+	{
+		event->hasSpawned = false;
+	}
+}
+
+void EnergySpawner::EndPlayingTimeline()
+{
+	playingTimelineActive_ = false;
 }
 
 void EnergySpawner::DebugUpdate()
@@ -168,6 +194,40 @@ bool EnergySpawner::SpawnInZone(FieldZone zone)
 		settings_.appearDuration, 
 		typeSettings_[static_cast<size_t>(size)]
 	);
+	return true;
+}
+
+bool EnergySpawner::SpawnAtArcPosition(EnergySize size, float arcPosition)
+{
+	if (!gameplayEnabled_)
+	{
+		return false;
+	}
+
+	const size_t sizeIndex = static_cast<size_t>(size);
+	if (sizeIndex >= typeSettings_.size())
+	{
+		return false;
+	}
+	if (GetActiveCount() >= static_cast<size_t>(settings_.maxActiveCount))
+	{
+		return false;
+	}
+
+	auto available = std::find_if(pickups_.begin(), pickups_.end(), [](const auto& pickup)
+		{
+			return !pickup->IsActive();
+		});
+	if (available == pickups_.end())
+	{
+		return false;
+	}
+
+	(*available)->Spawn(
+		size,
+		MakeArcSpawnPosition(size, arcPosition),
+		settings_.appearDuration,
+		typeSettings_[sizeIndex]);
 	return true;
 }
 
@@ -232,6 +292,22 @@ size_t EnergySpawner::GetActiveCount() const
 void EnergySpawner::ApplyDebugParameters()
 {
 	debugParameter_->ApplyIfDirty();
+
+	const int32_t clampedEventCount = (std::clamp)(
+		timelineEventCount_,
+		0,
+		static_cast<int32_t>(pickups_.size()));
+	if (clampedEventCount != timelineEventCount_)
+	{
+		timelineEventCount_ = clampedEventCount;
+		RegisterTimelineEventCount();
+	}
+	if (static_cast<size_t>(timelineEventCount_) != timelineEvents_.size())
+	{
+		ResizeTimelineEvents(static_cast<size_t>(timelineEventCount_));
+		// 新規イベントに同名の保存済みグループがあれば、その値を取り込む。
+		debugParameter_->Apply();
+	}
 	SanitizeSettings();
 }
 
@@ -260,6 +336,7 @@ void EnergySpawner::SanitizeSettings()
 		type.rainbowSpeed = (std::max)(type.rainbowSpeed, 0.0f);
 		type.rainbowSaturation = (std::clamp)(type.rainbowSaturation, 0.0f, 1.0f);
 	}
+	SanitizeTimelineEvents();
 }
 
 void EnergySpawner::UpdatePickups(float deltaTime)
@@ -290,6 +367,27 @@ void EnergySpawner::SpawnRandom()
 {
 	const int zoneIndex = RandomGenerator::Get<int>(0, static_cast<int>(kEnergySpawnZones.size()) - 1);
 	SpawnInZone(kEnergySpawnZones[static_cast<size_t>(zoneIndex)]);
+}
+
+void EnergySpawner::UpdatePlayingTimeline(float deltaTime)
+{
+	if (!playingTimelineActive_)
+	{
+		return;
+	}
+
+	playingTimelineElapsed_ += (std::max)(deltaTime, 0.0f);
+	for (auto& event : timelineEvents_)
+	{
+		if (event->hasSpawned || playingTimelineElapsed_ < event->timeSeconds)
+		{
+			continue;
+		}
+
+		const EnergySize size = static_cast<EnergySize>(event->energySize);
+		// 上限やプール不足時は生成済みにせず、次フレーム以降に再試行する。
+		event->hasSpawned = SpawnAtArcPosition(size, event->arcPosition);
+	}
 }
 
 Vector3 EnergySpawner::MakeSpawnPosition(FieldZone zone) const 
@@ -335,6 +433,41 @@ Vector3 EnergySpawner::MakeSpawnPosition(FieldZone zone) const
 	};
 }
 
+Vector3 EnergySpawner::MakeArcSpawnPosition(EnergySize size, float arcPosition) const
+{
+	const FieldZone zone = GetSpawnZone(size);
+	FieldZone innerZone = FieldZone::Center;
+	switch (zone)
+	{
+	case FieldZone::Middle:
+		innerZone = FieldZone::NearBuffer;
+		break;
+	case FieldZone::Far:
+		innerZone = FieldZone::MiddleBuffer;
+		break;
+	case FieldZone::Near:
+	default:
+		break;
+	}
+
+	const float innerRadius = field_->GetRadius(innerZone);
+	const float outerRadius = field_->GetRadius(zone);
+	const float radius = (innerRadius + outerRadius) * 0.5f;
+	const float normalizedPosition = (std::clamp)(arcPosition, 0.0f, 1.0f);
+	const float startDegrees =
+		settings_.spawnAngleCenterDegrees - settings_.spawnAngleRangeDegrees * 0.5f;
+	const float angleDegrees = startDegrees + settings_.spawnAngleRangeDegrees * normalizedPosition;
+	const float angle = angleDegrees * (PI / 180.0f);
+	const Vector3 center = field_->GetSettings().center;
+
+	return
+	{
+		center.x + std::cos(angle) * radius,
+		settings_.groundHeight,
+		center.z + std::sin(angle) * radius,
+	};
+}
+
 EnergySize EnergySpawner::GetEnergySize(FieldZone zone) const
 {
 	switch (zone)
@@ -347,6 +480,116 @@ EnergySize EnergySpawner::GetEnergySize(FieldZone zone) const
 		return EnergySize::Large;
 	default:
 		return EnergySize::Small;
+	}
+}
+
+FieldZone EnergySpawner::GetSpawnZone(EnergySize size) const
+{
+	switch (size)
+	{
+	case EnergySize::Small:
+		return FieldZone::Near;
+	case EnergySize::Medium:
+		return FieldZone::Middle;
+	case EnergySize::Large:
+	case EnergySize::Special:
+		return FieldZone::Far;
+	default:
+		return FieldZone::Near;
+	}
+}
+
+void EnergySpawner::InitializeTimelineEvents()
+{
+	const int32_t clampedCount = (std::clamp)(
+		timelineEventCount_,
+		0,
+		static_cast<int32_t>(pickups_.size()));
+	if (clampedCount != timelineEventCount_)
+	{
+		timelineEventCount_ = clampedCount;
+		RegisterTimelineEventCount();
+	}
+
+	ResizeTimelineEvents(static_cast<size_t>(timelineEventCount_));
+	// EventCountを先に読み、その個数分の動的フィールドを登録してから値を読む。
+	debugParameter_->Apply();
+	SanitizeTimelineEvents();
+}
+
+void EnergySpawner::ResizeTimelineEvents(size_t count)
+{
+	const size_t safeCount = (std::min)(count, pickups_.size());
+	while (timelineEvents_.size() > safeCount)
+	{
+		const size_t removedIndex = timelineEvents_.size() - 1;
+		char groupName[64];
+		sprintf_s(groupName, "PlayingTimeline/Events/Event%03zu", removedIndex);
+		debugParameter_->RemoveGroup(groupName);
+		timelineEvents_.pop_back();
+	}
+
+	while (timelineEvents_.size() < safeCount)
+	{
+		const size_t index = timelineEvents_.size();
+		auto event = std::make_unique<ScheduledEnergySpawnEvent>();
+		if (!timelineEvents_.empty())
+		{
+			event->timeSeconds = timelineEvents_.back()->timeSeconds + 1.0f;
+		}
+		timelineEvents_.push_back(std::move(event));
+		RegisterTimelineEvent(index);
+	}
+
+	timelineEventCount_ = static_cast<int32_t>(timelineEvents_.size());
+}
+
+void EnergySpawner::RegisterTimelineEvent(size_t index)
+{
+	if (index >= timelineEvents_.size())
+	{
+		return;
+	}
+
+	char groupName[64];
+	sprintf_s(groupName, "PlayingTimeline/Events/Event%03zu", index);
+	auto& event = *timelineEvents_[index];
+	debugParameter_->Register("TimeSeconds", event.timeSeconds, 0, groupName);
+	debugParameter_->Register("EnergySize", event.energySize, 1, groupName);
+	debugParameter_->Register("ArcPosition", event.arcPosition, 2, groupName);
+}
+
+void EnergySpawner::RegisterTimelineEventCount()
+{
+	debugParameter_->Register("EventCount", timelineEventCount_, 0, "PlayingTimeline");
+}
+
+void EnergySpawner::RemoveTimelineEvent(size_t index)
+{
+	if (index >= timelineEvents_.size())
+	{
+		return;
+	}
+
+	// インデックスを詰め直すため、一度イベント配下だけを登録解除して再構築する。
+	debugParameter_->RemoveGroup("PlayingTimeline/Events");
+	timelineEvents_.erase(timelineEvents_.begin() + index);
+	timelineEventCount_ = static_cast<int32_t>(timelineEvents_.size());
+	RegisterTimelineEventCount();
+	for (size_t i = 0; i < timelineEvents_.size(); ++i)
+	{
+		RegisterTimelineEvent(i);
+	}
+}
+
+void EnergySpawner::SanitizeTimelineEvents()
+{
+	const int32_t maxSize = static_cast<int32_t>(EnergySize::Count) - 1;
+	for (auto& event : timelineEvents_)
+	{
+		event->timeSeconds = (std::max)(event->timeSeconds, 0.0f);
+		event->energySize = (std::clamp)(event->energySize, 0, maxSize);
+		event->arcPosition = (std::clamp)(event->arcPosition, 0.0f, 1.0f);
 	}
 }
 
@@ -371,6 +614,57 @@ void EnergySpawner::DrawDebugWindow()
 	if (ImGui::Button("Spawn Far / Large"))
 	{
 		SpawnInZone(FieldZone::Far);
+	}
+
+	ImGui::Separator();
+	ImGui::Text("Playing Spawn Timeline");
+	ImGui::TextDisabled("Arc: 0.0 = Left, 0.5 = Center, 1.0 = Right");
+	ImGui::Text("Elapsed: %.2f sec", playingTimelineElapsed_);
+	if (ImGui::Button("Add Timeline Event") && timelineEvents_.size() < pickups_.size())
+	{
+		ResizeTimelineEvents(timelineEvents_.size() + 1);
+		RegisterTimelineEventCount();
+	}
+	ImGui::SameLine();
+	ImGui::TextDisabled("Save from Parameter Inspector > Energy");
+
+	size_t removeIndex = timelineEvents_.size();
+	for (size_t i = 0; i < timelineEvents_.size(); ++i)
+	{
+		ImGui::PushID(static_cast<int>(i));
+		auto& event = *timelineEvents_[i];
+		const char* state = event.hasSpawned ? "Spawned" : "Pending";
+		char header[96];
+		sprintf_s(header, "Event %03zu  [%.2fs / %s]", i, event.timeSeconds, state);
+		const bool open = ImGui::TreeNode(header);
+		ImGui::SameLine();
+		if (ImGui::SmallButton("Delete"))
+		{
+			removeIndex = i;
+		}
+
+		if (open)
+		{
+			bool changed = ImGui::DragFloat("Time Seconds", &event.timeSeconds, 0.1f, 0.0f, 3600.0f, "%.2f s");
+			changed |= ImGui::Combo(
+				"Energy Size",
+				&event.energySize,
+				kEnergySizeNames.data(),
+				static_cast<int>(kEnergySizeNames.size()));
+			changed |= ImGui::SliderFloat("Arc Position", &event.arcPosition, 0.0f, 1.0f, "%.3f");
+			if (changed)
+			{
+				SanitizeTimelineEvents();
+				// 独自UIで変えた値をParameter Inspectorの保存対象へ書き戻す。
+				RegisterTimelineEvent(i);
+			}
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+	}
+	if (removeIndex < timelineEvents_.size())
+	{
+		RemoveTimelineEvent(removeIndex);
 	}
 
 	ImGui::End();
