@@ -8,6 +8,7 @@
 #include "Application/Enemy/EnemyManager.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/UI/TimeUI.h"
+#include "Application/UI/UnitCountUI.h"
 
 using namespace GameEngine;
 
@@ -52,6 +53,9 @@ void PlayingPhase::OnEnter(GameFlowContext& context)
 	if (context.enemyManager)
 	{
 		context.enemyManager->BeginPlayingTimeline();
+	}
+	if (context.unitCountUI) {
+		context.unitCountUI->SetActive(true);
 	}
 }
 
@@ -119,5 +123,9 @@ void PlayingPhase::OnExit(GameFlowContext& context)
 	if (context.rocket)
 	{
 		context.finalEnergy = context.rocket->GetEnergy(); 
+	}
+
+	if (context.unitCountUI) {
+		context.unitCountUI->SetActive(false);
 	}
 }

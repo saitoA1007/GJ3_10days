@@ -60,6 +60,7 @@
     <ClCompile Include="Application\Result\ShuffleNumber.cpp" />
     <ClCompile Include="Application\UI\LetterboxUI.cpp" />
     <ClCompile Include="Application\UI\TimeUI.cpp" />
+    <ClCompile Include="Application\UI\UnitCountUI.cpp" />
     <ClCompile Include="Application\Unit\Unit.cpp" />
     <ClCompile Include="Application\Unit\UnitManager.cpp" />
     <ClCompile Include="Application\Rocket\Rocket.cpp" />
@@ -293,6 +294,7 @@
     <ClInclude Include="Application\Result\ShuffleNumber.h" />
     <ClInclude Include="Application\UI\LetterboxUI.h" />
     <ClInclude Include="Application\UI\TimeUI.h" />
+    <ClInclude Include="Application\UI\UnitCountUI.h" />
     <ClInclude Include="Application\Unit\Pikumi.h" />
     <ClInclude Include="Application\Unit\Unit.h" />
     <ClInclude Include="Application\Unit\UnitManager.h" />
