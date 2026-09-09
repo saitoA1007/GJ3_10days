@@ -123,7 +123,7 @@ void IncorporateEffect::Update() {
 			afterRingParticle_->SetActive(false);
 			// ブラックホールを消す
 			blackHoleEffect_->SetActive(false);
-
+			isActive_ = false;
 			// 周りのパーティクルが消えきってから演出を終了する
 			if (blackHoleParticle_->GetCurrentNumInstance() == 0) {
 				Stop();
