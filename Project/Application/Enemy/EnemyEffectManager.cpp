@@ -23,6 +23,15 @@ EnemyEffectManager::EnemyEffectManager(GameEngine::ModelManager* modelManager, G
 		beam->SetActive(false);
 		beamEffects_.push_back(beam);
 	}
+
+	deadEffects_.reserve(16);
+	for (uint32_t i = 0; i < 16; ++i) {
+		auto* deadEffect = objectManager->AddObject<ParticleBehavior>("EnemyDead", 64, textureManager, planeModel);
+		deadEffect->SetActive(false);
+		deadEffects_.push_back(deadEffect);
+	}
+
+	deadEffectIndex_ = 0;
 }
 
 void EnemyEffectManager::Initialize() {
@@ -30,7 +39,6 @@ void EnemyEffectManager::Initialize() {
 }
 
 void EnemyEffectManager::Update() {
-
 }
 
 void EnemyEffectManager::Draw() {
@@ -47,4 +55,10 @@ void EnemyEffectManager::StartSpawnEffect(Vector3 pos) {
 		beamEffects_[i]->SetActive(true);
 		break;
 	}
+}
+
+void EnemyEffectManager::StartDeadEffect(Vector3 pos) {
+	deadEffects_[deadEffectIndex_]->Emit(pos);
+	deadEffects_[deadEffectIndex_]->SetActive(true);
+	deadEffectIndex_ = (deadEffectIndex_ + 1) % deadEffects_.size();
 }

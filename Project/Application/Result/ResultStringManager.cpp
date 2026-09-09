@@ -42,8 +42,6 @@ void ResultStringManager::Initialize() {
 	}
 
 	debugParameter_.Apply();
-
-	
 }
 
 void ResultStringManager::Update() {
