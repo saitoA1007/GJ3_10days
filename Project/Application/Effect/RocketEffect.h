@@ -40,6 +40,8 @@ public:
 
 	float GetEnergy() const { return energy_; }
 
+	Phase GetPhase() const { return phase_; }
+
 public:
 
 	//ロケット
