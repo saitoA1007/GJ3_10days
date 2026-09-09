@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "AudioManager.h"
 #include "FPSCounter.h"
+#include "Application/HalfTime/HalfTimeView.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/UI/TimeUI.h"
 
@@ -27,6 +28,11 @@ void PlayingPhase::OnEnter(GameFlowContext& context)
 	audioManager.Stop(audioManager.GetHandleByName(kSecondHalfBgmName));
 	audioManager.Play(firstHalfBgmHandle, kBgmVolume, true);
 	hasStartedSecondHalfBgm_ = false;
+	hasStartedHalfTimeView_ = false;
+	if (context.halfTimeView)
+	{
+		context.halfTimeView->Reset();
+	}
 
 	if (context.settings)
 	{
@@ -61,6 +67,15 @@ bool PlayingPhase::OnUpdate(GameFlowContext& context)
 				true);
 			hasStartedSecondHalfBgm_ = true;
 		}
+
+		if (!hasStartedHalfTimeView_ && progress >= kSecondHalfStartProgress)
+		{
+			if (context.halfTimeView)
+			{
+				context.halfTimeView->Start();
+			}
+			hasStartedHalfTimeView_ = true;
+		}
 	}
 
 	return remainingTime_ <= 0.0f; // 時間切れで終了
@@ -71,6 +86,10 @@ void PlayingPhase::OnExit(GameFlowContext& context)
 	auto& audioManager = AudioManager::GetInstance();
 	audioManager.Stop(audioManager.GetHandleByName(kFirstHalfBgmName));
 	audioManager.Stop(audioManager.GetHandleByName(kSecondHalfBgmName));
+	if (context.halfTimeView)
+	{
+		context.halfTimeView->Stop();
+	}
 
 	if (context.timeUI)
 	{

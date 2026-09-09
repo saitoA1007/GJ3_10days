@@ -1,0 +1,69 @@
+{
+    "HalfTimeView": {
+        "Easing": {
+            "MoveInEaseType": {
+                "_EaseType": "EaseOutCubic"
+            },
+            "MoveOutEaseType": {
+                "_EaseType": "EaseInCubic"
+            }
+        },
+        "End": {
+            "Position": [
+                -16.0,
+                -31.0,
+                -26.0
+            ],
+            "Rotate": [
+                2.010999917984009,
+                3.1415927410125732,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "Hold": {
+            "Position": [
+                0.0,
+                -31.0,
+                -26.0
+            ],
+            "Rotate": [
+                2.010999917984009,
+                3.1415927410125732,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "SceneName": "Game",
+        "Start": {
+            "Position": [
+                16.0,
+                -31.0,
+                -26.0
+            ],
+            "Rotate": [
+                2.010999917984009,
+                3.1415927410125732,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "Time": {
+            "HoldDuration": 0.75,
+            "MoveInDuration": 0.25,
+            "MoveOutDuration": 0.25
+        }
+    }
+}

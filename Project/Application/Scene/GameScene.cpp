@@ -18,6 +18,7 @@ using namespace GameEngine;
 #include "Application//Unit/UnitEffectManager.h"
 #include "Application/Field/FieldEffect.h"
 #include "Application/Score/ScoreView.h"
+#include "Application/HalfTime/HalfTimeView.h"
 #include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
 #include "Application/Tutorial/TutorialTextSequence.h"
@@ -171,6 +172,11 @@ GameScene::GameScene() {
 		startPlayingModels,
 		gameCamera->GetCamera());
 
+	auto* halfTimeModel = modelManager_->GetNameByModel("harfTime.obj");
+	halfTimeView_ = std::make_unique<HalfTimeView>(
+		halfTimeModel,
+		gameCamera->GetCamera());
+
 	// クリアのムービー
 	// 月のオブジェクト
 	auto* sphereModel = modelManager_->GetNameByModel("moon.gltf");
@@ -220,6 +226,7 @@ GameScene::GameScene() {
 	flowContext.tutorialLogoView = tutorialLogoView_.get();
 	flowContext.tutorialLogo2View = tutorialLogo2View_.get();
 	flowContext.startPlayingView = startPlayingView_.get();
+	flowContext.halfTimeView = halfTimeView_.get();
 	flowContext.resultMessage = resultMessage;
 	flowContext.timeUI = timeUI;
 
@@ -548,6 +555,7 @@ void GameScene::Initialize() {
 	if (tutorialLogo2View_) tutorialLogo2View_->Reset();
 	if (tutorialTextSequence_) tutorialTextSequence_->Reset();
 	if (startPlayingView_) startPlayingView_->Reset();
+	if (halfTimeView_) halfTimeView_->Reset();
 }
 
 void GameScene::Update() {
@@ -612,6 +620,7 @@ void GameScene::DebugUpdate()
 void GameScene::Draw() {
 	DrawTutorialViews();
 	if (startPlayingView_) startPlayingView_->Draw(renderQueue_);
+	if (halfTimeView_) halfTimeView_->Draw(renderQueue_);
 	scoreView_->Draw(renderQueue_);
 	if (fadeSprite_) {
 		renderQueue_->SubmitSprite(fadeSprite_.get());

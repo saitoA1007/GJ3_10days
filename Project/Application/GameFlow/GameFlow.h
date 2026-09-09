@@ -52,4 +52,5 @@ private:
 	std::vector<std::unique_ptr<IGamePhase>> phases_;
 	size_t currentPhaseIndex_ = 0;
 	bool debugPaused_ = false;
+	bool isHalfTimeDebugPreviewPlaying_ = false;
 };
