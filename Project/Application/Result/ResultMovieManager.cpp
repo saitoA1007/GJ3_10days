@@ -47,13 +47,14 @@ void ResultMovieManager::Update() {
 
 	case ResultMoveCamera::Phase::kStop:
 
+		// バーをおろす
+		letterboxUI_.SetBarActive(false);
+
 		if (rocketEffect_->GetEnergy() > 1.0f) {
 			if (isExplo_) { return; }
 			isExplo_ = true;
 			moonObject_->Break();
 			explosionEffect_->Start({80.0f,50.0f,0.0f});
-			// バーをおろす
-			letterboxUI_.SetBarActive(false);
 		}
 		break;
 	}
