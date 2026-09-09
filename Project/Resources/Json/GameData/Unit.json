@@ -2,12 +2,12 @@
     "Unit": {
         "Blackhole": {
             "BHBaseRadius": 18.0,
-            "BHDuration": 3.0,
+            "BHDuration": 2.0,
             "BHEnergyThreshold": 35,
             "BHFarDistance": 30.0,
             "BHKillRadius": 0.5,
             "BHNearDistance": 10.0,
-            "BHPullSpeed": 8.0,
+            "BHPullSpeed": 6.0,
             "BHRadiusFarMult": 1.2999999523162842,
             "BHRadiusMidMult": 1.0,
             "BHRadiusNearMult": 0.20000000298023224,

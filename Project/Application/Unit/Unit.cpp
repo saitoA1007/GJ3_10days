@@ -72,6 +72,10 @@ void Unit::Update()
 		highlightTimer_ -= FpsCounter::deltaTime;
 	}
 
+	if (injectionTimer_ > 0.0f) {
+		injectionTimer_ -= FpsCounter::deltaTime;
+	}
+
 	// 各状態の責務を分け、遷移は到達・衝突が成立した関数内だけで行う
 	switch (state_) {
 	case UnitState::Stored:
@@ -245,8 +249,10 @@ void Unit::UpdateMovingToEnergy(float deltaTime) {
 		return;
 	}
 
-	MoveTowards(targetEnergy_->GetPosition(), deltaTime);
-	ConsumeStamina(deltaTime);
+	if (!IsBeingInjected()) {
+		MoveTowards(targetEnergy_->GetPosition(), deltaTime);
+		ConsumeStamina(deltaTime);
+	}
 
 	const float pickupRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
 	if (DistanceSquaredXZ(position_, targetEnergy_->GetPosition()) <= pickupRadiusSquared) {
@@ -271,15 +277,19 @@ void Unit::UpdateMovingToEnemy(float deltaTime)
 		return;
 	}
 
-	// 敵への移動とスタミナ消費のみを行う
-	MoveTowards(targetEnemy_->GetPosition(), deltaTime);
-	ConsumeStamina(deltaTime);
+	if (!IsBeingInjected()) {
+		MoveTowards(targetEnemy_->GetPosition(), deltaTime); 
+		ConsumeStamina(deltaTime);
+	}
+
 }
 
 void Unit::UpdateMovingToPosition(float deltaTime)
 {
-	MoveTowards(targetPosition_, deltaTime);
-	ConsumeStamina(deltaTime);
+	if (!IsBeingInjected()) {
+		MoveTowards(targetPosition_, deltaTime);
+		ConsumeStamina(deltaTime);
+	}
 
 	const float arrivalRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
 	if (DistanceSquaredXZ(position_, targetPosition_) <= arrivalRadiusSquared)
@@ -296,8 +306,10 @@ void Unit::UpdateReturningToRocket(float deltaTime)
 		return;
 	}
 
-	MoveTowards(rocket_->GetPosition(), deltaTime);
-	ConsumeStamina(deltaTime);
+	if (!IsBeingInjected()) {
+		MoveTowards(rocket_->GetPosition(), deltaTime);
+		ConsumeStamina(deltaTime);
+	}
 
 	if (targetEnergy_ && targetEnergy_->IsCarried())
 	{
@@ -372,19 +384,14 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		return false;
 	}
 
-	// スタミナの上限は常に maxChargeEnergyCost
 	const float upperLimit = static_cast<float>(settings_->bhEnergyThreshold);
-
-	// 現在のスタミナから上限までの空き容量を計算
 	const float staminaDeficit = upperLimit - stamina_;
 
-	// 既に上限に達している場合は注入しない
 	if (staminaDeficit <= 0.0f)
 	{
 		return false;
 	}
 
-	// 今回注入要求する量
 	const int32_t actualRequest = (std::min)(requestedAmount, static_cast<int32_t>(std::ceil(staminaDeficit)));
 
 	if (actualRequest <= 0)
@@ -392,7 +399,6 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		return false;
 	}
 
-	// ロケットからエネルギーを引き落とす
 	const EnergyChange change = rocket_->AllocateEnergyToUnit(actualRequest);
 	const int32_t actualAllocated = std::abs(change.amount);
 
@@ -401,7 +407,8 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		return false;
 	}
 
-	// 引き出せた分だけスタミナを回復・加算
+	injectionTimer_ = 0.15f;
+
 	stamina_ = (std::min)(stamina_ + static_cast<float>(actualAllocated), upperLimit);
 
 	// スタミナが閾値以上になったらブラックホール化
@@ -412,10 +419,8 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 		absorbedBasePoint_ = 0;
 		bhEffectTimer_ = 0.0f;
 
-		// ブラックホール化したら本体の当たり判定をオフ
 		collider_.SetActive(false);
 
-		// ターゲットの解除・ドロップ処理
 		if (targetEnergy_)
 		{
 			if (targetEnergy_->IsCarried()) {

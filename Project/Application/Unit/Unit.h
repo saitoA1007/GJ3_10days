@@ -226,5 +226,8 @@ private:
 
 	std::unique_ptr<GameEngine::ModelComponent> blackholeModel_;
 	float bhEffectTimer_ = 0.0f;
+
+	float injectionTimer_ = 0.0f;
+	bool IsBeingInjected() const { return injectionTimer_ > 0.0f; }
 };
 
