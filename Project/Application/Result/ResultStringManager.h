@@ -87,6 +87,7 @@ private:
 	uint32_t setNumSH_ = 0;
 	// タイトル
 	uint32_t backTitleSH_ = 0;
+	uint32_t bgmSH_ = 0;
 
 	enum Type {
 		Shuffle,

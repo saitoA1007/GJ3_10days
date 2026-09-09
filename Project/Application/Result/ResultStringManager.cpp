@@ -44,6 +44,7 @@ ResultStringManager::ResultStringManager(GameEngine::InputCommand* inputCommand,
 	shuffleSH_ = AudioManager::GetInstance().GetHandleByName("resultShuffle.mp3");
 	setNumSH_ = AudioManager::GetInstance().GetHandleByName("resultSetNum.mp3");
 	backTitleSH_ = AudioManager::GetInstance().GetHandleByName("resultSetNum.mp3");
+	bgmSH_ = AudioManager::GetInstance().GetHandleByName("clearBgm.mp3");
 }
 
 void ResultStringManager::Initialize() {
@@ -121,6 +122,7 @@ void ResultStringManager::Update() {
 		}
 
 		break;
+
 	case ResultStringManager::Control:
 		//入力によってシーンの切り替えを行うことを許す。
 
@@ -128,6 +130,11 @@ void ResultStringManager::Update() {
 		if (inputCommand_->IsCommandActive("Decision")) {
 			AudioManager::GetInstance().Play(backTitleSH_, 0.2f, false);
 			isSceneFinished_ = true;
+
+			// bgmを停止
+			if (AudioManager::GetInstance().IsPlay(bgmSH_)) {
+				AudioManager::GetInstance().Stop(bgmSH_);
+			}
 		}
 		break;
 	}
@@ -184,6 +191,9 @@ void ResultStringManager::Boot(int score) {
 	} else {
 		messageType_ = ResultMessage::Type::Tobisugi;
 	}
+
+	// bgmを再生
+	AudioManager::GetInstance().Play(bgmSH_, 0.2f, true);
 }
 
 void ResultStringManager::RegistTransform(Transform& transform, std::string groop) {
