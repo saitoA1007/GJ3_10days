@@ -179,11 +179,8 @@ void ResultStringManager::Boot(int score) {
 		lerped /= 10;
 	}
 
-	const int buffer = 30;
-	if (score < aimScore_ - buffer) {
+	if (score <= aimScore_) {
 		messageType_ = ResultMessage::Type::Mousukosi;
-	} else if (score >= aimScore_ - buffer && score <= aimScore_ + buffer) {
-		messageType_ = ResultMessage::Type::Tyakuriku;
 	} else {
 		messageType_ = ResultMessage::Type::Tobisugi;
 	}
