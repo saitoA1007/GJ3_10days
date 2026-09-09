@@ -42,4 +42,15 @@ private:
 	LetterboxUI letterboxUI_;
 
 	bool isExplo_ = false;
+
+	// ロケットの音
+	uint32_t subFireSH_ = 0;
+	uint32_t mainFireSH_ = 0;
+	uint32_t moonBreakSH_ = 0;
+
+	bool isSubFire_ = false;
+	bool isMainFire_ = false;
+	bool isMainFireStop_ = false;
+
+	bool isPlay_ = false;
 };
