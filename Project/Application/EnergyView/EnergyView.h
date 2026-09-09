@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DebugParameter.h"
 #include "IGameObject.h"
 
 #include "Application/Score/ScoreView.h"
@@ -38,9 +39,16 @@ public:
 	void Draw() override;
 
 private:
-	/// @brief ロケットの現在値をScoreViewへ渡し、Register設定を反映する。
-	void SyncValue();
+	/// @brief ロケットの現在値へ表示値を補間し、ScoreViewへ反映する。
+	/// @param[in] deltaTime 前フレームからのゲーム内経過秒数。
+	void SyncValue(float deltaTime);
 
 	const Rocket* rocket_ = nullptr; // 表示するEnergyの取得元
 	ScoreView numberView_;           // 数字モデルの配置・色・5桁分解を担当する既存View
+	GameEngine::DebugParameter debugParameter_; // 数値変動時間の調整用Register
+	float changeDuration_ = 0.5f;    // 現在の表示値から新しい値へ変化する秒数
+	float displayedValue_ = 0.0f;    // 補間途中を保持する表示用Energy
+	float changeStartValue_ = 0.0f;  // 今回の補間を開始した時点の表示値
+	float changeElapsedTime_ = 0.0f; // 今回の補間に使った経過秒数
+	int32_t targetValue_ = 0;        // ロケットが持つ最新の実Energy
 };

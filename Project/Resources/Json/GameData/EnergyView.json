@@ -1,5 +1,6 @@
 {
     "EnergyView": {
+        "ChangeDuration": 0.5,
         "Color": [
             1.0,
             1.0,
