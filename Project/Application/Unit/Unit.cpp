@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 
+#include "AudioManager.h"
 #include "RenderQueue.h"
 
 #include "Application/Rocket/Rocket.h"
@@ -14,6 +15,21 @@
 #include "UnitEffectManager.h"
 #include "FPSCounter.h"
 using namespace GameEngine;
+
+namespace
+{
+	constexpr const char* kBlackholeSpawnSoundName = "horl.mp3";
+	constexpr float kBlackholeSpawnSoundVolume = 1.0f;
+
+	void PlayBlackholeSpawnSound()
+	{
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t soundHandle =
+			audioManager.GetHandleByName(kBlackholeSpawnSoundName);
+		audioManager.Stop(soundHandle);
+		audioManager.Play(soundHandle, kBlackholeSpawnSoundVolume, false);
+	}
+}
 
 UnitEffectManager* Unit::unitEffectManager_ = nullptr;
 
@@ -549,6 +565,7 @@ bool Unit::ActivateBlackhole()
 		const Vector3 position = modelComponent_->worldTransform_.transform_.translate;
 		unitEffectManager_->StartBlackHole(position, GetBlackholeRadius() * 0.2f);
 	}
+	PlayBlackholeSpawnSound();
 
 	collider_.SetActive(false);
 
