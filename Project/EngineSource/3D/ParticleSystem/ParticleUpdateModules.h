@@ -53,6 +53,10 @@ namespace GameEngine {
 
 		void Update(ParticleData& particleData, [[maybe_unused]] float time) override;
 
+		void SetEndScale(float scale) {
+			endSize_ = scale;
+		}
+
 	private:
 		float endSize_ = 0.0f;
 		Vector3 separateAxesEndSize_ = {};

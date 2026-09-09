@@ -72,6 +72,7 @@ TestScene::TestScene() {
 	//uint32_t pGH = textureManager_->GetHandleByName("effectCircle.png");
 	//gameObjectManager_->AddObject<ImpactDetectionEffect>(effectModel_, pGH);
 
+	//gameObjectManager_->AddObject<ParticleBehavior>("afterRingParticle", 8, textureManager_, effectModel_);
 	//gameObjectManager_->AddObject<ParticleBehavior>("blackHoleParticle", 64, textureManager_, effectModel_);
 	//gameObjectManager_->AddObject<ParticleBehavior>("starParticle", 16, textureManager_, effectModel_);
 	//gameObjectManager_->AddObject<ParticleBehavior>("ringParticle", 8, textureManager_, effectModel_);
@@ -86,9 +87,9 @@ TestScene::TestScene() {
 	auto pModel = modelManager_->GetNameByModel("Prick.gltf");
 	gameObjectManager_->AddObject<ParticleBehavior>("EnemyDeadEffect", 32, textureManager_, pModel);
 
-	auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
+	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
 }
 
 void TestScene::Initialize() {
