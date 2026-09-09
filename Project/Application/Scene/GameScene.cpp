@@ -121,11 +121,12 @@ GameScene::GameScene() {
 	uint32_t beamNoiseGH = textureManager_->GetHandleByName("beamNoise.png");
 	auto* unitModel = modelManager_->GetNameByModel("unit2.obj");
 	auto* blackHoleModel = modelManager_->GetNameByModel("cursor.obj");
+	auto* markerModel = modelManager_->GetNameByModel("cursor.obj");
 	uint32_t grainGH = textureManager_->GetHandleByName("grain.png");
 	// ユニットの演出管理機能
 	auto* unitEffectManager = gameObjectManager_->AddObject<UnitEffectManager>(modelManager_, textureManager_, gameObjectManager_);
 	// ユニット管理機能
-	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, beamNoiseGH, energyModel, grainGH,
+	unitManager_ = gameObjectManager_->AddObject<UnitManager>(unitModel, blackHoleModel, rocket_, crossBeamModel, markerModel, beamNoiseGH, energyModel, grainGH,
 		unitEffectManager, energySpawner_, enemyManager_);
 
 	auto* cursorModel = modelManager_->GetNameByModel("cursor.obj");

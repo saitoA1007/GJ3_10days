@@ -84,7 +84,8 @@ public:
 		Rocket* rocket, const UnitSettings* settings,
 		GameEngine::Model* bameModel, uint32_t beamGH,
 		GameEngine::Model* arrowModel, uint32_t lineGH,
-		EnergySpawner* energySpawner);
+		EnergySpawner* energySpawner,
+		GameEngine::Model* markerModel = nullptr);
 
 	// 待機状態と初期位置へ戻す
 	void Initialize() override;
@@ -250,5 +251,6 @@ private:
 	bool isBeingPulledByBlackhole_ = false;
 
 	static UnitEffectManager* unitEffectManager_;
+	std::unique_ptr<GameEngine::ModelComponent> targetMarkerModel_;
 };
 

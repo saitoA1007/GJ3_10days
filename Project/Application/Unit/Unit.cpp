@@ -25,7 +25,7 @@ Unit::Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
 	Rocket* rocket, const UnitSettings* settings,
 	GameEngine::Model* bameModel, uint32_t beamGH,
 	GameEngine::Model* arrowModel, uint32_t lineGH,
-	EnergySpawner* energySpawner)
+	EnergySpawner* energySpawner, GameEngine::Model* markerModel)
 	: rocket_(rocket), settings_(settings), RopeEffect_(bameModel, beamGH), energySpawner_(energySpawner), NaviEffect_(bameModel, lineGH, arrowModel)
 {
 	modelComponent_ = std::make_unique<ModelComponent>(model);
@@ -36,6 +36,12 @@ Unit::Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
 		blackholeModel_ = std::make_unique<GameEngine::ModelComponent>(circleModel);
 		blackholeModel_->materialData_->enableLighting = false; // エフェクトなのでライティング不要
 		blackholeModel_->materialData_->color = { 0.1f, 0.1f, 0.1f, 0.8f }; // 黒系の半透明
+	}
+
+	if (markerModel)
+	{
+		targetMarkerModel_ = std::make_unique<GameEngine::ModelComponent>(markerModel);
+		targetMarkerModel_->materialData_->enableLighting = false; 
 	}
 
 	// コライダーのセットアップ
@@ -152,7 +158,12 @@ void Unit::Draw()
 
 	if (state_ == UnitState::Blackhole && blackholeModel_)
 	{
-		blackholeModel_->DrawRaytracing(renderQueue_);
+		/*blackholeModel_->DrawRaytracing(renderQueue_);*/
+	}
+
+	if (state_ == UnitState::MovingToPosition && targetMarkerModel_)
+	{
+		targetMarkerModel_->Draw(renderQueue_);
 	}
 
 }
@@ -219,6 +230,14 @@ bool Unit::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEn
 	targetPosition_ = targetPosition;
 	targetPosition_.y = settings_->groundY;
 	state_ = UnitState::MovingToPosition;
+
+	if (targetMarkerModel_)
+	{
+		targetMarkerModel_->worldTransform_.transform_.translate = targetPosition_;
+		targetMarkerModel_->worldTransform_.transform_.translate.y = settings_->groundY + 0.02f;
+		targetMarkerModel_->Update();
+	}
+
 	collider_.SetActive(true);
 	SyncModel();
 	return true;
@@ -316,6 +335,31 @@ void Unit::UpdateMovingToPosition(float deltaTime)
 	if (!IsBeingInjected()) {
 		MoveTowards(targetPosition_, deltaTime);
 		ConsumeStamina(deltaTime);
+	}
+
+	if (targetMarkerModel_)
+	{
+		targetMarkerModel_->worldTransform_.transform_.rotate.y += 2.5f * deltaTime;
+
+		const float phase = targetMarkerModel_->worldTransform_.transform_.rotate.y;
+
+		
+		const float baseScale = 0.7f; 
+		const float pulseHorizontal = std::sin(phase * 2.0f) * 0.15f; 
+		const float pulseVertical = std::cos(phase * 2.0f) * 0.10f; 
+
+		targetMarkerModel_->worldTransform_.transform_.scale = {
+			baseScale + pulseHorizontal,
+			baseScale + pulseVertical,
+			baseScale + pulseHorizontal
+		};
+
+		const float floatOffset = (std::sin(phase * 3.0f) + 1.0f) * 0.03f; 
+
+		targetMarkerModel_->worldTransform_.transform_.translate = targetPosition_;
+		targetMarkerModel_->worldTransform_.transform_.translate.y = settings_->groundY + 0.02f + floatOffset;
+
+		targetMarkerModel_->Update();
 	}
 
 	const float arrivalRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
