@@ -2,7 +2,7 @@
     "LockOn": {
         "Charge": {
             "MaxEnergyCost": 30,
-            "MaxSeconds": 3.0,
+            "MaxSeconds": 1.2000000476837158,
             "StartSeconds": 0.20000000298023224
         },
         "Color": {

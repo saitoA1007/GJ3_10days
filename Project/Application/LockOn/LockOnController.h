@@ -162,6 +162,10 @@ private:
 	/// @return 0～1へ収めたチャージ率。
 	float CalculateChargeRatio() const;
 
+	/// @brief 最大チャージ中は通常色と赤色を交互に返す。
+	/// @return 現在のチャージリング表示色。
+	Vector4 GetChargeDisplayColor() const;
+
 	/// @brief チャージ率から整数の消費要求量を計算する。
 	/// @return 小数点以下を切り捨てた消費要求量。
 	int32_t CalculateRequestedEnergy() const;
@@ -198,6 +202,7 @@ private:
 	EnergyPickup* selectedEnergy_ = nullptr;                    
 	Enemy* selectedEnemy_ = nullptr;                            
 	float lockOnSeconds_ = 0.0f;                                
+	float maxChargeBlinkElapsedTime_ = 0.0f;
 	float minimumDispatchHoldSeconds_ = 0.0f;
 	bool isCharging_ = false;                                   
 	bool gameplayEnabled_ = true;  

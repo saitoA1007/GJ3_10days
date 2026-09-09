@@ -38,7 +38,7 @@ struct UnitSettings
 	float normalSpeed = 1.5f;                           
 	float boostedSpeed = 5.0f;                          
 	float pickupRadius = 0.45f;                         
-	float deliveryRadius = 1.6f;                        
+	float deliveryRadius = 3.0f;
 	float collisionRadius = 0.6f;                       
 	float staminaDrainPerSecond = 2.0f;                 
 	float distanceDrainRate = 0.08f;                    
