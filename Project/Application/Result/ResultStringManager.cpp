@@ -108,7 +108,7 @@ void ResultStringManager::Update() {
 
 		if (timer_ >= GetStopTime(maxDigit_ - 1)) {
 			currentType_ = ResultStringManager::Message;
-			resultMessage_->Boot(ResultMessage::Type::Mousukosi);
+			resultMessage_->Boot(messageType_);
 			AudioManager::GetInstance().Stop(shuffleSH_);
 			AudioManager::GetInstance().Play(setNumSH_, 0.5f, false);
 		}

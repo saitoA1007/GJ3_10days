@@ -32,6 +32,7 @@ void PlayingPhase::OnEnter(GameFlowContext& context)
 	audioManager.Play(firstHalfBgmHandle, kBgmVolume, true);
 	hasStartedSecondHalfBgm_ = false;
 	hasStartedHalfTimeView_ = false;
+	hasEnabledSecondHalfEnergySpawn_ = false;
 	if (context.halfTimeView)
 	{
 		context.halfTimeView->Reset();
@@ -93,6 +94,15 @@ bool PlayingPhase::OnUpdate(GameFlowContext& context)
 				context.halfTimeView->Start();
 			}
 			hasStartedHalfTimeView_ = true;
+		}
+
+		if (!hasEnabledSecondHalfEnergySpawn_ && progress >= kSecondHalfStartProgress)
+		{
+			if (context.energySpawner)
+			{
+				context.energySpawner->SetPlayingRandomSpawnEnabled(true);
+			}
+			hasEnabledSecondHalfEnergySpawn_ = true;
 		}
 	}
 

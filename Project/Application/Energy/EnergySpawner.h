@@ -92,6 +92,10 @@ public:
 	/// @brief GamePlaying用の固定生成タイムラインを停止する。
 	void EndPlayingTimeline();
 
+	/// @brief 現在のPlayingでランダム生成を許可するか切り替える。
+	/// @param[in] enabled 後半のランダム生成を許可するならtrue。
+	void SetPlayingRandomSpawnEnabled(bool enabled) { playingRandomSpawnEnabled_ = enabled; }
+
 	/// @brief 指定された生成可能領域へ空中生成する。
 	/// @param[in] zone Near・Middle・Farのいずれか。
 	/// @return 生成できた場合はtrue。
@@ -199,6 +203,7 @@ private:
 	float spawnTimer_ = 0.0f;                                      // 次回自動生成までに経過した秒数
 	bool gameplayEnabled_ = true;                                  // Ready・TimeUp・Pause中はfalse
 	bool autoSpawnEnabled_ = false;                                // Playing中だけtrue
+	bool playingRandomSpawnEnabled_ = false;                       // Playing後半に入るまでfalse
 	std::vector<std::unique_ptr<ScheduledEnergySpawnEvent>> timelineEvents_; // Editorで追加・削除する固定生成列
 	int32_t timelineEventCount_ = 0;                               // JSONへ可変長イベント数を保存する値
 	float playingTimelineElapsed_ = 0.0f;                          // GamePlaying開始からの経過秒数
