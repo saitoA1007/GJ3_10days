@@ -203,7 +203,7 @@ GameScene::GameScene() {
 		energySpawner_,
 		unitManager_
 	);
-	enemyManager_->SetStage("Tutorial");
+	enemyManager_->SetStage("Three");
 
 	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
 	auto* timeUI = gameObjectManager_->AddObject<TimeUI>(unitIconGH);

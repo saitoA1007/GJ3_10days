@@ -35,7 +35,9 @@ private:
 	float GetMessageActivateTime() const { return messageActivateTime_ + GetStopTime(maxDigit_ - 1); }
 	float GetControlTime() const { return messageActivateTime_ + GetMessageActivateTime(); }
 
-	const int aimScore_ = 500;
+	void RegistTransform(Transform& transform, std::string groop);
+
+	const int aimScore_ = 150;
 	const int aimScoreDistance_ = 1000000;
 
 	std::vector<int> scoreDigits_;
@@ -43,6 +45,8 @@ private:
 	std::unique_ptr<ResultMessage> resultMessage_ = nullptr;
 
 	std::unique_ptr<GameEngine::ModelComponent> kmModel_;
+	std::unique_ptr<GameEngine::ModelComponent> spaceModel_;
+	std::unique_ptr<GameEngine::ModelComponent> arrowModel_;
 
 	const int maxDigit_ = 7;
 
@@ -60,6 +64,8 @@ private:
 	float numberMergin_ = 0.5f;
 
 	Transform kmTransform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+	Transform spaceTransform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+	Transform arrowTransform_ = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 
 	enum Type {
 		Shuffle,
@@ -68,4 +74,6 @@ private:
 		Control,
 		Count
 	} currentType_ = Type::Shuffle;
+
+	ResultMessage::Type messageType_ = ResultMessage::Type::Mousukosi;
 };

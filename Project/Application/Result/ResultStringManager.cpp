@@ -28,11 +28,13 @@ ResultStringManager::ResultStringManager(GameEngine::ModelManager* modelManager,
 	debugParameter_.Register("Translate", numberTransform_.translate, 2, "Number");
 	debugParameter_.Register("Mergin", numberMergin_, 3, "Number");
 
-	debugParameter_.Register("Scale", kmTransform_.scale, 0, "KM");
-	debugParameter_.Register("Rotate", kmTransform_.rotate, 1, "KM");
-	debugParameter_.Register("Translate", kmTransform_.translate, 2, "KM");
+	RegistTransform(kmTransform_, "KM");
+	RegistTransform(spaceTransform_, "Space");
+	RegistTransform(arrowTransform_, "Arrow");
 
 	kmModel_ = std::make_unique<GameEngine::ModelComponent>(modelManager->GetNameByModel("km.obj"));
+	spaceModel_ = std::make_unique<GameEngine::ModelComponent>(modelManager->GetNameByModel("bottom0.obj"));
+	arrowModel_ = std::make_unique<GameEngine::ModelComponent>(modelManager->GetNameByModel("ResultArrow.obj"));
 }
 
 void ResultStringManager::Initialize() {
@@ -99,6 +101,12 @@ void ResultStringManager::Draw() {
 	for (auto& num : shuffleNumbers_) {
 		num->Draw();
 	}
+	kmModel_->Draw(renderQueue_);
+
+	if (currentType_ == Control) {
+		spaceModel_->Draw(renderQueue_);
+		arrowModel_->Draw(renderQueue_);
+	}
 }
 
 void ResultStringManager::DebugUpdate() {
@@ -114,6 +122,13 @@ void ResultStringManager::DebugUpdate() {
 	}
 
 	kmModel_->worldTransform_.transform_ = kmTransform_;
+	kmModel_->Update();
+
+	spaceModel_->worldTransform_.transform_ = spaceTransform_;
+	spaceModel_->Update();
+
+	arrowModel_->worldTransform_.transform_ = arrowTransform_;
+	arrowModel_->Update();
 }
 
 void ResultStringManager::Boot(int score) {
@@ -136,4 +151,19 @@ void ResultStringManager::Boot(int score) {
 		scoreDigits_.push_back(digit);
 		lerped /= 10;
 	}
+
+	const int buffer = 30;
+	if (score < aimScore_ - buffer) {
+		messageType_ = ResultMessage::Type::Mousukosi;
+	} else if (score >= aimScore_ - buffer && score <= aimScore_ + buffer) {
+		messageType_ = ResultMessage::Type::Tyakuriku;
+	} else {
+		messageType_ = ResultMessage::Type::Tobisugi;
+	}
+}
+
+void ResultStringManager::RegistTransform(Transform& transform, std::string groop) {
+	debugParameter_.Register("Scale", transform.scale, 0, groop);
+	debugParameter_.Register("Rotate", transform.rotate, 1, groop);
+	debugParameter_.Register("Translate", transform.translate, 2, groop);
 }
