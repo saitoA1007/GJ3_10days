@@ -625,7 +625,7 @@ void Unit::ProcessBlackholeAbsorption(
 	// エネルギーの吸い込み
 	for (auto* energy : energies)
 	{
-		if (!energy || !energy->IsActive() || energy->IsCarried()) continue;
+		if (!energy || !energy->IsActive() || energy->IsCarried() || energy->GetSize() == EnergySize::Special) continue; if (!energy || !energy->IsActive() || energy->IsCarried()) continue;
 
 		float distSq = DistanceSquaredXZ(position_, energy->GetPosition());
 		if (distSq <= radiusSq)
@@ -637,7 +637,6 @@ void Unit::ProcessBlackholeAbsorption(
 				case EnergySize::Small:   absorbedBasePoint_ += 1; break;
 				case EnergySize::Medium:  absorbedBasePoint_ += 2; break;
 				case EnergySize::Large:   absorbedBasePoint_ += 3; break;
-				case EnergySize::Special: absorbedBasePoint_ += 5; break;
 				}
 				energy->Deactivate();
 			}
