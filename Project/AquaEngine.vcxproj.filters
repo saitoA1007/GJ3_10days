@@ -800,6 +800,7 @@
     <ClCompile Include="Application\UI\TimeUI.cpp" />
     <ClCompile Include="Application\UI\LetterboxUI.cpp" />
     <ClCompile Include="Application\Effect\IncorporateEffect.cpp" />
+    <ClCompile Include="Application\Result\ResultStringManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Effect\BlackHoleEffect.h" />
@@ -1080,6 +1081,7 @@
     <ClInclude Include="Application\UI\TimeUI.h" />
     <ClInclude Include="Application\UI\LetterboxUI.h" />
     <ClInclude Include="Application\Effect\IncorporateEffect.h" />
+    <ClInclude Include="Application\Result\ResultStringManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Externals\imgui\ProggyClean.ttf" />

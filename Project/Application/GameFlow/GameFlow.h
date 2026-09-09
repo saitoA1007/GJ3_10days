@@ -6,6 +6,7 @@
 #include "DebugParameter.h"
 #include "IGameObject.h"
 #include "IGamePhase.h"
+#include "ResultPhase.h"
 
 class GameFlow final : public GameEngine::IGameObject
 {
@@ -24,6 +25,8 @@ public:
 	void BeginTutorialEnemyCollisionStep();
 	void BeginTutorialEnemyLockOnStep();
 	void BeginTutorialEnemyHoldStep();
+
+	bool BackToTitle() const;
 
 	IGamePhase* GetCurrentPhase() const
 	{

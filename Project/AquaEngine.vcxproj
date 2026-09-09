@@ -470,6 +470,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Result\ResultMessage.cpp" />
     <ClCompile Include="Application\Effect\Monoris.cpp" />
     <ClCompile Include="Application\Effect\MonorisManager.cpp" />
+    <ClCompile Include="Application\Result\ResultStringManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -805,6 +806,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Application\Utils\ShigeFunc.h" />
     <ClInclude Include="Application\Result\ResultMessage.h" />
+    <ClInclude Include="Application\Result\ResultStringManager.h" />
     <ClInclude Include="Application\Effect\Monoris.h" />
     <ClInclude Include="Application\Effect\MonorisManager.h" />
   </ItemGroup>

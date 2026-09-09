@@ -33,6 +33,7 @@ using namespace GameEngine;
 #include <Application/result/ShuffleNumber.h>
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
+#include <Application/Result/ResultStringManager.h>
 #include <Application/Effect/MonorisManager.h>
 #include <algorithm>
 #include <cmath>
@@ -171,7 +172,7 @@ GameScene::GameScene() {
 	// リザルトムービー管理
 	auto* resultMoiveManager = gameObjectManager_->AddObject<ResultMovieManager>(reCamera, moonObject, rocketEffect, explosionEffect);
 	// リザルトメッセージ
-	auto resultMessage = gameObjectManager_->AddObject<ResultMessage>(modelManager_, animationManager_);
+	auto resultMessage = gameObjectManager_->AddObject<ResultStringManager>(modelManager_, animationManager_);
 
 	ScoreView::DigitModels digitModels{};
 	for (int digit = 0; digit < static_cast<int>(digitModels.size()); ++digit) {
@@ -581,6 +582,10 @@ void GameScene::Update() {
 	light->SetDirectionalColor(lightColor_);
 	ImGui::End();
 #endif
+
+	if (gameFlow_->BackToTitle() /* && 確定キーの入力動作 */) {
+		/* Titleへ戻る処理 */
+	}
 }
 
 void GameScene::DebugUpdate()

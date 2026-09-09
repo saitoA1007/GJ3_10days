@@ -1,0 +1,29 @@
+{
+    "ResultStringManager": {
+        "Number": {
+            "Mergin": -2.0,
+            "Rotate": [
+                0.25999999046325684,
+                -0.6499999761581421,
+                -0.03999999910593033
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Translate": [
+                69.48999786376953,
+                55.29999923706055,
+                -26.719999313354492
+            ]
+        },
+        "SceneName": "Game",
+        "Time": {
+            "ControlTime": 3.0,
+            "MessageActivateTime": 3.0,
+            "ShuffleStopDelay": 0.30000001192092896,
+            "ShuffleStopTime": 1.0
+        }
+    }
+}
