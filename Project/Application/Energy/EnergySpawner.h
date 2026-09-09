@@ -140,7 +140,7 @@ private:
 		EnergyTypeSettings{ 0.45f, 10, { 1.00f, 0.88f, 0.20f, 1.0f } },
 		EnergyTypeSettings{ 0.70f, 25, { 0.25f, 0.85f, 1.00f, 1.0f } },
 		EnergyTypeSettings{ 1.00f, 50, { 0.92f, 0.35f, 1.00f, 1.0f } },
-		EnergyTypeSettings{ 1.50f, 0,  { 0.80f, 0.10f, 1.00f, 1.0f } },
+		EnergyTypeSettings{ 2.00f, 0,  { 0.40f, 0.40f, 0.40f, 1.0f } },
 	};
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;   // 設定とParameter Inspectorの接続
 	float spawnTimer_ = 0.0f;                                      // 次回自動生成までに経過した秒数
