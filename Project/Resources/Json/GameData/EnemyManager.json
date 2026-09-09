@@ -124,83 +124,83 @@
             "Events": {
                 "Event000": {
                     "ArcPosition": 0.3540000021457672,
-                    "TimeSeconds": 1.0
+                    "TimeSeconds": 5.0
                 },
                 "Event001": {
                     "ArcPosition": 0.6510000228881836,
-                    "TimeSeconds": 1.0
+                    "TimeSeconds": 5.0
                 },
                 "Event002": {
                     "ArcPosition": 0.10100000351667404,
-                    "TimeSeconds": 3.0
+                    "TimeSeconds": 10.0
                 },
                 "Event003": {
                     "ArcPosition": 0.20100000500679016,
-                    "TimeSeconds": 3.0
+                    "TimeSeconds": 10.0
                 },
                 "Event004": {
                     "ArcPosition": 0.8989999890327454,
-                    "TimeSeconds": 5.0
+                    "TimeSeconds": 15.0
                 },
                 "Event005": {
                     "ArcPosition": 0.7990000247955322,
-                    "TimeSeconds": 5.0
+                    "TimeSeconds": 15.0
                 },
                 "Event006": {
                     "ArcPosition": 0.5,
-                    "TimeSeconds": 10.0
+                    "TimeSeconds": 20.0
                 },
                 "Event007": {
                     "ArcPosition": 0.5529999732971191,
-                    "TimeSeconds": 10.0
+                    "TimeSeconds": 20.0
                 },
                 "Event008": {
                     "ArcPosition": 0.4519999921321869,
-                    "TimeSeconds": 10.0
+                    "TimeSeconds": 20.0
                 },
                 "Event009": {
                     "ArcPosition": 0.6010000109672546,
-                    "TimeSeconds": 10.0
+                    "TimeSeconds": 20.0
                 },
                 "Event010": {
                     "ArcPosition": 0.4020000100135803,
-                    "TimeSeconds": 10.0
+                    "TimeSeconds": 20.0
                 },
                 "Event011": {
                     "ArcPosition": 0.9020000100135803,
-                    "TimeSeconds": 13.0
+                    "TimeSeconds": 25.0
                 },
                 "Event012": {
                     "ArcPosition": 0.7990000247955322,
-                    "TimeSeconds": 13.0
+                    "TimeSeconds": 25.0
                 },
                 "Event013": {
                     "ArcPosition": 0.7009999752044678,
-                    "TimeSeconds": 13.0
+                    "TimeSeconds": 25.0
                 },
                 "Event014": {
                     "ArcPosition": 0.0989999994635582,
-                    "TimeSeconds": 16.0
+                    "TimeSeconds": 30.0
                 },
                 "Event015": {
                     "ArcPosition": 0.20200000703334808,
-                    "TimeSeconds": 16.0
+                    "TimeSeconds": 30.0
                 },
                 "Event016": {
                     "ArcPosition": 0.3009999990463257,
-                    "TimeSeconds": 16.0
+                    "TimeSeconds": 30.0
                 },
                 "Event017": {
                     "ArcPosition": 0.5,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 35.0
                 },
                 "Event018": {
                     "ArcPosition": 0.5509999990463257,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 35.0
                 },
                 "Event019": {
                     "ArcPosition": 0.45399999618530273,
-                    "TimeSeconds": 20.0
+                    "TimeSeconds": 35.0
                 }
             }
         },
