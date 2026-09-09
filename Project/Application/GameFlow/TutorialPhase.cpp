@@ -15,6 +15,7 @@ using namespace GameEngine;
 namespace
 {
 	constexpr const char* kLockOnReleaseCommand = "LockOnRelease";
+	constexpr const char* kSkipTutorialCommand = "SkipTutorial";
 	constexpr const char* kTutorialBgmName = "tutorialBGM.mp3";
 	constexpr float kTutorialBgmVolume = 1.0f;
 }
@@ -48,6 +49,12 @@ void TutorialPhase::OnEnter(GameFlowContext& context)
 
 bool TutorialPhase::OnUpdate(GameFlowContext& context)
 {
+	if (context.inputCommand &&
+		context.inputCommand->IsCommandActive(kSkipTutorialCommand))
+	{
+		return true;
+	}
+
 	switch (step_)
 	{
 	case Step::SelectEnergy:

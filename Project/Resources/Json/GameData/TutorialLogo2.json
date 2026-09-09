@@ -1,0 +1,27 @@
+{
+    "TutorialLogo2": {
+        "EaseType": {
+            "_EaseType": "EaseOutElastic"
+        },
+        "EndPosition": [
+            7.599999904632568,
+            -27.5,
+            -26.0
+        ],
+        "HoldDuration": 1.0,
+        "MoveDuration": 0.5,
+        "Rotation": [
+            2.010999917984009,
+            3.1415927410125732,
+            0.0
+        ],
+        "Scale": 0.36000001430511475,
+        "SceneName": "Game",
+        "StartDelay": 0.0,
+        "StartPosition": [
+            16.0,
+            -27.5,
+            -26.0
+        ]
+    }
+}

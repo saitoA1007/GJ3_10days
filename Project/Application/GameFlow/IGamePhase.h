@@ -48,6 +48,7 @@ struct GameFlowContext
 	GameFlowSettings* settings = nullptr;
 	ResultMovieManager* resultMovieManager_ = nullptr;
 	TutorialCameraModelView* tutorialLogoView = nullptr;
+	TutorialCameraModelView* tutorialLogo2View = nullptr;
 	StartPlayingView* startPlayingView = nullptr;
 	TimeUI* timeUI = nullptr;
 	ResultStringManager* resultMessage = nullptr;

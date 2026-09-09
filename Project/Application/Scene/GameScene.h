@@ -113,6 +113,7 @@ private: // シーン機能
 	Score score_;
 	std::unique_ptr<ScoreView> scoreView_;
 	std::unique_ptr<TutorialCameraModelView> tutorialLogoView_;
+	std::unique_ptr<TutorialCameraModelView> tutorialLogo2View_;
 	std::unique_ptr<TutorialTextSequence> tutorialTextSequence_;
 	std::unique_ptr<StartPlayingView> startPlayingView_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;

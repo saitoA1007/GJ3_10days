@@ -145,6 +145,19 @@ GameScene::GameScene() {
 		gameCamera->GetCamera(),
 		"TutorialLogo",
 		TutorialCameraModelView::Settings{});
+	auto* tutorialLogo2Model = modelManager_->GetNameByModel("tutorialLogo2.obj");
+	TutorialCameraModelView::Settings tutorialLogo2Settings{};
+	tutorialLogo2Settings.startPosition = { 16.0f, -29.0f, -26.0f };
+	tutorialLogo2Settings.endPosition = { 5.5f, -29.0f, -26.0f };
+	tutorialLogo2Settings.rotation = { 2.01099992f, 3.14159274f, 0.0f };
+	tutorialLogo2Settings.scale = 1.0f;
+	tutorialLogo2Settings.moveDuration = 0.5f;
+	tutorialLogo2Settings.easeType = EaseType::kEaseOutElastic;
+	tutorialLogo2View_ = std::make_unique<TutorialCameraModelView>(
+		tutorialLogo2Model,
+		gameCamera->GetCamera(),
+		"TutorialLogo2",
+		tutorialLogo2Settings);
 
 	StartPlayingView::Models startPlayingModels{};
 	for (std::size_t i = 0; i < startPlayingModels.size(); ++i)
@@ -203,6 +216,7 @@ GameScene::GameScene() {
 	flowContext.inputCommand = inputCommand_;
 	flowContext.resultMovieManager_ = resultMoiveManager;
 	flowContext.tutorialLogoView = tutorialLogoView_.get();
+	flowContext.tutorialLogo2View = tutorialLogo2View_.get();
 	flowContext.startPlayingView = startPlayingView_.get();
 	flowContext.resultMessage = resultMessage;
 	flowContext.timeUI = timeUI;
@@ -539,6 +553,7 @@ void GameScene::Initialize() {
 	fadeSprite_->Update();
 	fadeElapsedTime_ = 0.0f;
 	if (tutorialLogoView_) tutorialLogoView_->Reset();
+	if (tutorialLogo2View_) tutorialLogo2View_->Reset();
 	if (tutorialTextSequence_) tutorialTextSequence_->Reset();
 	if (startPlayingView_) startPlayingView_->Reset();
 }
@@ -617,12 +632,14 @@ void GameScene::UpdateTutorialViews(bool advanceAnimation)
 	const bool isTutorial = currentPhase && std::string_view(currentPhase->GetName()) == "Tutorial";
 	const float deltaTime = FpsCounter::deltaTime;
 	if (tutorialLogoView_) tutorialLogoView_->Update(isTutorial, advanceAnimation, deltaTime);
+	if (tutorialLogo2View_) tutorialLogo2View_->Update(isTutorial, advanceAnimation, deltaTime);
 	if (tutorialTextSequence_) tutorialTextSequence_->Update(advanceAnimation, deltaTime);
 }
 
 void GameScene::DrawTutorialViews()
 {
 	if (tutorialLogoView_) tutorialLogoView_->Draw(renderQueue_);
+	if (tutorialLogo2View_) tutorialLogo2View_->Draw(renderQueue_);
 	if (tutorialTextSequence_) tutorialTextSequence_->Draw(renderQueue_);
 }
 
@@ -630,6 +647,7 @@ void GameScene::InputRegisterCommand() {
 
 	// 決定ボタン
 	inputCommand_->RegisterCommand("PauseAction", { {InputState::KeyTrigger, DIK_M},{InputState::PadTrigger, XINPUT_GAMEPAD_START} });
+	inputCommand_->RegisterCommand("SkipTutorial", { {InputState::KeyTrigger, DIK_ESCAPE} });
 	inputCommand_->RegisterCommand("Decision", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_A} });
 	inputCommand_->RegisterCommand("SelectUp", { {InputState::KeyTrigger, DIK_W },{InputState::PadLeftStick,0,{0.0f,1.0f},0.2f}, { InputState::PadTrigger, XINPUT_GAMEPAD_DPAD_UP } });
 	inputCommand_->RegisterCommand("SelectDown", { {InputState::KeyTrigger, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadTrigger, XINPUT_GAMEPAD_DPAD_DOWN} });
