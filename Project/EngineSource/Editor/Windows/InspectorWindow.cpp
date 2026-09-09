@@ -67,15 +67,15 @@ void InspectorWindow::Draw() {
 
 void InspectorWindow::DrawGroup(GameParamEditor::Group& group, const std::string& groupPath) {
 
-    if (groupPath == "Energy/PlayingTimeline") {
-        DrawEnergyTimelineControls(group);
+    if (groupPath.ends_with("/PlayingTimeline")) {
+        DrawPlayingTimelineControls(group);
     }
 
     // このグループのアイテムを描画
     DrawItems(group, groupPath);
 
-    // サブグループを再帰的に
-    for (auto& [childName, childGroup] : group.children) {
+    // PlayingTimelineは設定群より先に表示し、長いグループの下へ隠れないようにする。
+    auto drawChild = [&](const std::string& childName, GameParamEditor::Group& childGroup) {
         ImGui::PushID(childName.c_str());
 
         if (ImGui::TreeNode(childName.c_str())) {
@@ -85,6 +85,19 @@ void InspectorWindow::DrawGroup(GameParamEditor::Group& group, const std::string
         }
 
         ImGui::PopID();
+    };
+
+    auto timelineIt = group.children.find("PlayingTimeline");
+    if (timelineIt != group.children.end()) {
+        drawChild(timelineIt->first, timelineIt->second);
+    }
+
+    // 残りのサブグループを再帰的に
+    for (auto& [childName, childGroup] : group.children) {
+        if (childName == "PlayingTimeline") {
+            continue;
+        }
+        drawChild(childName, childGroup);
     }
 }
 
@@ -108,12 +121,12 @@ void InspectorWindow::DrawItems(GameParamEditor::Group& group, const std::string
     // ソート済みの順序で描画
     for (auto& [itemName, itemPtr] : sortedItems) {
 		// EventCountは専用の追加・削除UIで扱い、数値ドラッグは表示しない。
-		if (groupPath == "Energy/PlayingTimeline" && itemName == "EventCount") {
+		if (groupPath.ends_with("/PlayingTimeline") && itemName == "EventCount") {
 			continue;
 		}
 
         ImGui::PushID(itemName.c_str());
-		if (!DrawEnergyTimelineItem(groupPath, itemName, *itemPtr)) {
+		if (!DrawPlayingTimelineItem(groupPath, itemName, *itemPtr)) {
 			std::visit(DebugParameterVisitor{ itemName, itemPtr->isDirty, textureManager_ }, itemPtr->value);
 		}
         ImGui::Separator();
@@ -121,7 +134,7 @@ void InspectorWindow::DrawItems(GameParamEditor::Group& group, const std::string
     }
 }
 
-void InspectorWindow::DrawEnergyTimelineControls(GameParamEditor::Group& group) {
+void InspectorWindow::DrawPlayingTimelineControls(GameParamEditor::Group& group) {
     auto countIt = group.items.find("EventCount");
     if (countIt == group.items.end() || !std::holds_alternative<int32_t>(countIt->second.value)) {
         ImGui::TextDisabled("Timeline is unavailable.");
@@ -146,15 +159,17 @@ void InspectorWindow::DrawEnergyTimelineControls(GameParamEditor::Group& group) 
     ImGui::Separator();
 }
 
-bool InspectorWindow::DrawEnergyTimelineItem(
+bool InspectorWindow::DrawPlayingTimelineItem(
     const std::string& groupPath,
     const std::string& itemName,
     GameParamEditor::Item& item) {
-    if (!groupPath.starts_with("Energy/PlayingTimeline/Events/Event")) {
+    const bool isEnergyEvent = groupPath.starts_with("Energy/PlayingTimeline/Events/Event");
+    const bool isEnemyEvent = groupPath.starts_with("EnemyManager/PlayingTimeline/Events/Event");
+    if (!isEnergyEvent && !isEnemyEvent) {
         return false;
     }
 
-    if (itemName == "EnergySize" && std::holds_alternative<int32_t>(item.value)) {
+    if (isEnergyEvent && itemName == "EnergySize" && std::holds_alternative<int32_t>(item.value)) {
         constexpr const char* kEnergySizeNames[] = { "Small", "Medium", "Large", "Special" };
         auto& value = std::get<int32_t>(item.value);
         value = (std::clamp)(value, 0, static_cast<int32_t>(std::size(kEnergySizeNames)) - 1);

@@ -3,9 +3,9 @@
         "0_Straight_S": {
             "HP": 1,
             "HighlightColor": [
-                0.7220077514648438,
-                0.15610982477664948,
-                0.15610982477664948,
+                1.0,
+                0.8999999761581421,
+                0.4000000059604645,
                 1.0
             ],
             "HitColor": [
@@ -20,8 +20,8 @@
                 1.0,
                 1.0
             ],
-            "Size": 0.8600000143051147,
-            "Speed": 1.0
+            "Size": 1.0,
+            "Speed": 2.0
         },
         "1_Straight_M": {
             "HP": 3,
@@ -119,8 +119,40 @@
             "SwingWidth": 3.0999999046325684
         },
         "CollisionRadius": 1.2200000286102295,
+        "PlayingTimeline": {
+            "EventCount": 6,
+            "Events": {
+                "Event000": {
+                    "ArcPosition": 0.3540000021457672,
+                    "TimeSeconds": 1.0
+                },
+                "Event001": {
+                    "ArcPosition": 0.6510000228881836,
+                    "TimeSeconds": 1.0
+                },
+                "Event002": {
+                    "ArcPosition": 0.10100000351667404,
+                    "TimeSeconds": 3.0
+                },
+                "Event003": {
+                    "ArcPosition": 0.20100000500679016,
+                    "TimeSeconds": 3.0
+                },
+                "Event004": {
+                    "ArcPosition": 0.8989999890327454,
+                    "TimeSeconds": 5.0
+                },
+                "Event005": {
+                    "ArcPosition": 0.7990000247955322,
+                    "TimeSeconds": 5.0
+                }
+            }
+        },
         "Pop": false,
         "PopInterval": 3.0,
-        "SceneName": "Game"
+        "SceneName": "Game",
+        "Spawn": {
+            "StageSpawnEnabled": false
+        }
     }
 }

@@ -14,6 +14,13 @@ class EnergySpawner;
 class UnitManager;
 class EnemyEffectManager;
 
+/// @brief GamePlaying開始からの経過時間で発火する敵生成イベント。
+struct ScheduledEnemySpawnEvent {
+	float timeSeconds = 0.0f; // GamePlaying開始から生成までの秒数
+	float arcPosition = 0.5f; // 外周半円の左端0.0、中央0.5、右端1.0
+	bool hasSpawned = false; // 現在のPlayingで生成済みか（保存対象外）
+};
+
 class EnemyManager : public GameEngine::IGameObject {
 public:
 
@@ -47,6 +54,12 @@ public:
 	void SetAutoSpawnEnabled(bool enabled) { autoSpawnEnabled_ = enabled; }
 	bool IsAutoSpawnEnabled() const { return autoSpawnEnabled_; }
 
+	/// @brief GamePlaying用の敵生成タイムラインを先頭から開始する。
+	void BeginPlayingTimeline();
+
+	/// @brief GamePlaying用の敵生成タイムラインを停止する。
+	void EndPlayingTimeline();
+
 	// 現在アクティブな敵の数を取得
 	size_t GetActiveCount() const { return activeEnemies_.size(); }
 	int GetCurrentNum() const { return static_cast<int>(activeEnemies_.size()); }
@@ -59,6 +72,14 @@ public:
 private:
 
 	void LoadPreset();
+	void ApplyDebugParameters();
+	void UpdatePlayingTimeline(float deltaTime);
+	Vector2 MakeTimelineSpawnPosition(float arcPosition) const;
+	void InitializeTimelineEvents();
+	void ResizeTimelineEvents(size_t count);
+	void RegisterTimelineEvent(size_t index);
+	void RegisterTimelineEventCount();
+	void SanitizeTimelineEvents();
 
 	const uint32_t maxEnemyNum_ = 0;
 
@@ -83,6 +104,11 @@ private:
 	float popTimer_ = 0.0f;
 	bool gameplayEnabled_ = true;
 	bool autoSpawnEnabled_ = false;
+	bool stageSpawnEnabled_ = true; // 従来のステージプリセット生成を行うか
+	std::vector<std::unique_ptr<ScheduledEnemySpawnEvent>> timelineEvents_;
+	int32_t timelineEventCount_ = 0;
+	float playingTimelineElapsed_ = 0.0f;
+	bool playingTimelineActive_ = false;
 
 private:
 	// 演出管理

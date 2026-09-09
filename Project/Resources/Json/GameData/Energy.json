@@ -6,22 +6,37 @@
             "RotationSpeed": 1.5
         },
         "PlayingTimeline": {
-            "EventCount": 3,
+            "EventCount": 6,
             "Events": {
                 "Event000": {
                     "ArcPosition": 0.5,
                     "EnergySize": 0,
-                    "TimeSeconds": 1.0
+                    "TimeSeconds": 0.0
                 },
                 "Event001": {
                     "ArcPosition": 1.0,
                     "EnergySize": 0,
-                    "TimeSeconds": 1.0
+                    "TimeSeconds": 0.0
                 },
                 "Event002": {
                     "ArcPosition": 0.0,
                     "EnergySize": 0,
-                    "TimeSeconds": 1.0
+                    "TimeSeconds": 0.0
+                },
+                "Event003": {
+                    "ArcPosition": 0.25099998712539673,
+                    "EnergySize": 1,
+                    "TimeSeconds": 2.5
+                },
+                "Event004": {
+                    "ArcPosition": 0.7509999871253967,
+                    "EnergySize": 1,
+                    "TimeSeconds": 2.5
+                },
+                "Event005": {
+                    "ArcPosition": 0.5,
+                    "EnergySize": 2,
+                    "TimeSeconds": 5.0
                 }
             }
         },
@@ -35,15 +50,15 @@
             "InitialCountPerZone": 0,
             "Lifetime": 20.0,
             "MaxActiveCount": 64,
-            "RandomSpawnEnabled": true,
+            "RandomSpawnEnabled": false,
             "SpawnInterval": 2.0
         },
         "Type": {
             "Large": {
                 "Color": [
-                    0.0895896628499031,
-                    0.040115684270858765,
-                    0.15057915449142456,
+                    0.07346342504024506,
+                    0.21621620655059814,
+                    0.10212419927120209,
                     1.0
                 ],
                 "Scale": 2.5,
@@ -57,17 +72,17 @@
                 "rainbowSaturation": 0.8500000238418579,
                 "rainbowSpeed": 0.25,
                 "rimColor": [
-                    0.9343628883361816,
-                    0.0,
+                    0.07722008228302002,
                     1.0,
+                    0.0,
                     1.0
                 ]
             },
             "Medium": {
                 "Color": [
-                    0.09366288781166077,
-                    0.15172076225280762,
                     0.23552125692367554,
+                    0.09366288781166077,
+                    0.09366288781166077,
                     1.0
                 ],
                 "Scale": 1.7999999523162842,
@@ -81,9 +96,9 @@
                 "rainbowSaturation": 0.8500000238418579,
                 "rainbowSpeed": 0.25,
                 "rimColor": [
-                    0.0,
-                    0.9189190864562988,
                     1.0,
+                    0.0,
+                    0.0,
                     1.0
                 ]
             },
