@@ -45,20 +45,16 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			}
 			// UnitがEnergyを持っていない場合
 			else {
+				hp_ = 0; 
+
 				if (hitUnit->GetStamina() > 0.0f) {
-					hp_ = 0;
-					damageTimer_ = 0.0f;
-
-					if (hp_ <= 0) {
-						EnergyPickup* droppedEnergy = this->DefeatAndDropEnergy();
-						if (droppedEnergy) {
-							hitUnit->StartCarryingEnergy(droppedEnergy);
-						}
+					EnergyPickup* droppedEnergy = this->DefeatAndDropEnergy();
+					if (droppedEnergy) {
+						hitUnit->StartCarryingEnergy(droppedEnergy);
 					}
-				} else {
-					// スタミナが0の場合：相打ち
+				}
+				else {
 					this->DefeatAndDropEnergy();
-
 					hitUnit->ReturnToStorageAfterDefeat();
 				}
 			}

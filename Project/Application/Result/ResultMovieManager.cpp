@@ -81,7 +81,7 @@ void ResultMovieManager::Update() {
 		// バーをおろす
 		letterboxUI_.SetBarActive(false);
 
-		if (rocketEffect_->GetEnergy() > 1.0f) {
+		if (rocketEffect_->GetEnergy() >= 1.0f) {
 			if (isExplo_) { return; }
 			AudioManager::GetInstance().Play(moonBreakSH_, 0.5f, false);
 			isExplo_ = true;

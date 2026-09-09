@@ -51,7 +51,7 @@ private:
 	GameEngine::InputCommand* inputCommand_ = nullptr;
 	bool isSceneFinished_ = false;
 
-	const int aimScore_ = 150;
+	const int aimScore_ = 100;
 	const int aimScoreDistance_ = 1000000;
 
 	std::vector<int> scoreDigits_;
@@ -87,6 +87,7 @@ private:
 	uint32_t setNumSH_ = 0;
 	// タイトル
 	uint32_t backTitleSH_ = 0;
+	uint32_t bgmSH_ = 0;
 
 	enum Type {
 		Shuffle,

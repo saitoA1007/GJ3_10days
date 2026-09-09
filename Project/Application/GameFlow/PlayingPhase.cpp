@@ -58,6 +58,10 @@ void PlayingPhase::OnEnter(GameFlowContext& context)
 	if (context.unitCountUI) {
 		context.unitCountUI->SetActive(true);
 	}
+
+	if (context.rocket) {
+		context.rocket->SetActive(true);
+	}
 }
 
 bool PlayingPhase::OnUpdate(GameFlowContext& context)
@@ -133,6 +137,7 @@ void PlayingPhase::OnExit(GameFlowContext& context)
 	if (context.rocket)
 	{
 		context.finalEnergy = context.rocket->GetEnergy(); 
+		context.rocket->SetActive(false);
 	}
 
 	if (context.unitCountUI) {
