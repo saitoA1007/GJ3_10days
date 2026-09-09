@@ -8,6 +8,7 @@
 
 #include "Application/Enemy/EnemyManager.h"
 #include "Application/Energy/EnergySpawner.h"
+#include "Application/HalfTime/HalfTimeView.h"
 #include "Application/LockOn/LockOnController.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/Unit/UnitManager.h"
@@ -48,6 +49,7 @@ void GameFlow::Initialize()
 	ApplyDebugParameters();
 	currentPhaseIndex_ = 0;
 	debugPaused_ = false;
+	isHalfTimeDebugPreviewPlaying_ = false;
 
 	// パラメータを反映した状態でフェーズシーケンスを構築
 	BuildPhases();
@@ -92,7 +94,12 @@ void GameFlow::Update()
 	}
 
 	IGamePhase* current = phases_[currentPhaseIndex_].get();
-	if (current->OnUpdate(context_))
+	const bool shouldAdvance = current->OnUpdate(context_);
+	if (context_.halfTimeView && !isHalfTimeDebugPreviewPlaying_)
+	{
+		context_.halfTimeView->Update(FpsCounter::deltaTime);
+	}
+	if (shouldAdvance)
 	{
 		AdvanceToNextPhase();
 	}
@@ -206,6 +213,12 @@ void GameFlow::DebugUpdate()
 {
 	ApplyDebugParameters();
 #ifdef USE_IMGUI
+	if (isHalfTimeDebugPreviewPlaying_ && context_.halfTimeView)
+	{
+		context_.halfTimeView->Update(FpsCounter::deltaTime);
+		isHalfTimeDebugPreviewPlaying_ = context_.halfTimeView->IsVisible();
+	}
+
 	if (ImGui::Begin("Game Flow"))
 	{
 		IGamePhase* current = GetCurrentPhase();
@@ -220,7 +233,6 @@ void GameFlow::DebugUpdate()
 			debugPaused_ = !debugPaused_;
 			ApplyGameplayState();
 		}
-
 		ImGui::Separator();
 		ImGui::Text("Phase List:");
 		for (size_t i = 0; i < phases_.size(); ++i)
@@ -234,6 +246,29 @@ void GameFlow::DebugUpdate()
 			char label[32];
 			sprintf_s(label, "Jump##%zu", i);
 			if (ImGui::Button(label)) ChangePhase(i);
+		}
+	}
+	ImGui::End();
+
+	if (ImGui::Begin("Half Time Preview"))
+	{
+		if (context_.halfTimeView)
+		{
+			if (ImGui::Button("Play Half Time"))
+			{
+				context_.halfTimeView->Start();
+				isHalfTimeDebugPreviewPlaying_ = true;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Stop"))
+			{
+				context_.halfTimeView->Stop();
+				isHalfTimeDebugPreviewPlaying_ = false;
+			}
+		}
+		else
+		{
+			ImGui::TextDisabled("HalfTimeView is unavailable.");
 		}
 	}
 	ImGui::End();

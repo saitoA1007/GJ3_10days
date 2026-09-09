@@ -22,6 +22,7 @@ class UnitManager;
 class TutorialCameraModelView;
 class TutorialTextSequence;
 class StartPlayingView;
+class HalfTimeView;
 
 namespace GameEngine
 {
@@ -116,6 +117,7 @@ private: // シーン機能
 	std::unique_ptr<TutorialCameraModelView> tutorialLogo2View_;
 	std::unique_ptr<TutorialTextSequence> tutorialTextSequence_;
 	std::unique_ptr<StartPlayingView> startPlayingView_;
+	std::unique_ptr<HalfTimeView> halfTimeView_;
 	std::unique_ptr<GameEngine::ControllerVibration> controllerVibration_;
 	std::unique_ptr<GameEngine::Sprite> fadeSprite_;
 	float fadeElapsedTime_ = 0.0f;
