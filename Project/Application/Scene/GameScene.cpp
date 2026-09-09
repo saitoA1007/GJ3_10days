@@ -28,6 +28,7 @@ using namespace GameEngine;
 #include "Application/Effect/MoonObject.h"
 #include "Application/Effect/RocketEffect.h"
 #include "Application/Effect/ExplosionEffect.h"
+#include "Application/Effect/IncorporateEffect.h"
 #include <Application/result/ShuffleNumber.h>
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
@@ -460,8 +461,10 @@ GameScene::GameScene() {
 
 	// ブラックホールのテスト
 	//auto* sphereModel = modelManager_->GetNameByModel("sphere.obj");
-	auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
-	gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+	//auto* ringModel = modelManager_->GetNameByModel("blackHoleRing.gltf");
+	//gameObjectManager_->AddObject<BlackHoleEffect>(sphereModel, ringModel);
+
+	//gameObjectManager_->AddObject<IncorporateEffect>(modelManager_, textureManager_, gameObjectManager_);
 
 	//// ポール
 	//auto* poleModel = modelManager_->GetNameByModel("pole.gltf");
