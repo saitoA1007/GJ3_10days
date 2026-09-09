@@ -16,7 +16,9 @@ namespace
 {
 	constexpr const char* kDescentSoundName = "rocketDescent.mp3";
 	constexpr const char* kLandingSoundName = "rocketLanding.mp3";
+	constexpr const char* kEnergyChargeSoundName = "energyCharge.mp3";
 	constexpr float kEntranceSoundVolume = 1.0f;
+	constexpr float kEnergyChargeSoundVolume = 1.0f;
 }
 
 Rocket::Rocket(Model* model, FieldEffect* fieldEffect, const RocketSettings& settings)
@@ -126,6 +128,14 @@ EnergyChange Rocket::DepositEnergy(int32_t amount)
 	// 増減理由を付けておくことで、将来UIや演出が変化元を判別できる。
 	const EnergyChange change = energy_.Add(amount, EnergyChangeReason::Delivery);
 	NotifyEnergyChanged(change);
+	if (change.Changed())
+	{
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t energyChargeSoundHandle =
+			audioManager.GetHandleByName(kEnergyChargeSoundName);
+		audioManager.Stop(energyChargeSoundHandle);
+		audioManager.Play(energyChargeSoundHandle, kEnergyChargeSoundVolume, false);
+	}
 	// 取得したことによるフィールド演出
 	fieldEffect_->Start({0.0f,1.0f,0.137f,1.0f});
 	return change;
