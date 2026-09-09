@@ -34,6 +34,7 @@ public:
 		GameEngine::Model* circleModel,
 		Rocket* rocket,
 		GameEngine::Model* baemModel,
+		GameEngine::Model* markerModel,
 		uint32_t beamGH,
 		GameEngine::Model* arrowModel,
 		uint32_t lineGH,

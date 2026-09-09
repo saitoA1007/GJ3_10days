@@ -15,7 +15,7 @@
 using namespace GameEngine;
 
 UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocket* rocket,
-	GameEngine::Model* baemModel, uint32_t beamGH,
+	GameEngine::Model* baemModel, GameEngine::Model* markerModel, uint32_t beamGH,
 	GameEngine::Model* arrowModel, uint32_t lineGH,
 	UnitEffectManager* unitEffectManager, EnergySpawner* energySpawner, EnemyManager* enemyManager, size_t capacity)
 	: rocket_(rocket), energySpawner_(energySpawner), enemyManager_(enemyManager)
@@ -29,7 +29,7 @@ UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocke
 	for (size_t i = 0; i < safeCapacity; ++i)
 	{
 		units_.push_back(std::make_unique<Unit>(
-			unitModel, circleModel, rocket_, &settings_.unit, baemModel, beamGH, arrowModel, lineGH, energySpawner_));
+			unitModel, circleModel, rocket_, &settings_.unit, baemModel, beamGH, arrowModel, lineGH, energySpawner_, markerModel));
 	}
 
 	debugParameter_ = std::make_unique<DebugParameter>("Unit");
