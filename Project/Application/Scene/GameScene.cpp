@@ -499,10 +499,13 @@ GameScene::GameScene() {
 			text13Definition,
 			textEndDefinition });
 
+	// エネルギーアイコン
+	auto* energyIconModel = modelManager_->GetNameByModel("energyIcon.obj");
+	energyIconModel->SetDefaultIsEnableLight(false);
 	energyView_ = gameObjectManager_->AddObject<EnergyView>(
 		digitModels,
 		mainCamera_.get(),
-		rocket_);
+		rocket_, energyIconModel);
 
 	//==============================================
 	// これより下はエフェクトのテストで書いています
