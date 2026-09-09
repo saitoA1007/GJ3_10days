@@ -90,6 +90,10 @@ private: // シーン機能
 	void UpdateTutorialViews(bool advanceAnimation);
 	/// チュートリアル表示をカメラへ追従させて描画
 	void DrawTutorialViews();
+	/// 現在のゲーム進行がチュートリアルか
+	bool IsTutorialPhase() const;
+	/// 右側のスコアモデルを非表示にする進行中か
+	bool ShouldHideRightScoreModels() const;
 
 	std::unique_ptr<GameEngine::Camera> mainCamera_;                // 3D描画とマウスレイ投影に使うカメラ
 	std::unique_ptr<GameEngine::DebugParameter> mainCameraDebugParameter_; // Translate / Rotate の確認・調整用
