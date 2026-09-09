@@ -26,6 +26,7 @@ ResultMovieManager::ResultMovieManager(ResultMoveCamera* camera, MoonObject* moo
 
 void ResultMovieManager::Initialize() {
 	letterboxUI_.Initialize();
+	letterboxUI_.Update();
 	rocketEffect_->Reset();
 
 	explosionEffect_->SetActive(false);
