@@ -102,6 +102,7 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type, uint32_t effe
 	wasDefeated_ = false;
 	isReservedForAttack_ = false;
 	isHighlighted_ = false;
+	movementEnabled_ = true;
 	targetUnit_ = nullptr;
 
 	hp_ = config_.hp;
@@ -136,9 +137,6 @@ void Enemy::Update() {
 
 	timer_ += GameEngine::FpsCounter::deltaTime;
 
-	// 運搬中ユニットの索敵
-	UpdateTarget();
-
 	// 移動
 	if (isBeingPulled_) {
 		collider_.SetActive(false); 
@@ -147,14 +145,19 @@ void Enemy::Update() {
 	else {
 		collider_.SetActive(true);  
 
-		if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
-			TrackingMovement(GameEngine::FpsCounter::deltaTime);
-		} else {
-			if (type_ == EnemyType::Round) {
-				RoundMovement();
-			}
-			else {
-				DefaultMovement();
+		if (movementEnabled_)
+		{
+			// 運搬中ユニットの索敵
+			UpdateTarget();
+			if (targetUnit_ && targetUnit_->IsCarryingEnergy()) {
+				TrackingMovement(GameEngine::FpsCounter::deltaTime);
+			} else {
+				if (type_ == EnemyType::Round) {
+					RoundMovement();
+				}
+				else {
+					DefaultMovement();
+				}
 			}
 		}
 	}
@@ -265,6 +268,17 @@ void Enemy::CancelAttackReservation() {
 void Enemy::SetHighlighted(bool highlighted) {
 	if (!isActive_) return;
 	isHighlighted_ = highlighted;
+}
+
+void Enemy::SetMovementEnabled(bool enabled)
+{
+	movementEnabled_ = enabled;
+	if (!movementEnabled_)
+	{
+		targetUnit_ = nullptr;
+		data_->transform.translate.y = 0.7f * config_.size_;
+		collider_.SetWorldPosition(data_->transform.translate);
+	}
 }
 
 EnergyPickup* Enemy::DefeatAndDropEnergy() {

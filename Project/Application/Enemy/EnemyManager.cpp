@@ -1,4 +1,5 @@
 #include "EnemyManager.h"
+#include <algorithm>
 #include <LogManager.h>
 #include <Application/Utils/ShigeFunc.h>
 #include <RandomGenerator.h>
@@ -432,6 +433,51 @@ Enemy* EnemyManager::Pop(int num, Vector2 position, EnemyType type) {
 		}
 	}
 	return firstSpawnedEnemy;
+}
+
+void EnemyManager::Despawn(Enemy* enemy)
+{
+	if (!enemy)
+	{
+		return;
+	}
+
+	for (auto it = activeEnemies_.begin(); it != activeEnemies_.end(); ++it)
+	{
+		if (it->second != enemy)
+		{
+			continue;
+		}
+
+		const int index = it->first;
+		if (commonEffect_)
+		{
+			commonEffect_->ReleaseEffectID(enemy->GetEffectID());
+		}
+		enemy->Initialize();
+		activeEnemies_.erase(it);
+		freeEnemyIndices_.push_back(index);
+		activeEnemyVector_.erase(
+			(std::remove)(activeEnemyVector_.begin(), activeEnemyVector_.end(), enemy),
+			activeEnemyVector_.end());
+		worldTransforms_.UpdateTransformMatrix(maxEnemyNum_);
+		return;
+	}
+
+	for (auto it = deadEnemies_.begin(); it != deadEnemies_.end(); ++it)
+	{
+		if (it->second != enemy)
+		{
+			continue;
+		}
+
+		const int index = it->first;
+		enemy->Initialize();
+		deadEnemies_.erase(it);
+		freeEnemyIndices_.push_back(index);
+		worldTransforms_.UpdateTransformMatrix(maxEnemyNum_);
+		return;
+	}
 }
 
 void EnemyManager::LoadPreset() {

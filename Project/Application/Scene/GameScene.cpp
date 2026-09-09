@@ -456,6 +456,25 @@ GameScene::GameScene() {
 	text13Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
 	text13Definition.showSuccessColor = false;
 
+	TutorialTextSequence::StepDefinition text14Definition{};
+	text14Definition.phaseStep = TutorialPhase::Step::UnitHold;
+	text14Definition.model = modelManager_->GetNameByModel("tutorialText14.obj");
+	text14Definition.parameterGroupName = "TutorialText14";
+	text14Definition.viewSettings.startPosition = { 0.0f, -40.0f, -25.0f };
+	text14Definition.viewSettings.endPosition = { 0.0f, -34.5f, -25.0f };
+	text14Definition.viewSettings.rotation = { 1.721f, 3.14159274f, 0.0f };
+	text14Definition.viewSettings.scale = 1.0f;
+	text14Definition.viewSettings.startDelay = 0.5f;
+	text14Definition.viewSettings.moveDuration = 0.5f;
+	text14Definition.viewSettings.easeType = EaseType::kEaseOutExpo;
+	text14Definition.onActivated = [this]()
+	{
+		if (gameFlow_)
+		{
+			gameFlow_->BeginTutorialUnitHoldStep();
+		}
+	};
+
 	TutorialTextSequence::StepDefinition textEndDefinition{};
 	textEndDefinition.progressMode = TutorialTextSequence::ProgressMode::TimedHold;
 	textEndDefinition.model = modelManager_->GetNameByModel("tutorialTextEnd.obj");
@@ -497,6 +516,7 @@ GameScene::GameScene() {
 			text11Definition,
 			text12Definition,
 			text13Definition,
+			text14Definition,
 			textEndDefinition });
 
 	// エネルギーアイコン

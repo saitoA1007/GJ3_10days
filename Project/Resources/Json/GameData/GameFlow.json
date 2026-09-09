@@ -29,7 +29,32 @@
                 0.0,
                 -18.0
             ],
-            "RequiredHoldDuration": 1.0
+            "RequiredHoldDuration": 1.0,
+            "StaticEnemy0PositionXZ": [
+                -5.0,
+                -20.0
+            ],
+            "StaticEnemy1PositionXZ": [
+                5.0,
+                -20.0
+            ],
+            "StaticUnitPositionXZ": [
+                0.0,
+                -14.0
+            ],
+            "UnitEnergy0PositionXZ": [
+                -4.0,
+                -14.0
+            ],
+            "UnitEnergy1PositionXZ": [
+                0.0,
+                -18.0
+            ],
+            "UnitEnergy2PositionXZ": [
+                4.0,
+                -14.0
+            ],
+            "UnitRequiredHoldDuration": 2.0
         }
     }
 }

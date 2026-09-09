@@ -72,6 +72,12 @@ public:
 
 	bool DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy);
 
+	/// @brief チュートリアル用の静止ユニットを1体配置する。
+	Unit* SpawnTutorialStaticUnit(const Vector3& position);
+
+	/// @brief チュートリアル用の静止ユニットを待機状態へ戻す。
+	void RecallTutorialStaticUnit(Unit* unit);
+
 	/// @brief 指定位置の索敵範囲内にいる、最も近い運搬ユニットを探す。
 	Unit* FindNearestCarryingUnit(const Vector3& position, float maxDistance) const;
 

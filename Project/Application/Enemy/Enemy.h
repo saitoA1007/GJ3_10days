@@ -67,6 +67,7 @@ public:
 	void SetSnake(float width, float speed) { snakeWidth_ = width; snakeSpeed_ = speed; }
 	void SetRound(float speed) { roundSpeed_ = speed; }
 	void SetDamageTime(float time) { damageTime_ = time; }
+	void SetMovementEnabled(bool enabled);
 	void SetHighlighted(bool highlighted);
 
 	bool IsTargetable() const { return isActive_ && !isDead_ && !isReservedForAttack_; }
@@ -127,6 +128,7 @@ private:
 	bool wasDefeated_ = false;
 	bool isReservedForAttack_ = false; // ユニット攻撃の予約状態
 	bool isHighlighted_ = false;        // ロックオンハイライト中か
+	bool movementEnabled_ = true;       // falseなら現在座標で静止
 
 	float damageTimer_ = 0.0f;
 	float snakeTimer_ = 0.0f;

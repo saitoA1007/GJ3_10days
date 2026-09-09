@@ -14,6 +14,7 @@ using namespace GameEngine;
 
 namespace
 {
+	constexpr const char* kLockOnPushCommand = "LockOnPush";
 	constexpr const char* kLockOnReleaseCommand = "LockOnRelease";
 	constexpr const char* kSkipTutorialCommand = "SkipTutorial";
 	constexpr const char* kTutorialBgmName = "tutorialBGM.mp3";
@@ -31,6 +32,12 @@ void TutorialPhase::OnEnter(GameFlowContext& context)
 	step_ = Step::SelectEnergy;
 	chargeEnergy_ = nullptr;
 	enemyHoldTarget_ = nullptr;
+	tutorialUnitHoldTarget_ = nullptr;
+	tutorialUnitEnergies_.fill(nullptr);
+	tutorialStaticEnemies_.fill(nullptr);
+	tutorialUnitHoldElapsed_ = 0.0f;
+	tutorialUnitHoldStarted_ = false;
+	tutorialUnitBlackholeStarted_ = false;
 	enemyHitCountAtSpawn_ = context.rocket ? context.rocket->GetEnemyHitCount() : 0;
 	if (context.lockOnController)
 	{
@@ -141,8 +148,57 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 			context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_;
 		if (enemyHoldCompleted || enemyDefeated || enemyReachedRocket)
 		{
-			step_ = Step::Complete;
+			step_ = Step::WaitForUnitHoldInstruction;
 			context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
+		}
+		break;
+	}
+	case Step::WaitForUnitHoldInstruction:
+		break;
+	case Step::UnitHold:
+	{
+		const float requiredHoldDuration = context.settings
+			? (std::max)(context.settings->tutorialUnitRequiredHoldDuration, 0.0f)
+			: 0.0f;
+		const bool isHolding = context.inputCommand &&
+			context.inputCommand->IsCommandActive(kLockOnPushCommand);
+		const bool released = context.inputCommand &&
+			context.inputCommand->IsCommandActive(kLockOnReleaseCommand);
+		const bool targetHovered = context.lockOnController &&
+			context.lockOnController->IsTutorialHoldTargetHovered();
+
+		if (!tutorialUnitBlackholeStarted_ && isHolding && targetHovered)
+		{
+			if (!tutorialUnitHoldStarted_)
+			{
+				tutorialUnitHoldElapsed_ = 0.0f;
+				tutorialUnitHoldStarted_ = true;
+			}
+			tutorialUnitHoldElapsed_ +=
+				(std::max)(GameEngine::FpsCounter::deltaTime, 0.0f);
+
+			if (tutorialUnitHoldElapsed_ >= requiredHoldDuration &&
+				tutorialUnitHoldTarget_)
+			{
+				tutorialUnitBlackholeStarted_ =
+					tutorialUnitHoldTarget_->ActivateBlackhole();
+			}
+		}
+		else if (!tutorialUnitBlackholeStarted_ && isHolding)
+		{
+			tutorialUnitHoldElapsed_ = 0.0f;
+			tutorialUnitHoldStarted_ = false;
+		}
+
+		if (released)
+		{
+			if (tutorialUnitBlackholeStarted_)
+			{
+				step_ = Step::Complete;
+			}
+			tutorialUnitHoldElapsed_ = 0.0f;
+			tutorialUnitHoldStarted_ = false;
+			tutorialUnitBlackholeStarted_ = false;
 		}
 		break;
 	}
@@ -162,9 +218,34 @@ void TutorialPhase::OnExit(GameFlowContext& context)
 	{
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
 		context.lockOnController->SetEnemySelectionEnabled(true);
+		context.lockOnController->SetTutorialHoldTarget(nullptr);
+	}
+	if (context.unitManager)
+	{
+		context.unitManager->RecallTutorialStaticUnit(tutorialUnitHoldTarget_);
+	}
+	for (EnergyPickup* energy : tutorialUnitEnergies_)
+	{
+		if (energy && energy->IsActive())
+		{
+			energy->Deactivate();
+		}
+	}
+	if (context.enemyManager)
+	{
+		for (Enemy* enemy : tutorialStaticEnemies_)
+		{
+			context.enemyManager->Despawn(enemy);
+		}
 	}
 	chargeEnergy_ = nullptr;
 	enemyHoldTarget_ = nullptr;
+	tutorialUnitHoldTarget_ = nullptr;
+	tutorialUnitEnergies_.fill(nullptr);
+	tutorialStaticEnemies_.fill(nullptr);
+	tutorialUnitHoldElapsed_ = 0.0f;
+	tutorialUnitHoldStarted_ = false;
+	tutorialUnitBlackholeStarted_ = false;
 }
 
 void TutorialPhase::BeginChargeEnergyStep(GameFlowContext& context)
@@ -244,4 +325,54 @@ void TutorialPhase::BeginEnemyHoldStep(GameFlowContext& context)
 	{
 		context.lockOnController->SetMinimumDispatchHoldSeconds(0.0f);
 	}
+}
+
+void TutorialPhase::BeginUnitHoldStep(GameFlowContext& context)
+{
+	if (step_ != Step::WaitForUnitHoldInstruction ||
+		!context.unitManager || !context.energySpawner ||
+		!context.enemyManager || !context.lockOnController || !context.settings)
+	{
+		return;
+	}
+
+	const Vector2& unitPosition = context.settings->tutorialStaticUnitPositionXZ;
+	tutorialUnitHoldTarget_ = context.unitManager->SpawnTutorialStaticUnit(
+		{ unitPosition.x, 0.0f, unitPosition.y });
+	if (!tutorialUnitHoldTarget_)
+	{
+		return;
+	}
+
+	const std::array<Vector2, 3> energyPositions = {
+		context.settings->tutorialUnitEnergy0PositionXZ,
+		context.settings->tutorialUnitEnergy1PositionXZ,
+		context.settings->tutorialUnitEnergy2PositionXZ,
+	};
+	for (size_t i = 0; i < energyPositions.size(); ++i)
+	{
+		tutorialUnitEnergies_[i] = context.energySpawner->SpawnOnGround(
+			EnergySize::Small,
+			{ energyPositions[i].x, 0.0f, energyPositions[i].y });
+	}
+
+	const std::array<Vector2, 2> enemyPositions = {
+		context.settings->tutorialStaticEnemy0PositionXZ,
+		context.settings->tutorialStaticEnemy1PositionXZ,
+	};
+	for (size_t i = 0; i < enemyPositions.size(); ++i)
+	{
+		tutorialStaticEnemies_[i] = context.enemyManager->Pop(
+			1, enemyPositions[i], EnemyType::Straight_S);
+		if (tutorialStaticEnemies_[i])
+		{
+			tutorialStaticEnemies_[i]->SetMovementEnabled(false);
+		}
+	}
+
+	tutorialUnitHoldElapsed_ = 0.0f;
+	tutorialUnitHoldStarted_ = false;
+	tutorialUnitBlackholeStarted_ = false;
+	context.lockOnController->SetTutorialHoldTarget(tutorialUnitHoldTarget_);
+	step_ = Step::UnitHold;
 }

@@ -23,6 +23,7 @@ class EnergyPickup;
 class EnergySpawner;
 class Field;
 class Rocket;
+class Unit;
 class UnitManager;
 
 /// @brief カーソル、対象選択、長押しチャージに関する調整値。
@@ -89,6 +90,10 @@ public:
 
 	/// @brief Enemyをロックオン候補に含めるか切り替える。
 	void SetEnemySelectionEnabled(bool enabled);
+
+	/// @brief Text14中に長押し判定する静止Unitを設定する。
+	void SetTutorialHoldTarget(Unit* unit);
+	bool IsTutorialHoldTargetHovered() const { return tutorialHoldTargetHovered_; }
 
 	/// @brief 現在のカーソル座標を取得する。
 	/// @return カーソル座標への参照。
@@ -192,6 +197,7 @@ private:
 	Vector3 cursorPosition_ = {};                               
 	EnergyPickup* selectedEnergy_ = nullptr;                    
 	Enemy* selectedEnemy_ = nullptr;                            
+	Unit* tutorialHoldTarget_ = nullptr;
 	float lockOnSeconds_ = 0.0f;                                
 	float maxChargeBlinkElapsedTime_ = 0.0f;
 	float minimumDispatchHoldSeconds_ = 0.0f;
@@ -205,5 +211,6 @@ private:
 	float injectAccumulator_ = 0.0f;
 	bool suppressLockOn_ = false;
 	bool hasUnitInRadius_ = false;
+	bool tutorialHoldTargetHovered_ = false;
 };
 

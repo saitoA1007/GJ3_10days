@@ -31,6 +31,7 @@ enum class UnitState : uint8_t
 	MovingToEnergy,    // 予約したEnergyへ移動中
 	MovingToEnemy,     // 予約したEnemyへ移動中
 	MovingToPosition,
+	TutorialStatic,    // チュートリアル用に指定座標で静止
 	ReturningToRocket, // Energyを頭上に載せて帰還中
 	Blackhole,
 };
@@ -114,6 +115,9 @@ public:
 	// 指定した地面の目標座標へ派遣する
 	bool DispatchToPosition(const Vector3& targetPosition, int32_t requestedEnergy);
 
+	// チュートリアル用の静止ユニットとして指定位置へ配置する
+	bool SetUpTutorialStatic(const Vector3& position);
+
 	// 予約を解放して強制的に待機状態へ戻す
 	void Recall();
 
@@ -138,6 +142,9 @@ public:
 
 	// カーソルを合わせてエネルギーを注入
 	bool InjectEnergy(int32_t requestedAmount);
+
+	// 現在位置で、通常プレイと同じブラックホール状態を開始する
+	bool ActivateBlackhole();
 
 	// ブラックホールの現在の有効半径を取得
 	float GetBlackholeRadius() const;
@@ -172,8 +179,10 @@ public:
 		return state_ == UnitState::MovingToEnergy ||
 			state_ == UnitState::MovingToEnemy ||
 			state_ == UnitState::ReturningToRocket ||
-			state_ == UnitState::MovingToPosition;
+			state_ == UnitState::MovingToPosition ||
+			state_ == UnitState::TutorialStatic;
 	}
+	bool IsTutorialStatic() const { return state_ == UnitState::TutorialStatic; }
 
 	// エネルギーを持って帰還中か判定
 	bool IsCarryingEnergy() const;

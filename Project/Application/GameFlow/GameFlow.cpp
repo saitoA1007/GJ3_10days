@@ -39,6 +39,13 @@ GameFlow::GameFlow(const GameFlowContext& context, const GameFlowSettings& setti
 	debugParameter_->Register("LockOnEnemyPositionXZ", settings_.tutorialLockOnEnemyPositionXZ, 4, "Tutorial");
 	debugParameter_->Register("EnemyHoldPositionXZ", settings_.tutorialEnemyHoldPositionXZ, 5, "Tutorial");
 	debugParameter_->Register("EnemyRequiredHoldDuration", settings_.tutorialEnemyRequiredHoldDuration, 6, "Tutorial");
+	debugParameter_->Register("StaticUnitPositionXZ", settings_.tutorialStaticUnitPositionXZ, 7, "Tutorial");
+	debugParameter_->Register("UnitEnergy0PositionXZ", settings_.tutorialUnitEnergy0PositionXZ, 8, "Tutorial");
+	debugParameter_->Register("UnitEnergy1PositionXZ", settings_.tutorialUnitEnergy1PositionXZ, 9, "Tutorial");
+	debugParameter_->Register("UnitEnergy2PositionXZ", settings_.tutorialUnitEnergy2PositionXZ, 10, "Tutorial");
+	debugParameter_->Register("StaticEnemy0PositionXZ", settings_.tutorialStaticEnemy0PositionXZ, 11, "Tutorial");
+	debugParameter_->Register("StaticEnemy1PositionXZ", settings_.tutorialStaticEnemy1PositionXZ, 12, "Tutorial");
+	debugParameter_->Register("UnitRequiredHoldDuration", settings_.tutorialUnitRequiredHoldDuration, 13, "Tutorial");
 	debugParameter_->Apply();
 
 	SetUpdateOrder(0);
@@ -119,6 +126,8 @@ void GameFlow::ApplyDebugParameters()
 		(std::max)(settings_.tutorialRequiredHoldDuration, 0.0f);
 	settings_.tutorialEnemyRequiredHoldDuration =
 		(std::max)(settings_.tutorialEnemyRequiredHoldDuration, 0.0f);
+	settings_.tutorialUnitRequiredHoldDuration =
+		(std::max)(settings_.tutorialUnitRequiredHoldDuration, 0.0f);
 }
 
 void GameFlow::BeginTutorialChargeEnergyStep()
@@ -273,5 +282,14 @@ void GameFlow::DebugUpdate()
 	}
 	ImGui::End();
 #endif
+}
+
+void GameFlow::BeginTutorialUnitHoldStep()
+{
+	auto* tutorialPhase = dynamic_cast<TutorialPhase*>(GetCurrentPhase());
+	if (tutorialPhase)
+	{
+		tutorialPhase->BeginUnitHoldStep(context_);
+	}
 }
 

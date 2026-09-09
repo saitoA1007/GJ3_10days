@@ -25,6 +25,7 @@ public:
 	void BeginTutorialEnemyCollisionStep();
 	void BeginTutorialEnemyLockOnStep();
 	void BeginTutorialEnemyHoldStep();
+	void BeginTutorialUnitHoldStep();
 
 	bool BackToTitle() const;
 

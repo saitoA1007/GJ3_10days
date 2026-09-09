@@ -103,6 +103,8 @@ void LockOnController::Initialize()
 	isCharging_ = false;
 	injectAccumulator_ = 0.0f;
 	enemySelectionEnabled_ = true;
+	tutorialHoldTarget_ = nullptr;
+	tutorialHoldTargetHovered_ = false;
 	SyncCursorModel();
 }
 
@@ -123,6 +125,39 @@ void LockOnController::Update()
 	hasUnitInRadius_ = false; 
 
 	const bool isPushActive = inputCommand_->IsCommandActive(kLockOnPushCommand);
+	if (tutorialHoldTarget_)
+	{
+		const Vector3 offset = tutorialHoldTarget_->GetPosition() - cursorPosition_;
+		const float distanceSquared = offset.x * offset.x + offset.z * offset.z;
+		const float selectionRadiusSquared =
+			settings_.selectionRadius * settings_.selectionRadius;
+		tutorialHoldTargetHovered_ =
+			tutorialHoldTarget_->IsTutorialStatic() &&
+			distanceSquared <= selectionRadiusSquared;
+		hasUnitInRadius_ = tutorialHoldTargetHovered_;
+		isInjecting_ = isPushActive && tutorialHoldTargetHovered_;
+		injectAccumulator_ = 0.0f;
+		if (tutorialHoldTargetHovered_)
+		{
+			tutorialHoldTarget_->Highlight();
+		}
+		if (isInjecting_)
+		{
+			injectAnimTimer_ += FpsCounter::gameDeltaTime * 10.0f;
+		}
+		else
+		{
+			injectAnimTimer_ = 0.0f;
+		}
+		if (isCharging_)
+		{
+			CancelLockOn();
+		}
+		SyncCursorModel();
+		SyncChargeModel();
+		return;
+	}
+	tutorialHoldTargetHovered_ = false;
 
 	if (!isPushActive)
 	{
@@ -216,7 +251,7 @@ void LockOnController::Draw()
 	{
 		cursorModel_->DrawRaytracing(renderQueue_);
 
-		if (isCharging_ && (selectedEnergy_ || selectedEnemy_))
+		if (isInjecting_ || (isCharging_ && (selectedEnergy_ || selectedEnemy_)))
 		{
 			chargeModel_->DrawRaytracing(renderQueue_);
 		}
@@ -235,6 +270,8 @@ void LockOnController::SetGameplayEnabled(bool enabled)
 	if (!gameplayEnabled_)
 	{
 		CancelLockOn();
+		isInjecting_ = false;
+		tutorialHoldTargetHovered_ = false;
 	}
 }
 
@@ -466,6 +503,21 @@ void LockOnController::SyncChargeModel()
 
 	chargeModel_->materialData_->color = GetChargeDisplayColor();
 	chargeModel_->Update();
+}
+
+void LockOnController::SetTutorialHoldTarget(Unit* unit)
+{
+	if (tutorialHoldTarget_ == unit)
+	{
+		return;
+	}
+
+	CancelLockOn();
+	tutorialHoldTarget_ = unit;
+	tutorialHoldTargetHovered_ = false;
+	isInjecting_ = false;
+	injectAccumulator_ = 0.0f;
+	injectAnimTimer_ = 0.0f;
 }
 
 void LockOnController::UpdateSelection()

@@ -107,6 +107,10 @@ void Unit::Update()
 	case UnitState::MovingToPosition:
 		UpdateMovingToPosition(FpsCounter::deltaTime);
 		break;
+	case UnitState::TutorialStatic:
+		collider_.SetActive(false);
+		SyncModel();
+		return;
 	case UnitState::ReturningToRocket:
 		UpdateReturningToRocket(FpsCounter::deltaTime);
 		break;
@@ -152,7 +156,10 @@ void Unit::Draw()
 	if (IsDeployed() && state_ != UnitState::Blackhole)
 	{
 		modelComponent_->DrawRaytracing(renderQueue_);
-		RopeEffect_.Draw();
+		if (!IsTutorialStatic())
+		{
+			RopeEffect_.Draw();
+		}
 	}
 
 	if (state_ == UnitState::Blackhole && blackholeModel_)
@@ -235,6 +242,26 @@ bool Unit::DispatchToPosition(const Vector3& targetPosition, int32_t requestedEn
 	}
 
 	collider_.SetActive(true);
+	SyncModel();
+	return true;
+}
+
+bool Unit::SetUpTutorialStatic(const Vector3& position)
+{
+	if (!IsAvailable())
+	{
+		return false;
+	}
+
+	targetEnergy_ = nullptr;
+	targetEnemy_ = nullptr;
+	targetPosition_ = position;
+	position_ = position;
+	position_.y = settings_->groundY;
+	stamina_ = 0.0f;
+	maxStamina_ = 0.0f;
+	state_ = UnitState::TutorialStatic;
+	collider_.SetActive(false);
 	SyncModel();
 	return true;
 }
@@ -498,33 +525,50 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 	// スタミナが閾値以上になったらブラックホール化
 	if (stamina_ >= settings_->bhEnergyThreshold)
 	{
-		state_ = UnitState::Blackhole;
-		blackholeTimer_ = settings_->bhDuration;
-		absorbedBasePoint_ = 0;
-		bhEffectTimer_ = 0.0f;
+		ActivateBlackhole();
+	}
 
-		// ブラックホールの演出を開始
-		Vector3 pos = modelComponent_->worldTransform_.transform_.translate;
-		unitEffectManager_->StartBlackHole(pos, GetBlackholeRadius() * 0.2f );
+	return true;
+}
 
-		collider_.SetActive(false);
+bool Unit::ActivateBlackhole()
+{
+	if (!IsDeployed() || !settings_ || !modelComponent_)
+	{
+		return false;
+	}
 
-		if (targetEnergy_)
+	state_ = UnitState::Blackhole;
+	blackholeTimer_ = settings_->bhDuration;
+	absorbedBasePoint_ = 0;
+	bhEffectTimer_ = 0.0f;
+
+	// 通常プレイと同じブラックホール演出を現在位置から開始する。
+	if (unitEffectManager_)
+	{
+		const Vector3 position = modelComponent_->worldTransform_.transform_.translate;
+		unitEffectManager_->StartBlackHole(position, GetBlackholeRadius() * 0.2f);
+	}
+
+	collider_.SetActive(false);
+
+	if (targetEnergy_)
+	{
+		if (targetEnergy_->IsCarried())
 		{
-			if (targetEnergy_->IsCarried()) {
-				targetEnergy_->DropOnGround(position_);
-			}
-			else {
-				targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
-			}
-			targetEnergy_ = nullptr;
+			targetEnergy_->DropOnGround(position_);
 		}
-
-		if (targetEnemy_)
+		else
 		{
-			targetEnemy_->CancelAttackReservation();
-			targetEnemy_ = nullptr;
+			targetEnergy_->DropOnGround(targetEnergy_->GetPosition());
 		}
+		targetEnergy_ = nullptr;
+	}
+
+	if (targetEnemy_)
+	{
+		targetEnemy_->CancelAttackReservation();
+		targetEnemy_ = nullptr;
 	}
 
 	return true;

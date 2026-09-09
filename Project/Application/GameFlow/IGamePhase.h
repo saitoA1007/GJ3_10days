@@ -34,8 +34,15 @@ struct GameFlowSettings
 	Vector2 tutorialEnemyPositionXZ = { 0.0f, -18.0f }; // ロケット衝突工程用EnemyのX・Z座標
 	Vector2 tutorialLockOnEnemyPositionXZ = { 0.0f, -12.0f }; // ロックオン工程用EnemyのX・Z座標
 	Vector2 tutorialEnemyHoldPositionXZ = { 0.0f, -12.0f }; // 長押し工程用EnemyのX・Z座標
+	Vector2 tutorialStaticUnitPositionXZ = { 0.0f, -14.0f }; // Text14用静止UnitのX・Z座標
+	Vector2 tutorialUnitEnergy0PositionXZ = { -4.0f, -14.0f }; // Text14用Energy 0
+	Vector2 tutorialUnitEnergy1PositionXZ = { 0.0f, -18.0f };  // Text14用Energy 1
+	Vector2 tutorialUnitEnergy2PositionXZ = { 4.0f, -14.0f };  // Text14用Energy 2
+	Vector2 tutorialStaticEnemy0PositionXZ = { -5.0f, -20.0f }; // Text14用静止Enemy 0
+	Vector2 tutorialStaticEnemy1PositionXZ = { 5.0f, -20.0f };  // Text14用静止Enemy 1
 	float tutorialRequiredHoldDuration = 1.0f; // Medium Energyを長押しする必要時間
 	float tutorialEnemyRequiredHoldDuration = 1.0f; // Enemyを長押しする必要時間
+	float tutorialUnitRequiredHoldDuration = 1.0f; // 静止Unitを長押しする必要時間
 };
 
 // 各システムへの参照を一括保持するコンテキスト

@@ -38,6 +38,8 @@ public:
 	void SetStage(const std::string& stageName);
 	/// @brief 敵を生成し、最初に生成できた個体を返す。
 	Enemy* Pop(int num, Vector2 position, EnemyType type);
+	/// @brief 指定した敵を演出なしで即座にプールへ戻す。
+	void Despawn(Enemy* enemy);
 
 	void SetOnEnemyDefeated(std::function<void()> callback) {
 		onEnemyDefeated_ = std::move(callback);

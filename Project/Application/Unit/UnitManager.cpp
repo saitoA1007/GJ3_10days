@@ -178,6 +178,26 @@ bool UnitManager::DispatchToPosition(const Vector3& targetPosition, int32_t requ
 	return false;
 }
 
+Unit* UnitManager::SpawnTutorialStaticUnit(const Vector3& position)
+{
+	for (size_t i = 0; i < GetUnitCount(); ++i)
+	{
+		if (units_[i]->SetUpTutorialStatic(position))
+		{
+			return units_[i].get();
+		}
+	}
+	return nullptr;
+}
+
+void UnitManager::RecallTutorialStaticUnit(Unit* unit)
+{
+	if (unit)
+	{
+		unit->Recall();
+	}
+}
+
 Unit* UnitManager::FindNearestCarryingUnit(const Vector3& position, float maxDistance) const 
 {
 	Unit* nearest = nullptr;
@@ -224,7 +244,7 @@ bool UnitManager::InjectEnergyToUnitsAt(const Vector3& position, float radius, i
 	for (size_t i = 0; i < GetUnitCount(); ++i)
 	{
 		Unit* unit = units_[i].get();
-		if (!unit || !unit->IsDeployed()) continue;
+		if (!unit || !unit->IsDeployed() || unit->IsTutorialStatic()) continue;
 
 		const Vector3 offset = unit->GetPosition() - position;
 		const float distSq = offset.x * offset.x + offset.z * offset.z;

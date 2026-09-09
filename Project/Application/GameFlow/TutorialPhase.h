@@ -1,10 +1,12 @@
 #pragma once
+#include <array>
 #include <cstdint>
 
 #include "IGamePhase.h"
 
 class EnergyPickup;
 class Enemy;
+class Unit;
 
 class TutorialPhase : public IGamePhase
 {
@@ -21,6 +23,8 @@ public:
 		EnemyLockOnOrCollision,
 		WaitForEnemyHoldInstruction,
 		EnemyHoldOrCollision,
+		WaitForUnitHoldInstruction,
+		UnitHold,
 		Complete,
 	};
 
@@ -33,6 +37,7 @@ public:
 	void BeginEnemyCollisionStep(GameFlowContext& context);
 	void BeginEnemyLockOnStep(GameFlowContext& context);
 	void BeginEnemyHoldStep(GameFlowContext& context);
+	void BeginUnitHoldStep(GameFlowContext& context);
 
 	const char* GetName() const override { return "Tutorial"; }
 	// 操作を許可
@@ -44,5 +49,11 @@ private:
 	Step step_ = Step::SelectEnergy;
 	EnergyPickup* chargeEnergy_ = nullptr;
 	Enemy* enemyHoldTarget_ = nullptr;
+	Unit* tutorialUnitHoldTarget_ = nullptr;
+	std::array<EnergyPickup*, 3> tutorialUnitEnergies_{};
+	std::array<Enemy*, 2> tutorialStaticEnemies_{};
+	float tutorialUnitHoldElapsed_ = 0.0f;
+	bool tutorialUnitHoldStarted_ = false;
+	bool tutorialUnitBlackholeStarted_ = false;
 	uint64_t enemyHitCountAtSpawn_ = 0;
 };
