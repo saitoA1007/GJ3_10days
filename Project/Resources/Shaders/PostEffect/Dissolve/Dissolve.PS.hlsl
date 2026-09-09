@@ -29,7 +29,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     if (mask < gMaterial.threshold)
     {
         // マスク部分は黒色
-        output.color = float4(0, 0, 0, 1);
+        output.color = float4(1, 1, 1, 1);
 
     }  
     return output;
