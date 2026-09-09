@@ -51,6 +51,8 @@ public:
 	// 運搬ユニットを追跡中の敵の数を取得
 	size_t GetCarrierTargetCount() const;
 
+	const std::vector<Enemy*>& GetEnemies() const { return activeEnemyVector_; }
+
 private:
 
 	void LoadPreset();
@@ -67,6 +69,8 @@ private:
 	std::vector<std::unique_ptr<Enemy>> enemies_;
 	//アクティブな敵のマップ
 	std::map<int, Enemy*> activeEnemies_;
+	// アクティブな敵の vector キャッシュ
+	std::vector<Enemy*> activeEnemyVector_;
 	//死亡したとき専用アクションを起こす用のマップ
 	std::map<int, Enemy*> deadEnemies_;
 	std::function<void()> onEnemyDefeated_;

@@ -25,6 +25,8 @@ struct EnergySpawnSettings
 	float rotationSpeed = 1.5f;    // 着地後のY軸回転速度（rad/s）
 	int32_t maxActiveCount = 30;   // 落下・地上・運搬を含む同時存在上限
 	int32_t initialCountPerZone = 0; // 開始時にNear/Middle/Farへ置く個数
+	float lifetime = 10.0f;       
+	float dissolveDuration = 1.0f;
 };
 
 /// @brief 各フィールド領域の空からエネルギーを定期生成する。
@@ -100,6 +102,8 @@ public:
 	/// @return 生成設定への参照。
 	const EnergySpawnSettings& GetSettings() const { return settings_; }
 
+	const std::vector<EnergyPickup*>& GetEnergies() const { return activeEnergies_; }
+
 private:
 	/// @brief Register値を反映して安全な範囲へ補正する。
 	void ApplyDebugParameters();
@@ -129,12 +133,14 @@ private:
 
 	Field* field_ = nullptr;                                       // 生成円環の中心と半径の参照先
 	std::vector<std::unique_ptr<EnergyPickup>> pickups_;           // 再利用するエネルギーのプール
+	std::vector<EnergyPickup*> activeEnergies_;
 	EnergySpawnSettings settings_;                                 // 生成全体の設定
 	// Small・Medium・Largeの順で保持する見た目と獲得量。
 	std::array<EnergyTypeSettings, kEnergySizeCount> typeSettings_ = {
 		EnergyTypeSettings{ 0.45f, 10, { 1.00f, 0.88f, 0.20f, 1.0f } },
 		EnergyTypeSettings{ 0.70f, 25, { 0.25f, 0.85f, 1.00f, 1.0f } },
 		EnergyTypeSettings{ 1.00f, 50, { 0.92f, 0.35f, 1.00f, 1.0f } },
+		EnergyTypeSettings{ 1.50f, 0,  { 0.80f, 0.10f, 1.00f, 1.0f } },
 	};
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;   // 設定とParameter Inspectorの接続
 	float spawnTimer_ = 0.0f;                                      // 次回自動生成までに経過した秒数

@@ -20,7 +20,7 @@ public:
 
 public:
 
-	void Start();
+	void Start(float clearRate);
 
 	bool IsFin() const;
 
@@ -34,6 +34,7 @@ private:
 	// ロケットの演出
 	RocketEffect* rocketEffect_ = nullptr;
 
+	float clearRate_ = 0.0f;
 	// 爆破演出
 	ExplosionEffect* explosionEffect_ = nullptr;
 

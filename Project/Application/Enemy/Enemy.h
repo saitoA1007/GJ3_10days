@@ -82,6 +82,20 @@ public:
 	EnergyPickup* DefeatAndDropEnergy();
 	// 運搬ユニットを追跡中かどうかを取得
 
+	// ======== ブラックホール ========
+
+
+	// ブラックホール等からの引き寄せ処理
+	void PullTowards(const Vector3& targetPos, float speed, float deltaTime);
+	// エネルギーをドロップせずに強制消滅
+	void ForceDestroy() {
+		Destroy();
+	}
+	// 吸い込み対象として有効かどうか判定
+	bool IsAlive() const {
+		return isActive_ && !isDead_;
+	}
+
 private:
 
 	void DefaultMovement();
@@ -131,5 +145,7 @@ private:
 	float snakeSpeed_ = 0.0f;
 	float roundSpeed_ = 0.0f;
 
+	// ブラックホール
+	bool isBeingPulled_ = false;
 	uint32_t effectID_ = 0; // 恒常処理のID
 };
