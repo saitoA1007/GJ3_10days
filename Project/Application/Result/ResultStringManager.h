@@ -51,7 +51,7 @@ private:
 	GameEngine::InputCommand* inputCommand_ = nullptr;
 	bool isSceneFinished_ = false;
 
-	const int aimScore_ = 150;
+	const int aimScore_ = 100;
 	const int aimScoreDistance_ = 1000000;
 
 	std::vector<int> scoreDigits_;
