@@ -20,9 +20,19 @@ namespace GameEngine {
 
 	private:
 
-		void DrawGroup(GameParamEditor::Group& group);
+		void DrawGroup(GameParamEditor::Group& group, const std::string& groupPath);
 
-		void DrawItems(GameParamEditor::Group& group);
+		void DrawItems(GameParamEditor::Group& group, const std::string& groupPath);
+
+		/// @brief EnergyのPlayingタイムラインへイベント追加・末尾削除UIを表示する。
+		void DrawEnergyTimelineControls(GameParamEditor::Group& group);
+
+		/// @brief Energyタイムライン専用の入力UIを描画する。
+		/// @return 専用UIで描画した場合はtrue。
+		bool DrawEnergyTimelineItem(
+			const std::string& groupPath,
+			const std::string& itemName,
+			GameParamEditor::Item& item);
 
 	};
 

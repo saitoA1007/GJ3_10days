@@ -4,6 +4,7 @@
 #include "AudioManager.h"
 #include "FPSCounter.h"
 #include "Application/HalfTime/HalfTimeView.h"
+#include "Application/Energy/EnergySpawner.h"
 #include "Application/Rocket/Rocket.h"
 #include "Application/UI/TimeUI.h"
 
@@ -42,6 +43,10 @@ void PlayingPhase::OnEnter(GameFlowContext& context)
 	{
 		context.timeUI->SetUnit(0.0f);
 		context.timeUI->SetActive(true);
+	}
+	if (context.energySpawner)
+	{
+		context.energySpawner->BeginPlayingTimeline();
 	}
 }
 
@@ -83,6 +88,11 @@ bool PlayingPhase::OnUpdate(GameFlowContext& context)
 
 void PlayingPhase::OnExit(GameFlowContext& context)
 {
+	if (context.energySpawner)
+	{
+		context.energySpawner->EndPlayingTimeline();
+	}
+
 	auto& audioManager = AudioManager::GetInstance();
 	audioManager.Stop(audioManager.GetHandleByName(kFirstHalfBgmName));
 	audioManager.Stop(audioManager.GetHandleByName(kSecondHalfBgmName));
