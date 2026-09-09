@@ -116,7 +116,5 @@ private:
 	UnitManagerSettings settings_;                              // Registerから編集される共有設定
 	std::unique_ptr<GameEngine::DebugParameter> debugParameter_;// 設定とParameter Inspectorの接続
 	bool gameplayEnabled_ = true;                               // Ready・TimeUp・Pause中はfalse
-
-	UnitEffectManager* unitEffectManager_ = nullptr; // 演出管理
 };
 

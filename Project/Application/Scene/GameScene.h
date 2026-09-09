@@ -120,7 +120,7 @@ private: // シーン機能
 	float fadeElapsedTime_ = 0.0f;
 
 	// シーンライト
-	float intensity_ = 1.0f;
+	float intensity_ = 2.0f;
 	Vector3 dir_ = { 0.0f,-1.0f,0.5f };
 	Vector4 lightColor_ = { 1.0f,1.0f,1.0f,1.0f };
 private:
