@@ -130,7 +130,7 @@ void Unit::Update()
 	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, { 0.0f, 5.0f, 0.0f });
 	RopeEffect_.Update();
 
-	NaviEffect_.Start(modelComponent_->worldTransform_.transform_.translate, {});
+	NaviEffect_.Start(modelComponent_->worldTransform_.transform_.translate, targetPosition_);
 	NaviEffect_.Update();
 
 	SyncModel();
@@ -153,7 +153,6 @@ void Unit::Draw()
 	{
 		modelComponent_->DrawRaytracing(renderQueue_);
 		RopeEffect_.Draw();
-		NaviEffect_.Draw();
 	}
 
 	if (state_ == UnitState::Blackhole && blackholeModel_)
@@ -164,8 +163,8 @@ void Unit::Draw()
 	if (state_ == UnitState::MovingToPosition && targetMarkerModel_)
 	{
 		targetMarkerModel_->Draw(renderQueue_);
+		NaviEffect_.Draw();
 	}
-
 }
 
 void Unit::RefreshVisual() 
