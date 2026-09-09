@@ -33,6 +33,7 @@ using namespace GameEngine;
 #include <Application/result/ShuffleNumber.h>
 #include "Application/result/ResultMovieManager.h"
 #include "Application/GameCamera/ResultMoveCamera.h"
+#include <Application/Effect/MonorisManager.h>
 #include <algorithm>
 #include <cmath>
 #include <string>
@@ -505,6 +506,9 @@ GameScene::GameScene() {
 	// にぎやかし浮遊エフェクト
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldFloatingEffect", 256, textureManager_, effectModel);
 
+
+	auto monorisModel = modelManager_->GetNameByModel("Monoris.obj");
+	gameObjectManager_->AddObject<MonorisManager>(monorisModel, 32);
 }
 
 void GameScene::Initialize() {

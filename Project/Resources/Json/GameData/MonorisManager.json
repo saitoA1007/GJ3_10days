@@ -1,0 +1,42 @@
+{
+    "MonorisManager": {
+        "Material": {
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Metaric": 0.8100000023841858,
+            "Roughness": -5.752999782562256,
+            "SpecularColor": [
+                0.5,
+                0.5,
+                0.5,
+                1.0
+            ]
+        },
+        "SceneName": "Game",
+        "Transform": {
+            "FloatingSpeed": 2.0,
+            "FloatingWidth": 2.0,
+            "MoveSpeedRatio": 0.14000000059604645,
+            "Radius": 35.790000915527344,
+            "Rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Translate": [
+                0.0,
+                -3.440000057220459,
+                0.0
+            ]
+        }
+    }
+}
