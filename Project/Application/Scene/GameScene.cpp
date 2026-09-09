@@ -35,6 +35,7 @@ using namespace GameEngine;
 #include "Application/GameCamera/ResultMoveCamera.h"
 #include <Application/Result/ResultStringManager.h>
 #include <Application/Effect/MonorisManager.h>
+#include "Application/Scene/Transition/DissolveFade.h"
 #include <algorithm>
 #include <cmath>
 #include <string>
@@ -812,4 +813,10 @@ Vector3 GameScene::CalculateEnemyHitCameraShakeOffset() const
 		(std::cos(phase * 1.23f) * 0.7f + std::sin(phase * 2.71f + 2.1f) * 0.3f) * strength,
 		std::sin(phase * 0.83f + 0.7f) * strength * 0.2f,
 	};
+}
+
+std::unique_ptr<ITransitionEffect> GameScene::GetTransitionEffect() {
+	Dissolve* dissolve = postEffectManager_->GetPostEffect<Dissolve>("DissolvePass");
+	dissolve->SetNoiseTextureIndex(textureManager_->GetHandleByName("noise0.png"));
+	return std::make_unique<DissolveFade>(dissolve);
 }

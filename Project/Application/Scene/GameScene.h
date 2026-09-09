@@ -6,7 +6,6 @@
 // エンジン機能をインクルード
 #include "Camera.h"
 
-#include "Application/Scene/Transition/Fade.h"
 #include "Application/Score/Score.h"
 #include <ModelComponent.h>
 #include <DebugParameter.h>
@@ -75,7 +74,7 @@ public:
 	/// 遷移する演出
 	/// </summary>
 	/// <returns></returns>
-	std::unique_ptr<ITransitionEffect> GetTransitionEffect() override { return std::make_unique<Fade>(); }
+	std::unique_ptr<ITransitionEffect> GetTransitionEffect() override;
 
 private: // シーン機能
 
