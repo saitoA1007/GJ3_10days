@@ -3,6 +3,7 @@
 #include "FPSCounter.h"
 #include "Application/Result/ResultMovieManager.h"
 #include "Application/Rocket/Rocket.h"
+#include "Application/Unit/UnitManager.h"
 
 using namespace GameEngine;
 
@@ -16,6 +17,12 @@ void LaunchPhase::OnEnter(GameFlowContext& context)
 	}
 
 	clearRate = (std::max)(0.0f, clearRate);
+
+	if (context.unitManager)
+	{
+		context.unitManager->RecallAll();       
+		context.unitManager->SetGameplayEnabled(false);
+	}
 
 	// ムービーを開始する
 	context.resultMovieManager_->Start(clearRate);
