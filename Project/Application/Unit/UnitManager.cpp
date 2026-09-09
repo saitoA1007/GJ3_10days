@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
+#include "AudioManager.h"
 #include "FPSCounter.h"
 #include "ImGuiManager.h"
 
@@ -13,6 +14,20 @@
 #include "Application/Rocket/Rocket.h"
 
 using namespace GameEngine;
+
+namespace
+{
+	constexpr const char* kUnitSpawnSoundName = "unitSpawn.mp3";
+	constexpr float kUnitSpawnSoundVolume = 1.0f;
+
+	void PlayUnitSpawnSound()
+	{
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t soundHandle = audioManager.GetHandleByName(kUnitSpawnSoundName);
+		audioManager.Stop(soundHandle);
+		audioManager.Play(soundHandle, kUnitSpawnSoundVolume, false);
+	}
+}
 
 UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocket* rocket,
 	GameEngine::Model* baemModel, GameEngine::Model* markerModel, uint32_t beamGH,
@@ -138,7 +153,12 @@ bool UnitManager::DispatchToEnergy(EnergyPickup* target, int32_t requestedEnergy
 	{
 		if (units_[i]->IsAvailable())
 		{
-			return units_[i]->DispatchToEnergy(target, requestedEnergy);
+			const bool dispatched = units_[i]->DispatchToEnergy(target, requestedEnergy);
+			if (dispatched)
+			{
+				PlayUnitSpawnSound();
+			}
+			return dispatched;
 		}
 	}
 	return false;
@@ -155,7 +175,12 @@ bool UnitManager::DispatchToEnemy(Enemy* target, int32_t requestedEnergy)
 	{
 		if (units_[i]->IsAvailable())
 		{
-			return units_[i]->DispatchToEnemy(target, requestedEnergy);
+			const bool dispatched = units_[i]->DispatchToEnemy(target, requestedEnergy);
+			if (dispatched)
+			{
+				PlayUnitSpawnSound();
+			}
+			return dispatched;
 		}
 	}
 	return false;
@@ -172,7 +197,12 @@ bool UnitManager::DispatchToPosition(const Vector3& targetPosition, int32_t requ
 	{
 		if (units_[i]->IsAvailable())
 		{
-			return units_[i]->DispatchToPosition(targetPosition, requestedEnergy);
+			const bool dispatched = units_[i]->DispatchToPosition(targetPosition, requestedEnergy);
+			if (dispatched)
+			{
+				PlayUnitSpawnSound();
+			}
+			return dispatched;
 		}
 	}
 	return false;

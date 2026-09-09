@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include <AudioManager.h>
 #include <Vector2.h>
 #include <FPSCounter.h>
 #include <Application/CollisionConfig.h>
@@ -12,6 +13,22 @@
 #include "Application/Unit/UnitManager.h"
 #include <RandomGenerator.h>
 #include <numbers>
+
+namespace
+{
+	constexpr const char* kMutualDestructionSoundName = "break.mp3";
+	constexpr const char* kEnemyDefeatSoundName = "break2.mp3";
+	constexpr float kUnitCollisionSoundVolume = 1.0f;
+
+	void PlayUnitCollisionSound(const char* soundName)
+	{
+		auto& audioManager = GameEngine::AudioManager::GetInstance();
+		const uint32_t soundHandle =
+			audioManager.GetHandleByName(soundName);
+		audioManager.Stop(soundHandle);
+		audioManager.Play(soundHandle, kUnitCollisionSoundVolume, false);
+	}
+}
 
 Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 	GameEngine::UserData userData;
@@ -49,6 +66,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 
 				if (hitUnit->GetStamina() > 0.0f) {
 					EnergyPickup* droppedEnergy = this->DefeatAndDropEnergy();
+					PlayUnitCollisionSound(kEnemyDefeatSoundName);
 					if (droppedEnergy) {
 						hitUnit->StartCarryingEnergy(droppedEnergy);
 					}
@@ -56,6 +74,7 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 				else {
 					this->DefeatAndDropEnergy();
 					hitUnit->ReturnToStorageAfterDefeat();
+					PlayUnitCollisionSound(kMutualDestructionSoundName);
 				}
 			}
 			break;

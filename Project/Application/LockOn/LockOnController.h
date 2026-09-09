@@ -63,7 +63,7 @@ public:
 		EnemyManager* enemyManager,
 		UnitManager* unitManager,
 		const LockOnSettings& settings = {});
-	~LockOnController() override = default;
+	~LockOnController() override;
 
 	/// @brief カーソルをロケット位置へ戻し、選択とチャージを解除する。
 	void Initialize() override;
@@ -161,6 +161,12 @@ private:
 	/// @brief 対象とチャージ状態を破棄する。
 	void CancelLockOn();
 
+	/// @brief ロックオン長押し中のループ音を開始する。
+	void StartLockOnChargeSound();
+
+	/// @brief ロックオン長押し中のループ音を停止する。
+	void StopLockOnChargeSound();
+
 	/// @brief 短押し猶予を除いたチャージ率を計算する。
 	/// @return 0～1へ収めたチャージ率。
 	float CalculateChargeRatio() const;
@@ -222,5 +228,6 @@ private:
 	bool hasUnitInRadius_ = false;
 	bool tutorialHoldTargetHovered_ = false;
 	bool tutorialInteractionRestricted_ = false;
+	bool isLockOnChargeSoundPlaying_ = false;
 };
 

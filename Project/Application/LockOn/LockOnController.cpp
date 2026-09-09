@@ -40,6 +40,8 @@ namespace
 	constexpr Vector4 kMaxChargeBlinkColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 	constexpr const char* kCursorTargetSoundName = "cursolTarget.mp3";
 	constexpr float kCursorTargetSoundVolume = 1.0f;
+	constexpr const char* kLockOnChargeSoundName = "LockOnCharge.mp3";
+	constexpr float kLockOnChargeSoundVolume = 1.0f;
 
 	void PlayCursorTargetSound()
 	{
@@ -102,8 +104,14 @@ LockOnController::LockOnController(
 	SetUpdateOrder(30);
 }
 
+LockOnController::~LockOnController()
+{
+	StopLockOnChargeSound();
+}
+
 void LockOnController::Initialize() 
 {
+	StopLockOnChargeSound();
 	ApplyDebugParameters();
 	gameplayEnabled_ = true;
 	SetSelection(nullptr, nullptr);
@@ -656,6 +664,7 @@ void LockOnController::StartLockOn()
 	isCharging_ = true;
 	lockOnSeconds_ = 0.0f;
 	maxChargeBlinkElapsedTime_ = 0.0f;
+	StartLockOnChargeSound();
 }
 
 void LockOnController::UpdateLockOn(float deltaTime)
@@ -722,6 +731,7 @@ void LockOnController::CompleteLockOn()
 	{
 		return;
 	}
+	StopLockOnChargeSound();
 	if (lockOnSeconds_ < minimumDispatchHoldSeconds_)
 	{
 		CancelLockOn();
@@ -754,6 +764,7 @@ void LockOnController::CompleteLockOn()
 
 void LockOnController::CancelLockOn()
 {
+	StopLockOnChargeSound();
 	if (chargedEnergy_ > 0 && rocket_)
 	{
 		rocket_->DepositEnergy(chargedEnergy_);
@@ -764,6 +775,32 @@ void LockOnController::CancelLockOn()
 	lockOnSeconds_ = 0.0f;
 	maxChargeBlinkElapsedTime_ = 0.0f;
 	SetSelection(nullptr, nullptr);
+}
+
+void LockOnController::StartLockOnChargeSound()
+{
+	if (isLockOnChargeSoundPlaying_)
+	{
+		return;
+	}
+
+	auto& audioManager = AudioManager::GetInstance();
+	const uint32_t soundHandle = audioManager.GetHandleByName(kLockOnChargeSoundName);
+	audioManager.Stop(soundHandle);
+	audioManager.Play(soundHandle, kLockOnChargeSoundVolume, true);
+	isLockOnChargeSoundPlaying_ = true;
+}
+
+void LockOnController::StopLockOnChargeSound()
+{
+	if (!isLockOnChargeSoundPlaying_)
+	{
+		return;
+	}
+
+	auto& audioManager = AudioManager::GetInstance();
+	audioManager.Stop(audioManager.GetHandleByName(kLockOnChargeSoundName));
+	isLockOnChargeSoundPlaying_ = false;
 }
 
 float LockOnController::CalculateChargeRatio() const
