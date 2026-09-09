@@ -4,6 +4,8 @@
 using namespace GameEngine;
 
 TimeUI::TimeUI(uint32_t unitIceGH) {
+	// GameFlowが進行度を更新した後に表示位置を反映する。
+	SetUpdateOrder(50);
 
 	unitSprite_.textureHandle_ = unitIceGH;
 

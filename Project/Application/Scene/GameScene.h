@@ -79,6 +79,8 @@ private: // シーン機能
 	void UpdateCamera(float deltaTime);
 	/// 敵がロケットへ到達したときのカメラシェイクを開始
 	void StartEnemyHitCameraShake();
+	/// 敵がロケットへ到達したときのダメージ音を再生
+	void PlayRocketDamageSound();
 	/// 現在のシェイク時間から減衰付きの位置オフセットを計算
 	Vector3 CalculateEnemyHitCameraShakeOffset() const;
 	/// チュートリアル表示の調整値と移動アニメーションを更新

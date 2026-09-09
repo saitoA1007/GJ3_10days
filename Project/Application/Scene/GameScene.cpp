@@ -20,6 +20,7 @@ using namespace GameEngine;
 #include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
 #include "Application/Tutorial/TutorialTextSequence.h"
+#include "AudioManager.h"
 #include "ControllerVibration.h"
 #include "DebugParameter.h"
 #include "FPSCounter.h"
@@ -46,6 +47,8 @@ namespace
 	constexpr int kChargeVibrationThreshold = 5;        // 振動を開始するためのチャージされたピクミの数
 	constexpr float kChargeVibrationLeftMotor = 0.35f;  // 左モーターの振動強度
 	constexpr float kChargeVibrationRightMotor = 0.25f; // 右モーターの振動強度
+	constexpr const char* kRocketDamageSoundName = "RocketDamage.mp3";
+	constexpr float kRocketDamageSoundVolume = 1.0f;
 	constexpr Vector3 kCameraPosition = { 0.0f, 60.0f, -60.0f };
 	constexpr Vector3 kCameraTarget = { 0.0f, 0.0f, 0.0f };
 	constexpr float kFadeDuration = 1.0f;
@@ -183,6 +186,10 @@ GameScene::GameScene() {
 	);
 	enemyManager_->SetStage("Tutorial");
 
+	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
+	auto* timeUI = gameObjectManager_->AddObject<TimeUI>(unitIconGH);
+	timeUI->SetActive(false);
+
 	GameFlowContext flowContext{};
 	flowContext.rocket = rocket_;
 	flowContext.energySpawner = energySpawner_;
@@ -194,6 +201,7 @@ GameScene::GameScene() {
 	flowContext.tutorialLogoView = tutorialLogoView_.get();
 	flowContext.startPlayingView = startPlayingView_.get();
 	flowContext.resultMessage = resultMessage;
+	flowContext.timeUI = timeUI;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 
@@ -494,8 +502,6 @@ GameScene::GameScene() {
 	// にぎやかし浮遊エフェクト
 	gameObjectManager_->AddObject<ParticleBehavior>("fieldFloatingEffect", 256, textureManager_, effectModel);
 
-	uint32_t unitIconGH = textureManager_->GetHandleByName("unitIcon.png");
-	gameObjectManager_->AddObject<TimeUI>(unitIconGH);
 }
 
 void GameScene::Initialize() {
@@ -662,6 +668,7 @@ void GameScene::UpdateCamera(float deltaTime)
 		if (enemyHitCount > lastHandledEnemyHitCount_)
 		{
 			StartEnemyHitCameraShake();
+			PlayRocketDamageSound();
 		}
 		lastHandledEnemyHitCount_ = enemyHitCount;
 	}
@@ -701,6 +708,13 @@ void GameScene::StartEnemyHitCameraShake()
 	enemyHitCameraShakeElapsedTime_ = 0.0f;
 	isEnemyHitCameraShaking_ =
 		enemyHitCameraShakeDuration_ > 0.0f && enemyHitCameraShakeAmplitude_ > 0.0f;
+}
+
+void GameScene::PlayRocketDamageSound()
+{
+	auto& audioManager = AudioManager::GetInstance();
+	const uint32_t soundHandle = audioManager.GetHandleByName(kRocketDamageSoundName);
+	audioManager.Play(soundHandle, kRocketDamageSoundVolume, false);
 }
 
 Vector3 GameScene::CalculateEnemyHitCameraShakeOffset() const
