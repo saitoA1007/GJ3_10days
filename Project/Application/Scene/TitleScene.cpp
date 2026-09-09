@@ -46,6 +46,10 @@ TitleScene::TitleScene() {
 	auto* halfDomeModel = modelManager_->GetNameByModel("halfDome.gltf");
 	halfDomeModel->SetDefaultIsEnableLight(false);
 	hyperspaceEffect_ = gameObjectManager_->AddObject<HyperspaceEffect>(halfDomeModel);
+
+	// 安全策
+	Dissolve* dissolve = postEffectManager_->GetPostEffect<Dissolve>("DissolvePass");
+	dissolve->SetThreshold(0.0f);
 }
 
 void TitleScene::Initialize() {
