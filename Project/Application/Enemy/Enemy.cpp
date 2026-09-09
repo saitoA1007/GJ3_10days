@@ -288,20 +288,27 @@ void Enemy::PullTowards(const Vector3& targetPos, float speed, float deltaTime)
 {
 	if (!data_) return;
 	Vector3 currentPos = data_->transform.translate;
-	Vector3 dir = targetPos - currentPos;
-	dir.y = 0.0f;
-	if (dir.LengthSquared() > 0.0001f) {
-		dir.Normalize();
-		data_->transform.translate += dir * speed * deltaTime;
+	Vector3 pullDir = targetPos - currentPos;
+	pullDir.y = 0.0f;
 
-		// ロケットからの距離・方向を再計算して保持
+	if (pullDir.LengthSquared() > 0.0001f) {
+		pullDir.Normalize();
+
+		Vector3 tangentDir = { -pullDir.z, 0.0f, pullDir.x };
+
+		float rotateSpeed = speed * 1.2f;
+
+		Vector3 velocity = (pullDir * speed) + (tangentDir * rotateSpeed);
+		data_->transform.translate += velocity * deltaTime;
+
+		// 距離と方向の再計算
 		Vector2 pos2D = { data_->transform.translate.x, data_->transform.translate.z };
 		distance_ = pos2D.Length();
 		if (distance_ > 0.0001f) {
 			direction_ = pos2D / distance_;
 		}
 	}
-	isBeingPulled_ = true; // 吸い込みフラグを立てる
+	isBeingPulled_ = true; // 吸い込みフラグ
 }
 
 EnergySize Enemy::GetDropEnergySize() const {

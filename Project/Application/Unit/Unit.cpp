@@ -99,8 +99,8 @@ void Unit::Update()
 		? std::clamp(stamina_ / maxChargeEnergy, 0.0f, 1.0f)
 		: 0.0f;
 
-	constexpr float minScale = 0.15f;
-	constexpr float maxScale = 1.3f;
+	constexpr float minScale = 0.05f;
+	constexpr float maxScale = 1.8f;
 
 	const float currentScale = minScale + (maxScale - minScale) * staminaRatio;
 	RopeEffect_.SetScale(currentScale);
@@ -250,7 +250,7 @@ void Unit::UpdateMovingToEnergy(float deltaTime) {
 
 	const float pickupRadiusSquared = settings_->pickupRadius * settings_->pickupRadius;
 	if (DistanceSquaredXZ(position_, targetEnergy_->GetPosition()) <= pickupRadiusSquared) {
-		// 回収成立後は同じEnergyを保持したまま帰還状態へ遷移する
+		// 回収成立後は同じEnergyを保持したまま帰還状態へ遷移
 		if (targetEnergy_->BeginCarry())
 		{
 			targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
@@ -475,6 +475,7 @@ void Unit::ProcessBlackholeAbsorption(
 
 	const float radiusSq = std::pow(GetBlackholeRadius(), 2);
 	const float killRadiusSq = std::pow(settings_->bhKillRadius, 2);
+	const float rotateSpeed = settings_->bhPullSpeed * 2.0f; // 回転速度
 
 	// 敵の吸い込み
 	for (auto* enemy : enemies)
@@ -486,7 +487,6 @@ void Unit::ProcessBlackholeAbsorption(
 		{
 			if (distSq <= killRadiusSq)
 			{
-				// 中心に到達したら、アイテムを落とさずに強制消滅
 				enemy->ForceDestroy();
 				absorbedBasePoint_ += 1;
 			}
@@ -501,7 +501,7 @@ void Unit::ProcessBlackholeAbsorption(
 	for (auto* unit : units)
 	{
 		if (unit == this || !unit->IsDeployed()) continue;
-		if (unit->IsBlackhole()) continue; 
+		if (unit->IsBlackhole()) continue;
 
 		float distSq = DistanceSquaredXZ(position_, unit->GetPosition());
 		if (distSq <= radiusSq)
@@ -513,10 +513,15 @@ void Unit::ProcessBlackholeAbsorption(
 			}
 			else
 			{
-				Vector3 dir = position_ - unit->GetPosition();
-				dir.y = 0.0f;
-				dir.Normalize();
-				unit->position_ += dir * settings_->bhPullSpeed * deltaTime;
+				// 渦巻きベクトルの計算
+				Vector3 pullDir = position_ - unit->position_;
+				pullDir.y = 0.0f;
+				pullDir.Normalize();
+
+				Vector3 tangentDir = { -pullDir.z, 0.0f, pullDir.x };
+				Vector3 velocity = (pullDir * settings_->bhPullSpeed) + (tangentDir * rotateSpeed);
+
+				unit->position_ += velocity * deltaTime;
 			}
 		}
 	}
@@ -531,22 +536,26 @@ void Unit::ProcessBlackholeAbsorption(
 		{
 			if (distSq <= killRadiusSq)
 			{
-				// サイズに応じたポイント
 				switch (energy->GetSize())
 				{
-				case EnergySize::Small:  absorbedBasePoint_ += 1; break;
-				case EnergySize::Medium: absorbedBasePoint_ += 2; break;
-				case EnergySize::Large:  absorbedBasePoint_ += 3; break;
+				case EnergySize::Small:   absorbedBasePoint_ += 1; break;
+				case EnergySize::Medium:  absorbedBasePoint_ += 2; break;
+				case EnergySize::Large:   absorbedBasePoint_ += 3; break;
 				case EnergySize::Special: absorbedBasePoint_ += 5; break;
 				}
 				energy->Deactivate();
 			}
 			else
 			{
-				Vector3 dir = position_ - energy->GetPosition();
-				dir.y = 0.0f;
-				dir.Normalize();
-				energy->SetPosition(energy->GetPosition() + dir * settings_->bhPullSpeed * deltaTime);
+				// 渦巻きベクトルの計算
+				Vector3 pullDir = position_ - energy->GetPosition();
+				pullDir.y = 0.0f;
+				pullDir.Normalize();
+
+				Vector3 tangentDir = { -pullDir.z, 0.0f, pullDir.x };
+				Vector3 velocity = (pullDir * settings_->bhPullSpeed) + (tangentDir * rotateSpeed);
+
+				energy->SetPosition(energy->GetPosition() + velocity * deltaTime);
 			}
 		}
 	}
@@ -698,7 +707,7 @@ void Unit::SyncModel()
 		collider_.SetWorldPosition(position_);
 	}
 
-	// Push入力中かつ範囲内にいる場合はハイライトカラー（明るい発光）を適用
+	// Push入力中かつ範囲内にいる場合はハイライトカラー
 	if (highlightTimer_ > 0.0f)
 	{
 		modelComponent_->materialData_->color = stamina_ > 0.0f

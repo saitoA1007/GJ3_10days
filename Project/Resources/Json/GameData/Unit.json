@@ -3,7 +3,7 @@
         "Blackhole": {
             "BHBaseRadius": 18.0,
             "BHDuration": 3.0,
-            "BHEnergyThreshold": 40,
+            "BHEnergyThreshold": 35,
             "BHFarDistance": 30.0,
             "BHKillRadius": 0.5,
             "BHNearDistance": 10.0,
