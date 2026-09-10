@@ -61,6 +61,8 @@ UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocke
 	debugParameter_->Register("Enabled", settings_.unit.bounceEnabled, 0, "Bounce");
 	debugParameter_->Register("Height", settings_.unit.bounceHeight, 1, "Bounce");
 	debugParameter_->Register("Frequency", settings_.unit.bounceFrequency, 2, "Bounce");
+	debugParameter_->Register("ScaleAmplitude", settings_.unit.injectionScaleAmplitude, 0, "Injection");
+	debugParameter_->Register("ScaleFrequency", settings_.unit.injectionScaleFrequency, 1, "Injection");
 	debugParameter_->Register("Radius", settings_.unit.collisionRadius, 0, "Collision");
 	debugParameter_->Register("DrainPerSecond", settings_.unit.staminaDrainPerSecond, 0, "Stamina");
 	debugParameter_->Register("DistanceDrainRate", settings_.unit.distanceDrainRate, 1, "Stamina");
@@ -339,6 +341,8 @@ void UnitManager::SanitizeSettings()
 	settings_.unit.deliveryRadius = (std::max)(settings_.unit.deliveryRadius, 0.0f);
 	settings_.unit.bounceHeight = (std::max)(settings_.unit.bounceHeight, 0.0f);
 	settings_.unit.bounceFrequency = (std::max)(settings_.unit.bounceFrequency, 0.0f);
+	settings_.unit.injectionScaleAmplitude = (std::max)(settings_.unit.injectionScaleAmplitude, 0.0f);
+	settings_.unit.injectionScaleFrequency = (std::max)(settings_.unit.injectionScaleFrequency, 0.0f);
 	settings_.unit.collisionRadius = (std::max)(settings_.unit.collisionRadius, 0.0f);
 	settings_.unit.staminaDrainPerSecond = (std::max)(settings_.unit.staminaDrainPerSecond, 0.0f);
 	settings_.unit.distanceDrainRate = (std::max)(settings_.unit.distanceDrainRate, 0.0f);

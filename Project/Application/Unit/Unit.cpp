@@ -98,6 +98,8 @@ void Unit::Initialize()
 	highlightTimer_ = 0.0f;
 	absorbedBasePoint_ = 0;
 	bounceElapsedTime_ = 0.0f;
+	injectionTimer_ = 0.0f;
+	injectionScaleElapsedTime_ = 0.0f;
 	SyncModel();
 }
 
@@ -113,6 +115,7 @@ void Unit::Update()
 	}
 
 	UpdateBounce(FpsCounter::deltaTime);
+	UpdateInjectionScale(FpsCounter::deltaTime);
 
 	// 各状態の責務を分け、遷移は到達・衝突が成立した関数内だけで行う
 	switch (state_) {
@@ -321,6 +324,9 @@ void Unit::Recall()
 	collider_.SetActive(false);
 	blackholeTimer_ = 0.0f;
 	absorbedBasePoint_ = 0;
+	bounceElapsedTime_ = 0.0f;
+	injectionTimer_ = 0.0f;
+	injectionScaleElapsedTime_ = 0.0f;
 	SyncModel();
 }
 
@@ -503,6 +509,9 @@ void Unit::ReturnToStorageAfterDefeat()
 	maxStamina_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
+	bounceElapsedTime_ = 0.0f;
+	injectionTimer_ = 0.0f;
+	injectionScaleElapsedTime_ = 0.0f;
 
 	// コライダーの無効化（待機状態にするため）
 	collider_.SetActive(false);
@@ -894,6 +903,37 @@ Vector3 Unit::GetVisualPosition() const
 	return visualPosition;
 }
 
+void Unit::UpdateInjectionScale(float deltaTime)
+{
+	if (!IsBeingInjected())
+	{
+		injectionScaleElapsedTime_ = 0.0f;
+		return;
+	}
+
+	injectionScaleElapsedTime_ += (std::max)(deltaTime, 0.0f);
+}
+
+Vector3 Unit::GetAnimatedScale() const
+{
+	Vector3 animatedScale = settings_->scale;
+	if (!IsBeingInjected() ||
+		settings_->injectionScaleAmplitude <= 0.0f ||
+		settings_->injectionScaleFrequency <= 0.0f)
+	{
+		return animatedScale;
+	}
+
+	const float phase = injectionScaleElapsedTime_ * settings_->injectionScaleFrequency * kPi * 2.0f;
+	const float scaleFactor = (std::max)(
+		1.0f + std::sin(phase) * settings_->injectionScaleAmplitude,
+		0.0f);
+	animatedScale.x *= scaleFactor;
+	animatedScale.y *= scaleFactor;
+	animatedScale.z *= scaleFactor;
+	return animatedScale;
+}
+
 float Unit::DistanceSquaredXZ(const Vector3& a, const Vector3& b) const
 {
 	const float x = a.x - b.x;
@@ -903,7 +943,7 @@ float Unit::DistanceSquaredXZ(const Vector3& a, const Vector3& b) const
 
 void Unit::SyncModel() 
 {
-	modelComponent_->worldTransform_.transform_.scale = settings_->scale;
+	modelComponent_->worldTransform_.transform_.scale = GetAnimatedScale();
 	modelComponent_->worldTransform_.transform_.translate = GetVisualPosition();
 	if (collider_.IsActive())
 	{

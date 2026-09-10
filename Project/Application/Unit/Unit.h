@@ -50,6 +50,8 @@ struct UnitSettings
 	bool bounceEnabled = true;                         // 移動中にモデルを上下させるか
 	float bounceHeight = 0.35f;                        // 1回のジャンプで上がる最大の高さ
 	float bounceFrequency = 2.5f;                      // 1秒あたりのジャンプ回数
+	float injectionScaleAmplitude = 0.2f;              // 注入中の基準Scaleに対する拡縮率
+	float injectionScaleFrequency = 8.0f;              // 注入中の1秒あたりの拡縮回数
 	float collisionRadius = 0.6f;                       
 	float staminaDrainPerSecond = 2.0f;                 
 	float distanceDrainRate = 0.08f;                    
@@ -218,6 +220,8 @@ private:
 	void UpdateBounce(float deltaTime);
 	bool ShouldBounce() const;
 	Vector3 GetVisualPosition() const;
+	void UpdateInjectionScale(float deltaTime);
+	Vector3 GetAnimatedScale() const;
 	float DistanceSquaredXZ(const Vector3& a, const Vector3& b) const;
 	void SyncModel();
 
@@ -244,6 +248,7 @@ private:
 	float stamina_ = 0.0f;   
 	float maxStamina_ = 0.0f;
 	float bounceElapsedTime_ = 0.0f;                   // 現在のジャンプ位相を進める経過時間
+	float injectionScaleElapsedTime_ = 0.0f;           // 注入中の拡縮アニメーション位相
 
 	// 繋がっている演出
 	RopeEffect RopeEffect_;

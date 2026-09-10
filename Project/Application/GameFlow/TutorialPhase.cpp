@@ -132,6 +132,10 @@ bool TutorialPhase::OnUpdate(GameFlowContext& context)
 			context.lockOnController->IsCharging();
 		const bool enemyReachedRocket = context.rocket &&
 			context.rocket->GetEnemyHitCount() > enemyHitCountAtSpawn_;
+		if (enemyLockOnStarted && context.unitManager && enemyLockOnTarget_)
+		{
+			context.unitManager->DispatchToEnemy(enemyLockOnTarget_, 0);
+		}
 		if (enemyLockOnStarted || enemyReachedRocket)
 		{
 			step_ = Step::WaitForEnemyHoldInstruction;

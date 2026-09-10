@@ -35,6 +35,10 @@
                 1.0
             ]
         },
+        "Injection": {
+            "ScaleAmplitude": 0.2,
+            "ScaleFrequency": 8.0
+        },
         "Manager": {
             "UnitCount": 9
         },
