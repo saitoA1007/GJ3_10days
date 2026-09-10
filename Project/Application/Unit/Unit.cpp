@@ -738,6 +738,14 @@ void Unit::Highlight()
 	highlightTimer_ = 0.1f;
 }
 
+void Unit::RefreshInjectionAnimation()
+{
+	if (IsDeployed())
+	{
+		injectionTimer_ = 0.15f;
+	}
+}
+
 void Unit::UpdateBlackhole(float deltaTime)
 {
 	blackholeTimer_ -= deltaTime;

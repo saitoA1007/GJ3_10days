@@ -172,6 +172,7 @@ void LockOnController::Update()
 		}
 		if (isInjecting_)
 		{
+			tutorialHoldTarget_->RefreshInjectionAnimation();
 			injectAnimTimer_ += FpsCounter::gameDeltaTime * 10.0f;
 		}
 		else

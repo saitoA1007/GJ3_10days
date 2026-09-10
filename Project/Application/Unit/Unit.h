@@ -164,6 +164,7 @@ public:
 	bool IsBlackhole() const { return state_ == UnitState::Blackhole; }
 
 	void Highlight();
+	void RefreshInjectionAnimation();
 
 	void SetBeingPulledByBlackhole(bool pulled) {
 		isBeingPulledByBlackhole_ = pulled;
