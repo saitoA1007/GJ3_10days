@@ -135,6 +135,7 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type, uint32_t effe
 	hp_ = config_.hp;
 	damageTimer_ = 100.f;
 	snakeTimer_ = 0.0f;
+	roundTimer_ = 0.0f;
 
 	collider_.SetActive(true);
 	collider_.SetRadius(collisionRadius_ * config.size_);
@@ -277,9 +278,11 @@ void Enemy::UpdateTarget() {
 	if (!context_.unitManager) return;
 
 	// 追跡中のユニットがエネルギー運搬をやめた場合はターゲット解除
+	bool stoppedTracking = false;
 	if (targetUnit_) {
 		if (!targetUnit_->IsCarryingEnergy()) {
 			targetUnit_ = nullptr;
+			stoppedTracking = true;
 		}
 	}
 
@@ -290,6 +293,27 @@ void Enemy::UpdateTarget() {
 			PlayEnemyNoticeSound();
 		}
 	}
+
+	// 代わりの追跡対象がいない場合は、現在位置を通常移動の基準にする。
+	if (stoppedTracking && !targetUnit_) {
+		RebaseMovementFromCurrentPosition();
+	}
+}
+
+void Enemy::RebaseMovementFromCurrentPosition() {
+	Vector2 position = {
+		data_->transform.translate.x,
+		data_->transform.translate.z
+	};
+
+	distance_ = position.Length();
+	if (distance_ > 0.0001f) {
+		direction_ = position / distance_;
+	}
+
+	// SnakeとRoundも現在位置から滑らかに通常移動を再開する。
+	snakeTimer_ = 0.0f;
+	roundTimer_ = 0.0f;
 }
 
 bool Enemy::TryReserveForAttack() {
@@ -314,6 +338,9 @@ void Enemy::SetMovementEnabled(bool enabled)
 	movementEnabled_ = enabled;
 	if (!movementEnabled_)
 	{
+		if (targetUnit_) {
+			RebaseMovementFromCurrentPosition();
+		}
 		targetUnit_ = nullptr;
 		data_->transform.translate.y = 0.7f * config_.size_;
 		collider_.SetWorldPosition(data_->transform.translate);

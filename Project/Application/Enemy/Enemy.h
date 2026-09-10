@@ -108,6 +108,7 @@ private:
 	void TrackingMovement(float deltaTime); // 運搬ユニット追跡移動
 
 	void UpdateTarget();
+	void RebaseMovementFromCurrentPosition();
 	EnergySize GetDropEnergySize() const;
 
 	void Destroy() override {
