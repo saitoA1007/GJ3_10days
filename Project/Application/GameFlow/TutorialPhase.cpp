@@ -54,6 +54,10 @@ void TutorialPhase::OnEnter(GameFlowContext& context)
 		tutorialEnergy_ = context.energySpawner->SpawnOnGround(
 			EnergySize::Small,
 			{ positionXZ.x, 0.0f, positionXZ.y });
+		if (tutorialEnergy_)
+		{
+			tutorialEnergy_->SetLifetimeEnabled(false);
+		}
 		if (context.lockOnController)
 		{
 			context.lockOnController->SetTutorialAllowedTargets(tutorialEnergy_, nullptr);
@@ -255,6 +259,14 @@ void TutorialPhase::OnExit(GameFlowContext& context)
 			context.enemyManager->Despawn(enemy);
 		}
 	}
+	if (tutorialEnergy_ && tutorialEnergy_->IsActive())
+	{
+		tutorialEnergy_->SetLifetimeEnabled(true);
+	}
+	if (chargeEnergy_ && chargeEnergy_->IsActive())
+	{
+		chargeEnergy_->SetLifetimeEnabled(true);
+	}
 	tutorialEnergy_ = nullptr;
 	chargeEnergy_ = nullptr;
 	enemyLockOnTarget_ = nullptr;
@@ -281,6 +293,7 @@ void TutorialPhase::BeginChargeEnergyStep(GameFlowContext& context)
 		{ positionXZ.x, 0.0f, positionXZ.y });
 	if (chargeEnergy_)
 	{
+		chargeEnergy_->SetLifetimeEnabled(false);
 		step_ = Step::ChargeEnergy;
 		context.lockOnController->SetTutorialAllowedTargets(chargeEnergy_, nullptr);
 		context.lockOnController->SetMinimumDispatchHoldSeconds(

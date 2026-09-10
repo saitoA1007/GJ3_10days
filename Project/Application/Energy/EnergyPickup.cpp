@@ -38,6 +38,10 @@ void EnergyPickup::Spawn(
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
 	rainbowHue_ = 0.0f;
+	lifetimeTimer_ = 0.0f;
+	dissolveTimer_ = 0.0f;
+	isDissolving_ = false;
+	lifetimeEnabled_ = true;
 
 	// ディゾルブの初期設定
 	appearTime_ = 0.0f;
@@ -64,6 +68,10 @@ void EnergyPickup::SpawnOnGround(
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
 	rainbowHue_ = 0.0f;
+	lifetimeTimer_ = 0.0f;
+	dissolveTimer_ = 0.0f;
+	isDissolving_ = false;
+	lifetimeEnabled_ = true;
 	material_.materialData_->dissolveThreshold = 0.0f;
 	SyncModel();
 }
@@ -79,6 +87,10 @@ void EnergyPickup::Reset()
 	floatingAmplitude_ = 0.0f;
 	isHighlighted_ = false;
 	rainbowHue_ = 0.0f;
+	lifetimeTimer_ = 0.0f;
+	dissolveTimer_ = 0.0f;
+	isDissolving_ = false;
+	lifetimeEnabled_ = true;
 	material_.materialData_->dissolveThreshold = 0.0f;
 }
 
@@ -131,7 +143,7 @@ void EnergyPickup::Update(
 		}
 	}
 	// 地上放置時・消去ディゾルブ処理
-	else if (state_ == EnergyState::OnGround)
+	else if (state_ == EnergyState::OnGround && lifetimeEnabled_)
 	{
 		if (!isDissolving_)
 		{
@@ -280,6 +292,30 @@ void EnergyPickup::SetHighlighted(bool highlighted)
 
 	isHighlighted_ = highlighted;
 	if (IsActive()) 
+	{
+		SyncModel();
+	}
+}
+
+void EnergyPickup::SetLifetimeEnabled(bool enabled)
+{
+	if (lifetimeEnabled_ == enabled)
+	{
+		return;
+	}
+
+	lifetimeEnabled_ = enabled;
+	lifetimeTimer_ = 0.0f;
+	dissolveTimer_ = 0.0f;
+	if (!lifetimeEnabled_)
+	{
+		isDissolving_ = false;
+		if (state_ == EnergyState::OnGround)
+		{
+			material_.materialData_->dissolveThreshold = 0.0f;
+		}
+	}
+	if (IsActive())
 	{
 		SyncModel();
 	}

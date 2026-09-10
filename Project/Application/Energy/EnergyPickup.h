@@ -126,6 +126,9 @@ public:
 	/// @param[in] highlighted 選択中として表示するならtrue。
 	void SetHighlighted(bool highlighted);
 
+	/// @brief 地上放置中の時間経過による消滅を切り替える。
+	void SetLifetimeEnabled(bool enabled);
+
 	// 生成後に特別な獲得量を上書き設定するためのメソッド
 	void SetCustomValue(int32_t value) { typeSettings_.value = value; }
 
@@ -213,5 +216,6 @@ private:
 	float lifetimeTimer_ = 0.0f; 
 	float dissolveTimer_ = 0.0f; 
 	bool isDissolving_ = false;
+	bool lifetimeEnabled_ = true;
 };
 
