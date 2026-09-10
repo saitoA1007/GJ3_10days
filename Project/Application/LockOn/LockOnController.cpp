@@ -787,7 +787,7 @@ void LockOnController::StartLockOnChargeSound()
 	auto& audioManager = AudioManager::GetInstance();
 	const uint32_t soundHandle = audioManager.GetHandleByName(kLockOnChargeSoundName);
 	audioManager.Stop(soundHandle);
-	audioManager.Play(soundHandle, kLockOnChargeSoundVolume, true);
+	audioManager.Play(soundHandle, kLockOnChargeSoundVolume, false);
 	isLockOnChargeSoundPlaying_ = true;
 }
 

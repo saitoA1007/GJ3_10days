@@ -161,10 +161,10 @@ private:
 	/// @brief 対象とチャージ状態を破棄する。
 	void CancelLockOn();
 
-	/// @brief ロックオン長押し中のループ音を開始する。
+	/// @brief ロックオン長押し音を1回だけ再生する。
 	void StartLockOnChargeSound();
 
-	/// @brief ロックオン長押し中のループ音を停止する。
+	/// @brief ロックオン長押し音を停止する。
 	void StopLockOnChargeSound();
 
 	/// @brief 短押し猶予を除いたチャージ率を計算する。
