@@ -8,6 +8,7 @@
             -34.5,
             -25.0
         ],
+        "HoldDuration": 1.0,
         "MoveDuration": 1.0,
         "Rotation": [
             1.7209999561309814,

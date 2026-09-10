@@ -126,7 +126,7 @@ void ResultStringManager::Update() {
 	case ResultStringManager::Control:
 		//入力によってシーンの切り替えを行うことを許す。
 
-		// スペースでタイトルへ
+		// 決定入力（スペースまたは左クリック）でタイトルへ
 		if (inputCommand_->IsCommandActive("Decision")) {
 			AudioManager::GetInstance().Play(backTitleSH_, 0.2f, false);
 			isSceneFinished_ = true;

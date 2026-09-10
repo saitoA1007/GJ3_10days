@@ -19,7 +19,10 @@ TitleScene::~TitleScene() {}
 TitleScene::TitleScene() {
 
 	// 決定ボタンコマンドを追加
-	inputCommand_->RegisterCommand("Decision", { {InputState::KeyTrigger, DIK_SPACE} });
+	inputCommand_->RegisterCommand("Decision", {
+		{ InputState::KeyTrigger, DIK_SPACE },
+		{ InputState::MouseTrigger, 0 },
+		});
 	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_F } });
 	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_G } });
 	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
