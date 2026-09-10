@@ -20,7 +20,7 @@
                 1.0,
                 1.0
             ],
-            "Size": 1.0,
+            "Size": 1.2000000476837158,
             "Speed": 2.0
         },
         "1_Straight_M": {
@@ -118,7 +118,7 @@
             "Speed": 1.0,
             "SwingWidth": 3.0999999046325684
         },
-        "CollisionRadius": 1.2200000286102295,
+        "CollisionRadius": 1.0,
         "PlayingTimeline": {
             "EventCount": 41,
             "Events": {
