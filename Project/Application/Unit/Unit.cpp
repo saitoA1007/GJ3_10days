@@ -18,6 +18,7 @@ using namespace GameEngine;
 
 namespace
 {
+	constexpr float kPi = 3.1415926535f;
 	constexpr const char* kBlackholeSpawnSoundName = "horl.mp3";
 	constexpr float kBlackholeSpawnSoundVolume = 1.0f;
 
@@ -96,6 +97,7 @@ void Unit::Initialize()
 	blackholeTimer_ = 0.0f;
 	highlightTimer_ = 0.0f;
 	absorbedBasePoint_ = 0;
+	bounceElapsedTime_ = 0.0f;
 	SyncModel();
 }
 
@@ -109,6 +111,8 @@ void Unit::Update()
 	if (injectionTimer_ > 0.0f) {
 		injectionTimer_ -= FpsCounter::deltaTime;
 	}
+
+	UpdateBounce(FpsCounter::deltaTime);
 
 	// 各状態の責務を分け、遷移は到達・衝突が成立した関数内だけで行う
 	switch (state_) {
@@ -147,10 +151,10 @@ void Unit::Update()
 	const float currentScale = minScale + (maxScale - minScale) * staminaRatio;
 	RopeEffect_.SetScale(currentScale);
 
-	RopeEffect_.Start(modelComponent_->worldTransform_.transform_.translate, { 0.0f, 5.0f, 0.0f });
+	RopeEffect_.Start(GetVisualPosition(), { 0.0f, 5.0f, 0.0f });
 	RopeEffect_.Update();
 
-	NaviEffect_.Start(modelComponent_->worldTransform_.transform_.translate, targetPosition_);
+	NaviEffect_.Start(GetVisualPosition(), targetPosition_);
 	NaviEffect_.Update();
 
 	SyncModel();
@@ -193,7 +197,7 @@ void Unit::Draw()
 void Unit::RefreshVisual() 
 {
 	if (targetEnergy_ && targetEnergy_->IsCarried()) {
-		targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+		targetEnergy_->SetCarriedPosition(GetVisualPosition() + settings_->carryOffset);
 	}
 	SyncModel();
 }
@@ -344,7 +348,7 @@ void Unit::UpdateMovingToEnergy(float deltaTime) {
 		// 回収成立後は同じEnergyを保持したまま帰還状態へ遷移
 		if (targetEnergy_->BeginCarry())
 		{
-			targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+			targetEnergy_->SetCarriedPosition(GetVisualPosition() + settings_->carryOffset);
 			state_ = UnitState::ReturningToRocket;
 		}
 		else 
@@ -423,7 +427,7 @@ void Unit::UpdateReturningToRocket(float deltaTime)
 
 	if (targetEnergy_ && targetEnergy_->IsCarried())
 	{
-		targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+		targetEnergy_->SetCarriedPosition(GetVisualPosition() + settings_->carryOffset);
 	}
 
 	const float deliveryRadiusSquared = settings_->deliveryRadius * settings_->deliveryRadius;
@@ -452,6 +456,7 @@ void Unit::AllocateStamina(int32_t requestedEnergy)
 
 void Unit::SetLaunchPositionTowards(const Vector3& destination)
 {
+	bounceElapsedTime_ = 0.0f;
 	position_ = rocket_->GetPosition() + settings_->launchOffset;
 	position_.y = settings_->groundY;
 
@@ -535,8 +540,11 @@ bool Unit::InjectEnergy(int32_t requestedAmount)
 	}
 
 	injectionTimer_ = 0.15f;
+	bounceElapsedTime_ = 0.0f;
 
 	stamina_ = (std::min)(stamina_ + static_cast<float>(actualAllocated), upperLimit);
+	// UnitManagerより後に注入処理が走るため、このフレーム中に地面へ戻しておく。
+	SyncModel();
 
 	// スタミナが閾値以上になったらブラックホール化
 	if (stamina_ >= settings_->bhEnergyThreshold)
@@ -803,7 +811,7 @@ void Unit::StartCarryingEnergy(EnergyPickup* energy)
 	if (energy->TryReserve() && energy->BeginCarry())
 	{
 		targetEnergy_ = energy;
-		targetEnergy_->SetCarriedPosition(position_ + settings_->carryOffset);
+		targetEnergy_->SetCarriedPosition(GetVisualPosition() + settings_->carryOffset);
 		state_ = UnitState::ReturningToRocket;
 		targetEnemy_ = nullptr;
 	}
@@ -846,6 +854,46 @@ void Unit::ConsumeStamina(float deltaTime)
 	stamina_ = (std::max)(stamina_ - consumed, 0.0f);
 }
 
+void Unit::UpdateBounce(float deltaTime)
+{
+	if (!ShouldBounce())
+	{
+		// 注入中や移動終了時は、次の描画から必ず地面へ戻す。
+		bounceElapsedTime_ = 0.0f;
+		return;
+	}
+
+	bounceElapsedTime_ += (std::max)(deltaTime, 0.0f);
+}
+
+bool Unit::ShouldBounce() const
+{
+	if (!settings_->bounceEnabled ||
+		settings_->bounceHeight <= 0.0f ||
+		settings_->bounceFrequency <= 0.0f ||
+		IsBeingInjected())
+	{
+		return false;
+	}
+
+	return state_ == UnitState::MovingToEnergy ||
+		state_ == UnitState::MovingToEnemy ||
+		state_ == UnitState::MovingToPosition ||
+		state_ == UnitState::ReturningToRocket;
+}
+
+Vector3 Unit::GetVisualPosition() const
+{
+	Vector3 visualPosition = position_;
+	if (ShouldBounce())
+	{
+		// abs(sin)で地面より下へ潜らず、Frequency回/秒のジャンプを作る。
+		const float phase = bounceElapsedTime_ * settings_->bounceFrequency * kPi;
+		visualPosition.y += std::abs(std::sin(phase)) * settings_->bounceHeight;
+	}
+	return visualPosition;
+}
+
 float Unit::DistanceSquaredXZ(const Vector3& a, const Vector3& b) const
 {
 	const float x = a.x - b.x;
@@ -856,7 +904,7 @@ float Unit::DistanceSquaredXZ(const Vector3& a, const Vector3& b) const
 void Unit::SyncModel() 
 {
 	modelComponent_->worldTransform_.transform_.scale = settings_->scale;
-	modelComponent_->worldTransform_.transform_.translate = position_;
+	modelComponent_->worldTransform_.transform_.translate = GetVisualPosition();
 	if (collider_.IsActive())
 	{
 		collider_.SetWorldPosition(position_);

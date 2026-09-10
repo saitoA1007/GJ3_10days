@@ -58,6 +58,9 @@ UnitManager::UnitManager(Model* unitModel, GameEngine::Model* circleModel, Rocke
 	debugParameter_->Register("BoostedSpeed", settings_.unit.boostedSpeed, 1, "Move");
 	debugParameter_->Register("PickupRadius", settings_.unit.pickupRadius, 2, "Move");
 	debugParameter_->Register("DeliveryRadius", settings_.unit.deliveryRadius, 3, "Move");
+	debugParameter_->Register("Enabled", settings_.unit.bounceEnabled, 0, "Bounce");
+	debugParameter_->Register("Height", settings_.unit.bounceHeight, 1, "Bounce");
+	debugParameter_->Register("Frequency", settings_.unit.bounceFrequency, 2, "Bounce");
 	debugParameter_->Register("Radius", settings_.unit.collisionRadius, 0, "Collision");
 	debugParameter_->Register("DrainPerSecond", settings_.unit.staminaDrainPerSecond, 0, "Stamina");
 	debugParameter_->Register("DistanceDrainRate", settings_.unit.distanceDrainRate, 1, "Stamina");
@@ -334,6 +337,8 @@ void UnitManager::SanitizeSettings()
 	settings_.unit.boostedSpeed = (std::max)(settings_.unit.boostedSpeed, settings_.unit.normalSpeed);
 	settings_.unit.pickupRadius = (std::max)(settings_.unit.pickupRadius, 0.0f);
 	settings_.unit.deliveryRadius = (std::max)(settings_.unit.deliveryRadius, 0.0f);
+	settings_.unit.bounceHeight = (std::max)(settings_.unit.bounceHeight, 0.0f);
+	settings_.unit.bounceFrequency = (std::max)(settings_.unit.bounceFrequency, 0.0f);
 	settings_.unit.collisionRadius = (std::max)(settings_.unit.collisionRadius, 0.0f);
 	settings_.unit.staminaDrainPerSecond = (std::max)(settings_.unit.staminaDrainPerSecond, 0.0f);
 	settings_.unit.distanceDrainRate = (std::max)(settings_.unit.distanceDrainRate, 0.0f);

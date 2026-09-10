@@ -47,6 +47,9 @@ struct UnitSettings
 	float boostedSpeed = 5.0f;                          
 	float pickupRadius = 0.45f;                         
 	float deliveryRadius = 3.0f;
+	bool bounceEnabled = true;                         // 移動中にモデルを上下させるか
+	float bounceHeight = 0.35f;                        // 1回のジャンプで上がる最大の高さ
+	float bounceFrequency = 2.5f;                      // 1秒あたりのジャンプ回数
 	float collisionRadius = 0.6f;                       
 	float staminaDrainPerSecond = 2.0f;                 
 	float distanceDrainRate = 0.08f;                    
@@ -212,6 +215,9 @@ private:
 	void SetLaunchPositionTowards(const Vector3& destination);
 	void MoveTowards(const Vector3& target, float deltaTime);
 	void ConsumeStamina(float deltaTime);
+	void UpdateBounce(float deltaTime);
+	bool ShouldBounce() const;
+	Vector3 GetVisualPosition() const;
 	float DistanceSquaredXZ(const Vector3& a, const Vector3& b) const;
 	void SyncModel();
 
@@ -237,6 +243,7 @@ private:
 	Vector3 position_ = {};                              
 	float stamina_ = 0.0f;   
 	float maxStamina_ = 0.0f;
+	float bounceElapsedTime_ = 0.0f;                   // 現在のジャンプ位相を進める経過時間
 
 	// 繋がっている演出
 	RopeEffect RopeEffect_;
