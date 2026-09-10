@@ -18,7 +18,9 @@ namespace
 {
 	constexpr const char* kMutualDestructionSoundName = "break.mp3";
 	constexpr const char* kEnemyDefeatSoundName = "break2.mp3";
+	constexpr const char* kEnemyNoticeSoundName = "enemyOko.mp3";
 	constexpr float kUnitCollisionSoundVolume = 1.0f;
+	constexpr float kEnemyNoticeSoundVolume = 1.0f;
 
 	void PlayUnitCollisionSound(const char* soundName)
 	{
@@ -27,6 +29,15 @@ namespace
 			audioManager.GetHandleByName(soundName);
 		audioManager.Stop(soundHandle);
 		audioManager.Play(soundHandle, kUnitCollisionSoundVolume, false);
+	}
+
+	void PlayEnemyNoticeSound()
+	{
+		auto& audioManager = GameEngine::AudioManager::GetInstance();
+		const uint32_t soundHandle =
+			audioManager.GetHandleByName(kEnemyNoticeSoundName);
+		audioManager.Stop(soundHandle);
+		audioManager.Play(soundHandle, kEnemyNoticeSoundVolume, false);
 	}
 }
 
@@ -106,6 +117,7 @@ void Enemy::SetUp(Vector2 position, Config config, EnemyType type, uint32_t effe
 
 	data_->transform.scale = { config.size_, config.size_, config.size_ };
 	data_->transform.translate = { position.x, 0.0f, position.y };
+	data_->transform.rotate.z = 0.0f;
 	data_->color = config_.normalColor_;
 
 	distance_ = position.Length();
@@ -177,6 +189,13 @@ void Enemy::Update() {
 		}
 	}
 
+	const bool isTracking = targetUnit_ && targetUnit_->IsCarryingEnergy();
+	const float rotationSpeed = rotationSpeed_ *
+		(isTracking ? trackingSpeedMultiplier_ : 1.0f);
+	data_->transform.rotate.z = std::fmod(
+		data_->transform.rotate.z + rotationSpeed * GameEngine::FpsCounter::deltaTime,
+		2.0f * std::numbers::pi_v<float>);
+
 	data_->transform.rotate.y = -(std::atan2f(direction_.y, direction_.x) + std::numbers::pi_v<float> *0.5f);
 	collider_.SetWorldPosition(data_->transform.translate);
 
@@ -241,7 +260,9 @@ void Enemy::TrackingMovement(float deltaTime) {
 	float dist = dir.Length();
 	if (dist > 0.0001f) {
 		dir.Normalize();
-		float moveDist = GameEngine::Math::Min(config_.speed_ * deltaTime, dist);
+		float moveDist = GameEngine::Math::Min(
+			config_.speed_ * trackingSpeedMultiplier_ * deltaTime,
+			dist);
 		data_->transform.translate += dir * moveDist;
 
 		// 距離をロケット中心からの距離へ再計算
@@ -265,6 +286,9 @@ void Enemy::UpdateTarget() {
 	// ターゲットがいない場合のみ、新たな運搬ユニットを検索
 	if (!targetUnit_) {
 		targetUnit_ = context_.unitManager->FindNearestCarryingUnit(GetPosition(), searchRadius_);
+		if (targetUnit_) {
+			PlayEnemyNoticeSound();
+		}
 	}
 }
 

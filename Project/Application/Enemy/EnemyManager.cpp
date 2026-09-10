@@ -70,6 +70,8 @@ void EnemyManager::Initialize() {
 	debugParam_.Register("Pop", debugPop_);
 	debugParam_.Register("PopInterval", popInterval_);
 	debugParam_.Register("CollisionRadius", collisionRadius_);
+	debugParam_.Register("RotationSpeed", rotationSpeed_, 0, "Movement");
+	debugParam_.Register("TrackingSpeedMultiplier", trackingSpeedMultiplier_, 1, "Movement");
 	debugParam_.Register("StageSpawnEnabled", stageSpawnEnabled_, 0, "Spawn");
 	debugParam_.Register("EventCount", timelineEventCount_, 0, "PlayingTimeline");
 
@@ -130,6 +132,8 @@ void EnemyManager::ResetAll()
 void EnemyManager::Update() {
 	ApplyDebugParameters();
 	Enemy::SetCollisionRadius(collisionRadius_);
+	Enemy::SetRotationSpeed(rotationSpeed_);
+	Enemy::SetTrackingSpeedMultiplier(trackingSpeedMultiplier_);
 
 	// ゲームプレイが無効なら更新をスキップ
 	if (!gameplayEnabled_) {

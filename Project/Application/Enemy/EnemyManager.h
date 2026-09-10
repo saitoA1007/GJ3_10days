@@ -128,6 +128,8 @@ private:
 	float roundSpeed_ = 2.0f;
 
 	//共通の設定
+	float rotationSpeed_ = 1.5f;
+	float trackingSpeedMultiplier_ = 2.0f;
 	std::vector<Enemy::Config> configList_;
 	std::vector<std::string> enemyTypeNames_ = {
 		"Straight_S",

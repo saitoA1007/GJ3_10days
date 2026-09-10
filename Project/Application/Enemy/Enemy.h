@@ -48,6 +48,10 @@ public:
 	~Enemy() = default;
 
 	static void SetCollisionRadius(float radius) { collisionRadius_ = radius; }
+	static void SetRotationSpeed(float speed) { rotationSpeed_ = speed; }
+	static void SetTrackingSpeedMultiplier(float multiplier) {
+		trackingSpeedMultiplier_ = (multiplier < 0.0f) ? 0.0f : multiplier;
+	}
 
 	// 外部システムの参照を設定
 	void SetContext(const Context& context) { context_ = context; }
@@ -112,6 +116,8 @@ private:
 	}
 
 	static inline float collisionRadius_ = 1.f;
+	static inline float rotationSpeed_ = 1.5f;
+	static inline float trackingSpeedMultiplier_ = 2.0f;
 
 	GameEngine::WorldTransforms::TransformData* data_ = nullptr;
 	GameEngine::SphereCollider collider_;
