@@ -36,7 +36,7 @@
             ]
         },
         "Injection": {
-            "ScaleAmplitude": 0.2,
+            "ScaleAmplitude": 0.20000000298023224,
             "ScaleFrequency": 8.0
         },
         "Manager": {
@@ -51,7 +51,7 @@
         "SceneName": "Game",
         "Stamina": {
             "DistanceDrainRate": 0.07999999821186066,
-            "DrainPerSecond": 2.0
+            "DrainPerSecond": 1.0
         },
         "Transform": {
             "CarryOffset": [
