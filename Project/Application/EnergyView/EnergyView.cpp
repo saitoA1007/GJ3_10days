@@ -77,10 +77,22 @@ void EnergyView::SyncValue(float deltaTime)
 	const int32_t latestValue = rocket_->GetEnergy();
 	if (latestValue != targetValue_)
 	{
-		// 連続して増減しても表示値を飛ばさず、現在位置から最新値へつなぎ直す。
-		changeStartValue_ = displayedValue_;
-		targetValue_ = latestValue;
-		changeElapsedTime_ = 0.0f;
+		if (latestValue < targetValue_)
+		{
+			// ロックオン中の連続消費は実値へ即時追従させ、
+			// チャージ上限へ到達した時点で表示にも全消費量を反映する。
+			targetValue_ = latestValue;
+			displayedValue_ = static_cast<float>(targetValue_);
+			changeStartValue_ = displayedValue_;
+			changeElapsedTime_ = changeDuration_;
+		}
+		else
+		{
+			// Energy獲得時は現在の表示値から最新値へ滑らかにつなぐ。
+			changeStartValue_ = displayedValue_;
+			targetValue_ = latestValue;
+			changeElapsedTime_ = 0.0f;
+		}
 	}
 
 	if (changeDuration_ <= 0.0f)
