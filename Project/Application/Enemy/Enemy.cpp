@@ -69,7 +69,9 @@ Enemy::Enemy(GameEngine::WorldTransforms::TransformData* data) : data_(data) {
 			// UnitがEnergyを持って運搬中に当たった場合
 			if (hitUnit->IsCarryingEnergy()) {
 				// 敵の勝ち
-				hitUnit->DefeatAndDropEnergy();
+				if (hitUnit->DefeatAndDropEnergy()) {
+					PlayUnitCollisionSound(kMutualDestructionSoundName);
+				}
 			}
 			// UnitがEnergyを持っていない場合
 			else {

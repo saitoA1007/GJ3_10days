@@ -20,7 +20,9 @@ namespace
 {
 	constexpr float kPi = 3.1415926535f;
 	constexpr const char* kBlackholeSpawnSoundName = "horl.mp3";
+	constexpr const char* kUnitEnergySoundName = "unitEnergy.mp3";
 	constexpr float kBlackholeSpawnSoundVolume = 1.0f;
+	constexpr float kUnitEnergySoundVolume = 1.0f;
 
 	void PlayBlackholeSpawnSound()
 	{
@@ -29,6 +31,15 @@ namespace
 			audioManager.GetHandleByName(kBlackholeSpawnSoundName);
 		audioManager.Stop(soundHandle);
 		audioManager.Play(soundHandle, kBlackholeSpawnSoundVolume, false);
+	}
+
+	void PlayUnitEnergySound()
+	{
+		auto& audioManager = AudioManager::GetInstance();
+		const uint32_t soundHandle =
+			audioManager.GetHandleByName(kUnitEnergySoundName);
+		audioManager.Stop(soundHandle);
+		audioManager.Play(soundHandle, kUnitEnergySoundVolume, false);
 	}
 }
 
@@ -356,6 +367,7 @@ void Unit::UpdateMovingToEnergy(float deltaTime) {
 		{
 			targetEnergy_->SetCarriedPosition(GetVisualPosition() + settings_->carryOffset);
 			state_ = UnitState::ReturningToRocket;
+			PlayUnitEnergySound();
 		}
 		else 
 		{
@@ -831,6 +843,7 @@ void Unit::StartCarryingEnergy(EnergyPickup* energy)
 		targetEnergy_->SetCarriedPosition(GetVisualPosition() + settings_->carryOffset);
 		state_ = UnitState::ReturningToRocket;
 		targetEnemy_ = nullptr;
+		PlayUnitEnergySound();
 	}
 	else
 	{
