@@ -32,6 +32,10 @@ struct RocketSettings
 	int32_t initialEnergy = 0;                   // シーン開始時の保有量
 	int32_t requiredEnergy = 100;
 	int32_t enemyHitLoss = 10;                   // 敵1体の到達で失う量
+	float deliveryScaleMultiplier = 1.2f;       // Energy納品時に到達する表示倍率
+	float enemyHitScaleMultiplier = 0.8f;       // 敵追突時に到達する表示倍率
+	float scaleAnimationDuration = 0.25f;        // 1回拡縮して通常サイズへ戻るまでの秒数
+	int32_t scaleAnimationRepeatCount = 3;       // 1イベントで拡縮を繰り返す回数
 	int32_t debugEnergyAmount = 10;              // ImGuiの増減ボタンで使う量
 };
 
@@ -131,6 +135,14 @@ private:
 	/// @param[in] deltaTime 前フレームからの経過秒数。
 	void UpdateEntrance(float deltaTime);
 
+	/// @brief 納品・被ダメージ時のScaleアニメーションを開始する。
+	/// @param[in] peakMultiplier アニメーション中間点でのScale倍率。
+	void StartScaleAnimation(float peakMultiplier);
+
+	/// @brief Scaleアニメーションを経過時間だけ進める。
+	/// @param[in] deltaTime 前フレームからの経過秒数。
+	void UpdateScaleAnimation(float deltaTime);
+
 	/// @brief 設定位置をモデルとColliderへ反映する。
 	void SyncComponents();
 
@@ -149,6 +161,10 @@ private:
 	Vector3 currentPosition_ = {};                              // 登場移動を反映した現在座標
 	float entranceElapsedTime_ = 0.0f;                          // 登場移動の経過秒数
 	bool isEntrancePlaying_ = false;                            // A座標からB座標へ移動中か
+	float scaleAnimationElapsedTime_ = 0.0f;                    // 拡縮アニメーションの経過秒数
+	float scaleAnimationPeakMultiplier_ = 1.0f;                 // 拡縮の中間点で到達する倍率
+	float currentScaleMultiplier_ = 1.0f;                       // 現在モデルへ適用する倍率
+	bool isScaleAnimating_ = false;                             // 納品・被ダメージの拡縮中か
 	RocketEnergy energy_;                                      // 値の加算・安全な消費を担当する小クラス
 	std::unique_ptr<GameEngine::ModelComponent> modelComponent_;// Rocket.gltfの描画情報
 	GameEngine::SphereCollider collider_;                       // 敵の到達検出に使う球Collider

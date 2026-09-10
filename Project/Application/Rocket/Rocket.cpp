@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <utility>
 
 #include "Application/CollisionConfig.h"
@@ -52,6 +53,10 @@ Rocket::Rocket(Model* model, FieldEffect* fieldEffect, const RocketSettings& set
 	debugParameter_->Register("RequiredEnergy", settings_.requiredEnergy, 0, "Energy");
 	debugParameter_->Register("InitialEnergy", settings_.initialEnergy, 1, "Energy");
 	debugParameter_->Register("EnemyHitLoss", settings_.enemyHitLoss, 2, "Energy");
+	debugParameter_->Register("DeliveryMultiplier", settings_.deliveryScaleMultiplier, 0, "ScaleAnimation");
+	debugParameter_->Register("EnemyHitMultiplier", settings_.enemyHitScaleMultiplier, 1, "ScaleAnimation");
+	debugParameter_->Register("Duration", settings_.scaleAnimationDuration, 2, "ScaleAnimation");
+	debugParameter_->Register("RepeatCount", settings_.scaleAnimationRepeatCount, 3, "ScaleAnimation");
 	debugParameter_->Register("ChangeAmount", settings_.debugEnergyAmount, 0, "Debug");
 	debugParameter_->Apply();
 	SanitizeSettings();
@@ -62,6 +67,10 @@ void Rocket::Initialize()
 	ApplyDebugParameters();
 	energy_.Reset(settings_.initialEnergy);
 	enemyHitCount_ = 0;
+	scaleAnimationElapsedTime_ = 0.0f;
+	scaleAnimationPeakMultiplier_ = 1.0f;
+	currentScaleMultiplier_ = 1.0f;
+	isScaleAnimating_ = false;
 	collider_.SetActive(true);
 	StartEntrance();
 	SyncComponents();
@@ -71,6 +80,7 @@ void Rocket::Update()
 {
 	ApplyDebugParameters();
 	UpdateEntrance(FpsCounter::gameDeltaTime);
+	UpdateScaleAnimation(FpsCounter::gameDeltaTime);
 	SyncComponents();
 }
 
@@ -135,6 +145,7 @@ EnergyChange Rocket::DepositEnergy(int32_t amount)
 			audioManager.GetHandleByName(kEnergyChargeSoundName);
 		audioManager.Stop(energyChargeSoundHandle);
 		audioManager.Play(energyChargeSoundHandle, kEnergyChargeSoundVolume, false);
+		StartScaleAnimation(settings_.deliveryScaleMultiplier);
 	}
 	// 取得したことによるフィールド演出
 	fieldEffect_->Start({0.0f,1.0f,0.137f,1.0f});
@@ -154,6 +165,7 @@ EnergyChange Rocket::ReceiveEnemyHit()
 	++enemyHitCount_;
 	const EnergyChange change = energy_.ConsumeUpTo(settings_.enemyHitLoss, EnergyChangeReason::EnemyHit);
 	NotifyEnergyChanged(change);
+	StartScaleAnimation(settings_.enemyHitScaleMultiplier);
 	// ダメージを受けたことによるフィールド演出
 	fieldEffect_->Start({ 1.0f,0.0f,0.0f,1.0f });
 	return change;
@@ -179,6 +191,10 @@ void Rocket::SanitizeSettings()
 	settings_.colliderRadius = (std::max)(settings_.colliderRadius, 0.0f);
 	settings_.initialEnergy = (std::max)(settings_.initialEnergy, 0);
 	settings_.enemyHitLoss = (std::max)(settings_.enemyHitLoss, 0);
+	settings_.deliveryScaleMultiplier = (std::max)(settings_.deliveryScaleMultiplier, 0.0f);
+	settings_.enemyHitScaleMultiplier = (std::max)(settings_.enemyHitScaleMultiplier, 0.0f);
+	settings_.scaleAnimationDuration = (std::max)(settings_.scaleAnimationDuration, 0.0f);
+	settings_.scaleAnimationRepeatCount = (std::max)(settings_.scaleAnimationRepeatCount, 1);
 	settings_.debugEnergyAmount = (std::max)(settings_.debugEnergyAmount, 0);
 }
 
@@ -232,10 +248,63 @@ void Rocket::UpdateEntrance(float deltaTime)
 	}
 }
 
+void Rocket::StartScaleAnimation(float peakMultiplier)
+{
+	scaleAnimationElapsedTime_ = 0.0f;
+	scaleAnimationPeakMultiplier_ = (std::max)(peakMultiplier, 0.0f);
+	currentScaleMultiplier_ = 1.0f;
+	isScaleAnimating_ = settings_.scaleAnimationDuration > 0.0f;
+}
+
+void Rocket::UpdateScaleAnimation(float deltaTime)
+{
+	if (!isScaleAnimating_ || settings_.scaleAnimationDuration <= 0.0f)
+	{
+		currentScaleMultiplier_ = 1.0f;
+		isScaleAnimating_ = false;
+		return;
+	}
+
+	scaleAnimationElapsedTime_ = (std::min)(
+		scaleAnimationElapsedTime_ + (std::max)(deltaTime, 0.0f),
+		settings_.scaleAnimationDuration * settings_.scaleAnimationRepeatCount);
+	const float totalDuration =
+		settings_.scaleAnimationDuration * settings_.scaleAnimationRepeatCount;
+	if (scaleAnimationElapsedTime_ >= totalDuration)
+	{
+		currentScaleMultiplier_ = 1.0f;
+		isScaleAnimating_ = false;
+		return;
+	}
+
+	const float completedCycles =
+		scaleAnimationElapsedTime_ / settings_.scaleAnimationDuration;
+	const float progress = completedCycles - std::floor(completedCycles);
+
+	// 前半で拡大・縮小し、後半で設定された通常Scaleへ戻す。
+	if (progress < 0.5f)
+	{
+		currentScaleMultiplier_ = GameEngine::Lerp(
+			1.0f,
+			scaleAnimationPeakMultiplier_,
+			progress * 2.0f,
+			EaseType::kEaseOutCubic);
+	}
+	else
+	{
+		currentScaleMultiplier_ = GameEngine::Lerp(
+			scaleAnimationPeakMultiplier_,
+			1.0f,
+			(progress - 0.5f) * 2.0f,
+			EaseType::kEaseOutCubic);
+	}
+
+}
+
 void Rocket::SyncComponents() 
 {
 	// 見た目と当たり判定が別座標にならないよう、同じ設定から毎回同期する。
-	modelComponent_->worldTransform_.transform_.scale = settings_.scale;
+	modelComponent_->worldTransform_.transform_.scale = settings_.scale * currentScaleMultiplier_;
 	modelComponent_->worldTransform_.transform_.rotate = settings_.rotation;
 	modelComponent_->worldTransform_.transform_.translate = currentPosition_;
 	modelComponent_->Update();
