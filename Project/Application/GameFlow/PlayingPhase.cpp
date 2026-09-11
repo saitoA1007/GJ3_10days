@@ -9,6 +9,7 @@
 #include "Application/Rocket/Rocket.h"
 #include "Application/UI/TimeUI.h"
 #include "Application/UI/UnitCountUI.h"
+#include "Application/UI/TimeCount.h"
 
 using namespace GameEngine;
 
@@ -62,6 +63,8 @@ void PlayingPhase::OnEnter(GameFlowContext& context)
 	if (context.rocket) {
 		context.rocket->SetActive(true);
 	}
+
+	context.timeCountUI_->SetRemainingTime(remainingTime_);
 }
 
 bool PlayingPhase::OnUpdate(GameFlowContext& context)
@@ -74,6 +77,10 @@ bool PlayingPhase::OnUpdate(GameFlowContext& context)
 		if (context.timeUI)
 		{
 			context.timeUI->SetUnit((std::clamp)(progress, 0.0f, 1.0f));
+		}
+
+		if (context.timeCountUI_) {
+			context.timeCountUI_->SetRemainingTime(remainingTime_);
 		}
 
 		if (!hasStartedSecondHalfBgm_ && progress >= kSecondHalfStartProgress)
@@ -118,6 +125,10 @@ void PlayingPhase::OnExit(GameFlowContext& context)
 	if (context.enemyManager)
 	{
 		context.enemyManager->EndPlayingTimeline();
+	}
+
+	if (context.timeCountUI_) {
+		context.timeCountUI_->SetRemainingTime(0.0f);
 	}
 
 	auto& audioManager = AudioManager::GetInstance();

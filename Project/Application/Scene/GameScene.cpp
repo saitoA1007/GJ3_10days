@@ -19,6 +19,7 @@ using namespace GameEngine;
 #include "Application/Field/FieldEffect.h"
 #include "Application/Score/ScoreView.h"
 #include "Application/UI/UnitCountUI.h"
+#include "Application/UI/TimeCount.h"
 #include "Application/HalfTime/HalfTimeView.h"
 #include "Application/StartPlaying/StartPlayingView.h"
 #include "Application/Tutorial/TutorialCameraModelView.h"
@@ -224,6 +225,12 @@ GameScene::GameScene() {
 	// ユニットの数を表示
 	auto* unitCountUI = gameObjectManager_->AddObject<UnitCountUI>(digitModels, mainCamera_.get(), unitManager_);
 
+	// 時間のカウント
+	uint32_t oneGH = textureManager_->GetHandleByName("1.png");
+	uint32_t twoGH = textureManager_->GetHandleByName("2.png");
+	uint32_t threeGH = textureManager_->GetHandleByName("3.png");
+	auto* timeCountUI = gameObjectManager_->AddObject<TimeCountUI>(oneGH, twoGH, threeGH);
+
 	GameFlowContext flowContext{};
 	flowContext.rocket = rocket_;
 	flowContext.energySpawner = energySpawner_;
@@ -239,6 +246,7 @@ GameScene::GameScene() {
 	flowContext.resultMessage = resultStringManager_;
 	flowContext.timeUI = timeUI;
 	flowContext.unitCountUI = unitCountUI;
+	flowContext.timeCountUI_ = timeCountUI;
 
 	gameFlow_ = gameObjectManager_->AddObject<GameFlow>(flowContext);
 

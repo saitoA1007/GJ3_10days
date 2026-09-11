@@ -114,6 +114,8 @@ void ResultMovieManager::Start(float clearRate) {
 	resultMoveCamera_->Start();
 	rocketEffect_->Reset();
 
+	rocketEffect_->rocketModel_.worldTransform_.transform_.translate = { 0.0f,5.5f,0.0f };
+
 	// リセット
 	moonObject_->Reset();
 
