@@ -86,6 +86,12 @@ GameScene::GameScene() {
 	mainCameraDebugParameter_->Register("Frequency", enemyHitCameraShakeFrequency_, 2, "EnemyHitShake");
 
 	dir_.Normalize();
+	auto* light = renderQueue_->GetLightManager();
+	dir_.Normalize();
+
+	light->SetDirectionalDirction(dir_);
+	light->SetDirectionalIntensity(intensity_);
+	light->SetDirectionalColor(lightColor_);
 
 	// 背景を設定
 	uint32_t skyboxGH = textureManager_->GetHandleByName("rogland_clear_night_1k.dds");
