@@ -2,11 +2,13 @@
 #include "DebugParameter.h"
 #include "IGameObject.h"
 #include "Camera.h"
+#include "Sprite.h"
 
 class ResultMoveCamera : public GameEngine::IGameObject {
 public:
 
 	enum class Phase {
+		kFade, // フェード
 		kWait, // 発射までの待機
 		kMove, // 移動
 		kStop  // 止まる
@@ -17,16 +19,14 @@ public:
 
 	void Initialize() override;
 	void Update() override;
+	void Draw() override;
 
 public:
 
 	void Start() {
 		isFinished_ = false;
-		phase_ = Phase::kWait;
-		timer_ = 0.0f;
-		// メインカメラに映す
-		//mainCamera_->SetCamera(camera_);
-		renderQueue_->SetCamera(&camera_);
+		phase_ = Phase::kFade;
+		timer_ = 0.0f;	
 	}
 
 	// 現在のフェーズを取得
@@ -60,7 +60,7 @@ private:
 
 	GameEngine::Camera camera_;
 
-	Phase phase_ = Phase::kWait;
+	Phase phase_ = Phase::kFade;
 
 	float timer_ = 0.0f;
 
@@ -73,7 +73,10 @@ private:
 	// 揺れの速さ
 	float shakeFreq_ = 0.0f;
 
-	bool isFinished_ = false;
+	bool isFinished_ = true;
+
+	// 隠すスプライト
+	GameEngine::Sprite sprite_;
 
 private:
 

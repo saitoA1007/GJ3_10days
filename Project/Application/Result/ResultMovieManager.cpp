@@ -49,6 +49,9 @@ void ResultMovieManager::Update() {
 			return;
 		}
 
+		// バーを出現
+		letterboxUI_.SetBarActive(true);
+
 		if (!isSubFire_) {
 			AudioManager::GetInstance().Play(subFireSH_, 0.5f, true);
 			isSubFire_ = true;
@@ -110,9 +113,6 @@ void ResultMovieManager::Start(float clearRate) {
 	// カメラ演出を開始
 	resultMoveCamera_->Start();
 	rocketEffect_->Reset();
-
-	// バーを出現
-	letterboxUI_.SetBarActive(true);
 
 	// リセット
 	moonObject_->Reset();

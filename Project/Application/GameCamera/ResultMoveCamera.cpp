@@ -23,11 +23,15 @@ ResultMoveCamera::ResultMoveCamera() {
 
 	camera_.Initialize({ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f },{} },1280,720);
 
-	camera_.transform_.translate;
+	sprite_.size_ = { 1.0f,1.0f };
+	sprite_.scale_ = { 1280.0f,720.0f };
+	sprite_.color_ = { 1.0f,1.0f,1.0f,0.0f };
+
+	//camera_.transform_.translate;
 }
 
 void ResultMoveCamera::Initialize() {
-	phase_ = Phase::kWait;
+	phase_ = Phase::kFade;
 	timer_ = 0.0f;
 	shakePhase_ = 0.0f;
 	shakePower_ = 0.0f;
@@ -43,6 +47,25 @@ void ResultMoveCamera::Update() {
 
 	switch (phase_)
 	{
+	case ResultMoveCamera::Phase::kFade:
+		timer_ += deltaTime / 2.0f;
+
+		if (timer_ <= 0.5f) {
+			float localT = timer_ / 0.5f;
+			sprite_.color_.w = Lerp(0.0f, 1.0f, localT, EaseType::kEaseInQuad);
+		} else {
+			renderQueue_->SetCamera(&camera_);
+			float localT = (timer_ - 0.5f) / 0.5f;
+			sprite_.color_.w = Lerp(1.0f, 0.0f, localT, EaseType::kEaseInQuad);
+		}
+
+		if (timer_ >= 1.0f) {
+			timer_ = 0.0f;
+			phase_ = Phase::kWait;
+			sprite_.color_.w = 0.0f;
+		}
+		break;
+
 	case ResultMoveCamera::Phase::kWait:
 		UpdateWait(deltaTime);
 		break;
@@ -71,6 +94,14 @@ void ResultMoveCamera::Update() {
 	camera_.transform_.rotate = baseRotate_ + shakeRotate;
 
 	camera_.Update();
+	sprite_.Update();
+}
+
+void ResultMoveCamera::Draw() {
+	if (phase_ == Phase::kFade) {
+		// 
+		renderQueue_->SubmitSprite(&sprite_);
+	}
 }
 
 void ResultMoveCamera::UpdateWait(float deltaTime) {
