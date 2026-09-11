@@ -123,7 +123,7 @@ void MainObjectCHS(inout Payload payload, MyAttribute attrib) {
     float3 lightColor = gDirectionalLight.color.xyz * gDirectionalLight.intensity;
     
     // 平行光源
-    float3 directLight = CalculateBRDF(albedoColor, worldNormal, viewDir, lightDir, lightColor, material.roughness, material.metallic);
+    float3 directLight = CalculateBRDF(albedoColor, worldNormal, viewDir, lightDir, lightColor, material.roughness, material.metallic) * 2.0f;
     
     // 反射レイを飛ばして反射色を取得
     float3 reflectColor = Reflection(worldPosition, worldNormal, payload.recursive);
