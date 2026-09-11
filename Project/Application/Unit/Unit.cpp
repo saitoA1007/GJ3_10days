@@ -58,7 +58,7 @@ Unit::Unit(GameEngine::Model* model, GameEngine::Model* circleModel,
 {
 	modelComponent_ = std::make_unique<ModelComponent>(model);
 	modelComponent_->materialData_->enableLighting = true;
-	modelComponent_->materialData_->metallic = 0.3f;
+	modelComponent_->materialData_->metallic = 0.2f;
 
 	if (circleModel)
 	{

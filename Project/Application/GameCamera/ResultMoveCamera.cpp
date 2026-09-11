@@ -80,7 +80,6 @@ void ResultMoveCamera::Update() {
 
 		if (timer_ >= 1.0f) {
 			timer_ = 0.0f;
-			phase_ = Phase::kWait;
 			basePos_ = endPos_;
 			isFinished_ = true;
 		}
